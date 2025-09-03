@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="HireLens logo">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563EB"></stop>
+      <stop offset="100%" stop-color="#06B6D4"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Lens circle -->
+  <circle cx="28" cy="28" r="20" fill="url(#g1)"></circle>
+  <circle cx="28" cy="28" r="14" fill="white" fill-opacity="0.08"></circle>
+
+  <!-- H monogram inside -->
+  <g fill="white" transform="translate(18,14)">
+    <rect x="0" y="0" width="3.5" height="26" rx="1.5"></rect>
+    <rect x="12" y="0" width="3.5" height="26" rx="1.5"></rect>
+    <rect x="0" y="11" width="15.5" height="3.5" rx="1.5"></rect>
+  </g>
+
+  <!-- Handle -->
+  <rect x="40" y="40" width="20" height="5" rx="2.5" transform="rotate(-30 50 42)" fill="#0F172A" opacity="0.25"></rect>
+</svg>
