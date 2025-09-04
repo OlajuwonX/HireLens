@@ -19,6 +19,12 @@
   --color-badge-green-text: #254d4a;
   --color-badge-red-text: #752522;
   --color-badge-yellow-text: #73321b;
+
+  /* Add missing color definitions */
+  --color-border: #e5e7eb;
+  --color-ring: #3b82f6;
+  --color-background: #ffffff;
+  --color-foreground: #111827;
 }
 
 html,
@@ -151,5 +157,15 @@ form {
   }
   to {
     opacity: 1;
+  }
+}
+
+
+@layer base {
+  * {
+    @apply border-gray-200 outline-blue-500/50;
+  }
+  body {
+    @apply bg-white text-gray-900;
   }
 }
