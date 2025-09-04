@@ -3,6 +3,9 @@ import Navbar from "../components/navbar";
 import Particles from "../components/Particles";
 import {resumes} from "../../constants";
 import ResumeCard from "../components/resume.card";
+import { useNavigate} from "react-router";
+import {useEffect} from "react";
+import {usePuterStore} from "../lib/puter";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -12,7 +15,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return (
+    const { isLoading, auth } = usePuterStore();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(!auth.isAuthenticated) navigate('/auth?next=/'); //if a user tries to access a secured route without
+        // authenticated they will be blocked here.
+    }, [auth.isAuthenticated])
+
+    return (
     <main className="relative w-full h-screen overflow-auto bg-gray-200">
       <Navbar />
       {/* Particles Background*/}
