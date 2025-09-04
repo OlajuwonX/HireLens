@@ -16,9 +16,9 @@ async function loadPdfJs(): Promise<any> {
 
     // FIX: Use proper import and set worker source BEFORE using the library
     loadPromise = import("pdfjs-dist").then((lib) => {
-        // FIX: Use CDN worker instead of local file that doesn't exist
-        // OLD (BROKEN): lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-        lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+        // FIX: Use local worker file to avoid version mismatch
+        // OLD (CDN): lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+        lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
         pdfjsLib = lib;
         isLoading = false;
