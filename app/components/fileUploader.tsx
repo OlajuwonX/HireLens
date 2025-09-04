@@ -1,5 +1,6 @@
 import {useCallback, useState} from "react";
 import {useDropzone} from "react-dropzone";
+import {formatSize} from "../lib/utils.format";
 
 interface FileUploaderProps {
     onFileSelect?: (file: File | null) => void;
@@ -10,9 +11,18 @@ const FileUploader = ({onFileSelect}: FileUploaderProps) => {
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0] || null;
-    }, [])
 
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+        onFileSelect?.(file);
+    }, [onFileSelect]);
+
+    const {getRootProps, getInputProps, isDragActive, acceptedFiles} = useDropzone({
+        onDrop,
+        multiple: false,
+        accept: {'application/pdf': ['.pdf']},
+        maxSize: 10 * 1024 * 1024,
+    }) //handles file upload.
+
+    const file = acceptedFiles[0] || null;
 
     return (
         <div className="w-full gradient-border">
@@ -29,8 +39,13 @@ const FileUploader = ({onFileSelect}: FileUploaderProps) => {
 
                     {
                         file ? (
-                            <div>
-
+                            <div className="text-center">
+                                <p className="text-lg text-gray-700 font-medium truncate">
+                                    {file.name}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                    {formatSize(file.size)}
+                                </p>
                             </div>
                         ) : (
                             <div>
@@ -39,7 +54,7 @@ const FileUploader = ({onFileSelect}: FileUploaderProps) => {
                                         Click to upload
                                     </span> or drag and drop.
                                 </p>
-                                <p className="text-lg text-gray-500">PDF (max 20MB)</p>
+                                <p className="text-lg text-gray-500">PDF (max {formatSize(maxFileSize)})</p>
                             </div>
                         )
                     }
