@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="212e1013-e697-4555-87d0-d4d6afa4f9ca" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/pdfToImg.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/pdfToImg.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/upload.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/upload.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -122,7 +123,7 @@
       <option name="presentableId" value="Default" />
       <updated>1756906391619</updated>
       <workItem from="1756906397129" duration="24031000" />
-      <workItem from="1756938072130" duration="23802000" />
+      <workItem from="1756938072130" duration="26315000" />
     </task>
     <servers />
   </component>

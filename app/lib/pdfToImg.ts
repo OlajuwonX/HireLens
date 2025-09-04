@@ -13,13 +13,22 @@ async function loadPdfJs(): Promise<any> {
     if (loadPromise) return loadPromise;
 
     isLoading = true;
-    // @ts-expect-error - pdfjs-dist/build/pdf.mjs is not a module
-    loadPromise = import("pdfjs-dist/build/pdf.mjs").then((lib) => {
-        // Set the worker source to use local file
-        lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+    // FIX: Use proper import and set worker source BEFORE using the library
+    loadPromise = import("pdfjs-dist").then((lib) => {
+        // FIX: Use CDN worker instead of local file that doesn't exist
+        // OLD (BROKEN): lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+        lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+
         pdfjsLib = lib;
         isLoading = false;
         return lib;
+    }).catch((error) => {
+        // FIX: Add error handling for import failures
+        console.error('Failed to load PDF.js:', error);
+        isLoading = false;
+        loadPromise = null;
+        throw error;
     });
 
     return loadPromise;
@@ -29,25 +38,62 @@ export async function convertPdfToImage(
     file: File
 ): Promise<PdfConversionResult> {
     try {
+        // FIX: Add validation for file type
+        if (!file || file.type !== 'application/pdf') {
+            return {
+                imageUrl: "",
+                file: null,
+                error: "Invalid file type. Please provide a PDF file.",
+            };
+        }
+
         const lib = await loadPdfJs();
 
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+
+        // FIX: Add error handling for PDF loading
+        let pdf;
+        try {
+            pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+        } catch (pdfError) {
+            return {
+                imageUrl: "",
+                file: null,
+                error: `Invalid or corrupted PDF file: ${pdfError}`,
+            };
+        }
+
         const page = await pdf.getPage(1);
 
         const viewport = page.getViewport({ scale: 4 });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
 
+        // FIX: Add null check for context
+        if (!context) {
+            return {
+                imageUrl: "",
+                file: null,
+                error: "Failed to get canvas context",
+            };
+        }
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
-        if (context) {
-            context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = "high";
-        }
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
 
-        await page.render({ canvasContext: context!, viewport }).promise;
+        // FIX: Add error handling for rendering
+        try {
+            await page.render({ canvasContext: context, viewport }).promise;
+        } catch (renderError) {
+            return {
+                imageUrl: "",
+                file: null,
+                error: `Failed to render PDF page: ${renderError}`,
+            };
+        }
 
         return new Promise((resolve) => {
             canvas.toBlob(

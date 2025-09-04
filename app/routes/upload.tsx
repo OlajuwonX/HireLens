@@ -57,6 +57,11 @@ const Upload = () => {
         if (!feedback) return setStatusText('Error: Failed to analyze resume');
 
         const feedbackText = typeof feedback.message.content === 'string' ? feedback.message.content : feedback.message.content[0].text; // to extract the array as text.
+
+        data.feedback = JSON.parse(feedbackText); //to parse the feedback data.
+        await kv.set(`resume:${uuid}`, JSON.stringify(data));  //to update the value of keys in the keyvalue store.
+        setStatusText('Analysis complete, redirecting ...');
+        console.log(data);
     } //to analyse the data provided
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
