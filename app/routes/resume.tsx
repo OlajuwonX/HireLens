@@ -96,7 +96,6 @@ const Resume = () => {
 
                 <section
                     className="feedback-section h-[100vh] top-0 items-center justify--center">
-                    <h2 className="text-4xl font-semibold !text-gray-900">Resume Details</h2>
                     {imageUrl && resumeUrl && (
                         <div className="animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[90%] max-wxl:h-fit">
                             <a
