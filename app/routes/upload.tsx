@@ -82,7 +82,7 @@ const Upload = () => {
 
             // FIX: Add navigation after successful analysis
             setTimeout(() => {
-                navigate(`/results/${uuid}`); // Adjust route as needed
+                navigate(`/resume/${uuid}`); // to redirect to the real resume details page, exact page
             }, 1000);
 
         } catch (error) {

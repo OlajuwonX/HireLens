@@ -5,7 +5,7 @@ const Resume = () => {
     const {id} = useParams(); //destructure id coming from react-router
 
     return (
-        <div>Resume</div>
+        <div>Resume{id}</div>
     )
 }
 export default Resume
