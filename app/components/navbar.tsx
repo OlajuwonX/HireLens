@@ -5,7 +5,7 @@ const Navbar = () => {
         <nav className="navbar">
             <Link to="/" >
                 <p className=" flex text-2xl font-bold text-gradient cursor-pointer relative z-1">
-                  <img src="/favicon.svg" alt="Logo" className="size-10"/>  HireLens
+                  <img src="/hllogo.png" alt="Logo" className="size-10 rounded-sm"/>  HireLens
                 </p>
             </Link>
             <Link to="/upload" className="primary-button w-fit cursor-pointer relative z-1">

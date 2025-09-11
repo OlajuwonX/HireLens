@@ -13,7 +13,7 @@ import {usePuterStore} from "./lib/puter";
 import {useEffect} from "react";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+  { rel: "icon", type: "image/png+xml", href: "/hllogo.png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
