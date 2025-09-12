@@ -1,10 +1,9 @@
 import type { Route } from "./+types/home";
 import Navbar from "../components/navbar";
 import Particles from "../components/Particles";
-import {resumes} from "../../constants";
 import ResumeCard from "../components/resume.card";
 import { useNavigate} from "react-router";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {usePuterStore} from "../lib/puter";
 
 export function meta({}: Route.MetaArgs) {
@@ -15,13 +14,31 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-    const { isLoading, auth } = usePuterStore();
+    const { auth, kv } = usePuterStore();
     const navigate = useNavigate();
+    const [resumes, setResumes] = useState<Resume[]>([]);
+    const [loadingResumes, setLoadingResumes] = useState<boolean>(false);
 
     useEffect(() => {
         if(!auth.isAuthenticated) navigate('/auth?next=/'); //if a user tries to access a secured route without
         // authenticated they will be blocked here.
     }, [auth.isAuthenticated])
+
+    useEffect(() => {
+        const loadResumes = async() => {
+            setLoadingResumes(true);
+
+            const resumes = (await kv.list('resumes:*', true)) as KVItem[]
+
+            const parsedResumes = resumes?.map((resume) => (
+                JSON.parse(resume.value) as Resume
+            ))
+            console.log(parsedResumes, parsedResumes);
+            setResumes(parsedResumes || []);
+            setLoadingResumes(false);
+        }
+        loadResumes()
+    }, []);
 
     return (
     <main className="relative w-full h-screen overflow-auto bg-gray-100">
@@ -46,7 +63,7 @@ export default function Home() {
           <h2>Stay Ahead: Track Submissions and AI Insights</h2>
         </div>
 
-          {resumes.length > 0 && (
+          {!loadingResumes && resumes.length > 0 && (
               <div className="resumes-section w-full max-w-7xl">
                   {resumes.map((resume) => (
                       <ResumeCard key={resume.id} resume={resume} />

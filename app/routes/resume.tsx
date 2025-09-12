@@ -95,7 +95,7 @@ const Resume = () => {
                 </section>
 
                 <section
-                    className="feedback-section h-[100vh] top-0 items-center justify--center">
+                    className="feedback-section h-[100vh] top-0 sticky items-center justify--center">
                     {imageUrl && resumeUrl && (
                         <div className="animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[90%] max-wxl:h-fit">
                             <a
