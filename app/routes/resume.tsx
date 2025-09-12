@@ -55,7 +55,7 @@ const Resume = () => {
 
     return (
         <main className="!pt-0">
-            <nav className="resume-nav overflow-auto">
+            <nav className="resume-nav overflow-auto relative z-10">
                 <Link to="/" className="back-button">
                     <img src="/icon/back.svg" alt="back" className="size-2.5" />
                     <span className="text-gray-900 text-sm font-semibold">Back to Homepage</span>
