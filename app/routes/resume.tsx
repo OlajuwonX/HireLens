@@ -21,7 +21,9 @@ const Resume = () => {
 
     useEffect(() => {
         if(!isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume/${id}`); //if a user tries to access a
-        // secured route without authentication they will be blocked here.
+        // secured route
+        // without
+        // authenticated they will be blocked here.
     }, [isLoading])
 
     useEffect(() => {

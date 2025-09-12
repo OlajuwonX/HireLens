@@ -13,22 +13,22 @@ const ScoreBadge = ({ score }: { score: number }) => {
                 "flex flex-row gap-1 items-center px-2 py-0.5 rounded-[96px]",
                 score > 69
                     ? "bg-badge-green"
-                    : score > 39
+                    : score > 49
                         ? "bg-badge-yellow"
                         : "bg-badge-red"
             )}
         >
             <img
-                src={score > 69 ? "/icons/check.svg" : "/icons/warning.svg"}
+                src={score > 74 ? "/icon/check.svg" : "/icon/warning.svg"}
                 alt="score"
                 className="size-4"
             />
             <p
                 className={cn(
                     "text-sm font-medium",
-                    score > 69
+                    score > 74
                         ? "text-badge-green-text"
-                        : score > 39
+                        : score > 49
                             ? "text-badge-yellow-text"
                             : "text-badge-red-text"
                 )}
@@ -66,7 +66,7 @@ const CategoryContent = ({
                     <div className="flex flex-row gap-2 items-center" key={index}>
                         <img
                             src={
-                                tip.type === "good" ? "/icons/check.svg" : "/icons/warning.svg"
+                                tip.type === "good" ? "/icon/check.svg" : "/icon/warning.svg"
                             }
                             alt="score"
                             className="size-5"
@@ -90,8 +90,8 @@ const CategoryContent = ({
                             <img
                                 src={
                                     tip.type === "good"
-                                        ? "/icons/check.svg"
-                                        : "/icons/warning.svg"
+                                        ? "/icon/check.svg"
+                                        : "/icon/warning.svg"
                                 }
                                 alt="score"
                                 className="size-5"
