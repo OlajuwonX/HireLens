@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import {usePuterStore} from "../lib/puter";
 import Particles from "../components/Particles";
 import Summary from "../components/summary";
-import Details from "../components/Details";
+import Details from "../components/details";
 import ATS from "../components/ATS";
 
 export const meta = () => ([
@@ -21,9 +21,7 @@ const Resume = () => {
 
     useEffect(() => {
         if(!isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume/${id}`); //if a user tries to access a
-        // secured route
-        // without
-        // authenticated they will be blocked here.
+        // secured route without authentication they will be blocked here.
     }, [isLoading])
 
     useEffect(() => {
@@ -84,7 +82,7 @@ const Resume = () => {
                         >
                             <Summary feedback={feedback} />
                             <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []} />
-                            <Details />
+                            <Details feedback={feedback} />
                         </div>
                     ) : (
                         <img
