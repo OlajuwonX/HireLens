@@ -35,9 +35,9 @@ body {
 main {
   @apply min-h-screen pt-10;
 }
-h1 {
-  @apply text-6xl  text-gradient leading-tight tracking-[-2px] font-semibold;
-}
+/*h1 {*/
+/*  !*@apply text-6xl md:text-4xl sm:text-xl  text-gradient leading-tight tracking-[-2px] font-semibold;*!*/
+/*}*/
 
 h2 {
   @apply text-3xl text-dark-200;
