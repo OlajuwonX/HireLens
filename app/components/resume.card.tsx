@@ -1,7 +1,6 @@
 import {Link} from "react-router";
 import ScoreCircle from "./score.circle";
 import {useEffect, useState} from "react";
-import resume from "../routes/resume";
 import {usePuterStore} from "../lib/puter";
 
 
