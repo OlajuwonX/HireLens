@@ -4,5 +4,19 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Ignore eval warnings from pdfjs-dist
+        if (warning.code === 'EVAL' && warning.id?.includes('pdfjs-dist')) {
+          return;
+        }
+        warn(warning);
+      }
+    }
+  },
+  plugins: [
+      tailwindcss(),
+      reactRouter(),
+      tsconfigPaths()],
 });
