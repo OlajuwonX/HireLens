@@ -36,7 +36,7 @@ main {
   @apply min-h-screen pt-10;
 }
 h1 {
-  @apply text-6xl sm:text-4xl  text-gradient leading-tight tracking-[-2px] font-semibold;
+  @apply text-6xl md:text-4xl sm:text-4xl text-gradient leading-tight tracking-[-2px] font-semibold;
 }
 
 h2 {
