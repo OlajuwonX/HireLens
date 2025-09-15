@@ -5,23 +5,7 @@ import ResumeCard from "../components/resume.card";
 import {Link, useNavigate} from "react-router";
 import {useEffect, useState} from "react";
 import {usePuterStore} from "../lib/puter";
-
-
-interface Resume {
-    id: string;
-    companyName?: string;
-    jobTitle?: string;
-    feedback: {
-        overallScore: number;
-    };
-    imagePath: string;
-    resumePath: string;
-}
-
-interface KVItem {
-    key: string;
-    value: string;
-}
+import type { Resume, KVItem} from '../../constants'
 
 
 export function meta({}: Route.MetaArgs) {

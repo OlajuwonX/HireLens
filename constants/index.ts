@@ -239,3 +239,27 @@ export const prepareInstructions = ({jobTitle, jobDescription}: { jobTitle: stri
       ${AIResponseFormat}
       Return the analysis as an JSON object, without any other text and without the backticks.
       Do not include any other text or comments.`;
+
+
+export interface Feedback {
+    overallScore: number;
+    ATS: any; // Define proper types based on your AI response structure
+    toneAndStyle: any;
+    content: any;
+    structure: any;
+    skills: any;
+}
+
+export interface Resume {
+    id: string;
+    companyName?: string;
+    jobTitle?: string;
+    feedback: Feedback; // Use the complete Feedback interface
+    imagePath: string;
+    resumePath: string;
+}
+
+export interface KVItem {
+    key: string;
+    value: string;
+}
