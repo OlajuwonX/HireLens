@@ -1,4 +1,6 @@
 name = "hirelens"
-compatibility_date = "2024-09-01"
+compatibility_date = "2025-01-01"
 
-pages_build_output_dir = "./build/client"
+[assets]
+directory = "./build/client"       # folder where Remix outputs browser assets
+binding = "ASSETS"                 # gives access to static assets in the Worker
