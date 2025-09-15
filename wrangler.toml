@@ -1,6 +1,0 @@
-name = "hirelens"
-compatibility_date = "2025-01-01"
-
-[assets]
-directory = "./build/client"       # folder where Remix outputs browser assets
-binding = "ASSETS"                 # gives access to static assets in the Worker
