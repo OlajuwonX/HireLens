@@ -5,6 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
     build: {
+        outDir: "./build/client",
         rollupOptions: {
             onwarn(warning, warn) {
                 // Ignore eval warnings from pdfjs-dist
