@@ -6,6 +6,24 @@ import {Link, useNavigate} from "react-router";
 import {useEffect, useState} from "react";
 import {usePuterStore} from "../lib/puter";
 
+
+interface Resume {
+    id: string;
+    companyName?: string;
+    jobTitle?: string;
+    feedback: {
+        overallScore: number;
+    };
+    imagePath: string;
+    resumePath: string;
+}
+
+interface KVItem {
+    key: string;
+    value: string;
+}
+
+
 export function meta({}: Route.MetaArgs) {
     return [
         { title: "HireLens" },
@@ -25,6 +43,8 @@ export default function Home() {
     }, [auth.isAuthenticated])
 
     useEffect(() => {
+        if (!auth.isAuthenticated) return;
+
         const loadResumes = async() => {
             setLoadingResumes(true);
 
@@ -38,7 +58,7 @@ export default function Home() {
             setLoadingResumes(false);
         }
         loadResumes()
-    }, []);
+    }, [auth.isAuthenticated, kv]);
 
     return (
         <main className="relative w-full h-screen overflow-auto bg-gray-100">
@@ -86,8 +106,6 @@ export default function Home() {
                     </div>
                 )}
             </section>
-
-
         </main>
     );
 }
