@@ -99,7 +99,7 @@ form {
     @apply flex flex-row gap-2 justify-between min-h-[110px] max-sm:flex-col items-center max-md:justify-center max-md:items-center;
   }
   .feedback-section {
-    @apply flex flex-col gap-8 w-1/2 px-8 max-lg:w-full py-6;
+    @apply flex flex-col gap-8 w-1/2 px-8 max-lg:w-full py-2;
   }
   .navbar {
     @apply flex flex-row justify-between items-center bg-white rounded-xl p-4 w-full px-10 max-w-[1200px] mx-auto;
