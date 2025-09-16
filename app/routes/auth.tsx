@@ -1,6 +1,7 @@
 import {usePuterStore} from "~/lib/puter";
 import {useEffect} from "react";
 import {useLocation, useNavigate} from "react-router";
+import Particles from "../components/Particles";
 
 export const meta = () => ([
     { title: 'HireLens | Auth' },
@@ -19,8 +20,21 @@ const Auth = () => {
     }, [auth.isAuthenticated, next])
 
     return (
-        <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center">
-            <div className="gradient-border shadow-lg">
+        <main className="min-h-screen flex items-center justify-center">
+            <div className="absolute inset-0 z-0">
+                <Particles
+                    particleColors={["#00ff00", "#00008b", "#ff0000"]}
+                    particleCount={200}
+                    particleSpread={12}
+                    speed={0.2}
+                    particleBaseSize={130}
+                    moveParticlesOnHover={true}
+                    alphaParticles={false}
+                    disableRotation={false}
+                    className="w-full h-full"
+                />
+            </div>
+            <div className="gradient-border shadow-lg z-10">
                 <section className="flex flex-col gap-8 bg-white rounded-2xl p-10">
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1>Welcome</h1>

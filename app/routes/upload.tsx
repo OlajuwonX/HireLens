@@ -119,7 +119,7 @@ const Upload = () => {
     }
 
     return (
-        <main className="relative w-full h-screen overflow-auto bg-gray-200">
+        <main className="relative w-full h-screen overflow-auto">
             <Navbar />
             {/* Particles Background*/}
             <div className="absolute inset-0 z-0">

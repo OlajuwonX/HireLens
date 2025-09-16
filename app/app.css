@@ -33,7 +33,7 @@ body {
 }
 
 main {
-  @apply min-h-screen pt-10;
+  @apply min-h-screen pt-10 bg-white;
 }
 h1 {
   @apply text-4xl sm:text-5xl md:text-6xl text-gradient leading-tight tracking-[-2px] font-semibold;
@@ -159,7 +159,7 @@ form {
 
 @layer base {
   * {
-    @apply border-gray-200 outline-blue-500/50;
+    @apply border-gray-200 outline-green-300;
   }
   body {
     @apply bg-white text-gray-900;

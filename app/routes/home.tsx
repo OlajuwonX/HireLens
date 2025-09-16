@@ -45,7 +45,7 @@ export default function Home() {
     }, [auth.isAuthenticated, kv]);
 
     return (
-        <main className="relative w-full h-screen overflow-auto bg-gray-100">
+        <main className="relative w-full h-screen overflow-auto bg-white">
             <Navbar />
             {/* Particles Background*/}
             <div className="absolute inset-0 z-0">
