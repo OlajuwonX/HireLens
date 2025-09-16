@@ -34,11 +34,11 @@ const Auth = () => {
                     className="w-full h-full"
                 />
             </div>
-            <div className="gradient-border shadow-lg z-10">
+            <div className="gradient-border relative shadow-lg z-10">
                 <section className="flex flex-col gap-8 bg-white rounded-2xl p-10">
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1>Welcome</h1>
-                        <h2>Log In to Continue Your Job Journey</h2>
+                        <h2>Log In to Continue</h2>
                     </div>
                     <div>
                         {isLoading ? (
