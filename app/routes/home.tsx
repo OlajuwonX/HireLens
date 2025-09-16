@@ -61,7 +61,7 @@ export default function Home() {
                     className="w-full h-full"
                 />
             </div>
-            <section className="main-section relative z-10 pt-12 pb-20 px-4">
+            <section className="main-section relative z-10 pt-12 pb-15 px-2">
                 <div className="page-heading">
                     <h1>Monitor Your Applications and Resume Scores</h1>
                     {!loadingResumes && resumes?.length === 0 ? (
@@ -77,7 +77,7 @@ export default function Home() {
                 )}
 
                 {!loadingResumes && resumes.length > 0 && (
-                    <div className="resumes-section w-full max-w-7xl">
+                    <div className="resumes-section w-full">
                         {resumes.map((resume) => (
                             <ResumeCard key={resume.id} resume={resume} />
                         ))}

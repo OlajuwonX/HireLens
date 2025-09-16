@@ -135,8 +135,8 @@ const Upload = () => {
                     className="w-full h-full"
                 />
             </div>
-            <section className="main-section relative z-10 pt-12 pb-20 px-4">
-                <div className="page-heading text-center py-16">
+            <section className="main-section relative z-10 pt-12 pb-15 px-2">
+                <div className="page-heading">
                     <h1>Monitor Your Applications and Resume Scores</h1>
                     {isProcessing ? (
                         <>
@@ -160,7 +160,6 @@ const Upload = () => {
                                     type="text"
                                     name="company-name"
                                     placeholder="Company Name"
-                                    // FIX: Add required attribute for better UX
                                     required
                                 />
                             </div>
@@ -170,7 +169,6 @@ const Upload = () => {
                                     type="text"
                                     name="job-title"
                                     placeholder="Job Title"
-                                    // FIX: Add required attribute
                                     required
                                 />
                             </div>
@@ -180,12 +178,11 @@ const Upload = () => {
                                     rows={5}
                                     name="job-description"
                                     placeholder="Job Description"
-                                    // FIX: Add required attribute
                                     required
                                 />
                             </div>
                             <div className="form-div">
-                                <label htmlFor="uploader">Upload Resume</label>
+                                <label htmlFor="uploader" className="font-semibold">Upload Resume</label>
                                 <FileUploader onFileSelect={handleFileSelect} />
                             </div>
                             <button className="primary-button" type="submit">
