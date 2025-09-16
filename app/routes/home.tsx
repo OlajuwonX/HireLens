@@ -62,7 +62,7 @@ export default function Home() {
                 />
             </div>
             <section className="main-section relative z-10 pt-12 pb-20 px-4">
-                <div className="page-heading text-center">
+                <div className="page-heading">
                     <h1>Monitor Your Applications and Resume Scores</h1>
                     {!loadingResumes && resumes?.length === 0 ? (
                         <h2>Upload your resume for review</h2>
