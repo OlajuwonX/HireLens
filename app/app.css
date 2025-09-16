@@ -93,7 +93,7 @@ form {
     @apply flex flex-wrap max-lg:flex-col gap-6 items-start w-full max-w-[1850px] justify-evenly;
   }
   .resume-card {
-    @apply flex flex-col gap-6 h-[530px] w-full lg:w-[450px] xl:w-[490px] bg-white rounded-2xl p-4;
+    @apply flex flex-col gap-6 h-[580px] w-full lg:w-[450px] xl:w-[490px] bg-white rounded-2xl p-4;
   }
   .resume-card-header {
     @apply flex flex-row gap-2 justify-between min-h-[110px] max-sm:flex-col items-center max-md:justify-center max-md:items-center;
