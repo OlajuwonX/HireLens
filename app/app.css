@@ -36,11 +36,11 @@ main {
   @apply min-h-screen pt-10;
 }
 h1 {
-  @apply text-6xl md:text-4xl sm:text-4xl text-gradient leading-tight tracking-[-2px] font-semibold;
+  @apply text-4xl sm:text-5xl md:text-6xl text-gradient leading-tight tracking-[-2px] font-semibold;
 }
 
 h2 {
-  @apply text-3xl text-dark-200;
+  @apply text-2xl md:text-3xl lg:text-3xl text-dark-200;
 }
 
 label {
@@ -84,7 +84,7 @@ form {
     @apply primary-gradient rounded-full py-4 px-8 cursor-pointer w-[600px] max-md:w-full text-3xl font-semibold text-white;
   }
   .main-section {
-    @apply flex flex-col items-center gap-8 pt-12 mx-15 pb-5;
+    @apply flex flex-col items-center gap-8 pt-6 mx-15 pb-5;
   }
   .page-heading {
     @apply flex flex-col items-center gap-8 max-w-4xl text-center;
