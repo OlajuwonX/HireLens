@@ -7,7 +7,7 @@
     "build": "next build",
     "dev": "next dev --port 5000",
     "start": "next start --port 5000",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

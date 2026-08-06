@@ -14,3 +14,6 @@
 
 # TypeScript
 *.tsbuildinfo
+
+# Logs
+*.log
