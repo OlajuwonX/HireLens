@@ -4,3 +4,13 @@
 # React Router
 /.react-router/
 /build/
+
+# Next.js
+/.next/
+/out/
+
+# pnpm
+/.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo

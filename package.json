@@ -2,11 +2,12 @@
   "name": "hirelens",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "build": "next build",
+    "dev": "next dev --port 5000",
+    "start": "next start --port 5000",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -25,6 +26,7 @@
     "isbot": "^5.1.27",
     "lucide-react": "^0.542.0",
     "motion": "^12.23.12",
+    "next": "^15.5.0",
     "ogl": "^1.0.11",
     "pdfjs-dist": "^3.11.174",
     "react": "^19.1.0",

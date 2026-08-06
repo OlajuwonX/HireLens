@@ -1,27 +1,52 @@
 {
   "include": [
     "**/*",
-    "**/.server/**/*",
     "**/.client/**/*",
-    ".react-router/types/**/*"
+    "**/.server/**/*",
+    ".next/types/**/*.ts"
   ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "vite/client"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "types": [
+      "node",
+      "vite/client"
+    ],
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "rootDirs": [".", "./.react-router/types"],
-    "baseUrl": ".",
+    "jsx": "preserve",
+    "rootDirs": [
+      "."
+    ],
+    "baseUrl": "./",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": [
+        "./app/*"
+      ]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true
-  }
+    "strict": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true
+  },
+  "exclude": [
+    "node_modules",
+    ".react-router",
+    "app/root.tsx",
+    "app/routes.ts",
+    "app/routes"
+  ]
 }
