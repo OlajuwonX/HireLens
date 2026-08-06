@@ -6,30 +6,16 @@
     ".next/types/**/*.ts"
   ],
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2022"
-    ],
-    "types": [
-      "node",
-      "vite/client"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["node"],
     "target": "ES2022",
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "rootDirs": [
-      "."
-    ],
-    "baseUrl": "./",
+    "rootDirs": ["."],
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "~/*": [
-        "./app/*"
-      ]
+      "@/*": ["./*"],
+      "~/*": ["./app/*"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
@@ -45,11 +31,5 @@
     ],
     "allowJs": true
   },
-  "exclude": [
-    "node_modules",
-    ".react-router",
-    "app/root.tsx",
-    "app/routes.ts",
-    "app/routes"
-  ]
+  "exclude": ["node_modules"]
 }
