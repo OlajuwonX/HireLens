@@ -2,7 +2,7 @@
   "name": "hirelens",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "next build",
     "dev": "next dev --port 5000",
@@ -25,6 +25,7 @@
     "lucide-react": "^0.542.0",
     "motion": "^12.23.12",
     "next": "^15.5.0",
+    "next-auth": "5.0.0-beta.32",
     "ogl": "^1.0.11",
     "pdfjs-dist": "^3.11.174",
     "react": "^19.1.0",

@@ -6,9 +6,11 @@ allowBuilds:
   esbuild: true
   sharp: true
 
+ignoredBuiltDependencies:
+  - canvas
+
 onlyBuiltDependencies:
   - esbuild
   - sharp
 
-ignoredBuiltDependencies:
-  - canvas
+storeDir: .pnpm-store/v11
