@@ -13,3 +13,7 @@
 
 # Logs
 *.log
+
+.env
+.claude
+
