@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { resumes, type NewResume } from "@/lib/db/schema";
 
@@ -15,6 +15,60 @@ export async function findResumeForUser(input: { userId: string; publicId: strin
     .from(resumes)
     .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
     .limit(1);
+
+  return resume ?? null;
+}
+
+export async function listResumesForUser(userId: string) {
+  return db
+    .select()
+    .from(resumes)
+    .where(eq(resumes.userId, userId))
+    .orderBy(desc(resumes.createdAt));
+}
+
+export async function renameResumeForUser(input: {
+  userId: string;
+  publicId: string;
+  title: string;
+}) {
+  const [resume] = await db
+    .update(resumes)
+    .set({ title: input.title, updatedAt: new Date() })
+    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .returning();
+
+  return resume ?? null;
+}
+
+export async function archiveResumeForUser(input: { userId: string; publicId: string }) {
+  const [resume] = await db
+    .update(resumes)
+    .set({ status: "ARCHIVED", archivedAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .returning();
+
+  return resume ?? null;
+}
+
+export async function deleteResumeForUser(input: { userId: string; publicId: string }) {
+  const [resume] = await db
+    .delete(resumes)
+    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .returning();
+
+  return resume ?? null;
+}
+
+export async function retryResumeProcessingForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
+  const [resume] = await db
+    .update(resumes)
+    .set({ status: "PROCESSING", updatedAt: new Date() })
+    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .returning();
 
   return resume ?? null;
 }

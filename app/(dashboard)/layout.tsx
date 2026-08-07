@@ -7,6 +7,7 @@ import { requireCurrentUser } from "@/features/auth/server/require-user";
 
 const navigation = [
   { label: "Overview", href: "/dashboard" },
+  { label: "Resumes", href: "/dashboard/resumes" },
   { label: "Account", href: "/settings/account" },
 ];
 
