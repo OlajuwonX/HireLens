@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { SignInForm } from "@/features/auth/components/sign-in-form";
 import { getCurrentUser } from "@/features/auth/server/current-user";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign in",
