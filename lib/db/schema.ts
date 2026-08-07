@@ -595,6 +595,7 @@ export type NewUser = typeof users.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type NewResume = typeof resumes.$inferInsert;
 export type ResumeVersion = typeof resumeVersions.$inferSelect;
+export type NewResumeVersion = typeof resumeVersions.$inferInsert;
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type NewFileAsset = typeof fileAssets.$inferInsert;
 export type Job = typeof jobs.$inferSelect;
