@@ -1,16 +1,25 @@
 import "server-only";
 
 import type { CurrentUser } from "./current-user";
+import { findOrCreateUserFromPublicProfile } from "./user.service";
 
 export type SyncedUserProfile = CurrentUser & {
-  persistence: "session-only";
+  persistence: "database";
+  userId: string;
 };
 
 export async function syncUserProfile(
   currentUser: CurrentUser,
 ): Promise<SyncedUserProfile> {
+  const user = await findOrCreateUserFromPublicProfile(currentUser.user);
+
   return {
     ...currentUser,
-    persistence: "session-only",
+    userId: user.id,
+    persistence: "database",
+    account: {
+      lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
+      onboardingCompleted: user.onboardingCompleted,
+    },
   };
 }

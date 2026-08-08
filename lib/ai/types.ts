@@ -1,4 +1,4 @@
-export type AIProviderName = "puter" | "mock";
+export type AIProviderName = "puter" | "gemini" | "mock";
 
 export type AIProviderResult = {
   provider: AIProviderName;
@@ -7,12 +7,18 @@ export type AIProviderResult = {
   durationMs: number;
 };
 
+export type ResumeDocumentInput = {
+  pdfBase64: string;
+  filename: string;
+  text: string | null;
+};
+
 export type GeneralAnalysisInput = {
-  resumeText: string | null;
+  resume: ResumeDocumentInput;
 };
 
 export type JobSpecificAnalysisInput = {
-  resumeText: string | null;
+  resume: ResumeDocumentInput;
   jobTitle: string;
   company: string;
   jobDescription: string;

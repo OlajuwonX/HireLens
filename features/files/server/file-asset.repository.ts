@@ -27,19 +27,14 @@ export async function findFileAssetForUser(input: {
   return fileAsset ?? null;
 }
 
-export async function findFileAssetByPublicIdForUser(input: {
+export async function findFileAssetById(input: {
   userId: string;
-  publicId: string;
+  id: string;
 }) {
   const [fileAsset] = await db
     .select()
     .from(fileAssets)
-    .where(
-      and(
-        eq(fileAssets.userId, input.userId),
-        eq(fileAssets.publicId, input.publicId),
-      ),
-    )
+    .where(and(eq(fileAssets.userId, input.userId), eq(fileAssets.id, input.id)))
     .limit(1);
 
   return fileAsset ?? null;

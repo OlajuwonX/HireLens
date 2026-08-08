@@ -2,8 +2,10 @@ packages:
   - .
 
 allowBuilds:
+  '@google/genai': set this to true or false
   canvas: true
   esbuild: true
+  protobufjs: set this to true or false
   sharp: true
 
 ignoredBuiltDependencies:

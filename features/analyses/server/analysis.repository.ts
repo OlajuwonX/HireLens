@@ -8,6 +8,86 @@ import {
   type ResumeAnalysis,
 } from "@/lib/db/schema";
 
+export async function findSucceededAnalysisByInputHash(input: {
+  userId: string;
+  inputHash: string;
+}) {
+  const [analysis] = await db
+    .select()
+    .from(resumeAnalyses)
+    .where(
+      and(
+        eq(resumeAnalyses.userId, input.userId),
+        eq(resumeAnalyses.inputHash, input.inputHash),
+        eq(resumeAnalyses.status, "SUCCEEDED"),
+      ),
+    )
+    .limit(1);
+
+  return analysis ?? null;
+}
+
+export async function findAnalysisByInputHash(input: {
+  userId: string;
+  inputHash: string;
+}) {
+  const [analysis] = await db
+    .select()
+    .from(resumeAnalyses)
+    .where(
+      and(
+        eq(resumeAnalyses.userId, input.userId),
+        eq(resumeAnalyses.inputHash, input.inputHash),
+      ),
+    )
+    .limit(1);
+
+  return analysis ?? null;
+}
+
+export async function resetAnalysisToPending(input: {
+  analysisId: string;
+  userId: string;
+  promptVersion: string;
+}) {
+  const [analysis] = await db
+    .update(resumeAnalyses)
+    .set({
+      status: "PENDING",
+      promptVersion: input.promptVersion,
+      failureReason: null,
+      rawResponse: null,
+      normalizedResult: null,
+      overallScore: null,
+      atsScore: null,
+      durationMs: null,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(resumeAnalyses.id, input.analysisId),
+        eq(resumeAnalyses.userId, input.userId),
+      ),
+    )
+    .returning();
+
+  return analysis ?? null;
+}
+
+export async function deleteAnalysisSuggestions(input: {
+  userId: string;
+  analysisId: string;
+}) {
+  await db
+    .delete(analysisSuggestions)
+    .where(
+      and(
+        eq(analysisSuggestions.userId, input.userId),
+        eq(analysisSuggestions.analysisId, input.analysisId),
+      ),
+    );
+}
+
 export async function createPendingAnalysis(input: {
   userId: string;
   resumeVersionId: string;

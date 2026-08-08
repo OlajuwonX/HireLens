@@ -3,8 +3,10 @@ import "server-only";
 import { and, desc, eq, max } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
+  fileAssets,
   resumeVersions,
   resumes,
+  type NewFileAsset,
   type NewResumeVersion,
 } from "@/lib/db/schema";
 
@@ -62,6 +64,60 @@ export async function getNextResumeVersionNumber(input: {
 export async function createResumeVersion(input: NewResumeVersion) {
   const [version] = await db.insert(resumeVersions).values(input).returning();
   return version;
+}
+
+export async function createResumeVersionWithFileAsset(input: {
+  userId: string;
+  resumeId: string;
+  label: string;
+  fileAsset: Omit<NewFileAsset, "userId" | "kind">;
+}) {
+  return db.transaction(async (tx) => {
+    const [asset] = await tx
+      .insert(fileAssets)
+      .values({ ...input.fileAsset, userId: input.userId, kind: "RESUME_PDF" })
+      .returning();
+
+    const [current] = await tx
+      .select({ value: max(resumeVersions.versionNumber) })
+      .from(resumeVersions)
+      .where(
+        and(
+          eq(resumeVersions.userId, input.userId),
+          eq(resumeVersions.resumeId, input.resumeId),
+        ),
+      );
+
+    const versionNumber = (current?.value ?? 0) + 1;
+    const isDefault = versionNumber === 1;
+
+    const [version] = await tx
+      .insert(resumeVersions)
+      .values({
+        userId: input.userId,
+        resumeId: input.resumeId,
+        fileAssetId: asset.id,
+        label: input.label,
+        versionNumber,
+        isDefault,
+      })
+      .returning();
+
+    if (isDefault) {
+      await tx
+        .update(resumes)
+        .set({
+          defaultVersionId: version.id,
+          status: "READY",
+          updatedAt: new Date(),
+        })
+        .where(
+          and(eq(resumes.userId, input.userId), eq(resumes.id, input.resumeId)),
+        );
+    }
+
+    return version;
+  });
 }
 
 export async function setDefaultResumeVersionForUser(input: {

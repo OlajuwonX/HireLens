@@ -1,15 +1,64 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { users, type NewUser } from "@/lib/db/schema";
+import { accounts, users, type NewUser } from "@/lib/db/schema";
 
 export async function findUserByEmail(email: string) {
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
   return user ?? null;
 }
 
 export async function createUser(input: NewUser) {
   const [user] = await db.insert(users).values(input).returning();
   return user;
+}
+
+export async function touchUserLogin(input: { userId: string }) {
+  const [user] = await db
+    .update(users)
+    .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+    .where(eq(users.id, input.userId))
+    .returning();
+
+  return user ?? null;
+}
+
+export async function upsertOAuthAccount(input: {
+  userId: string;
+  provider: string;
+  providerAccountId: string;
+}) {
+  const [existing] = await db
+    .select()
+    .from(accounts)
+    .where(
+      and(
+        eq(accounts.provider, input.provider),
+        eq(accounts.providerAccountId, input.providerAccountId),
+      ),
+    )
+    .limit(1);
+
+  if (existing) {
+    return existing;
+  }
+
+  const [account] = await db.insert(accounts).values(input).returning();
+
+  return account;
+}
+
+export async function completeUserOnboarding(input: { userId: string }) {
+  const [user] = await db
+    .update(users)
+    .set({ onboardingCompleted: true, updatedAt: new Date() })
+    .where(eq(users.id, input.userId))
+    .returning();
+
+  return user ?? null;
 }

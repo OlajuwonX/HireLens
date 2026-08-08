@@ -37,7 +37,7 @@ export default async function CompareResumeVersionsPage({ params }: ComparePageP
             ? "Comparison foundation ready"
             : "Create another version to compare"
         }
-        description="Stage 8 analysis scores will make this comparison meaningful."
+        description="Run an analysis on two or more versions to compare their scores."
       />
     </div>
   );

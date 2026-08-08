@@ -17,22 +17,25 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <PageHeader
         title="Overview"
-        description="Your authenticated HireLens workspace is ready for resume, job, and application features."
+        description="Here's where your job search stands."
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <MetricCard label="Profile persistence" value={profile.persistence} />
         <MetricCard
           label="Onboarding"
           value={profile.account.onboardingCompleted ? "Complete" : "Pending"}
         />
         <MetricCard
-          label="Last login"
-          value={profile.account.lastLoginAt ? "Recorded" : "Not recorded"}
+          label="Last sign-in"
+          value={
+            profile.account.lastLoginAt
+              ? new Date(profile.account.lastLoginAt).toLocaleDateString()
+              : "Not recorded"
+          }
         />
       </div>
       <EmptyState
-        title="Resume workspace coming next"
-        description="Stage 4 adds the database layer that will persist users, resumes, jobs, and application data."
+        title="Start with a resume"
+        description="Upload a resume to run an ATS and quality analysis against it."
       />
     </div>
   );

@@ -1,10 +1,23 @@
 import Image from "next/image";
+import Link from "next/link";
 
-const foundationItems = [
-  "Next.js 15 App Router shell",
-  "Mobile-first SaaS foundation",
-  "Resume workspace direction",
-  "Port 5000 development standard",
+const capabilities = [
+  {
+    title: "Resume analysis",
+    description: "See where your resume matches — and where it doesn't.",
+  },
+  {
+    title: "Job targeting",
+    description: "Turn job descriptions into clear requirements.",
+  },
+  {
+    title: "Application documents",
+    description: "Generate tailored cover letters and follow-ups.",
+  },
+  {
+    title: "Tracking",
+    description: "Follow every opportunity from discovery to offer.",
+  },
 ];
 
 export default function HomePage() {
@@ -23,33 +36,47 @@ export default function HomePage() {
             />
             <span className="text-xl font-bold">HireLens</span>
           </div>
-          <span className="rounded-full border border-gray-200 px-3 py-1 text-sm text-gray-600">
-            Stage 01
-          </span>
+          <Link
+            href="/sign-in"
+            className="rounded-full border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50"
+          >
+            Sign in
+          </Link>
         </nav>
 
         <div className="max-w-3xl">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-normal text-green-700">
-            Foundation ready
-          </p>
           <h1 className="text-4xl font-semibold leading-tight text-gray-950 sm:text-5xl">
-            A production SaaS foundation for resume analysis and application
-            tracking.
+            Build a stronger application for every job you want.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-            This stage establishes the Next.js App Router base. Product
-            features will move in through the staged rebuild plan so every
-            commit stays easy to review and debug.
+            Analyze your resume against real job requirements, spot missing
+            evidence, generate tailored application documents, and keep your
+            entire job search organized from one workspace.
           </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/sign-in"
+              className="inline-flex h-11 items-center bg-gray-950 px-5 text-sm font-semibold text-white hover:bg-gray-800"
+            >
+              Create free account
+            </Link>
+            <Link
+              href="/sign-in"
+              className="inline-flex h-11 items-center border border-gray-300 px-5 text-sm font-semibold text-gray-950 hover:bg-gray-50"
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {foundationItems.map((item) => (
+          {capabilities.map((item) => (
             <div
-              key={item}
-              className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700"
+              key={item.title}
+              className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3"
             >
-              {item}
+              <p className="text-sm font-semibold text-gray-950">{item.title}</p>
+              <p className="mt-1 text-sm text-gray-600">{item.description}</p>
             </div>
           ))}
         </div>

@@ -1,4 +1,4 @@
-export type StorageProviderName = "puter";
+export type StorageProviderName = "puter" | "s3" | "memory";
 
 export type UploadResumeInput = {
   userId: string;
@@ -23,5 +23,7 @@ export type StorageReadUrl = {
 export interface StorageProvider {
   uploadResume(input: UploadResumeInput): Promise<StoredFile>;
   createReadUrl(storageKey: string): Promise<StorageReadUrl>;
+
+  readFile(storageKey: string): Promise<Uint8Array>;
   deleteFile(storageKey: string): Promise<void>;
 }

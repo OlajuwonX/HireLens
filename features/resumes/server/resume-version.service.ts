@@ -1,14 +1,19 @@
 import "server-only";
 
-import { findFileAssetByPublicIdForUser } from "@/features/files/server/file-asset.repository";
+import { StorageValidationError, type StorageProvider } from "@/lib/storage";
+import { getStorageProvider } from "@/lib/storage/provider";
+import type { ResumeVersion } from "@/lib/db/schema";
 import { getOwnedResume } from "./resume.service";
 import {
-  createResumeVersion,
+  createResumeVersionWithFileAsset,
   findResumeVersionForUser,
-  getNextResumeVersionNumber,
   listResumeVersionsForUser,
   setDefaultResumeVersionForUser,
 } from "./resume-version.repository";
+
+export type CreateResumeVersionResult =
+  | { ok: true; version: ResumeVersion }
+  | { ok: false; error: "RESUME_NOT_FOUND" | "INVALID_FILE" | "UPLOAD_FAILED"; message: string };
 
 export async function listOwnedResumeVersions(input: {
   userId: string;
@@ -31,53 +36,74 @@ export async function listOwnedResumeVersions(input: {
   return { resume, versions };
 }
 
-export async function createOwnedResumeVersion(input: {
+export async function createOwnedResumeVersionFromUpload(input: {
   userId: string;
   resumePublicId: string;
-  fileAssetPublicId: string;
   label: string;
-}) {
+  file: File;
+  storageProvider?: StorageProvider;
+}): Promise<CreateResumeVersionResult> {
   const resume = await getOwnedResume({
     userId: input.userId,
     publicId: input.resumePublicId,
   });
 
   if (!resume) {
-    return null;
+    return {
+      ok: false,
+      error: "RESUME_NOT_FOUND",
+      message: "That resume could not be found.",
+    };
   }
 
-  const fileAsset = await findFileAssetByPublicIdForUser({
-    userId: input.userId,
-    publicId: input.fileAssetPublicId,
-  });
+  const storage = input.storageProvider ?? getStorageProvider();
+  const originalFilename = input.file.name || "resume.pdf";
 
-  if (!fileAsset || fileAsset.kind !== "RESUME_PDF") {
-    return null;
+  let stored;
+
+  try {
+    stored = await storage.uploadResume({
+      userId: input.userId,
+      file: input.file,
+      originalFilename,
+      contentType: input.file.type || "application/pdf",
+    });
+  } catch (error) {
+    if (error instanceof StorageValidationError) {
+      return { ok: false, error: "INVALID_FILE", message: error.message };
+    }
+
+    return {
+      ok: false,
+      error: "UPLOAD_FAILED",
+      message: "The file could not be uploaded. Please try again.",
+    };
   }
 
-  const versionNumber = await getNextResumeVersionNumber({
-    userId: input.userId,
-    resumeId: resume.id,
-  });
-
-  const version = await createResumeVersion({
-    userId: input.userId,
-    resumeId: resume.id,
-    fileAssetId: fileAsset.id,
-    label: input.label,
-    versionNumber,
-    isDefault: versionNumber === 1,
-  });
-
-  if (version.isDefault) {
-    await setDefaultResumeVersionForUser({
+  try {
+    const version = await createResumeVersionWithFileAsset({
       userId: input.userId,
       resumeId: resume.id,
-      versionId: version.id,
+      label: input.label,
+      fileAsset: {
+        storageProvider: stored.provider,
+        storageKey: stored.storageKey,
+        originalFilename: stored.originalFilename,
+        mimeType: stored.mimeType,
+        sizeBytes: stored.sizeBytes,
+      },
     });
-  }
 
-  return version;
+    return { ok: true, version };
+  } catch {
+    await storage.deleteFile(stored.storageKey).catch(() => undefined);
+
+    return {
+      ok: false,
+      error: "UPLOAD_FAILED",
+      message: "The version could not be saved. Please try again.",
+    };
+  }
 }
 
 export async function getOwnedResumeVersion(input: {
@@ -88,6 +114,16 @@ export async function getOwnedResumeVersion(input: {
     userId: input.userId,
     publicId: input.versionPublicId,
   });
+}
+
+export async function createOwnedResumeVersionReadUrl(input: {
+  userId: string;
+  storageKey: string;
+  storageProvider?: StorageProvider;
+}) {
+  const storage = input.storageProvider ?? getStorageProvider();
+
+  return storage.createReadUrl(input.storageKey);
 }
 
 export async function setOwnedDefaultResumeVersion(input: {

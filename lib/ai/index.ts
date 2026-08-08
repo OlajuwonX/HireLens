@@ -6,6 +6,10 @@ export {
   createGeneralAnalysisPrompt,
   createJobSpecificAnalysisPrompt,
 } from "./prompts";
+export {
+  GeminiResumeAIProvider,
+  type GeminiResumeAIProviderConfig,
+} from "./providers/gemini-resume-ai-provider";
 export { MockResumeAIProvider } from "./providers/mock-resume-ai-provider";
 export type {
   AIProviderName,
@@ -13,4 +17,5 @@ export type {
   GeneralAnalysisInput,
   JobSpecificAnalysisInput,
   ResumeAIProvider,
+  ResumeDocumentInput,
 } from "./types";

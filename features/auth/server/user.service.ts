@@ -1,7 +1,12 @@
 import "server-only";
 
-import { findUserByEmail, createUser } from "./user.repository";
 import type { PublicUser } from "@/features/auth/types/public-user";
+import {
+  createUser,
+  findUserByEmail,
+  touchUserLogin,
+  upsertOAuthAccount,
+} from "./user.repository";
 
 export async function findOrCreateUserFromPublicProfile(profile: PublicUser) {
   if (!profile.email) {
@@ -20,4 +25,20 @@ export async function findOrCreateUserFromPublicProfile(profile: PublicUser) {
     image: profile.image,
     lastLoginAt: new Date(),
   });
+}
+
+export async function recordSignIn(input: {
+  profile: PublicUser;
+  provider: string;
+  providerAccountId: string;
+}) {
+  const user = await findOrCreateUserFromPublicProfile(input.profile);
+
+  await upsertOAuthAccount({
+    userId: user.id,
+    provider: input.provider,
+    providerAccountId: input.providerAccountId,
+  });
+
+  return (await touchUserLogin({ userId: user.id })) ?? user;
 }
