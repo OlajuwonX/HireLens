@@ -173,11 +173,12 @@ export async function updateApplicationWithActivity(input: {
   activities: { title: string; description?: string | null }[];
 }) {
   return db.transaction(async (tx) => {
+    const hasActivities = input.activities.length > 0;
     const [application] = await tx
       .update(applications)
       .set({
         ...input.values,
-        lastActivityAt: new Date(),
+        ...(hasActivities ? { lastActivityAt: new Date() } : {}),
         updatedAt: new Date(),
       })
       .where(
@@ -192,7 +193,7 @@ export async function updateApplicationWithActivity(input: {
       return null;
     }
 
-    if (input.activities.length > 0) {
+    if (hasActivities) {
       await tx.insert(applicationActivities).values(
         input.activities.map((activity) => ({
           userId: input.userId,
@@ -212,15 +213,27 @@ export async function attachAnalysisToApplication(input: {
   applicationId: string;
   analysisId: string;
 }) {
-  await db
-    .update(applications)
-    .set({ analysisId: input.analysisId, updatedAt: new Date() })
-    .where(
-      and(
-        eq(applications.userId, input.userId),
-        eq(applications.id, input.applicationId),
-      ),
-    );
+  await db.transaction(async (tx) => {
+    await tx
+      .update(applications)
+      .set({
+        analysisId: input.analysisId,
+        lastActivityAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(applications.userId, input.userId),
+          eq(applications.id, input.applicationId),
+        ),
+      );
+
+    await tx.insert(applicationActivities).values({
+      userId: input.userId,
+      applicationId: input.applicationId,
+      title: "Analysis completed",
+    });
+  });
 }
 
 export async function listActivitiesForApplication(input: {

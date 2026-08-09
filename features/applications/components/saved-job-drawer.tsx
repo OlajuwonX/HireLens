@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
 import { listRequirementMatchesForAnalysis } from "@/features/analyses/server/requirement-match.repository";
 import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
+import { documentTypeLabels } from "@/features/documents/constants";
 import {
   getApplicationTimeline,
   getOwnedApplication,
@@ -166,7 +167,7 @@ export async function SavedJobDrawer({
               href={`/dashboard/documents/${document.publicId}`}
               className="text-meta font-medium text-text-primary underline-offset-4 hover:underline"
             >
-              {document.type.replaceAll("_", " ").toLowerCase()}
+              {documentTypeLabels[document.type]}
             </Link>
             <p className="font-mono text-system text-text-muted">
               {document.createdAt.toLocaleDateString()}

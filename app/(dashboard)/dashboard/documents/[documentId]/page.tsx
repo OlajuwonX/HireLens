@@ -24,7 +24,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     notFound();
   }
 
-  const { document, jobTitle, jobCompany, versionLabel } = row;
+  const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
 
   return (
     <div className="space-y-6">
@@ -58,7 +58,9 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
             </p>
             <p>
               <span className="font-medium text-text-primary">Resume: </span>
-              {versionLabel ?? "None"}
+              {versionLabel
+                ? `${resumeTitle ? `${resumeTitle} - ` : ""}${versionLabel}`
+                : "None"}
             </p>
             <p>
               <span className="font-medium text-text-primary">Created: </span>

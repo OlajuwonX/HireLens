@@ -6,6 +6,7 @@ import {
   applications,
   generatedDocuments,
   jobs,
+  resumes,
   resumeVersions,
   type GeneratedDocument,
   type NewGeneratedDocument,
@@ -15,6 +16,7 @@ export type DocumentRow = {
   document: GeneratedDocument;
   jobTitle: string | null;
   jobCompany: string | null;
+  resumeTitle: string | null;
   versionLabel: string | null;
 };
 
@@ -22,6 +24,7 @@ const rowShape = {
   document: generatedDocuments,
   jobTitle: jobs.title,
   jobCompany: jobs.company,
+  resumeTitle: resumes.title,
   versionLabel: resumeVersions.label,
 };
 
@@ -31,6 +34,7 @@ export async function listDocumentsForUser(userId: string): Promise<DocumentRow[
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
     .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
+    .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
     .where(eq(generatedDocuments.userId, userId))
     .orderBy(desc(generatedDocuments.updatedAt));
 }
@@ -60,6 +64,7 @@ export async function findDocumentRowForUser(input: {
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
     .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
+    .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
     .where(
       and(
         eq(generatedDocuments.userId, input.userId),

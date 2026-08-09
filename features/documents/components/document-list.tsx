@@ -6,7 +6,7 @@ import type { DocumentRow } from "../server/document.repository";
 export function DocumentList({ rows }: { rows: DocumentRow[] }) {
   return (
     <div className="grid gap-3">
-      {rows.map(({ document, jobTitle, jobCompany, versionLabel }) => (
+      {rows.map(({ document, jobTitle, jobCompany, resumeTitle, versionLabel }) => (
         <Link key={document.publicId} href={`/dashboard/documents/${document.publicId}`}>
           <Card className="transition-colors hover:bg-surface-secondary">
             <CardContent className="p-4">
@@ -26,7 +26,10 @@ export function DocumentList({ rows }: { rows: DocumentRow[] }) {
                 </p>
               </div>
               {versionLabel ? (
-                <p className="mt-3 text-label text-text-muted">{versionLabel}</p>
+                <p className="mt-3 text-label text-text-muted">
+                  {resumeTitle ? `${resumeTitle} - ` : ""}
+                  {versionLabel}
+                </p>
               ) : null}
             </CardContent>
           </Card>
