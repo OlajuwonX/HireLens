@@ -1,8 +1,8 @@
 "use client";
 
+import { IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { Menu } from "lucide-react";
-import { IconButton } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -34,15 +34,15 @@ export function AppShell({
   const title = pageTitle ?? titleFromPathname(pathname);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <DashboardSidebar
         footer={sidebarFooter}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="z-30 shrink-0 border-b border-border bg-background/95 backdrop-blur">
           <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
             <IconButton
               label="Open navigation"
@@ -59,7 +59,9 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
+          {children}
+        </main>
       </div>
     </div>
   );

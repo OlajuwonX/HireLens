@@ -1,11 +1,11 @@
 "use client";
 
+import { Button, IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
-import { Button, IconButton } from "@/components/ui/button";
 import { SidebarNav } from "./sidebar-nav";
 
 function Brand({ collapsed }: { collapsed: boolean }) {
@@ -56,7 +56,7 @@ export function DashboardSidebar({
       <aside
         data-collapsed={collapsed}
         className={cn(
-          "hidden shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
+          "hidden h-screen shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
           collapsed ? "w-18" : "w-60",
         )}
       >
@@ -81,7 +81,10 @@ export function DashboardSidebar({
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-pressed={collapsed}
               title={collapsed ? "Expand sidebar" : undefined}
-              className={cn("gap-3 border-t border-border", collapsed && "px-0")}
+              className={cn(
+                "gap-3 border-t border-border",
+                collapsed && "px-0",
+              )}
             >
               <ToggleIcon aria-hidden="true" className="size-4" />
               {collapsed ? null : "Collapse"}
