@@ -40,7 +40,7 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
     input: JobSpecificAnalysisInput,
   ): Promise<AIProviderResult> {
     return this.analyze({
-      system: createJobSpecificAnalysisPrompt(),
+      system: createJobSpecificAnalysisPrompt(input.priorCorrections),
       resume: input.resume,
       instruction: [
         "Analyze this resume against the following job posting.",
@@ -50,6 +50,9 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
         `Company: ${input.company}`,
         "Description:",
         input.jobDescription,
+        ...(input.requirements
+          ? ["Stated requirements:", input.requirements]
+          : []),
         "</job_posting>",
       ].join("\n"),
       schema: jobFitAnalysisSchema,

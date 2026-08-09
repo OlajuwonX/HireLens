@@ -1,11 +1,14 @@
 import "server-only";
 
+import type { StorageProvider } from "@/lib/storage";
+import { getStorageProvider } from "@/lib/storage/provider";
 import {
   archiveResumeForUser,
   createResume,
   deleteResumeForUser,
   findResumeForUser,
   listResumesForUser,
+  listStorageKeysForResume,
   renameResumeForUser,
   retryResumeProcessingForUser,
 } from "./resume.repository";
@@ -38,8 +41,32 @@ export async function archiveOwnedResume(input: { userId: string; publicId: stri
   return archiveResumeForUser(input);
 }
 
-export async function deleteOwnedResume(input: { userId: string; publicId: string }) {
-  return deleteResumeForUser(input);
+export async function deleteOwnedResume(input: {
+  userId: string;
+  publicId: string;
+  storageProvider?: StorageProvider;
+}) {
+  const resume = await findResumeForUser(input);
+
+  if (!resume) {
+    return null;
+  }
+
+  const keys = await listStorageKeysForResume({
+    userId: input.userId,
+    resumeId: resume.id,
+  });
+
+  const deleted = await deleteResumeForUser(input);
+  const storage = input.storageProvider ?? getStorageProvider();
+
+  await Promise.all(
+    keys.map(({ storageKey }) =>
+      storage.deleteFile(storageKey).catch(() => undefined),
+    ),
+  );
+
+  return deleted;
 }
 
 export async function retryOwnedResumeProcessing(input: {

@@ -26,6 +26,20 @@ export async function listResumeVersionsForUser(input: {
     .orderBy(desc(resumeVersions.versionNumber));
 }
 
+export async function listAllResumeVersionsForUser(userId: string) {
+  return db
+    .select({
+      publicId: resumeVersions.publicId,
+      label: resumeVersions.label,
+      isDefault: resumeVersions.isDefault,
+      resumeTitle: resumes.title,
+    })
+    .from(resumeVersions)
+    .innerJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
+    .where(eq(resumeVersions.userId, userId))
+    .orderBy(desc(resumeVersions.isDefault), desc(resumeVersions.createdAt));
+}
+
 export async function findResumeVersionForUser(input: {
   userId: string;
   publicId: string;

@@ -17,11 +17,20 @@ export type GeneralAnalysisInput = {
   resume: ResumeDocumentInput;
 };
 
+export type EvidenceCorrection = {
+  requirement: string;
+  markedIncorrect: boolean;
+  evidence: string | null;
+  notes: string | null;
+};
+
 export type JobSpecificAnalysisInput = {
   resume: ResumeDocumentInput;
   jobTitle: string;
   company: string;
   jobDescription: string;
+  requirements: string | null;
+  priorCorrections: EvidenceCorrection[];
 };
 
 export interface ResumeAIProvider {

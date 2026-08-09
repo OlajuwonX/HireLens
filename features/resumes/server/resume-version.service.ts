@@ -7,9 +7,14 @@ import { getOwnedResume } from "./resume.service";
 import {
   createResumeVersionWithFileAsset,
   findResumeVersionForUser,
+  listAllResumeVersionsForUser,
   listResumeVersionsForUser,
   setDefaultResumeVersionForUser,
 } from "./resume-version.repository";
+
+export async function listOwnedVersionOptions(userId: string) {
+  return listAllResumeVersionsForUser(userId);
+}
 
 export type CreateResumeVersionResult =
   | { ok: true; version: ResumeVersion }

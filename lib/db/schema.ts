@@ -603,3 +603,5 @@ export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
 export type Application = typeof applications.$inferSelect;
 export type ResumeAnalysis = typeof resumeAnalyses.$inferSelect;
+export type RequirementMatch = typeof requirementMatches.$inferSelect;
+export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;

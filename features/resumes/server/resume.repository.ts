@@ -2,7 +2,12 @@ import "server-only";
 
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { resumes, type NewResume } from "@/lib/db/schema";
+import {
+  fileAssets,
+  resumeVersions,
+  resumes,
+  type NewResume,
+} from "@/lib/db/schema";
 
 export async function createResume(input: NewResume) {
   const [resume] = await db.insert(resumes).values(input).returning();
@@ -17,6 +22,22 @@ export async function findResumeForUser(input: { userId: string; publicId: strin
     .limit(1);
 
   return resume ?? null;
+}
+
+export async function listStorageKeysForResume(input: {
+  userId: string;
+  resumeId: string;
+}) {
+  return db
+    .selectDistinct({ storageKey: fileAssets.storageKey })
+    .from(resumeVersions)
+    .innerJoin(fileAssets, eq(fileAssets.id, resumeVersions.fileAssetId))
+    .where(
+      and(
+        eq(resumeVersions.userId, input.userId),
+        eq(resumeVersions.resumeId, input.resumeId),
+      ),
+    );
 }
 
 export async function listResumesForUser(userId: string) {

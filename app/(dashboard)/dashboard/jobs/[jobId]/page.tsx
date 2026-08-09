@@ -10,7 +10,9 @@ import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import { RunJobFitForm } from "@/features/jobs/components/run-job-fit-form";
 import { getOwnedJob } from "@/features/jobs/server/job.service";
+import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
 import type { Job } from "@/lib/db/schema";
 
 export const metadata: Metadata = {
@@ -53,6 +55,7 @@ export default async function JobPage({ params }: JobPageProps) {
     notFound();
   }
 
+  const versions = await listOwnedVersionOptions(user.id);
   const salary = salaryOf(job);
 
   return (
@@ -147,6 +150,15 @@ export default async function JobPage({ params }: JobPageProps) {
                   View original posting
                 </Link>
               ) : null}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Analyse fit</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RunJobFitForm jobPublicId={job.publicId} versions={versions} />
             </CardContent>
           </Card>
 
