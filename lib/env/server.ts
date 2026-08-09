@@ -38,8 +38,33 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
 let cached: ServerEnv | undefined;
 
+const hints: Record<string, string> = {
+  DATABASE_URL: "a full Postgres connection string",
+  STORAGE_ENDPOINT:
+    "a full URL including https://, for example https://<account-id>.r2.cloudflarestorage.com",
+};
+
 export function getServerEnv(): ServerEnv {
-  cached ??= serverEnvSchema.parse(process.env);
+  if (cached) {
+    return cached;
+  }
+
+  const result = serverEnvSchema.safeParse(process.env);
+
+  if (!result.success) {
+    const details = result.error.issues
+      .map((issue) => {
+        const key = String(issue.path[0] ?? "unknown");
+        const hint = hints[key];
+
+        return `  ${key}: ${issue.message}${hint ? ` — expected ${hint}` : ""}`;
+      })
+      .join("\n");
+
+    throw new Error(`Invalid environment configuration:\n${details}`);
+  }
+
+  cached = result.data;
 
   return cached;
 }

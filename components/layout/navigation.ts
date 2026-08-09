@@ -22,7 +22,7 @@ const allNavigation: NavItem[] = [
     label: "Applications",
     href: "/dashboard/applications",
     Icon: Send,
-    ready: false,
+    ready: true,
   },
   { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true },
   {

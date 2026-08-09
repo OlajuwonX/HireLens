@@ -10,6 +10,8 @@ import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import { TrackJobForm } from "@/features/applications/components/track-job-form";
+import { findApplicationForJob } from "@/features/applications/server/application.repository";
 import { RunJobFitForm } from "@/features/jobs/components/run-job-fit-form";
 import { getOwnedJob } from "@/features/jobs/server/job.service";
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
@@ -55,7 +57,10 @@ export default async function JobPage({ params }: JobPageProps) {
     notFound();
   }
 
-  const versions = await listOwnedVersionOptions(user.id);
+  const [versions, existingApplication] = await Promise.all([
+    listOwnedVersionOptions(user.id),
+    findApplicationForJob({ userId: user.id, jobId: job.id }),
+  ]);
   const salary = salaryOf(job);
 
   return (
@@ -159,6 +164,19 @@ export default async function JobPage({ params }: JobPageProps) {
             </CardHeader>
             <CardContent>
               <RunJobFitForm jobPublicId={job.publicId} versions={versions} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Application</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrackJobForm
+                jobPublicId={job.publicId}
+                versions={versions}
+                existingApplicationPublicId={existingApplication?.publicId ?? null}
+              />
             </CardContent>
           </Card>
 
