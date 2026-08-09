@@ -1,8 +1,8 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { applications } from "@/lib/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export async function findApplicationForUser(input: {
   userId: string;

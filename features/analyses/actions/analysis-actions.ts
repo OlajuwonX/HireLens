@@ -1,10 +1,10 @@
 "use server";
 
+import { runGeneralResumeAnalysis } from "@/features/analyses/server/analysis.service";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { runGeneralResumeAnalysis } from "@/features/analyses/server/analysis.service";
 
 const runAnalysisSchema = z.object({
   resumePublicId: z.string().uuid(),

@@ -1,8 +1,8 @@
-import Link from "next/link";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { StatusBadge } from "@/components/data-display/status-badge";
 import type { ResumeAnalysis } from "@/lib/db/schema";
+import Link from "next/link";
 
 export function AnalysisList({ analyses }: { analyses: ResumeAnalysis[] }) {
   if (analyses.length === 0) {
@@ -24,7 +24,9 @@ export function AnalysisList({ analyses }: { analyses: ResumeAnalysis[] }) {
                 href={`/dashboard/analyses/${analysis.publicId}`}
                 className="font-semibold text-text-primary hover:text-text-primary"
               >
-                {analysis.type === "GENERAL" ? "General analysis" : "Job-fit analysis"}
+                {analysis.type === "GENERAL"
+                  ? "General analysis"
+                  : "Job-fit analysis"}
               </Link>
               <p className="mt-1 text-meta text-text-secondary">
                 {analysis.overallScore !== null

@@ -600,5 +600,6 @@ export type NewResumeVersion = typeof resumeVersions.$inferInsert;
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type NewFileAsset = typeof fileAssets.$inferInsert;
 export type Job = typeof jobs.$inferSelect;
+export type NewJob = typeof jobs.$inferInsert;
 export type Application = typeof applications.$inferSelect;
 export type ResumeAnalysis = typeof resumeAnalyses.$inferSelect;
