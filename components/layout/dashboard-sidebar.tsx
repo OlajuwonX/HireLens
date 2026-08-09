@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import { Button, IconButton } from "@/components/ui/button";
 import { SidebarNav } from "./sidebar-nav";
 
 function Brand({ collapsed }: { collapsed: boolean }) {
@@ -71,20 +72,20 @@ export function DashboardSidebar({
               <div className="border-t border-border pt-2">{footer}</div>
             ) : null}
 
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="row"
+              align={collapsed ? "center" : "start"}
+              block
               onClick={toggleCollapsed}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-pressed={collapsed}
               title={collapsed ? "Expand sidebar" : undefined}
-              className={cn(
-                "flex h-10 w-full items-center gap-3 rounded-control border-t border-border px-3 text-meta font-medium text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary",
-                collapsed && "justify-center px-0",
-              )}
+              className={cn("gap-3 border-t border-border", collapsed && "px-0")}
             >
-              <ToggleIcon aria-hidden="true" className="size-4 shrink-0" />
+              <ToggleIcon aria-hidden="true" className="size-4" />
               {collapsed ? null : "Collapse"}
-            </button>
+            </Button>
           </div>
         </div>
       </aside>
@@ -108,14 +109,13 @@ export function DashboardSidebar({
       >
         <div className="flex items-center justify-between gap-1 p-3">
           <Brand collapsed={false} />
-          <button
-            type="button"
+          <IconButton
+            label="Close navigation"
             onClick={onMobileClose}
-            aria-label="Close navigation"
-            className="grid size-9 shrink-0 place-items-center rounded-icon text-text-muted hover:bg-surface-elevated hover:text-text-primary"
+            className="shrink-0"
           >
             <X aria-hidden="true" className="size-4" />
-          </button>
+          </IconButton>
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">

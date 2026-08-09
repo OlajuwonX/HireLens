@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import Link from "next/link";
-import { LogOut, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useUiStore } from "@/lib/stores/ui-store";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { useUiStore } from "@/lib/stores/ui-store";
+import { cn } from "@/lib/utils";
+import { LogOut, Settings } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useId, useRef, useState } from "react";
 
 function initialsFrom(name: string | null, email: string | null) {
   const source = name?.trim() || email?.trim() || "";
@@ -97,22 +98,22 @@ export function ProfileMenu({
             ) : null}
           </div>
 
+          <Link
+            href="/settings/account"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
+          >
+            <Settings aria-hidden="true" className="size-4" />
+            Settings
+          </Link>
+
           <div className="border-b border-border px-3 py-2.5">
             <p className="mb-2 font-mono text-system uppercase text-text-muted">
               Theme
             </p>
             <ThemeToggle block />
           </div>
-
-          <Link
-            href="/settings/account"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary"
-          >
-            <Settings aria-hidden="true" className="size-4" />
-            Settings
-          </Link>
 
           <div className="border-t border-border px-3 py-2.5">
             <p className="font-mono text-system uppercase text-text-muted">
@@ -132,17 +133,17 @@ export function ProfileMenu({
         </div>
       ) : null}
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="profile"
+        align={collapsed ? "center" : "start"}
+        block
         onClick={() => setOpen((previous) => !previous)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         title={collapsed ? (name ?? email ?? "Account") : undefined}
-        className={cn(
-          "flex h-11 w-full items-center gap-2.5 rounded-control px-2 text-left transition-colors hover:bg-surface-secondary",
-          collapsed && "justify-center px-0",
-        )}
+        className={cn("gap-2.5", collapsed && "px-0")}
       >
         <span
           aria-hidden="true"
@@ -157,7 +158,7 @@ export function ProfileMenu({
             {name ?? email ?? "Account"}
           </span>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

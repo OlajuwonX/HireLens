@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createResumeMetadataAction } from "@/features/resumes/actions/resume-actions";
 
 export function CreateResumeForm() {
   return (
     <form action={createResumeMetadataAction} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="title" className="text-meta font-medium text-text-secondary">
+        <Label htmlFor="title">
           Resume name
-        </label>
+        </Label>
         <Input
           id="title"
           name="title"

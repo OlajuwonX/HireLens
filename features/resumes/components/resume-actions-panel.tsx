@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   archiveResumeAction,
   deleteResumeAction,
@@ -13,9 +14,9 @@ export function ResumeActionsPanel({ resume }: { resume: Resume }) {
     <div className="space-y-6">
       <form action={renameResumeAction} className="space-y-3">
         <input type="hidden" name="publicId" value={resume.publicId} />
-        <label htmlFor="title" className="text-meta font-medium text-text-secondary">
+        <Label htmlFor="title">
           Rename resume
-        </label>
+        </Label>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Input id="title" name="title" defaultValue={resume.title} required maxLength={120} />
           <Button type="submit" variant="outline">

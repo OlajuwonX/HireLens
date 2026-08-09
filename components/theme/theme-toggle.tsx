@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -71,23 +72,18 @@ export function ThemeToggle({
         const active = mounted && preference === value;
 
         return (
-          <button
+          <Button
             key={value}
-            type="button"
+            variant={active ? "segmentActive" : "segment"}
+            size="compact"
             role="radio"
             aria-checked={active}
             onClick={() => select(value)}
-            className={cn(
-              "inline-flex h-8 items-center justify-center gap-1.5 px-2.5 text-label font-medium transition-colors",
-              block && "flex-1",
-              active
-                ? "bg-accent text-accent-text"
-                : "text-text-secondary hover:bg-surface-elevated hover:text-text-primary",
-            )}
+            className={cn("gap-1.5 px-2.5 font-medium", block && "flex-1")}
           >
-            <Icon aria-hidden="true" className="size-2.5 shrink-0" />
+            <Icon aria-hidden="true" className="size-3" />
             {label}
-          </button>
+          </Button>
         );
       })}
     </div>

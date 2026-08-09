@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   createResumeVersionAction,
   type CreateResumeVersionFormState,
@@ -46,9 +47,9 @@ export function CreateResumeVersionForm({
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="label" className="text-meta font-medium text-text-secondary">
+        <Label htmlFor="label">
           Version label
-        </label>
+        </Label>
         <Input
           id="label"
           name="label"

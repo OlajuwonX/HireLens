@@ -2,6 +2,7 @@
 
 import { useUiStore } from "@/lib/stores/ui-store";
 import { Menu } from "lucide-react";
+import { IconButton } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -43,15 +44,14 @@ export function AppShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
           <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
-            <button
-              type="button"
+            <IconButton
+              label="Open navigation"
               onClick={() => setMobileOpen(true)}
-              aria-label="Open navigation"
               aria-expanded={mobileOpen}
-              className="grid size-9 shrink-0 place-items-center rounded-icon text-text-secondary hover:bg-surface-elevated hover:text-text-primary md:hidden"
+              className="shrink-0 md:hidden"
             >
               <Menu aria-hidden="true" className="size-5" />
-            </button>
+            </IconButton>
 
             <h1 className="min-w-0 flex-1 truncate text-section-title font-semibold text-text-primary">
               {title}
