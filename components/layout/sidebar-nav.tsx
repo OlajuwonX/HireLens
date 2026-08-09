@@ -1,14 +1,9 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import {
-  isActivePath,
-  primaryNavigation,
-  secondaryNavigation,
-  type NavItem,
-} from "./navigation";
+import { isActivePath, primaryNavigation, type NavItem } from "./navigation";
 
 function NavLink({
   item,
@@ -59,17 +54,6 @@ export function SidebarNav({
   return (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-1">
       {primaryNavigation.map((item) => (
-        <NavLink
-          key={item.href}
-          item={item}
-          collapsed={collapsed}
-          onNavigate={onNavigate}
-        />
-      ))}
-
-      <hr className="my-3 border-border" />
-
-      {secondaryNavigation.map((item) => (
         <NavLink
           key={item.href}
           item={item}

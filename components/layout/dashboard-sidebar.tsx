@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
+import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect } from "react";
 import { SidebarNav } from "./sidebar-nav";
-
-const COLLAPSE_STORAGE_KEY = "hirelens-sidebar-collapsed";
 
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
@@ -31,11 +30,8 @@ export function DashboardSidebar({
   mobileOpen: boolean;
   onMobileClose: () => void;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(localStorage.getItem(COLLAPSE_STORAGE_KEY) === "true");
-  }, []);
+  const collapsed = useUiStore((state) => state.sidebarCollapsed);
+  const toggleCollapsed = useUiStore((state) => state.toggleSidebar);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -51,14 +47,6 @@ export function DashboardSidebar({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, onMobileClose]);
-
-  function toggleCollapsed() {
-    setCollapsed((previous) => {
-      const next = !previous;
-      localStorage.setItem(COLLAPSE_STORAGE_KEY, String(next));
-      return next;
-    });
-  }
 
   const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
 
@@ -78,9 +66,9 @@ export function DashboardSidebar({
         <div className="flex flex-1 flex-col px-3 pb-3">
           <SidebarNav collapsed={collapsed} />
 
-          <div className="mt-auto space-y-3 pt-3">
-            {footer && !collapsed ? (
-              <div className="border-t border-border pt-3">{footer}</div>
+          <div className="mt-auto space-y-1 pt-3">
+            {footer ? (
+              <div className="border-t border-border pt-2">{footer}</div>
             ) : null}
 
             <button

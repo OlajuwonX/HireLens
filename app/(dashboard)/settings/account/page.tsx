@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageHeader } from "@/components/layout/page-header";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Account settings",
@@ -27,9 +27,7 @@ export default async function AccountSettingsPage() {
         <CardContent className="space-y-3 text-meta text-text-secondary">
           <p>Name: {user.name ?? "Not provided"}</p>
           <p>Email: {user.email}</p>
-          <p>
-            Email verified: {user.emailVerifiedAt ? "Yes" : "Not yet"}
-          </p>
+          <p>Email verified: {user.emailVerifiedAt ? "Yes" : "Not yet"}</p>
           <p>
             Last sign-in:{" "}
             {user.lastLoginAt

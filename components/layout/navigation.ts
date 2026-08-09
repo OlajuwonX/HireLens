@@ -23,7 +23,7 @@ export const primaryNavigation: NavItem[] = [
   { label: "Analytics", href: "/dashboard/analytics", Icon: BarChart3 },
 ];
 
-export const secondaryNavigation: NavItem[] = [
+export const utilityRoutes: NavItem[] = [
   { label: "Settings", href: "/settings/account", Icon: Settings },
 ];
 
