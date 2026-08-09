@@ -10,7 +10,7 @@ export function Toast({
       role="status"
       aria-live="polite"
       className={cn(
-        "rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 shadow-lg",
+        "rounded-card border border-border bg-surface px-4 py-3 text-meta text-text-primary shadow-lg",
         className,
       )}
       {...props}

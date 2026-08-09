@@ -22,11 +22,11 @@ export function ResumeList({ resumes }: { resumes: Resume[] }) {
             <div className="min-w-0">
               <Link
                 href={`/dashboard/resumes/${resume.publicId}`}
-                className="font-semibold text-gray-950 hover:text-green-700"
+                className="font-semibold text-text-primary hover:text-text-primary"
               >
                 {resume.title}
               </Link>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-meta text-text-secondary">
                 Created {resume.createdAt.toLocaleDateString()}
               </p>
             </div>

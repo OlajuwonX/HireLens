@@ -13,12 +13,12 @@ export function ResumeActionsPanel({ resume }: { resume: Resume }) {
     <div className="space-y-6">
       <form action={renameResumeAction} className="space-y-3">
         <input type="hidden" name="publicId" value={resume.publicId} />
-        <label htmlFor="title" className="text-sm font-medium text-gray-700">
+        <label htmlFor="title" className="text-meta font-medium text-text-secondary">
           Rename resume
         </label>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Input id="title" name="title" defaultValue={resume.title} required maxLength={120} />
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="outline">
             Rename
           </Button>
         </div>
@@ -28,14 +28,14 @@ export function ResumeActionsPanel({ resume }: { resume: Resume }) {
         {resume.status === "FAILED" ? (
           <form action={retryResumeProcessingAction}>
             <input type="hidden" name="publicId" value={resume.publicId} />
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="outline">
               Retry processing
             </Button>
           </form>
         ) : null}
         <form action={archiveResumeAction}>
           <input type="hidden" name="publicId" value={resume.publicId} />
-          <Button type="submit" variant="secondary" disabled={resume.status === "ARCHIVED"}>
+          <Button type="submit" variant="outline" disabled={resume.status === "ARCHIVED"}>
             Archive
           </Button>
         </form>

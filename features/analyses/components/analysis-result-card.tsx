@@ -18,13 +18,13 @@ export function AnalysisResultCard({ analysis }: { analysis: ResumeAnalysis }) {
       </div>
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold text-gray-950">Summary</h2>
+          <h2 className="text-section-title font-semibold text-text-primary">Summary</h2>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-gray-700">
+        <CardContent className="space-y-4 text-meta text-text-secondary">
           <p>{normalized?.summary ?? analysis.failureReason ?? "Analysis pending."}</p>
           {normalized?.recommendations?.length ? (
             <div className="space-y-2">
-              <h3 className="font-semibold text-gray-950">Recommendations</h3>
+              <h3 className="font-semibold text-text-primary">Recommendations</h3>
               <ul className="list-disc space-y-2 pl-5">
                 {normalized.recommendations.map((recommendation) => (
                   <li key={recommendation.problem}>

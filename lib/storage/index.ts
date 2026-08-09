@@ -8,10 +8,6 @@ export {
   validateResumePdfMetadata
 } from "./pdf-validation";
 export {
-  PuterStorageProvider,
-  type PuterFsClient
-} from "./puter-storage-provider";
-export {
   DEFAULT_READ_URL_TTL_SECONDS,
   S3StorageProvider,
   type S3StorageProviderConfig

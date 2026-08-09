@@ -10,7 +10,7 @@ export function ResumeVersionActionsPanel({
   return (
     <form action={setDefaultResumeVersionAction}>
       <input type="hidden" name="versionPublicId" value={version.publicId} />
-      <Button type="submit" variant="secondary" disabled={version.isDefault}>
+      <Button type="submit" variant="outline" disabled={version.isDefault}>
         {version.isDefault ? "Current default" : "Mark as default"}
       </Button>
     </form>

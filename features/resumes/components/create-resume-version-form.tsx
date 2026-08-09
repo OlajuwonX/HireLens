@@ -46,7 +46,7 @@ export function CreateResumeVersionForm({
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="label" className="text-sm font-medium text-gray-700">
+        <label htmlFor="label" className="text-meta font-medium text-text-secondary">
           Version label
         </label>
         <Input

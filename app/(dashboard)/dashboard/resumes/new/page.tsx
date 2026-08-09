@@ -16,7 +16,7 @@ export default function NewResumePage() {
       />
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold text-gray-950">Resume details</h2>
+          <h2 className="text-section-title font-semibold text-text-primary">Resume details</h2>
         </CardHeader>
         <CardContent>
           <CreateResumeForm />

@@ -1,15 +1,8 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { PageContainer } from "@/components/layout/page-container";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { requireCurrentUser } from "@/features/auth/server/require-user";
-
-const navigation = [
-  { label: "Overview", href: "/dashboard" },
-  { label: "Resumes", href: "/dashboard/resumes" },
-  { label: "Account", href: "/settings/account" },
-];
 
 export default async function DashboardLayout({
   children,
@@ -20,34 +13,22 @@ export default async function DashboardLayout({
 
   return (
     <AppShell
-      header={
-        <DashboardHeader>
-          <PageContainer className="flex items-center justify-between py-4">
-            <div>
-              <p className="text-lg font-semibold text-gray-950">HireLens</p>
-              <p className="text-sm text-gray-600">
-                {currentUser.user.email ?? "Signed in"}
-              </p>
-            </div>
-            <SignOutButton />
-          </PageContainer>
-        </DashboardHeader>
-      }
-      sidebar={
-        <DashboardSidebar>
-          {navigation.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              {item.label}
-            </a>
-          ))}
-        </DashboardSidebar>
+      headerRight={<ThemeToggle />}
+      sidebarFooter={
+        <div className="space-y-3">
+          <div className="min-w-0">
+            <p className="truncate text-label font-medium text-text-primary">
+              {currentUser.user.name ?? "Signed in"}
+            </p>
+            <p className="truncate font-mono text-system text-text-muted">
+              {currentUser.user.email ?? ""}
+            </p>
+          </div>
+          <SignOutButton />
+        </div>
       }
     >
-      {children}
+      <PageContainer>{children}</PageContainer>
     </AppShell>
   );
 }

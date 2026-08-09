@@ -11,7 +11,7 @@ export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       role="tablist"
-      className={cn("flex gap-1 overflow-x-auto rounded-lg bg-gray-100 p-1", className)}
+      className={cn("flex gap-1 overflow-x-auto rounded-card bg-surface-elevated p-1", className)}
       {...props}
     />
   );
@@ -28,8 +28,8 @@ export function TabsTrigger({
       role="tab"
       aria-selected={selected}
       className={cn(
-        "rounded-md px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-white hover:text-gray-950",
-        selected && "bg-white text-gray-950 shadow-sm",
+        "rounded-control px-3 py-2 text-meta font-semibold text-text-secondary hover:bg-surface hover:text-text-primary",
+        selected && "bg-surface text-text-primary shadow-sm",
         className,
       )}
       {...props}

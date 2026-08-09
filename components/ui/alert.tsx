@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 type AlertTone = "info" | "success" | "warning" | "error";
 
 const tones: Record<AlertTone, string> = {
-  info: "border-blue-200 bg-blue-50 text-blue-900",
-  success: "border-green-200 bg-green-50 text-green-900",
-  warning: "border-yellow-200 bg-yellow-50 text-yellow-900",
-  error: "border-red-200 bg-red-50 text-red-900",
+  info: "border-info/30 bg-info/8 text-text-primary",
+  success: "border-accent bg-accent/15 text-text-primary",
+  warning: "border-warning/40 bg-warning/10 text-text-primary",
+  error: "border-danger/40 bg-danger/10 text-text-primary",
 };
 
 export function Alert({
@@ -18,7 +18,11 @@ export function Alert({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={cn("rounded-lg border p-4 text-sm", tones[tone], className)}
+      className={cn(
+        "rounded-card border p-4 text-meta",
+        tones[tone],
+        className,
+      )}
       {...props}
     />
   );

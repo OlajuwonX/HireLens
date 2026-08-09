@@ -1,23 +1,46 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+"use client";
+
+import { useState } from "react";
+import { Menu } from "lucide-react";
+import { DashboardSidebar } from "./dashboard-sidebar";
 
 export function AppShell({
-  sidebar,
-  header,
+  sidebarFooter,
+  headerRight,
   children,
-  className,
 }: {
-  sidebar?: React.ReactNode;
-  header?: React.ReactNode;
+  sidebarFooter?: React.ReactNode;
+  headerRight?: React.ReactNode;
   children: React.ReactNode;
-  className?: string;
 }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <div className={cn("min-h-screen bg-gray-50 text-gray-950", className)}>
-      {header}
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        {sidebar ? <div className="hidden w-64 shrink-0 lg:block">{sidebar}</div> : null}
-        <main className="min-w-0 flex-1">{children}</main>
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar
+        footer={sidebarFooter}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+          <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+              aria-expanded={mobileOpen}
+              className="grid size-9 place-items-center rounded-icon text-text-secondary hover:bg-surface-elevated hover:text-text-primary md:hidden"
+            >
+              <Menu aria-hidden="true" className="size-5" />
+            </button>
+            <div className="min-w-0 flex-1" />
+            {headerRight}
+          </div>
+        </header>
+
+        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
       </div>
     </div>
   );

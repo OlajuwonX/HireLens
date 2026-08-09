@@ -1,32 +1,67 @@
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
-import { requireCurrentUser } from "@/features/auth/server/require-user";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 
 export const metadata: Metadata = {
   title: "Account settings",
 };
 
 export default async function AccountSettingsPage() {
-  const { user, account } = await requireCurrentUser();
+  const user = await requireDatabaseUser();
+  const hasPassword = Boolean(user.passwordHash);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Account settings"
-        description="Review the safe public account information available to the application."
+        description="Your profile and the ways you can sign in to HireLens."
       />
+
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold text-gray-950">Profile</h2>
+          <CardTitle>Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-gray-700">
+        <CardContent className="space-y-3 text-meta text-text-secondary">
           <p>Name: {user.name ?? "Not provided"}</p>
-          <p>Email: {user.email ?? "Not provided"}</p>
+          <p>Email: {user.email}</p>
           <p>
-            Onboarding: {account.onboardingCompleted ? "Complete" : "Pending"}
+            Email verified: {user.emailVerifiedAt ? "Yes" : "Not yet"}
           </p>
-          <p>Last login: {account.lastLoginAt ?? "Not recorded"}</p>
+          <p>
+            Last sign-in:{" "}
+            {user.lastLoginAt
+              ? user.lastLoginAt.toLocaleString()
+              : "Not recorded"}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
+          <CardTitle>Sign-in methods</CardTitle>
+          <Badge tone={hasPassword ? "green" : "neutral"}>
+            {hasPassword ? "Password set" : "Google only"}
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-meta text-text-secondary">
+            {hasPassword
+              ? "You can sign in with your email and password, or with Google using the same email address."
+              : "You currently sign in with Google. There is no password on this account."}
+          </p>
+
+          {hasPassword ? null : (
+            <Alert tone="info">
+              If you previously set a password and it is no longer listed here,
+              it was removed when Google confirmed you own this email address. A
+              password set before the address was verified cannot be trusted, so
+              HireLens clears it. You can keep signing in with Google, and set a
+              new password once password resets are available.
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

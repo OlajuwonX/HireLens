@@ -13,13 +13,13 @@ export function Pagination({
 }) {
   return (
     <nav className="flex items-center justify-between gap-3" aria-label="Pagination">
-      <Button variant="secondary" onClick={onPrevious} disabled={!onPrevious || page <= 1}>
+      <Button variant="outline" onClick={onPrevious} disabled={!onPrevious || page <= 1}>
         Previous
       </Button>
-      <span className="text-sm text-gray-600">
+      <span className="text-meta text-text-secondary">
         Page {page} of {totalPages}
       </span>
-      <Button variant="secondary" onClick={onNext} disabled={!onNext || page >= totalPages}>
+      <Button variant="outline" onClick={onNext} disabled={!onNext || page >= totalPages}>
         Next
       </Button>
     </nav>

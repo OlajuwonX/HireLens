@@ -5,8 +5,12 @@
   "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "next build",
+    "vercel-build": "pnpm db:verify && drizzle-kit migrate && next build",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:check": "drizzle-kit check",
+    "db:safety": "node scripts/check-migrations.mjs",
+    "db:verify": "drizzle-kit check && node scripts/check-migrations.mjs",
     "db:push": "drizzle-kit push",
     "dev": "next dev --port 5000",
     "start": "next start --port 5000",
@@ -26,6 +30,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tabler/icons-react": "^3.34.1",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
@@ -47,13 +52,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
+    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "daisyui": "^5.1.6",
     "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.1.4",
-    "tw-animate-css": "^1.3.8",
     "typescript": "^5.8.3",
     "vitest": "^4.1.10"
   }

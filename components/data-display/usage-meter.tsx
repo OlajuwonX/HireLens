@@ -9,17 +9,18 @@ export function UsageMeter({
   used: number;
   limit: number;
 }) {
-  const percent = limit > 0 ? (used / limit) * 100 : 0;
+  const safeLimit = Math.max(1, limit);
+  const percent = Math.min(100, Math.round((used / safeLimit) * 100));
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3 text-sm">
-        <span className="font-medium text-gray-700">{label}</span>
-        <span className="text-gray-500">
-          {used} of {limit} used
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-meta text-text-secondary">{label}</span>
+        <span className="font-mono text-system text-text-muted tabular-nums">
+          {used} / {limit}
         </span>
       </div>
-      <Progress value={percent} />
+      <Progress value={percent} aria-label={`${label} ${used} of ${limit} used`} />
     </div>
   );
 }

@@ -1,5 +1,10 @@
-import { recordSignIn } from "@/features/auth/server/user.service";
+import { signInSchema } from "@/features/auth/schemas/credentials.schema";
+import {
+  recordSignIn,
+  verifyCredentials,
+} from "@/features/auth/server/user.service";
 import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -8,14 +13,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(raw) {
+        const parsed = signInSchema.safeParse(raw);
+
+        if (!parsed.success) {
+          return null;
+        }
+
+        const user = await verifyCredentials(parsed.data);
+
+        if (!user) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+        };
+      },
+    }),
   ],
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/sign-in",
   },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      if (account && profile?.email) {
-        const user = await recordSignIn({
+    async jwt({ token, account, profile, user }) {
+      if (account?.provider === "google" && profile?.email) {
+        const record = await recordSignIn({
           profile: {
             name: typeof profile.name === "string" ? profile.name : null,
             email: profile.email,
@@ -23,10 +55,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
           provider: account.provider,
           providerAccountId: account.providerAccountId,
+          emailVerified: profile.email_verified === true,
         });
 
-        token.lastLoginAt = user.lastLoginAt?.toISOString() ?? null;
-        token.onboardingCompleted = user.onboardingCompleted;
+        token.lastLoginAt = record.lastLoginAt?.toISOString() ?? null;
+        token.onboardingCompleted = record.onboardingCompleted;
+      }
+
+      if (account?.provider === "credentials" && user) {
+        token.lastLoginAt = new Date().toISOString();
+        token.onboardingCompleted = Boolean(token.onboardingCompleted);
       }
 
       return token;

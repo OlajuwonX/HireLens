@@ -31,7 +31,7 @@ export default async function NewResumeVersionPage({ params }: NewVersionPagePro
       />
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold text-gray-950">Version metadata</h2>
+          <h2 className="text-section-title font-semibold text-text-primary">Version metadata</h2>
         </CardHeader>
         <CardContent>
           <CreateResumeVersionForm resumePublicId={resume.publicId} />

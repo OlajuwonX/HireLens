@@ -43,11 +43,11 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-gray-950">Status</h2>
+              <h2 className="text-section-title font-semibold text-text-primary">Status</h2>
               <ResumeStatusBadge status={resume.status} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-gray-700">
+          <CardContent className="space-y-2 text-meta text-text-secondary">
             <p>Public ID: {resume.publicId}</p>
             <p>Created: {resume.createdAt.toLocaleString()}</p>
             <p>Updated: {resume.updatedAt.toLocaleString()}</p>
@@ -59,7 +59,7 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
         </Card>
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-950">Actions</h2>
+            <h2 className="text-section-title font-semibold text-text-primary">Actions</h2>
           </CardHeader>
           <CardContent>
             <ResumeActionsPanel resume={resume} />
@@ -69,9 +69,9 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-gray-950">Versions</h2>
+            <h2 className="text-section-title font-semibold text-text-primary">Versions</h2>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button asChild variant="secondary">
+              <Button asChild variant="outline">
                 <a href={`/dashboard/resumes/${resume.publicId}/compare`}>Compare</a>
               </Button>
               <Button asChild>

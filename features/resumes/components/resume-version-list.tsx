@@ -28,11 +28,11 @@ export function ResumeVersionList({
             <div>
               <Link
                 href={`/dashboard/resumes/${resumePublicId}/versions/${version.publicId}`}
-                className="font-semibold text-gray-950 hover:text-green-700"
+                className="font-semibold text-text-primary hover:text-text-primary"
               >
                 {version.label}
               </Link>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-meta text-text-secondary">
                 Version {version.versionNumber} · Created {version.createdAt.toLocaleDateString()}
               </p>
             </div>

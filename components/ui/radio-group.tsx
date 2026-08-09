@@ -16,7 +16,7 @@ export const RadioItem = React.forwardRef<HTMLInputElement, RadioItemProps>(
       ref={ref}
       type="radio"
       className={cn(
-        "size-4 border-gray-300 text-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600",
+        "size-4 border-border-strong text-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600",
         className,
       )}
       {...props}

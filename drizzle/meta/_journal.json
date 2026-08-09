@@ -8,6 +8,13 @@
       "when": 1786056602832,
       "tag": "0000_typical_steve_rogers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786217340696,
+      "tag": "0001_perfect_boomerang",
+      "breakpoints": true
     }
   ]
 }

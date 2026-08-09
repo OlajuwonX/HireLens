@@ -14,10 +14,23 @@ export function FileDropzone({
   ...props
 }: FileDropzoneProps) {
   return (
-    <label className={cn("block cursor-pointer rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center hover:bg-gray-50", className)}>
-      <Upload className="mx-auto size-6 text-gray-500" aria-hidden="true" />
-      <span className="mt-3 block text-sm font-semibold text-gray-950">{label}</span>
-      {description ? <span className="mt-1 block text-sm text-gray-600">{description}</span> : null}
+    <label
+      className={cn(
+        "block cursor-pointer rounded-card border border-dashed border-border-strong bg-surface p-8 text-center transition-colors",
+        "hover:border-accent-hover hover:bg-surface-secondary",
+        "focus-within:border-accent-hover focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-hover",
+        className,
+      )}
+    >
+      <Upload aria-hidden="true" className="mx-auto size-5 text-text-muted" />
+      <span className="mt-3 block text-meta font-semibold text-text-primary">
+        {label}
+      </span>
+      {description ? (
+        <span className="mt-1 block text-label text-text-secondary">
+          {description}
+        </span>
+      ) : null}
       <input type="file" className="sr-only" {...props} />
     </label>
   );

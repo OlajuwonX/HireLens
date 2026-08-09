@@ -22,11 +22,11 @@ export function AnalysisList({ analyses }: { analyses: ResumeAnalysis[] }) {
             <div>
               <Link
                 href={`/dashboard/analyses/${analysis.publicId}`}
-                className="font-semibold text-gray-950 hover:text-green-700"
+                className="font-semibold text-text-primary hover:text-text-primary"
               >
                 {analysis.type === "GENERAL" ? "General analysis" : "Job-fit analysis"}
               </Link>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-meta text-text-secondary">
                 {analysis.overallScore !== null
                   ? `Overall ${analysis.overallScore}/100 · ATS ${analysis.atsScore ?? 0}/100`
                   : "Score pending"}

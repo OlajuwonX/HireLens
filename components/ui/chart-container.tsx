@@ -13,9 +13,9 @@ export function ChartContainer({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-lg border border-gray-200 bg-white p-4", className)}>
-      <h2 className="text-base font-semibold text-gray-950">{title}</h2>
-      {description ? <p className="mt-1 text-sm text-gray-600">{description}</p> : null}
+    <section className={cn("rounded-card border border-border bg-surface p-4", className)}>
+      <h2 className="text-body font-semibold text-text-primary">{title}</h2>
+      {description ? <p className="mt-1 text-meta text-text-secondary">{description}</p> : null}
       <div className="mt-4">{children}</div>
     </section>
   );

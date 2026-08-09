@@ -18,6 +18,36 @@ export async function createUser(input: NewUser) {
   return user;
 }
 
+export async function setUserPasswordHash(input: {
+  userId: string;
+  passwordHash: string;
+}) {
+  const [user] = await db
+    .update(users)
+    .set({ passwordHash: input.passwordHash, updatedAt: new Date() })
+    .where(eq(users.id, input.userId))
+    .returning();
+
+  return user ?? null;
+}
+
+export async function markEmailVerified(input: {
+  userId: string;
+  clearPasswordHash?: boolean;
+}) {
+  const [user] = await db
+    .update(users)
+    .set({
+      emailVerifiedAt: new Date(),
+      updatedAt: new Date(),
+      ...(input.clearPasswordHash ? { passwordHash: null } : {}),
+    })
+    .where(eq(users.id, input.userId))
+    .returning();
+
+  return user ?? null;
+}
+
 export async function touchUserLogin(input: { userId: string }) {
   const [user] = await db
     .update(users)

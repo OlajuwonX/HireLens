@@ -13,10 +13,21 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-lg border border-dashed border-gray-300 p-6 text-center", className)}>
-      <h2 className="text-lg font-semibold text-gray-950">{title}</h2>
-      {description ? <p className="mt-2 text-sm text-gray-600">{description}</p> : null}
-      {action ? <div className="mt-4">{action}</div> : null}
+    <section
+      className={cn(
+        "rounded-card border border-dashed border-border-strong bg-surface p-8 text-center",
+        className,
+      )}
+    >
+      <h2 className="text-section-title font-semibold text-text-primary">
+        {title}
+      </h2>
+      {description ? (
+        <p className="mx-auto mt-2 max-w-reading text-meta text-text-secondary">
+          {description}
+        </p>
+      ) : null}
+      {action ? <div className="mt-5">{action}</div> : null}
     </section>
   );
 }

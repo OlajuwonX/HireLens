@@ -1,33 +1,46 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AuthDivider } from "@/features/auth/components/auth-divider";
+import { GoogleButton } from "@/features/auth/components/google-button";
 import { SignInForm } from "@/features/auth/components/sign-in-form";
 import { getCurrentUser } from "@/features/auth/server/current-user";
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to HireLens with Google.",
 };
 
 export default async function SignInPage() {
-  const currentUser = await getCurrentUser();
-
-  if (currentUser) {
+  if (await getCurrentUser()) {
     redirect("/dashboard");
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <section className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-950">
-          Sign in to HireLens
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-page-title font-semibold text-text-primary">
+          Welcome back
         </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Use your Google account to access your resume workspace.
+        <p className="mt-1.5 text-meta text-text-secondary">
+          Sign in to pick up your job search where you left off.
         </p>
-        <div className="mt-6">
-          <SignInForm />
-        </div>
-      </section>
-    </main>
+      </div>
+
+      <SignInForm />
+
+      <AuthDivider />
+
+      <GoogleButton />
+
+      <p className="text-meta text-text-secondary">
+        New to HireLens?{" "}
+        <Link
+          href="/sign-up"
+          className="font-medium text-text-primary underline-offset-4 hover:underline"
+        >
+          Create an account
+        </Link>
+      </p>
+    </div>
   );
 }
