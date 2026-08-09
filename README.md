@@ -1,31 +1,47 @@
 # HireLens
 
-HireLens is being rebuilt as a Next.js SaaS for resume analysis, job-specific resume tailoring, saved jobs, application tracking, and AI-generated application documents.
+HireLens is a focused AI-assisted job application workspace. It helps users manage resume groups and versions, create an application from a real job posting, analyze a resume against that job, track whether the application is pending/accepted/rejected, and keep AI-generated application documents in one library.
 
-## Development
+## Product Screens
 
-Use pnpm:
+- Dashboard
+- Resumes
+- Applications
+- Saved Jobs
+- AI Documents
+- Settings
+
+## Local Development
+
+Use pnpm and run the app on port `5000`:
 
 ```bash
 pnpm install
-pnpm run dev
+pnpm dev
 ```
 
-The local dev server runs on port `5000`.
+Copy `.env.example` to `.env` and fill in the values before running database or AI/storage workflows.
 
 ## Scripts
 
 ```bash
-pnpm run typecheck
-pnpm run build
-pnpm run start
+pnpm typecheck
+pnpm test
+pnpm db:verify
+pnpm build
+pnpm start
 ```
 
-## Current Status
+## Deployment
 
-The project is in the foundation stages of the rebuild:
+`pnpm vercel-build` runs migration safety checks, applies Drizzle migrations, then builds Next.js.
 
-- Stage 1: Next.js App Router foundation.
-- Stage 2: UI, layout, and data-display primitives.
+## Security Notes
 
-Detailed implementation guidance lives in `.claude/`.
+- Secrets stay server-side in `.env`.
+- Browser routes use public UUIDs, not internal database IDs.
+- Repository queries filter by authenticated `userId`.
+- Resume PDFs are stored privately in Backblaze through S3-compatible signed URLs.
+- Gemini is called only from server code.
+
+Detailed implementation and interview notes live in `.claude/`.

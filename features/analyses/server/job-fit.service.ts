@@ -14,6 +14,11 @@ import { findFileAssetById } from "@/features/files/server/file-asset.repository
 import { getOwnedJob } from "@/features/jobs/server/job.service";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
 import {
+  completeUsage,
+  failUsage,
+  reserveUsage,
+} from "@/features/usage/server/ai-usage.service";
+import {
   createAnalysisSuggestions,
   createPendingAnalysis,
   deleteAnalysisSuggestions,
@@ -143,10 +148,46 @@ export async function runJobFitAnalysis(input: {
   const provider = input.provider ?? getResumeAIProvider();
   const storage = input.storageProvider ?? getStorageProvider();
   const startedAt = performance.now();
+  let pdfBytes: Uint8Array;
 
   try {
-    const pdfBytes = await storage.readFile(fileAsset.storageKey);
+    pdfBytes = await storage.readFile(fileAsset.storageKey);
+  } catch {
+    await markAnalysisFailed({
+      analysisId: pending.id,
+      userId: input.userId,
+      durationMs: Math.round(performance.now() - startedAt),
+      failureReason: "StorageReadFailed",
+    });
 
+    return {
+      ok: false,
+      error: "FAILED",
+      message: "The resume file could not be prepared for analysis.",
+    };
+  }
+
+  const reservation = await reserveUsage({
+    userId: input.userId,
+    action: "JOB_ANALYSIS",
+  });
+
+  if (!reservation.ok) {
+    await markAnalysisFailed({
+      analysisId: pending.id,
+      userId: input.userId,
+      durationMs: Math.round(performance.now() - startedAt),
+      failureReason: reservation.reason,
+    });
+
+    return {
+      ok: false,
+      error: "FAILED",
+      message: reservation.message,
+    };
+  }
+
+  try {
     const providerResult = await provider.analyzeResumeForJob({
       resume: {
         pdfBase64: Buffer.from(pdfBytes).toString("base64"),
@@ -169,6 +210,15 @@ export async function runJobFitAnalysis(input: {
       providerResult.rawResponse,
       jobFitAnalysisSchema,
     );
+
+    await completeUsage({
+      userId: input.userId,
+      reservationId: reservation.reservationId,
+      action: "JOB_ANALYSIS",
+      provider: providerResult.provider,
+      model: providerResult.model,
+      inputHash,
+    });
 
     const analysis = await markAnalysisSucceeded({
       analysisId: pending.id,
@@ -201,12 +251,21 @@ export async function runJobFitAnalysis(input: {
       reused: false,
     };
   } catch (error) {
+    await failUsage({
+      userId: input.userId,
+      reservationId: reservation.reservationId,
+      action: "JOB_ANALYSIS",
+      inputHash,
+      failureReason:
+        error instanceof Error ? error.name : "Unknown analysis failure",
+    });
+
     await markAnalysisFailed({
       analysisId: pending.id,
       userId: input.userId,
       durationMs: Math.round(performance.now() - startedAt),
       failureReason:
-        error instanceof Error ? error.message : "Unknown analysis failure",
+        error instanceof Error ? error.name : "Unknown analysis failure",
     });
 
     return {

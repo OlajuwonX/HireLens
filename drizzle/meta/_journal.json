@@ -36,6 +36,13 @@
       "when": 1786308320832,
       "tag": "0004_slim_scrambler",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786309590425,
+      "tag": "0005_spicy_electro",
+      "breakpoints": true
     }
   ]
 }

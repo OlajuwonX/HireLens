@@ -127,6 +127,11 @@ export const usageAction = pgEnum("usage_action", [
   "JOB_ANALYSIS",
   "COVER_LETTER",
   "APPLICATION_MESSAGE",
+  "IMPROVED_RESUME",
+  "PROFESSIONAL_SUMMARY",
+  "KEYWORD_ANALYSIS",
+  "BULLET_REWRITE",
+  "FOLLOW_UP_MESSAGE",
 ]);
 
 export const usageStatus = pgEnum("usage_status", [
@@ -618,3 +623,4 @@ export type RequirementMatch = typeof requirementMatches.$inferSelect;
 export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
+export type UsageAction = (typeof usageAction.enumValues)[number];

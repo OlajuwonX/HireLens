@@ -71,8 +71,9 @@ export class S3StorageProvider implements StorageProvider {
         }),
       );
     } catch (error) {
+      console.error("Backblaze upload failed", describeStorageError(error));
       throw new StorageProviderError(
-        `Could not store the resume file in Backblaze. ${describeStorageError(error)}`,
+        "Could not store the resume file. Check the storage configuration and try again.",
       );
     }
 
@@ -98,8 +99,9 @@ export class S3StorageProvider implements StorageProvider {
         expiresAt: new Date(Date.now() + this.readUrlTtlSeconds * 1000),
       };
     } catch (error) {
+      console.error("Backblaze read URL failed", describeStorageError(error));
       throw new StorageProviderError(
-        `Could not create a read URL for the file. ${describeStorageError(error)}`,
+        "Could not create a temporary file link.",
       );
     }
   }
@@ -120,9 +122,8 @@ export class S3StorageProvider implements StorageProvider {
         throw error;
       }
 
-      throw new StorageProviderError(
-        `Could not read the stored file. ${describeStorageError(error)}`,
-      );
+      console.error("Backblaze file read failed", describeStorageError(error));
+      throw new StorageProviderError("Could not read the stored file.");
     }
   }
 
@@ -135,8 +136,9 @@ export class S3StorageProvider implements StorageProvider {
         }),
       );
     } catch (error) {
+      console.error("Backblaze delete failed", describeStorageError(error));
       throw new StorageProviderError(
-        `Could not delete the stored file. ${describeStorageError(error)}`,
+        "Could not delete the stored file.",
       );
     }
   }
@@ -155,22 +157,17 @@ function describeStorageError(error: unknown) {
   };
   const code = String(record.Code ?? record.code ?? record.name ?? "");
   const message = typeof record.message === "string" ? record.message : "";
-  const debug =
-    process.env.NODE_ENV === "development" && (code || message)
-      ? ` Backblaze returned ${[code, message].filter(Boolean).join(": ")}.`
-      : "";
-
   if (code.includes("InvalidAccessKeyId") || code.includes("Signature")) {
-    return `Check STORAGE_ACCESS_KEY_ID, STORAGE_SECRET_ACCESS_KEY, STORAGE_REGION, and STORAGE_ENDPOINT.${debug}`;
+    return "Invalid Backblaze access key or signature configuration.";
   }
 
   if (code.includes("NoSuchBucket") || message.includes("bucket")) {
-    return `Check that STORAGE_BUCKET exactly matches your Backblaze bucket name.${debug}`;
+    return "Backblaze bucket was not found.";
   }
 
   if (message.includes("Invalid URL") || message.includes("ENOTFOUND")) {
-    return `Check STORAGE_ENDPOINT. It should look like https://s3.<region>.backblazeb2.com.${debug}`;
+    return "Backblaze endpoint is invalid or unreachable.";
   }
 
-  return `Check your Backblaze bucket, endpoint, region, and key permissions.${debug}`;
+  return [code, message].filter(Boolean).join(": ") || "Unknown storage error.";
 }

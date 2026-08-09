@@ -80,7 +80,12 @@ export async function createOwnedResumeVersionFromUpload(input: {
     }
 
     if (error instanceof StorageProviderError) {
-      return { ok: false, error: "UPLOAD_FAILED", message: error.message };
+      return {
+        ok: false,
+        error: "UPLOAD_FAILED",
+        message:
+          "The file could not be uploaded. Check storage setup or try again.",
+      };
     }
 
     return {

@@ -148,7 +148,7 @@ export async function runGeneralResumeAnalysis(input: {
       userId: input.userId,
       durationMs,
       failureReason:
-        error instanceof Error ? error.message : "Unknown analysis failure",
+        error instanceof Error ? error.name : "Unknown analysis failure",
     });
   }
 }
