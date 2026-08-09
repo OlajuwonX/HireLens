@@ -22,6 +22,24 @@ describe("hashAnalysisInput", () => {
     expect(first).not.toBe(second);
   });
 
+  it("changes when the AI action changes", async () => {
+    const base = {
+      resumeVersionId: "a",
+      jobId: "b",
+      promptVersion: "v4",
+    };
+    const first = await hashAnalysisInput({
+      ...base,
+      aiAction: "JOB_FIT_ANALYSIS",
+    });
+    const second = await hashAnalysisInput({
+      ...base,
+      aiAction: "COVER_LETTER",
+    });
+
+    expect(first).not.toBe(second);
+  });
+
   it("produces a 64 character hex digest", async () => {
     expect(await hashAnalysisInput({ any: "value" })).toMatch(/^[0-9a-f]{64}$/);
   });

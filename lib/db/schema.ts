@@ -106,8 +106,13 @@ export const suggestionSeverity = pgEnum("suggestion_severity", [
 ]);
 
 export const documentType = pgEnum("document_type", [
+  "IMPROVED_RESUME",
   "COVER_LETTER",
   "APPLICATION_EMAIL",
+  "PROFESSIONAL_SUMMARY",
+  "KEYWORD_ANALYSIS",
+  "BULLET_REWRITE",
+  "FOLLOW_UP_MESSAGE",
   "EMAIL_SUBJECT",
   "LINKEDIN_MESSAGE",
   "FOLLOW_UP_EMAIL",
@@ -470,6 +475,9 @@ export const generatedDocuments = pgTable(
       onDelete: "set null",
     }),
     resumeVersionId: uuid("resume_version_id").references(() => resumeVersions.id, {
+      onDelete: "set null",
+    }),
+    fileAssetId: uuid("file_asset_id").references(() => fileAssets.id, {
       onDelete: "set null",
     }),
     promptVersion: text("prompt_version").notNull(),

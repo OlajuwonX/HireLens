@@ -1,18 +1,21 @@
 export const DOCUMENT_TYPES = [
+  "IMPROVED_RESUME",
   "COVER_LETTER",
   "APPLICATION_EMAIL",
-  "EMAIL_SUBJECT",
-  "LINKEDIN_MESSAGE",
-  "FOLLOW_UP_EMAIL",
-  "THANK_YOU_EMAIL",
-  "PROFESSIONAL_INTRO",
-  "CAREER_CHANGE_EXPLANATION",
-  "ENTRY_LEVEL_NOTE",
+  "PROFESSIONAL_SUMMARY",
+  "KEYWORD_ANALYSIS",
+  "BULLET_REWRITE",
+  "FOLLOW_UP_MESSAGE",
 ] as const;
 
-export const documentTypeLabels: Record<(typeof DOCUMENT_TYPES)[number], string> = {
+export const documentTypeLabels = {
+  IMPROVED_RESUME: "Improved resume",
   COVER_LETTER: "Cover letter",
   APPLICATION_EMAIL: "Application email",
+  PROFESSIONAL_SUMMARY: "Professional summary",
+  KEYWORD_ANALYSIS: "Keyword gap analysis",
+  BULLET_REWRITE: "Bullet rewrite",
+  FOLLOW_UP_MESSAGE: "Follow-up message",
   EMAIL_SUBJECT: "Email subject",
   LINKEDIN_MESSAGE: "LinkedIn message",
   FOLLOW_UP_EMAIL: "Follow-up email",

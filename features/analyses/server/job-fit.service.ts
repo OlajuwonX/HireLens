@@ -75,6 +75,7 @@ export async function runJobFitAnalysis(input: {
 
   const inputHash = await hashAnalysisInput({
     type: "JOB_SPECIFIC",
+    aiAction: "JOB_FIT_ANALYSIS",
     promptVersion: JOB_FIT_ANALYSIS_PROMPT_VERSION,
     resumeVersionId: version.id,
     storageKey: fileAsset.storageKey,

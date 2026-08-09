@@ -61,8 +61,44 @@ describe("jobFitAnalysisSchema", () => {
     overallScore: 71,
     atsScore: 66,
     jobFitScore: 74,
+    scoreExplanations: {
+      overall: {
+        score: 71,
+        explanation: "Strong delivery evidence with a certification gap.",
+      },
+      ats: {
+        score: 66,
+        explanation: "Some required terms are missing or weakly represented.",
+      },
+      jobFit: {
+        score: 74,
+        explanation: "The resume maps to most core requirements.",
+      },
+    },
     summary: "Strong on delivery, light on certification.",
+    summaryRecommendation: "Open with the site-management evidence.",
     missingRequirements: ["NEBOSH certificate"],
+    keywordGroups: {
+      skills: [],
+      tools: [],
+      responsibilities: [],
+      industryLanguage: [],
+      certifications: [
+        {
+          keyword: "NEBOSH",
+          status: "MISSING",
+          recommendation: "Add only if held.",
+        },
+      ],
+      experienceTerms: [],
+    },
+    bulletIssues: [
+      {
+        original: "Managed the site.",
+        issue: "Too vague.",
+        recommendation: "Add scope and verified outcome.",
+      },
+    ],
     requirementMatches: [
       {
         id: "r1",

@@ -47,8 +47,51 @@ export class MockResumeAIProvider implements ResumeAIProvider {
         overallScore: 70,
         atsScore: 72,
         jobFitScore: 68,
+        scoreExplanations: {
+          overall: {
+            score: 70,
+            explanation: "The resume is directionally relevant but needs sharper evidence.",
+          },
+          ats: {
+            score: 72,
+            explanation: "Core terms are present, but some posting language is missing.",
+          },
+          jobFit: {
+            score: 68,
+            explanation: "Several requirements are strong while one named credential is absent.",
+          },
+        },
         summary: "Mock job-fit analysis generated without an external AI call.",
+        summaryRecommendation:
+          "Lead with the strongest role-specific evidence and add placeholders only where verified metrics are missing.",
         missingRequirements: ["Formal certification named in the posting"],
+        keywordGroups: {
+          skills: [
+            {
+              keyword: "Stakeholder communication",
+              status: "WEAK",
+              recommendation: "Make the communication audience and cadence explicit.",
+            },
+          ],
+          tools: [],
+          responsibilities: [],
+          industryLanguage: [],
+          certifications: [
+            {
+              keyword: "Formal certification",
+              status: "MISSING",
+              recommendation: "Add it only if held.",
+            },
+          ],
+          experienceTerms: [],
+        },
+        bulletIssues: [
+          {
+            original: "Managed projects.",
+            issue: "Too broad for a targeted application.",
+            recommendation: "Name the scope, stakeholders, and verified outcome.",
+          },
+        ],
         requirementMatches: [
           {
             id: "mock-req-1",
