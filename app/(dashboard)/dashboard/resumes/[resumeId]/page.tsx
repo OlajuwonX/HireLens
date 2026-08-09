@@ -37,7 +37,7 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
     <div className="space-y-6">
       <PageHeader
         title={resume.title}
-        description="Review and manage this resume record."
+        description="Manage versions of this resume and choose which file should be used for analysis and job targeting."
       />
       <div className="grid gap-4 lg:grid-cols-[1fr_24rem]">
         <Card>
@@ -48,12 +48,22 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
             </div>
           </CardHeader>
           <CardContent className="space-y-2 text-meta text-text-secondary">
-            <p>Public ID: {resume.publicId}</p>
-            <p>Created: {resume.createdAt.toLocaleString()}</p>
-            <p>Updated: {resume.updatedAt.toLocaleString()}</p>
             <p>
-              Upload metadata exists. File attachment and resume versions are next
-              in the staged rebuild.
+              <span className="font-medium text-text-primary">Resume: </span>
+              {resume.title}
+            </p>
+            <p>
+              <span className="font-medium text-text-primary">Created: </span>
+              {resume.createdAt.toLocaleString()}
+            </p>
+            <p>
+              <span className="font-medium text-text-primary">Last updated: </span>
+              {resume.updatedAt.toLocaleString()}
+            </p>
+            <p>
+              Versions are the actual PDF files HireLens analyses. Create a new
+              version when you upload a revised resume or tailor a resume for a
+              specific job.
             </p>
           </CardContent>
         </Card>
@@ -69,7 +79,12 @@ export default async function ResumeDetailPage({ params }: ResumeDetailPageProps
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-section-title font-semibold text-text-primary">Versions</h2>
+            <div>
+              <h2 className="text-section-title font-semibold text-text-primary">Versions</h2>
+              <p className="mt-1 text-meta text-text-secondary">
+                Each version is a separate PDF you can analyze, compare, and use for applications.
+              </p>
+            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild variant="outline">
                 <a href={`/dashboard/resumes/${resume.publicId}/compare`}>Compare</a>

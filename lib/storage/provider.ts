@@ -7,7 +7,6 @@ import type { StorageProvider } from "./types";
 
 let provider: StorageProvider | undefined;
 
-
 export function getStorageProvider(): StorageProvider {
   if (provider) {
     return provider;
@@ -26,11 +25,13 @@ export function getStorageProvider(): StorageProvider {
       endpoint: env.STORAGE_ENDPOINT,
       accessKeyId: env.STORAGE_ACCESS_KEY_ID,
       secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
+      providerName: "backblaze",
+      forcePathStyle: env.STORAGE_FORCE_PATH_STYLE,
     });
   } else {
     if (env.NODE_ENV === "production") {
       throw new Error(
-        "Object storage is not configured. Set STORAGE_BUCKET, STORAGE_ACCESS_KEY_ID and STORAGE_SECRET_ACCESS_KEY.",
+        "Backblaze storage is not configured. Set STORAGE_BUCKET, STORAGE_REGION, STORAGE_ENDPOINT, STORAGE_ACCESS_KEY_ID and STORAGE_SECRET_ACCESS_KEY.",
       );
     }
 

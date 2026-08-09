@@ -17,7 +17,12 @@ export type NavItem = {
 
 const allNavigation: NavItem[] = [
   { label: "Overview", href: "/dashboard", Icon: LayoutDashboard, ready: true },
-  { label: "Saved Jobs", href: "/dashboard/jobs", Icon: Briefcase, ready: true },
+  {
+    label: "Saved Jobs",
+    href: "/dashboard/jobs",
+    Icon: Briefcase,
+    ready: true,
+  },
   {
     label: "Applications",
     href: "/dashboard/applications",
@@ -29,7 +34,7 @@ const allNavigation: NavItem[] = [
     label: "AI Documents",
     href: "/dashboard/documents",
     Icon: Sparkles,
-    ready: false,
+    ready: true,
   },
   {
     label: "Analytics",

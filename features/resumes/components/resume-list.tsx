@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Resume } from "@/lib/db/schema";
+import Link from "next/link";
 import { ResumeStatusBadge } from "./resume-status-badge";
 
 export function ResumeList({ resumes }: { resumes: Resume[] }) {

@@ -108,10 +108,8 @@ export function ProfileMenu({
             Settings
           </Link>
 
-          <div className="border-b border-border px-3 py-2.5">
-            <p className="mb-2 font-mono text-system uppercase text-text-muted">
-              Theme
-            </p>
+          <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2.5">
+            <p className="text-meta font-medium text-text-secondary">Themes</p>
             <ThemeToggle block />
           </div>
 

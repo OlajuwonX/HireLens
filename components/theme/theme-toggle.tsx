@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -63,8 +62,8 @@ export function ThemeToggle({
       role="radiogroup"
       aria-label="Theme"
       className={cn(
-        "inline-flex rounded-control border border-border bg-surface",
-        block && "flex w-full",
+        "inline-flex items-center gap-1",
+        block && "flex",
         className,
       )}
     >
@@ -72,18 +71,21 @@ export function ThemeToggle({
         const active = mounted && preference === value;
 
         return (
-          <Button
+          <button
             key={value}
-            variant={active ? "segmentActive" : "segment"}
-            size="compact"
+            type="button"
             role="radio"
             aria-checked={active}
+            aria-label={label}
+            title={label}
             onClick={() => select(value)}
-            className={cn("gap-1.5 px-2.5 font-medium", block && "flex-1")}
+            className={cn(
+              "grid size-8 place-items-center rounded-full text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary",
+              active && "bg-surface-elevated text-text-primary",
+            )}
           >
-            <Icon aria-hidden="true" className="size-3" />
-            {label}
-          </Button>
+            <Icon aria-hidden="true" className="size-4" />
+          </button>
         );
       })}
     </div>

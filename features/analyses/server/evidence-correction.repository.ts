@@ -11,41 +11,24 @@ export async function upsertEvidenceCorrection(input: {
   evidence: string | null;
   notes: string | null;
 }) {
-  const [existing] = await db
-    .select()
-    .from(userEvidenceCorrections)
-    .where(
-      and(
-        eq(userEvidenceCorrections.userId, input.userId),
-        eq(
-          userEvidenceCorrections.requirementMatchId,
-          input.requirementMatchId,
-        ),
-      ),
-    )
-    .limit(1);
-
-  if (existing) {
-    const [updated] = await db
-      .update(userEvidenceCorrections)
-      .set({
+  const [correction] = await db
+    .insert(userEvidenceCorrections)
+    .values(input)
+    .onConflictDoUpdate({
+      target: [
+        userEvidenceCorrections.userId,
+        userEvidenceCorrections.requirementMatchId,
+      ],
+      set: {
         markedIncorrect: input.markedIncorrect,
         evidence: input.evidence,
         notes: input.notes,
         updatedAt: new Date(),
-      })
-      .where(eq(userEvidenceCorrections.id, existing.id))
-      .returning();
-
-    return updated ?? null;
-  }
-
-  const [created] = await db
-    .insert(userEvidenceCorrections)
-    .values(input)
+      },
+    })
     .returning();
 
-  return created ?? null;
+  return correction ?? null;
 }
 
 export async function deleteEvidenceCorrection(input: {

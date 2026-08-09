@@ -1,6 +1,7 @@
 import "server-only";
 
 import { StorageValidationError, type StorageProvider } from "@/lib/storage";
+import { StorageProviderError } from "@/lib/storage";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { ResumeVersion } from "@/lib/db/schema";
 import { getOwnedResume } from "./resume.service";
@@ -76,6 +77,10 @@ export async function createOwnedResumeVersionFromUpload(input: {
   } catch (error) {
     if (error instanceof StorageValidationError) {
       return { ok: false, error: "INVALID_FILE", message: error.message };
+    }
+
+    if (error instanceof StorageProviderError) {
+      return { ok: false, error: "UPLOAD_FAILED", message: error.message };
     }
 
     return {

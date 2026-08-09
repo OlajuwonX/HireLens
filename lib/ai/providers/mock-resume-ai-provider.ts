@@ -1,5 +1,6 @@
 import type {
   AIProviderResult,
+  ApplicationDocumentInput,
   GeneralAnalysisInput,
   JobSpecificAnalysisInput,
   ResumeAIProvider,
@@ -91,6 +92,30 @@ export class MockResumeAIProvider implements ResumeAIProvider {
           },
         ],
       }),
+    };
+  }
+
+  async generateApplicationDocument(
+    input: ApplicationDocumentInput,
+  ): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+
+    return {
+      provider: "mock",
+      model: "mock-application-document",
+      durationMs: Math.round(performance.now() - startedAt),
+      rawResponse: [
+        `Subject: ${input.jobTitle} at ${input.company}`,
+        "",
+        `Hello ${input.company} team,`,
+        "",
+        `I am interested in the ${input.jobTitle} role. My resume evidence should be tailored here without inventing details.`,
+        "",
+        "Relevant evidence: [verified resume evidence]",
+        "",
+        "Thank you,",
+        "[Your name]",
+      ].join("\n"),
     };
   }
 }

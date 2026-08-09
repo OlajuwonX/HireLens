@@ -5,21 +5,76 @@ import { z } from "zod";
 const blankAsUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
+const stripWrappingQuotes = (value: string) =>
+  value.replace(/^['"]|['"]$/g, "");
+
 const optionalString = z.preprocess(
-  blankAsUndefined,
+  (value) =>
+    typeof value === "string"
+      ? blankAsUndefined(stripWrappingQuotes(value.trim()))
+      : blankAsUndefined(value),
   z.string().min(1).optional(),
 );
 
-const optionalUrl = z.preprocess(blankAsUndefined, z.url().optional());
+const optionalUrl = z.preprocess(
+  (value) =>
+    typeof value === "string"
+      ? blankAsUndefined(stripWrappingQuotes(value.trim()))
+      : blankAsUndefined(value),
+  z.url().optional(),
+);
+
+const requiredUrl = z.preprocess(
+  (value) =>
+    typeof value === "string" ? stripWrappingQuotes(value.trim()) : value,
+  z.url(),
+);
+
+const optionalStorageEndpoint = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return blankAsUndefined(value);
+  }
+
+  const normalized = stripWrappingQuotes(value.trim());
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  return /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(normalized)
+    ? normalized
+    : `https://${normalized}`;
+}, z.url().optional());
 
 const optionalStringWithDefault = (fallback: string) =>
-  z.preprocess(blankAsUndefined, z.string().min(1).default(fallback));
+  z.preprocess(
+    (value) =>
+      typeof value === "string"
+        ? blankAsUndefined(stripWrappingQuotes(value.trim()))
+        : blankAsUndefined(value),
+    z.string().min(1).default(fallback),
+  );
+
+const optionalBooleanWithDefault = (fallback: boolean) =>
+  z.preprocess((value) => {
+    if (typeof value !== "string") {
+      return value ?? fallback;
+    }
+
+    const normalized = value.trim().toLowerCase();
+
+    if (!normalized) {
+      return fallback;
+    }
+
+    return ["1", "true", "yes", "on"].includes(normalized);
+  }, z.boolean().default(fallback));
 
 const serverEnvSchema = z.object({
   AUTH_GOOGLE_ID: optionalString,
   AUTH_GOOGLE_SECRET: optionalString,
   AUTH_SECRET: optionalString,
-  DATABASE_URL: z.url(),
+  DATABASE_URL: requiredUrl,
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
@@ -27,11 +82,13 @@ const serverEnvSchema = z.object({
   GEMINI_API_KEY: optionalString,
   GEMINI_MODEL: optionalStringWithDefault("gemini-2.5-flash"),
 
+  STORAGE_PROVIDER: z.enum(["backblaze"]).default("backblaze"),
   STORAGE_BUCKET: optionalString,
-  STORAGE_REGION: optionalStringWithDefault("auto"),
-  STORAGE_ENDPOINT: optionalUrl,
+  STORAGE_REGION: optionalStringWithDefault("us-west-004"),
+  STORAGE_ENDPOINT: optionalStorageEndpoint,
   STORAGE_ACCESS_KEY_ID: optionalString,
   STORAGE_SECRET_ACCESS_KEY: optionalString,
+  STORAGE_FORCE_PATH_STYLE: optionalBooleanWithDefault(false),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -41,7 +98,7 @@ let cached: ServerEnv | undefined;
 const hints: Record<string, string> = {
   DATABASE_URL: "a full Postgres connection string",
   STORAGE_ENDPOINT:
-    "a full URL including https://, for example https://<account-id>.r2.cloudflarestorage.com",
+    "a full Backblaze S3-compatible endpoint URL, for example https://s3.us-west-004.backblazeb2.com",
 };
 
 export function getServerEnv(): ServerEnv {

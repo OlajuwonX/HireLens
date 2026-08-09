@@ -1,4 +1,4 @@
-export type StorageProviderName = "puter" | "s3" | "memory";
+export type StorageProviderName = "backblaze" | "memory";
 
 export type UploadResumeInput = {
   userId: string;

@@ -1,4 +1,4 @@
-export type AIProviderName = "puter" | "gemini" | "mock";
+export type AIProviderName = "gemini" | "mock";
 
 export type AIProviderResult = {
   provider: AIProviderName;
@@ -33,7 +33,22 @@ export type JobSpecificAnalysisInput = {
   priorCorrections: EvidenceCorrection[];
 };
 
+export type ApplicationDocumentInput = {
+  documentType: string;
+  jobTitle: string;
+  company: string;
+  jobDescription: string;
+  requirements: string | null;
+  resumeLabel: string | null;
+  resumeText: string | null;
+  applicationStage: string | null;
+  notes: string | null;
+};
+
 export interface ResumeAIProvider {
   analyzeResume(input: GeneralAnalysisInput): Promise<AIProviderResult>;
   analyzeResumeForJob(input: JobSpecificAnalysisInput): Promise<AIProviderResult>;
+  generateApplicationDocument(
+    input: ApplicationDocumentInput,
+  ): Promise<AIProviderResult>;
 }

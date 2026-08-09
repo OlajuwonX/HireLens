@@ -27,11 +27,11 @@ export default async function NewResumeVersionPage({ params }: NewVersionPagePro
     <div className="space-y-6">
       <PageHeader
         title={`New version for ${resume.title}`}
-        description="Attach an existing resume PDF file asset as a version."
+        description="Upload a PDF and give this version a label you will recognize later."
       />
       <Card>
         <CardHeader>
-          <h2 className="text-section-title font-semibold text-text-primary">Version metadata</h2>
+          <h2 className="text-section-title font-semibold text-text-primary">Upload version</h2>
         </CardHeader>
         <CardContent>
           <CreateResumeVersionForm resumePublicId={resume.publicId} />

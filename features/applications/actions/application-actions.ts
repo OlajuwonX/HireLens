@@ -61,11 +61,15 @@ export async function changeApplicationStageAction(formData: FormData) {
     stage: getString(formData, "stage"),
   });
 
-  await changeApplicationStage({
+  const result = await changeApplicationStage({
     userId: user.id,
     publicId: input.publicId,
     stage: input.stage,
   });
+
+  if (!result.ok) {
+    throw new Error(result.message);
+  }
 
   revalidatePath("/dashboard/applications");
   revalidatePath(`/dashboard/applications/${input.publicId}`);

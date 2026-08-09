@@ -404,6 +404,10 @@ export const userEvidenceCorrections = pgTable(
   },
   (table) => [
     index("user_evidence_corrections_user_idx").on(table.userId),
+    uniqueIndex("user_evidence_corrections_user_requirement_idx").on(
+      table.userId,
+      table.requirementMatchId,
+    ),
     index("user_evidence_corrections_requirement_idx").on(table.requirementMatchId),
   ],
 );
@@ -433,6 +437,7 @@ export const applications = pgTable(
   },
   (table) => [
     uniqueIndex("applications_public_id_idx").on(table.publicId),
+    uniqueIndex("applications_user_job_idx").on(table.userId, table.jobId),
     index("applications_user_stage_idx").on(table.userId, table.stage),
     index("applications_user_follow_up_idx").on(table.userId, table.followUpAt),
   ],
@@ -607,3 +612,5 @@ export type ApplicationActivity = typeof applicationActivities.$inferSelect;
 export type ResumeAnalysis = typeof resumeAnalyses.$inferSelect;
 export type RequirementMatch = typeof requirementMatches.$inferSelect;
 export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
+export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
+export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;

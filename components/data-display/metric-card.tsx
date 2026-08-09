@@ -14,17 +14,17 @@ export function MetricCard({
 }) {
   return (
     <Card>
-      <CardContent className="pt-5">
-        <p className="font-mono text-system font-medium uppercase text-text-muted">
+      <CardContent className="px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-5">
+        <p className="truncate font-mono text-[0.6875rem] font-medium uppercase leading-4 text-text-muted sm:text-system">
           {label}
         </p>
-        <p className="mt-3 text-card-metric font-semibold text-text-primary tabular-nums">
+        <p className="mt-2 text-[1.5rem] font-semibold leading-none text-text-primary tabular-nums sm:mt-3 sm:text-card-metric">
           {value}
         </p>
         {hint ? (
           <p
             className={cn(
-              "mt-1 text-meta",
+              "mt-1 text-[0.75rem] leading-4 sm:text-meta",
               trend === "up" && "text-text-primary",
               trend === "down" && "text-danger",
               (!trend || trend === "flat") && "text-text-secondary",

@@ -23,6 +23,15 @@ export type ApplicationResult<T> =
   | { ok: true; value: T }
   | { ok: false; error: "NOT_FOUND" | "DUPLICATE"; message: string };
 
+function isUniqueViolation(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505"
+  );
+}
+
 async function resolveVersionId(input: {
   userId: string;
   versionPublicId?: string;
@@ -104,16 +113,30 @@ export async function trackJobAsApplication(input: {
     versionPublicId: input.values.resumeVersionPublicId,
   });
 
-  const application = await createApplicationWithActivity({
-    values: {
-      userId: input.userId,
-      jobId: job.id,
-      resumeVersionId,
-      stage: input.values.stage,
-      appliedAt: input.values.stage === "APPLIED" ? new Date() : null,
-    },
-    activityTitle: `Tracking started at ${applicationStageLabels[input.values.stage]}`,
-  });
+  let application: Awaited<ReturnType<typeof createApplicationWithActivity>>;
+
+  try {
+    application = await createApplicationWithActivity({
+      values: {
+        userId: input.userId,
+        jobId: job.id,
+        resumeVersionId,
+        stage: input.values.stage,
+        appliedAt: input.values.stage === "APPLIED" ? new Date() : null,
+      },
+      activityTitle: `Tracking started at ${applicationStageLabels[input.values.stage]}`,
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      return {
+        ok: false,
+        error: "DUPLICATE",
+        message: "You are already tracking an application for this job.",
+      };
+    }
+
+    throw error;
+  }
 
   return { ok: true, value: { publicId: application.publicId } };
 }

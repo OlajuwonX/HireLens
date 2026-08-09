@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "applications_user_job_idx" ON "applications" USING btree ("user_id","job_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "user_evidence_corrections_user_requirement_idx" ON "user_evidence_corrections" USING btree ("user_id","requirement_match_id");

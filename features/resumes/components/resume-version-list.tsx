@@ -15,7 +15,7 @@ export function ResumeVersionList({
     return (
       <EmptyState
         title="No versions yet"
-        description="Create a version once a resume PDF file asset is available."
+        description="Upload a PDF version before running resume analysis or targeting saved jobs."
       />
     );
   }

@@ -23,6 +23,8 @@ export type S3StorageProviderConfig = {
   endpoint?: string;
   accessKeyId: string;
   secretAccessKey: string;
+  providerName?: StoredFile["provider"];
+  forcePathStyle?: boolean;
   readUrlTtlSeconds?: number;
 };
 
@@ -34,7 +36,7 @@ export class S3StorageProvider implements StorageProvider {
     this.client = new S3Client({
       region: config.region,
       endpoint: config.endpoint,
-      forcePathStyle: Boolean(config.endpoint),
+      forcePathStyle: config.forcePathStyle ?? false,
       credentials: {
         accessKeyId: config.accessKeyId,
         secretAccessKey: config.secretAccessKey,
@@ -68,12 +70,14 @@ export class S3StorageProvider implements StorageProvider {
           ContentLength: body.byteLength,
         }),
       );
-    } catch {
-      throw new StorageProviderError("Could not store the resume file");
+    } catch (error) {
+      throw new StorageProviderError(
+        `Could not store the resume file in Backblaze. ${describeStorageError(error)}`,
+      );
     }
 
     return {
-      provider: "s3",
+      provider: this.config.providerName ?? "backblaze",
       storageKey,
       originalFilename: input.originalFilename,
       mimeType: input.contentType,
@@ -93,9 +97,9 @@ export class S3StorageProvider implements StorageProvider {
         url,
         expiresAt: new Date(Date.now() + this.readUrlTtlSeconds * 1000),
       };
-    } catch {
+    } catch (error) {
       throw new StorageProviderError(
-        "Could not create a read URL for the file",
+        `Could not create a read URL for the file. ${describeStorageError(error)}`,
       );
     }
   }
@@ -116,7 +120,9 @@ export class S3StorageProvider implements StorageProvider {
         throw error;
       }
 
-      throw new StorageProviderError("Could not read the stored file");
+      throw new StorageProviderError(
+        `Could not read the stored file. ${describeStorageError(error)}`,
+      );
     }
   }
 
@@ -128,8 +134,43 @@ export class S3StorageProvider implements StorageProvider {
           Key: storageKey,
         }),
       );
-    } catch {
-      throw new StorageProviderError("Could not delete the stored file");
+    } catch (error) {
+      throw new StorageProviderError(
+        `Could not delete the stored file. ${describeStorageError(error)}`,
+      );
     }
   }
+}
+
+function describeStorageError(error: unknown) {
+  if (typeof error !== "object" || error === null) {
+    return "Check your storage settings and try again.";
+  }
+
+  const record = error as {
+    name?: unknown;
+    Code?: unknown;
+    code?: unknown;
+    message?: unknown;
+  };
+  const code = String(record.Code ?? record.code ?? record.name ?? "");
+  const message = typeof record.message === "string" ? record.message : "";
+  const debug =
+    process.env.NODE_ENV === "development" && (code || message)
+      ? ` Backblaze returned ${[code, message].filter(Boolean).join(": ")}.`
+      : "";
+
+  if (code.includes("InvalidAccessKeyId") || code.includes("Signature")) {
+    return `Check STORAGE_ACCESS_KEY_ID, STORAGE_SECRET_ACCESS_KEY, STORAGE_REGION, and STORAGE_ENDPOINT.${debug}`;
+  }
+
+  if (code.includes("NoSuchBucket") || message.includes("bucket")) {
+    return `Check that STORAGE_BUCKET exactly matches your Backblaze bucket name.${debug}`;
+  }
+
+  if (message.includes("Invalid URL") || message.includes("ENOTFOUND")) {
+    return `Check STORAGE_ENDPOINT. It should look like https://s3.<region>.backblazeb2.com.${debug}`;
+  }
+
+  return `Check your Backblaze bucket, endpoint, region, and key permissions.${debug}`;
 }

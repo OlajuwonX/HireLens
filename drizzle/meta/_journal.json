@@ -15,6 +15,13 @@
       "when": 1786217340696,
       "tag": "0001_perfect_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786279303268,
+      "tag": "0002_useful_ironclad",
+      "breakpoints": true
     }
   ]
 }
