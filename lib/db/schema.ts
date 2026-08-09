@@ -59,14 +59,10 @@ export const employmentType = pgEnum("employment_type", [
   "NOT_SPECIFIED",
 ]);
 
-export const applicationStage = pgEnum("application_stage", [
-  "SAVED",
-  "PREPARING",
-  "APPLIED",
-  "INTERVIEW",
-  "OFFER",
+export const applicationStatus = pgEnum("application_stage", [
+  "PENDING",
+  "ACCEPTED",
   "REJECTED",
-  "WITHDRAWN",
 ]);
 
 export const analysisType = pgEnum("analysis_type", [
@@ -427,7 +423,7 @@ export const applications = pgTable(
     analysisId: uuid("analysis_id").references(() => resumeAnalyses.id, {
       onDelete: "set null",
     }),
-    stage: applicationStage("stage").notNull().default("SAVED"),
+    status: applicationStatus("stage").notNull().default("PENDING"),
     appliedAt: timestamp("applied_at", { withTimezone: true }),
     followUpAt: timestamp("follow_up_at", { withTimezone: true }),
     interviewAt: timestamp("interview_at", { withTimezone: true }),
@@ -438,7 +434,7 @@ export const applications = pgTable(
   (table) => [
     uniqueIndex("applications_public_id_idx").on(table.publicId),
     uniqueIndex("applications_user_job_idx").on(table.userId, table.jobId),
-    index("applications_user_stage_idx").on(table.userId, table.stage),
+    index("applications_user_stage_idx").on(table.userId, table.status),
     index("applications_user_follow_up_idx").on(table.userId, table.followUpAt),
   ],
 );

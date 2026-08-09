@@ -19,9 +19,21 @@ const optionalMoney = z.preprocess(
 
 export const jobPublicIdSchema = z.string().uuid();
 
-export const createJobSchema = z
-  .object({
-    title: z.string().trim().min(1, "Job title is required").max(200),
+export const salaryRangeIsOrdered = (job: {
+  salaryMin?: number;
+  salaryMax?: number;
+}) =>
+  job.salaryMin === undefined ||
+  job.salaryMax === undefined ||
+  job.salaryMin <= job.salaryMax;
+
+export const salaryRangeIssue = {
+  path: ["salaryMax"],
+  message: "Maximum salary must be greater than the minimum",
+};
+
+export const jobFieldsSchema = z.object({
+  title: z.string().trim().min(1, "Job title is required").max(200),
     company: z.string().trim().min(1, "Company is required").max(200),
     location: optionalText(200),
     workArrangement: z.enum(WORK_ARRANGEMENTS).default("NOT_SPECIFIED"),
@@ -44,18 +56,13 @@ export const createJobSchema = z
       blankToUndefined,
       z.coerce.date().optional(),
     ),
-    notes: optionalText(10_000),
-  })
-  .refine(
-    (job) =>
-      job.salaryMin === undefined ||
-      job.salaryMax === undefined ||
-      job.salaryMin <= job.salaryMax,
-    {
-      path: ["salaryMax"],
-      message: "Maximum salary must be greater than the minimum",
-    },
-  );
+  notes: optionalText(10_000),
+});
+
+export const createJobSchema = jobFieldsSchema.refine(
+  salaryRangeIsOrdered,
+  salaryRangeIssue,
+);
 
 export const updateJobSchema = z.intersection(
   createJobSchema,

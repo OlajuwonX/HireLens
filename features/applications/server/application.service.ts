@@ -1,17 +1,18 @@
 import "server-only";
 
-import { getOwnedJob } from "@/features/jobs/server/job.service";
+import { runJobFitAnalysis } from "@/features/analyses/server/job-fit.service";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
-import { applicationStageLabels } from "../constants";
+import { applicationStatusLabels } from "../constants";
 import type {
   ApplicationFilters,
-  CreateApplicationInput,
+  SaveAndAnalyzeInput,
   UpdateApplicationInput,
 } from "../schemas/application.schema";
 import {
-  createApplicationWithActivity,
+  attachAnalysisToApplication,
+  countApplicationsByStatus,
+  createJobWithApplication,
   deleteApplicationForUser,
-  findApplicationForJob,
   findApplicationForUser,
   findApplicationRowForUser,
   listActivitiesForApplication,
@@ -21,16 +22,7 @@ import {
 
 export type ApplicationResult<T> =
   | { ok: true; value: T }
-  | { ok: false; error: "NOT_FOUND" | "DUPLICATE"; message: string };
-
-function isUniqueViolation(error: unknown) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "23505"
-  );
-}
+  | { ok: false; error: "NOT_FOUND" | "ANALYSIS_FAILED"; message: string };
 
 async function resolveVersionId(input: {
   userId: string;
@@ -53,6 +45,10 @@ export async function getApplicationBoard(input: {
   filters: ApplicationFilters;
 }) {
   return listApplicationsForUser(input);
+}
+
+export async function getStatusCounts(userId: string) {
+  return countApplicationsByStatus(userId);
 }
 
 export async function getOwnedApplication(input: {
@@ -78,73 +74,74 @@ export async function getApplicationTimeline(input: {
   });
 }
 
-export async function trackJobAsApplication(input: {
+export async function saveAndAnalyze(input: {
   userId: string;
-  values: CreateApplicationInput;
-}): Promise<ApplicationResult<{ publicId: string }>> {
-  const job = await getOwnedJob({
-    userId: input.userId,
-    publicId: input.values.jobPublicId,
-  });
-
-  if (!job) {
-    return {
-      ok: false,
-      error: "NOT_FOUND",
-      message: "That job could not be found.",
-    };
-  }
-
-  const existing = await findApplicationForJob({
-    userId: input.userId,
-    jobId: job.id,
-  });
-
-  if (existing) {
-    return {
-      ok: false,
-      error: "DUPLICATE",
-      message: "You are already tracking an application for this job.",
-    };
-  }
-
-  const resumeVersionId = await resolveVersionId({
+  values: SaveAndAnalyzeInput;
+}): Promise<
+  ApplicationResult<{ applicationPublicId: string; analysed: boolean }>
+> {
+  const version = await getOwnedResumeVersion({
     userId: input.userId,
     versionPublicId: input.values.resumeVersionPublicId,
   });
 
-  let application: Awaited<ReturnType<typeof createApplicationWithActivity>>;
-
-  try {
-    application = await createApplicationWithActivity({
-      values: {
-        userId: input.userId,
-        jobId: job.id,
-        resumeVersionId,
-        stage: input.values.stage,
-        appliedAt: input.values.stage === "APPLIED" ? new Date() : null,
-      },
-      activityTitle: `Tracking started at ${applicationStageLabels[input.values.stage]}`,
-    });
-  } catch (error) {
-    if (isUniqueViolation(error)) {
-      return {
-        ok: false,
-        error: "DUPLICATE",
-        message: "You are already tracking an application for this job.",
-      };
-    }
-
-    throw error;
+  if (!version) {
+    return {
+      ok: false,
+      error: "NOT_FOUND",
+      message: "That resume version could not be found.",
+    };
   }
 
-  return { ok: true, value: { publicId: application.publicId } };
+  const { job, application } = await createJobWithApplication({
+    userId: input.userId,
+    resumeVersionId: version.id,
+    activityTitle: "Application created",
+    job: {
+      title: input.values.title,
+      company: input.values.company,
+      location: input.values.location ?? null,
+      workArrangement: input.values.workArrangement,
+      employmentType: input.values.employmentType,
+      salaryMin: input.values.salaryMin ?? null,
+      salaryMax: input.values.salaryMax ?? null,
+      currency: input.values.currency ?? null,
+      source: input.values.source ?? null,
+      sourceUrl: input.values.sourceUrl ?? null,
+      description: input.values.description,
+      requirements: input.values.requirements ?? null,
+      deadlineAt: input.values.deadlineAt ?? null,
+      notes: input.values.notes ?? null,
+    },
+  });
+
+  const analysis = await runJobFitAnalysis({
+    userId: input.userId,
+    versionPublicId: input.values.resumeVersionPublicId,
+    jobPublicId: job.publicId,
+  });
+
+  if (analysis.ok) {
+    await attachAnalysisToApplication({
+      userId: input.userId,
+      applicationId: application.id,
+      analysisId: analysis.analysisId,
+    });
+  }
+
+  return {
+    ok: true,
+    value: {
+      applicationPublicId: application.publicId,
+      analysed: analysis.ok,
+    },
+  };
 }
 
-export async function changeApplicationStage(input: {
+export async function changeApplicationStatus(input: {
   userId: string;
   publicId: string;
-  stage: UpdateApplicationInput["stage"];
+  status: UpdateApplicationInput["status"];
 }): Promise<ApplicationResult<{ publicId: string }>> {
   const current = await findApplicationForUser(input);
 
@@ -156,24 +153,18 @@ export async function changeApplicationStage(input: {
     };
   }
 
-  if (current.stage === input.stage) {
+  if (current.status === input.status) {
     return { ok: true, value: { publicId: current.publicId } };
   }
 
   const application = await updateApplicationWithActivity({
     userId: input.userId,
     publicId: input.publicId,
-    values: {
-      stage: input.stage,
-      appliedAt:
-        input.stage === "APPLIED" && !current.appliedAt
-          ? new Date()
-          : current.appliedAt,
-    },
+    values: { status: input.status },
     activities: [
       {
-        title: `Moved to ${applicationStageLabels[input.stage]}`,
-        description: `From ${applicationStageLabels[current.stage]}`,
+        title: `Marked ${applicationStatusLabels[input.status]}`,
+        description: `From ${applicationStatusLabels[current.status]}`,
       },
     ],
   });
@@ -213,10 +204,10 @@ export async function updateOwnedApplication(input: {
 
   const activities: { title: string; description?: string | null }[] = [];
 
-  if (current.stage !== input.values.stage) {
+  if (current.status !== input.values.status) {
     activities.push({
-      title: `Moved to ${applicationStageLabels[input.values.stage]}`,
-      description: `From ${applicationStageLabels[current.stage]}`,
+      title: `Marked ${applicationStatusLabels[input.values.status]}`,
+      description: `From ${applicationStatusLabels[current.status]}`,
     });
   }
 
@@ -229,24 +220,14 @@ export async function updateOwnedApplication(input: {
     });
   }
 
-  if (
-    input.values.interviewAt &&
-    current.interviewAt?.getTime() !== input.values.interviewAt.getTime()
-  ) {
-    activities.push({
-      title: `Interview set for ${input.values.interviewAt.toLocaleDateString()}`,
-    });
-  }
-
   const application = await updateApplicationWithActivity({
     userId: input.userId,
     publicId: input.values.publicId,
     values: {
-      stage: input.values.stage,
+      status: input.values.status,
       resumeVersionId,
       appliedAt: input.values.appliedAt ?? null,
       followUpAt: input.values.followUpAt ?? null,
-      interviewAt: input.values.interviewAt ?? null,
       notes: input.values.notes ?? null,
     },
     activities,

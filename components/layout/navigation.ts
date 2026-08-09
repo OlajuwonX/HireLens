@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   Briefcase,
   FileText,
   LayoutDashboard,
@@ -16,7 +15,14 @@ export type NavItem = {
 };
 
 const allNavigation: NavItem[] = [
-  { label: "Overview", href: "/dashboard", Icon: LayoutDashboard, ready: true },
+  { label: "Dashboard", href: "/dashboard", Icon: LayoutDashboard, ready: true },
+  { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true },
+  {
+    label: "Applications",
+    href: "/dashboard/applications",
+    Icon: Send,
+    ready: true,
+  },
   {
     label: "Saved Jobs",
     href: "/dashboard/jobs",
@@ -24,23 +30,10 @@ const allNavigation: NavItem[] = [
     ready: true,
   },
   {
-    label: "Applications",
-    href: "/dashboard/applications",
-    Icon: Send,
-    ready: true,
-  },
-  { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true },
-  {
     label: "AI Documents",
     href: "/dashboard/documents",
     Icon: Sparkles,
     ready: true,
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/analytics",
-    Icon: BarChart3,
-    ready: false,
   },
 ];
 

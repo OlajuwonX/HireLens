@@ -35,6 +35,22 @@ export async function listDocumentsForUser(userId: string): Promise<DocumentRow[
     .orderBy(desc(generatedDocuments.updatedAt));
 }
 
+export async function listDocumentsForApplication(input: {
+  userId: string;
+  applicationId: string;
+}) {
+  return db
+    .select()
+    .from(generatedDocuments)
+    .where(
+      and(
+        eq(generatedDocuments.userId, input.userId),
+        eq(generatedDocuments.applicationId, input.applicationId),
+      ),
+    )
+    .orderBy(desc(generatedDocuments.createdAt));
+}
+
 export async function findDocumentRowForUser(input: {
   userId: string;
   publicId: string;
@@ -83,7 +99,7 @@ export async function listDocumentApplicationOptions(userId: string) {
   return db
     .select({
       publicId: applications.publicId,
-      stage: applications.stage,
+      status: applications.status,
       jobTitle: jobs.title,
       jobCompany: jobs.company,
     })

@@ -77,7 +77,7 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
                 `<document_type>${input.documentType}</document_type>`,
                 `<job_title>${input.jobTitle}</job_title>`,
                 `<company>${input.company}</company>`,
-                `<application_stage>${input.applicationStage ?? "Not tracked"}</application_stage>`,
+                `<application_status>${input.applicationStatus ?? "Not tracked"}</application_status>`,
                 `<resume_label>${input.resumeLabel ?? "No resume version selected"}</resume_label>`,
                 "<job_description>",
                 input.jobDescription,

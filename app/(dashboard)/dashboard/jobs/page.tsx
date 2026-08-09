@@ -5,74 +5,94 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { JobFilters } from "@/features/jobs/components/job-filters";
-import { JobList } from "@/features/jobs/components/job-list";
-import { jobFiltersSchema } from "@/features/jobs/schemas/job.schema";
-import { getJobBoard } from "@/features/jobs/server/job.service";
+import { ApplicationFilters } from "@/features/applications/components/application-filters";
+import { ApplicationTable } from "@/features/applications/components/application-table";
+import { SavedJobDrawer } from "@/features/applications/components/saved-job-drawer";
+import { applicationFiltersSchema } from "@/features/applications/schemas/application.schema";
+import {
+  getApplicationBoard,
+  getStatusCounts,
+} from "@/features/applications/server/application.service";
 
 export const metadata: Metadata = {
   title: "Saved Jobs",
 };
 
-type JobsPageProps = {
+type SavedJobsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function JobsPage({ searchParams }: JobsPageProps) {
+export default async function SavedJobsPage({
+  searchParams,
+}: SavedJobsPageProps) {
   const user = await requireDatabaseUser();
   const raw = await searchParams;
 
-  const parsed = jobFiltersSchema.safeParse({
+  const parsed = applicationFiltersSchema.safeParse({
     q: raw.q,
-    status: raw.status,
-    arrangement: raw.arrangement,
-    sort: raw.sort ?? "created_desc",
+    tab: raw.tab ?? "PENDING",
+    sort: raw.sort ?? "activity_desc",
   });
 
   const filters = parsed.success
     ? parsed.data
-    : jobFiltersSchema.parse({ sort: "created_desc" });
+    : applicationFiltersSchema.parse({});
 
-  const jobs = await getJobBoard({ userId: user.id, filters });
-  const isFiltered = Boolean(
-    filters.q || filters.status || filters.arrangement,
-  );
+  const [rows, counts] = await Promise.all([
+    getApplicationBoard({ userId: user.id, filters }),
+    getStatusCounts(user.id),
+  ]);
+
+  const query = new URLSearchParams();
+  if (filters.q) query.set("q", filters.q);
+  if (filters.tab !== "PENDING") query.set("tab", filters.tab);
+  if (filters.sort !== "activity_desc") query.set("sort", filters.sort);
+
+  const openId = typeof raw.open === "string" ? raw.open : null;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Saved Jobs"
-        description="Opportunities you have saved, with the descriptions HireLens analyses against."
+        description="Everything you are tracking, from pending through to a decision."
         action={
           <Button asChild>
-            <Link href="/dashboard/jobs/new">Save a job</Link>
+            <Link href="/dashboard/applications">Create application</Link>
           </Button>
         }
       />
 
       <Suspense fallback={null}>
-        <JobFilters />
+        <ApplicationFilters counts={counts} />
       </Suspense>
 
-      {jobs.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState
-          title={isFiltered ? "No jobs match those filters" : "No saved jobs yet"}
+          title={filters.q ? "Nothing matches that search" : "No applications yet"}
           description={
-            isFiltered
-              ? "Try clearing the search or changing the filters."
-              : "Save a job posting to analyse your resume against its requirements."
+            filters.q
+              ? "Try a different search or another status tab."
+              : "Create an application to save the job and analyse your resume against it."
           }
           action={
-            isFiltered ? null : (
+            filters.q ? null : (
               <Button asChild>
-                <Link href="/dashboard/jobs/new">Save a job</Link>
+                <Link href="/dashboard/applications">Create application</Link>
               </Button>
             )
           }
         />
       ) : (
-        <JobList jobs={jobs} />
+        <ApplicationTable rows={rows} query={query.toString()} />
       )}
+
+      {openId ? (
+        <SavedJobDrawer
+          userId={user.id}
+          publicId={openId}
+          closeHref={`/dashboard/jobs${query.toString() ? `?${query}` : ""}`}
+        />
+      ) : null}
     </div>
   );
 }

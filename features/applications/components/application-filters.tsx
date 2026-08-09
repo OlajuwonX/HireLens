@@ -8,19 +8,24 @@ import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
 import {
   APPLICATION_SORT_OPTIONS,
-  APPLICATION_STAGES,
+  APPLICATION_TABS,
   applicationSortLabels,
-  applicationStageLabels,
+  applicationTabLabels,
 } from "@/features/applications/constants";
 
-export function ApplicationFilters() {
+export function ApplicationFilters({
+  counts,
+}: {
+  counts: Record<string, number>;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const view = params.get("view") === "pipeline" ? "pipeline" : "list";
+  const activeTab = params.get("tab") ?? "PENDING";
 
   function apply(next: Record<string, string>) {
     const search = new URLSearchParams(params.toString());
+    search.delete("open");
 
     for (const [key, value] of Object.entries(next)) {
       if (value) {
@@ -31,56 +36,50 @@ export function ApplicationFilters() {
     }
 
     startTransition(() => {
-      router.replace(`/dashboard/applications?${search.toString()}`);
+      router.replace(`/dashboard/jobs?${search.toString()}`);
     });
   }
+
+  const totalCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
   return (
     <div className="space-y-3" aria-busy={pending}>
       <div
-        role="radiogroup"
-        aria-label="View"
-        className="inline-flex rounded-control border border-border bg-surface"
+        role="tablist"
+        aria-label="Application status"
+        className="flex flex-wrap gap-1 overflow-x-auto rounded-control border border-border bg-surface p-1"
       >
-        {(["list", "pipeline"] as const).map((value) => (
-          <Button
-            key={value}
-            variant={view === value ? "segmentActive" : "segment"}
-            size="compact"
-            role="radio"
-            aria-checked={view === value}
-            onClick={() => apply({ view: value === "list" ? "" : value })}
-          >
-            {value === "list" ? "List" : "Pipeline"}
-          </Button>
-        ))}
+        {APPLICATION_TABS.map((tab) => {
+          const count = tab === "ALL" ? totalCount : (counts[tab] ?? 0);
+
+          return (
+            <Button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              variant={activeTab === tab ? "segmentActive" : "segment"}
+              size="compact"
+              onClick={() => apply({ tab: tab === "PENDING" ? "" : tab })}
+              className="gap-2 rounded-control"
+            >
+              {applicationTabLabels[tab]}
+              <span className="font-mono text-system tabular-nums opacity-70">
+                {count}
+              </span>
+            </Button>
+          );
+        })}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="application-search">Search</Label>
           <SearchInput
             id="application-search"
-            placeholder="Role or company"
+            placeholder="Job title or company"
             defaultValue={params.get("q") ?? ""}
             onChange={(event) => apply({ q: event.target.value })}
           />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="application-stage">Stage</Label>
-          <Select
-            id="application-stage"
-            defaultValue={params.get("stage") ?? ""}
-            onChange={(event) => apply({ stage: event.target.value })}
-          >
-            <option value="">All</option>
-            {APPLICATION_STAGES.map((value) => (
-              <option key={value} value={value}>
-                {applicationStageLabels[value]}
-              </option>
-            ))}
-          </Select>
         </div>
 
         <div className="space-y-1.5">

@@ -29,7 +29,7 @@ import {
 } from "./requirement-match.repository";
 
 export type JobFitResult =
-  | { ok: true; analysisPublicId: string; reused: boolean }
+  | { ok: true; analysisId: string; analysisPublicId: string; reused: boolean }
   | { ok: false; error: "NOT_FOUND" | "FILE_MISSING" | "FAILED"; message: string };
 
 export async function runJobFitAnalysis(input: {
@@ -94,7 +94,12 @@ export async function runJobFitAnalysis(input: {
   });
 
   if (reusable) {
-    return { ok: true, analysisPublicId: reusable.publicId, reused: true };
+    return {
+      ok: true,
+      analysisId: reusable.id,
+      analysisPublicId: reusable.publicId,
+      reused: true,
+    };
   }
 
   const existing = await findAnalysisByInputHash({
@@ -190,6 +195,7 @@ export async function runJobFitAnalysis(input: {
 
     return {
       ok: true,
+      analysisId: analysis?.id ?? pending.id,
       analysisPublicId: analysis?.publicId ?? pending.publicId,
       reused: false,
     };

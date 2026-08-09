@@ -41,7 +41,7 @@ export type ApplicationDocumentInput = {
   requirements: string | null;
   resumeLabel: string | null;
   resumeText: string | null;
-  applicationStage: string | null;
+  applicationStatus: string | null;
   notes: string | null;
 };
 

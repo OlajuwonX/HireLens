@@ -1,52 +1,36 @@
-export const APPLICATION_STAGES = [
-  "SAVED",
-  "PREPARING",
-  "APPLIED",
-  "INTERVIEW",
-  "OFFER",
-  "REJECTED",
-  "WITHDRAWN",
-] as const;
+export const APPLICATION_STATUSES = ["PENDING", "ACCEPTED", "REJECTED"] as const;
 
-export type ApplicationStage = (typeof APPLICATION_STAGES)[number];
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-export const applicationStageLabels: Record<ApplicationStage, string> = {
-  SAVED: "Saved",
-  PREPARING: "Preparing",
-  APPLIED: "Applied",
-  INTERVIEW: "Interview",
-  OFFER: "Offer",
+export const applicationStatusLabels: Record<ApplicationStatus, string> = {
+  PENDING: "Pending",
+  ACCEPTED: "Accepted",
   REJECTED: "Rejected",
-  WITHDRAWN: "Withdrawn",
 };
 
-export const PIPELINE_STAGES: ApplicationStage[] = [
-  "SAVED",
-  "PREPARING",
-  "APPLIED",
-  "INTERVIEW",
-  "OFFER",
-];
-
-export const CLOSED_STAGES: ApplicationStage[] = ["REJECTED", "WITHDRAWN"];
-
-export const applicationStageTone: Record<
-  ApplicationStage,
+export const applicationStatusTone: Record<
+  ApplicationStatus,
   "neutral" | "green" | "yellow" | "red" | "blue"
 > = {
-  SAVED: "neutral",
-  PREPARING: "neutral",
-  APPLIED: "blue",
-  INTERVIEW: "yellow",
-  OFFER: "green",
+  PENDING: "yellow",
+  ACCEPTED: "green",
   REJECTED: "red",
-  WITHDRAWN: "neutral",
+};
+
+export const APPLICATION_TABS = ["ALL", ...APPLICATION_STATUSES] as const;
+
+export type ApplicationTab = (typeof APPLICATION_TABS)[number];
+
+export const applicationTabLabels: Record<ApplicationTab, string> = {
+  ALL: "All",
+  ...applicationStatusLabels,
 };
 
 export const APPLICATION_SORT_OPTIONS = [
   "activity_desc",
   "created_desc",
-  "followup_asc",
+  "deadline_asc",
+  "score_desc",
   "company_asc",
 ] as const;
 
@@ -55,6 +39,7 @@ export type ApplicationSort = (typeof APPLICATION_SORT_OPTIONS)[number];
 export const applicationSortLabels: Record<ApplicationSort, string> = {
   activity_desc: "Recent activity",
   created_desc: "Newest first",
-  followup_asc: "Follow-up soonest",
+  deadline_asc: "Deadline soonest",
+  score_desc: "Best match",
   company_asc: "Company A–Z",
 };

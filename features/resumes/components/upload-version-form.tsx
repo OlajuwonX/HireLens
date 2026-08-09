@@ -22,12 +22,12 @@ function SubmitButton() {
 
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Uploading…" : "Create version"}
+      {pending ? "Uploading…" : "Add version"}
     </Button>
   );
 }
 
-export function CreateResumeVersionForm({
+export function UploadVersionForm({
   resumePublicId,
 }: {
   resumePublicId: string;
@@ -46,32 +46,28 @@ export function CreateResumeVersionForm({
         <Alert tone="error">{state.message}</Alert>
       ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor="label">
-          Version label
-        </Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="label">Version label</Label>
         <Input
           id="label"
           name="label"
           required
           maxLength={120}
-          placeholder="Job-specific version"
+          placeholder="Tailored for Acme"
         />
       </div>
 
-      <div className="space-y-2">
-        <FileDropzone
-          id="file"
-          name="file"
-          required
-          accept="application/pdf,.pdf"
-          label={selectedFileName ?? "Select a resume PDF"}
-          description="PDF only, up to 10MB."
-          onChange={(event) =>
-            setSelectedFileName(event.target.files?.[0]?.name ?? null)
-          }
-        />
-      </div>
+      <FileDropzone
+        id="file"
+        name="file"
+        required
+        accept="application/pdf,.pdf"
+        label={selectedFileName ?? "Select a resume PDF"}
+        description="PDF only, up to 10MB."
+        onChange={(event) =>
+          setSelectedFileName(event.target.files?.[0]?.name ?? null)
+        }
+      />
 
       <SubmitButton />
     </form>

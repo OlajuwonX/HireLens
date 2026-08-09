@@ -22,7 +22,7 @@ export default async function DocumentsPage() {
         description="Editable application documents generated from your saved jobs and resume evidence."
         action={
           <Button asChild>
-            <Link href="/dashboard/documents/new">Generate</Link>
+            <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
           </Button>
         }
       />
@@ -30,10 +30,10 @@ export default async function DocumentsPage() {
       {documents.length === 0 ? (
         <EmptyState
           title="No documents yet"
-          description="Generate a cover letter, email, subject line, or follow-up from a saved job."
+          description="Open a saved job and generate documents from its Analysis tab."
           action={
             <Button asChild>
-              <Link href="/dashboard/documents/new">Generate document</Link>
+              <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
             </Button>
           }
         />

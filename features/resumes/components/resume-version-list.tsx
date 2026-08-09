@@ -1,45 +1,72 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { setDefaultResumeVersionAction } from "@/features/resumes/actions/resume-version-actions";
 import type { ResumeVersion } from "@/lib/db/schema";
 
 export function ResumeVersionList({
-  resumePublicId,
   versions,
 }: {
-  resumePublicId: string;
   versions: ResumeVersion[];
 }) {
   if (versions.length === 0) {
     return (
       <EmptyState
         title="No versions yet"
-        description="Upload a PDF version before running resume analysis or targeting saved jobs."
+        description="Upload a PDF to this resume group before creating an application."
       />
     );
   }
 
+  const latest = versions.reduce((newest, version) =>
+    version.versionNumber > newest.versionNumber ? version : newest,
+  );
+  const hasExplicitDefault = versions.some((version) => version.isDefault);
+
   return (
-    <div className="grid gap-3">
-      {versions.map((version) => (
-        <Card key={version.publicId}>
-          <CardContent className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between sm:pt-5">
-            <div>
-              <Link
-                href={`/dashboard/resumes/${resumePublicId}/versions/${version.publicId}`}
-                className="font-semibold text-text-primary hover:text-text-primary"
-              >
-                {version.label}
-              </Link>
-              <p className="mt-1 text-meta text-text-secondary">
-                Version {version.versionNumber} · Created {version.createdAt.toLocaleDateString()}
+    <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
+      {versions.map((version) => {
+        const isEffectiveDefault = hasExplicitDefault
+          ? version.isDefault
+          : version.id === latest.id;
+
+        return (
+          <li
+            key={version.publicId}
+            className="flex flex-wrap items-center justify-between gap-3 p-4"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate text-meta font-medium text-text-primary">
+                  {version.label}
+                </p>
+                {isEffectiveDefault ? (
+                  <Badge tone="green">
+                    {version.isDefault ? "Default" : "Latest"}
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="font-mono text-system text-text-muted">
+                v{version.versionNumber} ·{" "}
+                {version.createdAt.toLocaleDateString()}
               </p>
             </div>
-            {version.isDefault ? <Badge tone="green">Default</Badge> : null}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+
+            {version.isDefault ? null : (
+              <form action={setDefaultResumeVersionAction}>
+                <input
+                  type="hidden"
+                  name="versionPublicId"
+                  value={version.publicId}
+                />
+                <Button type="submit" variant="outline" size="compact">
+                  Make default
+                </Button>
+              </form>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }

@@ -66,9 +66,7 @@ export async function createResumeVersionAction(
   revalidatePath(`/dashboard/resumes/${parsedFields.data.resumePublicId}`);
   revalidatePath("/dashboard/resumes");
 
-  redirect(
-    `/dashboard/resumes/${parsedFields.data.resumePublicId}/versions/${result.version.publicId}`,
-  );
+  redirect(`/dashboard/resumes/${parsedFields.data.resumePublicId}`);
 }
 
 export async function setDefaultResumeVersionAction(formData: FormData) {
@@ -84,6 +82,5 @@ export async function setDefaultResumeVersionAction(formData: FormData) {
 
   if (version) {
     revalidatePath("/dashboard/resumes");
-    revalidatePath(`/dashboard/resumes/${input.versionPublicId}`);
   }
 }

@@ -69,7 +69,7 @@ export async function generateOwnedDocument(input: {
     requirements: job.requirements,
     resumeLabel: version?.label ?? null,
     resumeText: version?.extractedText ?? null,
-    applicationStage: application?.application.stage ?? null,
+    applicationStatus: application?.application.status ?? null,
     notes: input.values.notes ?? null,
   });
 

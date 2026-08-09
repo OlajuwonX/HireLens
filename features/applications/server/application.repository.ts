@@ -7,28 +7,46 @@ import {
   applications,
   jobs,
   resumeVersions,
+  resumes,
+  resumeAnalyses,
   type Application,
   type NewApplication,
+  type NewJob,
 } from "@/lib/db/schema";
 import type { ApplicationFilters } from "../schemas/application.schema";
 
 const rowShape = {
   application: applications,
-  jobTitle: jobs.title,
-  jobCompany: jobs.company,
-  jobPublicId: jobs.publicId,
+  job: jobs,
   versionLabel: resumeVersions.label,
   versionPublicId: resumeVersions.publicId,
+  resumeTitle: resumes.title,
+  matchScore: resumeAnalyses.overallScore,
+  analysisPublicId: resumeAnalyses.publicId,
 };
 
 export type ApplicationRow = {
   application: Application;
-  jobTitle: string;
-  jobCompany: string;
-  jobPublicId: string;
+  job: typeof jobs.$inferSelect;
   versionLabel: string | null;
   versionPublicId: string | null;
+  resumeTitle: string | null;
+  matchScore: number | null;
+  analysisPublicId: string | null;
 };
+
+function baseQuery() {
+  return db
+    .select(rowShape)
+    .from(applications)
+    .innerJoin(jobs, eq(jobs.id, applications.jobId))
+    .leftJoin(
+      resumeVersions,
+      eq(resumeVersions.id, applications.resumeVersionId),
+    )
+    .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
+    .leftJoin(resumeAnalyses, eq(resumeAnalyses.id, applications.analysisId));
+}
 
 export async function findApplicationForUser(input: {
   userId: string;
@@ -52,14 +70,7 @@ export async function findApplicationRowForUser(input: {
   userId: string;
   publicId: string;
 }): Promise<ApplicationRow | null> {
-  const [row] = await db
-    .select(rowShape)
-    .from(applications)
-    .innerJoin(jobs, eq(jobs.id, applications.jobId))
-    .leftJoin(
-      resumeVersions,
-      eq(resumeVersions.id, applications.resumeVersionId),
-    )
+  const [row] = await baseQuery()
     .where(
       and(
         eq(applications.userId, input.userId),
@@ -71,32 +82,14 @@ export async function findApplicationRowForUser(input: {
   return row ?? null;
 }
 
-export async function findApplicationForJob(input: {
-  userId: string;
-  jobId: string;
-}) {
-  const [application] = await db
-    .select()
-    .from(applications)
-    .where(
-      and(
-        eq(applications.userId, input.userId),
-        eq(applications.jobId, input.jobId),
-      ),
-    )
-    .limit(1);
-
-  return application ?? null;
-}
-
 export async function listApplicationsForUser(input: {
   userId: string;
   filters: ApplicationFilters;
 }): Promise<ApplicationRow[]> {
   const conditions: SQL[] = [eq(applications.userId, input.userId)];
 
-  if (input.filters.stage) {
-    conditions.push(eq(applications.stage, input.filters.stage));
+  if (input.filters.tab !== "ALL") {
+    conditions.push(eq(applications.status, input.filters.tab));
   }
 
   if (input.filters.q) {
@@ -108,46 +101,68 @@ export async function listApplicationsForUser(input: {
     }
   }
 
-  if (input.filters.sort === "followup_asc") {
-    conditions.push(isNotNull(applications.followUpAt));
+  if (input.filters.sort === "deadline_asc") {
+    conditions.push(isNotNull(jobs.deadlineAt));
+  }
+
+  if (input.filters.sort === "score_desc") {
+    conditions.push(isNotNull(resumeAnalyses.overallScore));
   }
 
   const orderBy = {
     activity_desc: [desc(applications.lastActivityAt)],
     created_desc: [desc(applications.createdAt)],
-    followup_asc: [asc(applications.followUpAt)],
+    deadline_asc: [asc(jobs.deadlineAt)],
+    score_desc: [desc(resumeAnalyses.overallScore)],
     company_asc: [asc(jobs.company), asc(jobs.title)],
   }[input.filters.sort];
 
-  return db
-    .select(rowShape)
-    .from(applications)
-    .innerJoin(jobs, eq(jobs.id, applications.jobId))
-    .leftJoin(
-      resumeVersions,
-      eq(resumeVersions.id, applications.resumeVersionId),
-    )
+  return baseQuery()
     .where(and(...conditions))
     .orderBy(...orderBy);
 }
 
-export async function createApplicationWithActivity(input: {
-  values: NewApplication;
+export async function countApplicationsByStatus(userId: string) {
+  const rows = await db
+    .select({ status: applications.status, id: applications.id })
+    .from(applications)
+    .where(eq(applications.userId, userId));
+
+  return rows.reduce<Record<string, number>>((counts, row) => {
+    counts[row.status] = (counts[row.status] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+export async function createJobWithApplication(input: {
+  userId: string;
+  job: Omit<NewJob, "userId">;
+  resumeVersionId: string;
   activityTitle: string;
 }) {
   return db.transaction(async (tx) => {
+    const [job] = await tx
+      .insert(jobs)
+      .values({ ...input.job, userId: input.userId })
+      .returning();
+
     const [application] = await tx
       .insert(applications)
-      .values(input.values)
+      .values({
+        userId: input.userId,
+        jobId: job.id,
+        resumeVersionId: input.resumeVersionId,
+        status: "PENDING",
+      })
       .returning();
 
     await tx.insert(applicationActivities).values({
-      userId: application.userId,
+      userId: input.userId,
       applicationId: application.id,
       title: input.activityTitle,
     });
 
-    return application;
+    return { job, application };
   });
 }
 
@@ -158,12 +173,11 @@ export async function updateApplicationWithActivity(input: {
   activities: { title: string; description?: string | null }[];
 }) {
   return db.transaction(async (tx) => {
-    const hasActivities = input.activities.length > 0;
     const [application] = await tx
       .update(applications)
       .set({
         ...input.values,
-        ...(hasActivities ? { lastActivityAt: new Date() } : {}),
+        lastActivityAt: new Date(),
         updatedAt: new Date(),
       })
       .where(
@@ -178,7 +192,7 @@ export async function updateApplicationWithActivity(input: {
       return null;
     }
 
-    if (hasActivities) {
+    if (input.activities.length > 0) {
       await tx.insert(applicationActivities).values(
         input.activities.map((activity) => ({
           userId: input.userId,
@@ -191,6 +205,22 @@ export async function updateApplicationWithActivity(input: {
 
     return application;
   });
+}
+
+export async function attachAnalysisToApplication(input: {
+  userId: string;
+  applicationId: string;
+  analysisId: string;
+}) {
+  await db
+    .update(applications)
+    .set({ analysisId: input.analysisId, updatedAt: new Date() })
+    .where(
+      and(
+        eq(applications.userId, input.userId),
+        eq(applications.id, input.applicationId),
+      ),
+    );
 }
 
 export async function listActivitiesForApplication(input: {

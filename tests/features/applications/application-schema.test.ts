@@ -1,101 +1,116 @@
 import { describe, expect, it } from "vitest";
 import {
   applicationFiltersSchema,
-  changeStageSchema,
-  createApplicationSchema,
+  changeStatusSchema,
+  saveAndAnalyzeSchema,
   updateApplicationSchema,
 } from "@/features/applications/schemas/application.schema";
 import {
-  APPLICATION_STAGES,
-  CLOSED_STAGES,
-  PIPELINE_STAGES,
-  applicationStageLabels,
+  APPLICATION_STATUSES,
+  APPLICATION_TABS,
+  applicationStatusLabels,
 } from "@/features/applications/constants";
 
 const uuid = "8f1b1f4e-7c1a-4a5d-9a2e-2f9a5c1b3d77";
 
-describe("createApplicationSchema", () => {
-  it("defaults a new application to Saved", () => {
-    expect(createApplicationSchema.parse({ jobPublicId: uuid }).stage).toBe(
-      "SAVED",
-    );
+const validJob = {
+  resumeVersionPublicId: uuid,
+  title: "Quantity Surveyor",
+  company: "Turner",
+  description: "Manage cost planning across two sites.",
+};
+
+describe("saveAndAnalyzeSchema", () => {
+  it("accepts a resume version plus the minimum job fields", () => {
+    const result = saveAndAnalyzeSchema.safeParse(validJob);
+
+    expect(result.success).toBe(true);
+    expect(result.data?.workArrangement).toBe("NOT_SPECIFIED");
   });
 
-  it("treats a blank resume version as not chosen", () => {
-    const result = createApplicationSchema.parse({
-      jobPublicId: uuid,
-      resumeVersionPublicId: "",
-    });
+  it("requires a resume version, because analysis needs something to compare", () => {
+    const { resumeVersionPublicId: _omitted, ...withoutResume } = validJob;
 
-    expect(result.resumeVersionPublicId).toBeUndefined();
+    expect(saveAndAnalyzeSchema.safeParse(withoutResume).success).toBe(false);
   });
 
-  it("rejects an unknown stage", () => {
+  it("still enforces the job field rules", () => {
     expect(
-      createApplicationSchema.safeParse({ jobPublicId: uuid, stage: "GHOSTED" })
+      saveAndAnalyzeSchema.safeParse({ ...validJob, title: "" }).success,
+    ).toBe(false);
+    expect(
+      saveAndAnalyzeSchema.safeParse({ ...validJob, sourceUrl: "turner.com" })
         .success,
     ).toBe(false);
   });
 
-  it("requires a job", () => {
-    expect(createApplicationSchema.safeParse({}).success).toBe(false);
+  it("still enforces the salary range rule inherited from the job schema", () => {
+    const result = saveAndAnalyzeSchema.safeParse({
+      ...validJob,
+      salaryMin: "60000",
+      salaryMax: "45000",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["salaryMax"]);
   });
 });
 
-describe("updateApplicationSchema", () => {
-  const base = { publicId: uuid, stage: "APPLIED" };
-
-  it("coerces date inputs into Dates", () => {
-    const result = updateApplicationSchema.parse({
-      ...base,
-      followUpAt: "2026-10-01",
-    });
-
-    expect(result.followUpAt).toBeInstanceOf(Date);
-  });
-
-  it("treats blank dates as cleared", () => {
-    const result = updateApplicationSchema.parse({
-      ...base,
-      appliedAt: "",
-      followUpAt: "",
-      interviewAt: "",
-    });
-
-    expect(result.appliedAt).toBeUndefined();
-    expect(result.followUpAt).toBeUndefined();
-    expect(result.interviewAt).toBeUndefined();
-  });
-
-  it("treats blank notes as cleared", () => {
-    expect(updateApplicationSchema.parse({ ...base, notes: "  " }).notes)
-      .toBeUndefined();
-  });
-});
-
-describe("changeStageSchema", () => {
-  it("accepts every defined stage", () => {
-    for (const stage of APPLICATION_STAGES) {
+describe("changeStatusSchema", () => {
+  it("accepts every defined status", () => {
+    for (const status of APPLICATION_STATUSES) {
       expect(
-        changeStageSchema.safeParse({ publicId: uuid, stage }).success,
-        stage,
+        changeStatusSchema.safeParse({ publicId: uuid, status }).success,
+        status,
       ).toBe(true);
     }
   });
 
-  it("rejects an arbitrary stage", () => {
+  it("rejects a retired seven-stage value", () => {
+    for (const old of ["SAVED", "PREPARING", "APPLIED", "INTERVIEW", "OFFER"]) {
+      expect(
+        changeStatusSchema.safeParse({ publicId: uuid, status: old }).success,
+        old,
+      ).toBe(false);
+    }
+  });
+});
+
+describe("updateApplicationSchema", () => {
+  const base = { publicId: uuid, status: "ACCEPTED" };
+
+  it("coerces date inputs into Dates", () => {
     expect(
-      changeStageSchema.safeParse({ publicId: uuid, stage: "MAYBE" }).success,
-    ).toBe(false);
+      updateApplicationSchema.parse({ ...base, followUpAt: "2026-10-01" })
+        .followUpAt,
+    ).toBeInstanceOf(Date);
+  });
+
+  it("treats blank dates and notes as cleared", () => {
+    const result = updateApplicationSchema.parse({
+      ...base,
+      appliedAt: "",
+      followUpAt: "",
+      notes: "  ",
+    });
+
+    expect(result.appliedAt).toBeUndefined();
+    expect(result.followUpAt).toBeUndefined();
+    expect(result.notes).toBeUndefined();
   });
 });
 
 describe("applicationFiltersSchema", () => {
-  it("defaults to the list view sorted by recent activity", () => {
-    const result = applicationFiltersSchema.parse({});
+  it("defaults to the Pending tab", () => {
+    expect(applicationFiltersSchema.parse({}).tab).toBe("PENDING");
+  });
 
-    expect(result.view).toBe("list");
-    expect(result.sort).toBe("activity_desc");
+  it("accepts every tab including All", () => {
+    for (const tab of APPLICATION_TABS) {
+      expect(applicationFiltersSchema.safeParse({ tab }).success, tab).toBe(
+        true,
+      );
+    }
   });
 
   it("rejects an unknown sort so the query cannot be steered", () => {
@@ -103,37 +118,20 @@ describe("applicationFiltersSchema", () => {
       applicationFiltersSchema.safeParse({ sort: "salary_desc" }).success,
     ).toBe(false);
   });
-
-  it("rejects an unknown view", () => {
-    expect(applicationFiltersSchema.safeParse({ view: "kanban" }).success).toBe(
-      false,
-    );
-  });
 });
 
-describe("stage taxonomy", () => {
-  it("covers every stage exactly once across pipeline and closed", () => {
-    const covered = [...PIPELINE_STAGES, ...CLOSED_STAGES].sort();
-
-    expect(covered).toEqual([...APPLICATION_STAGES].sort());
-    expect(new Set(covered).size).toBe(APPLICATION_STAGES.length);
+describe("status taxonomy", () => {
+  it("is exactly the three statuses the update defines", () => {
+    expect(APPLICATION_STATUSES).toEqual(["PENDING", "ACCEPTED", "REJECTED"]);
   });
 
-  it("labels every stage", () => {
-    for (const stage of APPLICATION_STAGES) {
-      expect(applicationStageLabels[stage], stage).toBeTruthy();
+  it("labels every status", () => {
+    for (const status of APPLICATION_STATUSES) {
+      expect(applicationStatusLabels[status], status).toBeTruthy();
     }
   });
 
-  it("matches the seven stages named in the stage document", () => {
-    expect(APPLICATION_STAGES).toEqual([
-      "SAVED",
-      "PREPARING",
-      "APPLIED",
-      "INTERVIEW",
-      "OFFER",
-      "REJECTED",
-      "WITHDRAWN",
-    ]);
+  it("puts All first in the tab list", () => {
+    expect(APPLICATION_TABS[0]).toBe("ALL");
   });
 });

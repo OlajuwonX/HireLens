@@ -22,6 +22,13 @@
       "when": 1786279303268,
       "tag": "0002_useful_ironclad",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786304695164,
+      "tag": "0003_fine_trish_tilby",
+      "breakpoints": true
     }
   ]
 }
