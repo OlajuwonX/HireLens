@@ -1,9 +1,9 @@
 export { hashAnalysisInput } from "./hash-analysis-input";
 export { normalizeJsonModelOutput } from "./normalize-ai-response";
 export {
+  IMPROVED_RESUME_PROMPT_VERSION,
   JOB_FIT_ANALYSIS_PROMPT_VERSION,
-  RESUME_ANALYSIS_PROMPT_VERSION,
-  createGeneralAnalysisPrompt,
+  createImprovedResumePrompt,
   createJobSpecificAnalysisPrompt,
 } from "./prompts";
 export {
@@ -14,7 +14,7 @@ export { MockResumeAIProvider } from "./providers/mock-resume-ai-provider";
 export type {
   AIProviderName,
   AIProviderResult,
-  GeneralAnalysisInput,
+  ImprovedResumeInput,
   JobSpecificAnalysisInput,
   ResumeAIProvider,
   ResumeDocumentInput,

@@ -30,7 +30,9 @@ afterEach(() => {
 
 describe("migration safety check", () => {
   it("rejects a NOT NULL column added without a default", () => {
-    const result = runOn(`ALTER TABLE "users" ADD COLUMN "plan" text NOT NULL;`);
+    const result = runOn(
+      `ALTER TABLE "users" ADD COLUMN "plan" text NOT NULL;`,
+    );
 
     expect(result.code).toBe(1);
     expect(result.output).toContain("add-not-null-without-default");

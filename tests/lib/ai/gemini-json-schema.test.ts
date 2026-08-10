@@ -3,8 +3,7 @@ import {
   pruneToSupportedKeywords,
   toGeminiResponseSchema,
 } from "@/lib/ai/gemini-json-schema";
-import { jobFitAnalysisSchema } from "@/lib/ai/schemas/job-fit-analysis.schema";
-import { generalResumeAnalysisSchema } from "@/lib/ai/schemas/resume-analysis.schema";
+import { jobFitAnalysisSchema, storedJobFitAnalysisSchema } from "@/lib/ai/schemas/job-fit-analysis.schema";
 
 function collectKeys(value: unknown, found = new Set<string>()) {
   if (Array.isArray(value)) {
@@ -69,8 +68,8 @@ describe("pruneToSupportedKeywords", () => {
 });
 
 describe("toGeminiResponseSchema", () => {
-  it("emits only supported keywords for the general analysis schema", () => {
-    const keys = collectKeys(toGeminiResponseSchema(generalResumeAnalysisSchema));
+  it("emits only supported keywords for the stored analysis schema", () => {
+    const keys = collectKeys(toGeminiResponseSchema(storedJobFitAnalysisSchema));
 
     expect(keys.has("$schema")).toBe(false);
     expect(keys.has("minLength")).toBe(false);
@@ -84,7 +83,7 @@ describe("toGeminiResponseSchema", () => {
   });
 
   it("preserves the analysis shape the service depends on", () => {
-    const schema = toGeminiResponseSchema(generalResumeAnalysisSchema) as {
+    const schema = toGeminiResponseSchema(jobFitAnalysisSchema) as {
       type: string;
       required: string[];
       properties: Record<string, unknown>;
@@ -107,7 +106,7 @@ describe("toGeminiResponseSchema", () => {
   });
 
   it("preserves enum values on recommendation severity", () => {
-    const schema = toGeminiResponseSchema(generalResumeAnalysisSchema) as {
+    const schema = toGeminiResponseSchema(jobFitAnalysisSchema) as {
       properties: {
         recommendations: {
           items: { properties: { severity: { enum: string[] } } };

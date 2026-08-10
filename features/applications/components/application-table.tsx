@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import {
   Table,
   TableBody,
@@ -8,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { ApplicationRow } from "@/features/applications/server/application.repository";
+import { deleteApplicationAction } from "../actions/application-actions";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { StatusSelectForm } from "./status-select-form";
 
@@ -75,11 +77,20 @@ export function ApplicationTable({
                   <ApplicationStatusBadge status={row.application.status} />
                 </TableCell>
                 <TableCell>
-                  <StatusSelectForm
-                    publicId={row.application.publicId}
-                    status={row.application.status}
-                    selectId={`status-table-${row.application.publicId}`}
-                  />
+                  <div className="flex items-center gap-2">
+                    <StatusSelectForm
+                      publicId={row.application.publicId}
+                      status={row.application.status}
+                      selectId={`status-table-${row.application.publicId}`}
+                    />
+                    <DeleteConfirmButton
+                      action={deleteApplicationAction}
+                      publicId={row.application.publicId}
+                      title={`Delete ${row.job.title}?`}
+                      description="This will permanently delete this tracked application and its activity history. This action cannot be undone."
+                      confirmLabel="Delete application"
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -115,11 +126,20 @@ export function ApplicationTable({
               </div>
             </dl>
 
-            <StatusSelectForm
-              publicId={row.application.publicId}
-              status={row.application.status}
-              selectId={`status-card-${row.application.publicId}`}
-            />
+            <div className="flex items-center gap-2">
+              <StatusSelectForm
+                publicId={row.application.publicId}
+                status={row.application.status}
+                selectId={`status-card-${row.application.publicId}`}
+              />
+              <DeleteConfirmButton
+                action={deleteApplicationAction}
+                publicId={row.application.publicId}
+                title={`Delete ${row.job.title}?`}
+                description="This will permanently delete this tracked application and its activity history. This action cannot be undone."
+                confirmLabel="Delete application"
+              />
+            </div>
           </li>
         ))}
       </ul>

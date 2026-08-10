@@ -1,5 +1,6 @@
 "use server";
 
+import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/auth";
@@ -35,7 +36,7 @@ export async function signInWithCredentials(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? "Check your details and try again.",
+      message: firstIssueMessage(parsed.error, "Check your details and try again."),
     };
   }
 
@@ -68,7 +69,7 @@ export async function signUpWithCredentials(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? "Check your details and try again.",
+      message: firstIssueMessage(parsed.error, "Check your details and try again."),
     };
   }
 

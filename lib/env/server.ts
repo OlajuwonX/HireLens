@@ -80,7 +80,7 @@ const serverEnvSchema = z.object({
     .default("development"),
 
   GEMINI_API_KEY: optionalString,
-  GEMINI_MODEL: optionalStringWithDefault("gemini-2.5-flash"),
+  GEMINI_MODEL: optionalStringWithDefault("gemini-3.6-flash"),
 
   STORAGE_PROVIDER: z.enum(["backblaze"]).default("backblaze"),
   STORAGE_BUCKET: optionalString,

@@ -1,7 +1,5 @@
 import { z } from "zod";
-
-const blankToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
+import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 
 export const runJobFitSchema = z.object({
   jobPublicId: z.string().uuid(),

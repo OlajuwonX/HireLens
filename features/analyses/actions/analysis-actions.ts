@@ -7,6 +7,7 @@ import {
 import { findRequirementMatchForUser } from "@/features/analyses/server/requirement-match.repository";
 import { evidenceCorrectionSchema } from "@/features/analyses/schemas/analysis.schema";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { revalidatePath } from "next/cache";
 import type { AnalysisFormState } from "./analysis-form-state";
 
@@ -31,7 +32,7 @@ export async function saveEvidenceCorrectionAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? "Could not save that.",
+      message: firstIssueMessage(parsed.error, "Could not save that."),
     };
   }
 

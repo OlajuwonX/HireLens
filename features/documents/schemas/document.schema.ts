@@ -1,8 +1,6 @@
 import { z } from "zod";
+import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 import { DOCUMENT_TYPES } from "../constants";
-
-const blankToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
 
 export const documentPublicIdSchema = z.string().uuid();
 

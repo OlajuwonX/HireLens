@@ -1,34 +1,53 @@
 import type {
   AIProviderResult,
   ApplicationDocumentInput,
-  GeneralAnalysisInput,
+  ImprovedResumeInput,
   JobSpecificAnalysisInput,
   ResumeAIProvider,
 } from "../types";
 
 export class MockResumeAIProvider implements ResumeAIProvider {
-  async analyzeResume(_input: GeneralAnalysisInput): Promise<AIProviderResult> {
+  async generateImprovedResume(
+    input: ImprovedResumeInput,
+  ): Promise<AIProviderResult> {
     const startedAt = performance.now();
 
     return {
       provider: "mock",
-      model: "mock-resume-analysis",
+      model: "mock-improved-resume",
       durationMs: Math.round(performance.now() - startedAt),
       rawResponse: JSON.stringify({
-        overallScore: 72,
-        atsScore: 74,
-        summary: "Mock analysis generated without calling an external AI provider.",
-        strengths: ["Resume uploaded and stored successfully."],
-        weaknesses: ["No AI provider is configured in this environment."],
-        recommendations: [
+        fullName: "[verified full name]",
+        headline: input.jobTitle,
+        contact: {
+          email: "[verified email]",
+          phone: null,
+          location: null,
+          links: [],
+        },
+        summary: `Mock improved resume targeting ${input.jobTitle} at ${input.company}.`,
+        skills: [
           {
-            id: "mock-rec-1",
-            category: "Configuration",
-            severity: "MEDIUM",
-            problem: "This analysis did not come from a real model.",
-            reason: "No AI provider credentials are configured.",
-            action: "Set GEMINI_API_KEY to run a real analysis.",
+            category: "Core",
+            items: ["[verified skill]"],
           },
+        ],
+        experience: [
+          {
+            role: "[verified role]",
+            organisation: "[verified employer]",
+            location: null,
+            startDate: "[verified start]",
+            endDate: null,
+            bullets: [
+              "Delivered [verified outcome] against [verified scope].",
+            ],
+          },
+        ],
+        education: [],
+        certifications: [],
+        changeNotes: [
+          "No AI provider is configured, so this content is a placeholder.",
         ],
       }),
     };

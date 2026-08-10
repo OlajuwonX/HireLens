@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { DocumentActions } from "@/features/documents/components/document-actions";
 import { DocumentEditForm } from "@/features/documents/components/document-edit-form";
-import { documentTypeLabels } from "@/features/documents/constants";
+import { documentTypeLabels, type DOCUMENT_TYPES } from "@/features/documents/constants";
 import { getOwnedDocument } from "@/features/documents/server/document.service";
 
 export const metadata: Metadata = {
@@ -24,7 +25,15 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     notFound();
   }
 
-  const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
+  const {
+    document,
+    jobTitle,
+    jobCompany,
+    jobPublicId,
+    resumeTitle,
+    versionLabel,
+    versionPublicId,
+  } = row;
 
   return (
     <div className="space-y-6">
@@ -35,6 +44,16 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
             ? `${jobTitle} at ${jobCompany}`
             : "Editable generated document"
         }
+      />
+
+      <DocumentActions
+        publicId={document.publicId}
+        type={document.type as (typeof DOCUMENT_TYPES)[number]}
+        content={document.editedContent}
+        hasFile={Boolean(document.fileAssetId)}
+        jobPublicId={jobPublicId}
+        versionPublicId={versionPublicId}
+        applicationPublicId={null}
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">

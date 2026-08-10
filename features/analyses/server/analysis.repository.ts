@@ -202,6 +202,40 @@ export async function findAnalysisForUser(input: {
   return analysis ?? null;
 }
 
+export async function findAnalysisById(input: {
+  userId: string;
+  analysisId: string;
+}) {
+  const [analysis] = await db
+    .select()
+    .from(resumeAnalyses)
+    .where(
+      and(
+        eq(resumeAnalyses.userId, input.userId),
+        eq(resumeAnalyses.id, input.analysisId),
+      ),
+    )
+    .limit(1);
+
+  return analysis ?? null;
+}
+
+export async function listAnalysisSuggestions(input: {
+  userId: string;
+  analysisId: string;
+}) {
+  return db
+    .select()
+    .from(analysisSuggestions)
+    .where(
+      and(
+        eq(analysisSuggestions.userId, input.userId),
+        eq(analysisSuggestions.analysisId, input.analysisId),
+      ),
+    )
+    .orderBy(analysisSuggestions.createdAt);
+}
+
 export async function createAnalysisSuggestions(input: {
   userId: string;
   analysisId: string;
@@ -223,7 +257,11 @@ export async function createAnalysisSuggestions(input: {
       input.recommendations.map((recommendation) => ({
         userId: input.userId,
         analysisId: input.analysisId,
-        ...recommendation,
+        category: recommendation.category,
+        severity: recommendation.severity,
+        problem: recommendation.problem,
+        reason: recommendation.reason,
+        action: recommendation.action,
       })),
     )
     .returning();

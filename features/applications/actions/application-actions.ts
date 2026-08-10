@@ -11,6 +11,7 @@ import {
   updateApplicationSchema,
 } from "@/features/applications/schemas/application.schema";
 import {
+  analyzeOwnedApplication,
   changeApplicationStatus,
   deleteOwnedApplication,
   saveAndAnalyze,
@@ -145,4 +146,55 @@ export async function deleteApplicationAction(formData: FormData) {
   await deleteOwnedApplication({ userId: user.id, publicId: input.publicId });
   revalidatePath("/dashboard/jobs");
   redirect("/dashboard/jobs");
+}
+
+export async function analyzeApplicationAction(formData: FormData) {
+  const user = await requireDatabaseUser();
+  const input = applicationActionSchema.parse({
+    publicId: getString(formData, "publicId"),
+  });
+
+  const result = await analyzeOwnedApplication({
+    userId: user.id,
+    publicId: input.publicId,
+  });
+
+  if (!result.ok) {
+    throw new Error(result.message);
+  }
+
+  revalidatePath("/dashboard/jobs");
+  revalidatePath("/dashboard");
+  redirect(`/dashboard/jobs?open=${result.value.publicId}`);
+}
+
+export async function analyzeApplicationFormAction(
+  _state: ApplicationFormState,
+  formData: FormData,
+): Promise<ApplicationFormState> {
+  const user = await requireDatabaseUser();
+  const parsed = applicationActionSchema.safeParse({
+    publicId: getString(formData, "publicId"),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "That application could not be analysed.",
+      fieldErrors: {},
+    };
+  }
+
+  const result = await analyzeOwnedApplication({
+    userId: user.id,
+    publicId: parsed.data.publicId,
+  });
+
+  if (!result.ok) {
+    return { status: "error", message: result.message, fieldErrors: {} };
+  }
+
+  revalidatePath("/dashboard/jobs");
+  revalidatePath("/dashboard");
+  redirect(`/dashboard/jobs?open=${result.value.publicId}`);
 }

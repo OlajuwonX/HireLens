@@ -13,10 +13,6 @@ export type ResumeDocumentInput = {
   text: string | null;
 };
 
-export type GeneralAnalysisInput = {
-  resume: ResumeDocumentInput;
-};
-
 export type EvidenceCorrection = {
   requirement: string;
   markedIncorrect: boolean;
@@ -45,8 +41,17 @@ export type ApplicationDocumentInput = {
   notes: string | null;
 };
 
+export type ImprovedResumeInput = {
+  resume: ResumeDocumentInput;
+  jobTitle: string;
+  company: string;
+  jobDescription: string;
+  requirements: string | null;
+  notes: string | null;
+};
+
 export interface ResumeAIProvider {
-  analyzeResume(input: GeneralAnalysisInput): Promise<AIProviderResult>;
+  generateImprovedResume(input: ImprovedResumeInput): Promise<AIProviderResult>;
   analyzeResumeForJob(input: JobSpecificAnalysisInput): Promise<AIProviderResult>;
   generateApplicationDocument(
     input: ApplicationDocumentInput,

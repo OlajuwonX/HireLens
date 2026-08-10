@@ -1,5 +1,6 @@
 "use server";
 
+import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
@@ -38,7 +39,7 @@ export async function createResumeVersionAction(
     return {
       status: "error",
       message:
-        parsedFields.error.issues[0]?.message ?? "Check the form and try again.",
+        firstIssueMessage(parsedFields.error, "Check the form and try again."),
     };
   }
 
@@ -48,7 +49,7 @@ export async function createResumeVersionAction(
     return {
       status: "error",
       message:
-        parsedFile.error.issues[0]?.message ?? "Select a resume PDF to upload.",
+        firstIssueMessage(parsedFile.error, "Select a resume PDF to upload."),
     };
   }
 

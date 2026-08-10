@@ -2,19 +2,35 @@ import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { toGeminiResponseSchema } from "../gemini-json-schema";
 import { jobFitAnalysisSchema } from "../schemas/job-fit-analysis.schema";
-import { generalResumeAnalysisSchema } from "../schemas/resume-analysis.schema";
+import { improvedResumeSchema } from "../schemas/improved-resume.schema";
 import {
-  createGeneralAnalysisPrompt,
+  createImprovedResumePrompt,
   createJobSpecificAnalysisPrompt,
 } from "../prompts";
 import type {
   AIProviderResult,
   ApplicationDocumentInput,
-  GeneralAnalysisInput,
+  ImprovedResumeInput,
   JobSpecificAnalysisInput,
   ResumeAIProvider,
   ResumeDocumentInput,
 } from "../types";
+
+function describeEmptyResponse(response: {
+  candidates?: { finishReason?: unknown }[];
+  usageMetadata?: { thoughtsTokenCount?: number; candidatesTokenCount?: number };
+}) {
+  const finishReason = String(response.candidates?.[0]?.finishReason ?? "unknown");
+  const thoughts = response.usageMetadata?.thoughtsTokenCount ?? 0;
+  const output = response.usageMetadata?.candidatesTokenCount ?? 0;
+
+  return [
+    "The model returned no content",
+    `(finishReason=${finishReason},`,
+    `thinkingTokens=${thoughts},`,
+    `outputTokens=${output})`,
+  ].join(" ");
+}
 
 export type GeminiResumeAIProviderConfig = {
   apiKey: string;
@@ -28,12 +44,27 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
     this.client = new GoogleGenAI({ apiKey: config.apiKey });
   }
 
-  async analyzeResume(input: GeneralAnalysisInput): Promise<AIProviderResult> {
+  async generateImprovedResume(
+    input: ImprovedResumeInput,
+  ): Promise<AIProviderResult> {
     return this.analyze({
-      system: createGeneralAnalysisPrompt(),
+      system: createImprovedResumePrompt(),
       resume: input.resume,
-      instruction: "Produce a general audit of this resume.",
-      schema: generalResumeAnalysisSchema,
+      instruction: [
+        "Rewrite the attached resume for the following posting.",
+        "",
+        "<job_posting>",
+        `Title: ${input.jobTitle}`,
+        `Company: ${input.company}`,
+        "Description:",
+        input.jobDescription,
+        ...(input.requirements
+          ? ["Stated requirements:", input.requirements]
+          : []),
+        "</job_posting>",
+        ...(input.notes ? ["", `<notes>\n${input.notes}\n</notes>`] : []),
+      ].join("\n"),
+      schema: improvedResumeSchema,
     });
   }
 
@@ -109,7 +140,7 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
     const text = response.text;
 
     if (!text) {
-      throw new Error("The model returned no document content");
+      throw new Error(describeEmptyResponse(response));
     }
 
     return {
@@ -155,7 +186,7 @@ export class GeminiResumeAIProvider implements ResumeAIProvider {
     const text = response.text;
 
     if (!text) {
-      throw new Error("The model returned no analysis content");
+      throw new Error(describeEmptyResponse(response));
     }
 
     return {

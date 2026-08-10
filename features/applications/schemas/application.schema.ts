@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 import {
   APPLICATION_SORT_OPTIONS,
   APPLICATION_STATUSES,
@@ -9,9 +10,6 @@ import {
   salaryRangeIssue,
   salaryRangeIsOrdered,
 } from "@/features/jobs/schemas/job.schema";
-
-const blankToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
 
 const optionalDate = z.preprocess(blankToUndefined, z.coerce.date().optional());
 

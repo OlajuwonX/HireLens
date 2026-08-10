@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { AnalysisReport } from "@/features/analyses/components/analysis-report";
 import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
-import { listRequirementMatchesForAnalysis } from "@/features/analyses/server/requirement-match.repository";
+import { getAnalysisReport } from "@/features/analyses/server/analysis-report.service";
 import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
 import { documentTypeLabels } from "@/features/documents/constants";
+import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
 import {
   getApplicationTimeline,
   getOwnedApplication,
@@ -39,16 +41,15 @@ export async function SavedJobDrawer({
     return null;
   }
 
-  const [matches, activities, documents] = await Promise.all([
+  const [report, activities, documents] = await Promise.all([
     row.application.analysisId
-      ? listRequirementMatchesForAnalysis({
-          userId,
-          analysisId: row.application.analysisId,
-        })
-      : Promise.resolve([]),
+      ? getAnalysisReport({ userId, analysisId: row.application.analysisId })
+      : Promise.resolve(null),
     getApplicationTimeline({ userId, publicId }),
     listDocumentsForApplication({ userId, applicationId: row.application.id }),
   ]);
+
+  const matches = report?.matches ?? [];
 
   const overview = (
     <div className="space-y-6">
@@ -134,28 +135,39 @@ export async function SavedJobDrawer({
           </ol>
         </section>
       ) : null}
+
+      <ApplicationAiActions
+        jobPublicId={row.job.publicId}
+        applicationPublicId={row.application.publicId}
+        resumeVersionPublicId={row.versionPublicId}
+      />
     </div>
   );
 
   const analysis = row.analysisPublicId ? (
     <div className="space-y-6">
-      <div>
-        <p className="font-mono text-system font-medium uppercase text-text-muted">
-          Match score
-        </p>
-        <p className="mt-2 text-card-metric font-semibold text-text-primary tabular-nums">
-          {row.matchScore ?? "—"}
-          <span className="ml-1 text-meta font-normal text-text-muted">
-            / 100
-          </span>
-        </p>
-      </div>
+      <AnalysisReport
+        result={report?.result ?? null}
+        suggestions={report?.suggestions ?? []}
+      />
       <RequirementMatrix rows={matches} analysisPublicId={row.analysisPublicId} />
+      <ApplicationAiActions
+        jobPublicId={row.job.publicId}
+        applicationPublicId={row.application.publicId}
+        resumeVersionPublicId={row.versionPublicId}
+      />
     </div>
   ) : (
-    <p className="text-meta text-text-secondary">
-      No analysis is attached to this application yet.
-    </p>
+    <div className="space-y-5">
+      <p className="text-meta text-text-secondary">
+        No analysis is attached to this application yet.
+      </p>
+      <ApplicationAiActions
+        jobPublicId={row.job.publicId}
+        applicationPublicId={row.application.publicId}
+        resumeVersionPublicId={row.versionPublicId}
+      />
+    </div>
   );
 
   const documentsPanel =

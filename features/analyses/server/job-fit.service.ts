@@ -1,3 +1,4 @@
+import { aiFailureMessage, describeAiFailure } from "@/lib/ai/ai-failure";
 import "server-only";
 
 import {
@@ -251,27 +252,38 @@ export async function runJobFitAnalysis(input: {
       reused: false,
     };
   } catch (error) {
+    const failureReason = describeAiFailure(error);
+
+    console.error("Job fit analysis failed", {
+      userId: input.userId,
+      versionPublicId: input.versionPublicId,
+      jobPublicId: input.jobPublicId,
+      error: error instanceof Error ? error.name : "UnknownError",
+      message: failureReason,
+    });
+
     await failUsage({
       userId: input.userId,
       reservationId: reservation.reservationId,
       action: "JOB_ANALYSIS",
       inputHash,
-      failureReason:
-        error instanceof Error ? error.name : "Unknown analysis failure",
+      failureReason,
     });
 
     await markAnalysisFailed({
       analysisId: pending.id,
       userId: input.userId,
       durationMs: Math.round(performance.now() - startedAt),
-      failureReason:
-        error instanceof Error ? error.name : "Unknown analysis failure",
+      failureReason,
     });
 
     return {
       ok: false,
       error: "FAILED",
-      message: "The analysis could not be completed. Try again.",
+      message: aiFailureMessage(
+        error,
+        "The analysis could not be completed. Try again.",
+      ),
     };
   }
 }

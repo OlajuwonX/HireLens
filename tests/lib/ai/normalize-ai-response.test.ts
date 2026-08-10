@@ -1,27 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { normalizeJsonModelOutput } from "@/lib/ai/normalize-ai-response";
-import { generalResumeAnalysisSchema } from "@/lib/ai/schemas/resume-analysis.schema";
+import { jobFitAnalysisSchema } from "@/lib/ai/schemas/job-fit-analysis.schema";
+import { MockResumeAIProvider } from "@/lib/ai/providers/mock-resume-ai-provider";
 
 const schema = z.object({ value: z.string() });
 
-const validAnalysis = {
-  overallScore: 72,
-  atsScore: 68,
-  summary: "A solid resume with room to quantify impact.",
-  strengths: ["Clear structure"],
-  weaknesses: ["Few measurable outcomes"],
-  recommendations: [
-    {
-      id: "rec-1",
-      category: "Content",
-      severity: "HIGH",
-      problem: "Bullets describe duties rather than outcomes.",
-      reason: "Outcome-led bullets rank better with reviewers.",
-      action: "Rewrite each bullet to lead with a result.",
-    },
-  ],
-};
+async function mockAnalysis() {
+  const result = await new MockResumeAIProvider().analyzeResumeForJob({
+    resume: { pdfBase64: "", filename: "resume.pdf", text: null },
+    jobTitle: "Site Manager",
+    company: "Turner",
+    jobDescription: "Run the site.",
+    requirements: null,
+    priorCorrections: [],
+  });
+
+  return JSON.parse(String(result.rawResponse)) as Record<string, unknown>;
+}
 
 describe("normalizeJsonModelOutput", () => {
   it("parses a plain JSON string", () => {
@@ -61,21 +57,23 @@ describe("normalizeJsonModelOutput", () => {
     expect(() => normalizeJsonModelOutput('{"value":', schema)).toThrow();
   });
 
-  it("rejects output that does not match the analysis schema", () => {
+  it("rejects output that does not match the analysis schema", async () => {
+    const analysis = await mockAnalysis();
+
     expect(() =>
       normalizeJsonModelOutput(
-        JSON.stringify({ ...validAnalysis, overallScore: 140 }),
-        generalResumeAnalysisSchema,
+        JSON.stringify({ ...analysis, overallScore: 140 }),
+        jobFitAnalysisSchema,
       ),
     ).toThrow();
   });
 
-  it("accepts a well-formed analysis", () => {
+  it("accepts a well-formed analysis", async () => {
+    const analysis = await mockAnalysis();
+
     expect(
-      normalizeJsonModelOutput(
-        JSON.stringify(validAnalysis),
-        generalResumeAnalysisSchema,
-      ).overallScore,
-    ).toBe(72);
+      normalizeJsonModelOutput(JSON.stringify(analysis), jobFitAnalysisSchema)
+        .overallScore,
+    ).toBe(70);
   });
 });

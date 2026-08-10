@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { analysisRecommendationSchema } from "./resume-analysis.schema";
+
+export const analysisRecommendationSchema = z.object({
+  id: z.string().min(1),
+  category: z.string().min(1),
+  severity: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  problem: z.string().min(1),
+  reason: z.string().min(1),
+  action: z.string().min(1),
+});
 
 export const requirementMatchSchema = z.object({
   id: z.string().min(1),
@@ -65,3 +73,42 @@ export const jobFitAnalysisSchema = z.object({
 });
 
 export type JobFitAnalysis = z.infer<typeof jobFitAnalysisSchema>;
+
+const emptyKeywordGroups = {
+  skills: [],
+  tools: [],
+  responsibilities: [],
+  industryLanguage: [],
+  certifications: [],
+  experienceTerms: [],
+};
+
+export const storedJobFitAnalysisSchema = z.object({
+  overallScore: z.number().int().nullable().catch(null),
+  atsScore: z.number().int().nullable().catch(null),
+  jobFitScore: z.number().int().nullable().catch(null),
+  scoreExplanations: z
+    .object({
+      overall: scoreWithExplanationSchema,
+      ats: scoreWithExplanationSchema,
+      jobFit: scoreWithExplanationSchema,
+    })
+    .partial()
+    .catch({}),
+  summary: z.string().catch(""),
+  summaryRecommendation: z.string().catch(""),
+  missingRequirements: z.array(z.string()).catch([]),
+  keywordGroups: keywordGroupsSchema.catch(emptyKeywordGroups),
+  bulletIssues: z.array(bulletIssueSchema).catch([]),
+});
+
+export type StoredJobFitAnalysis = z.infer<typeof storedJobFitAnalysisSchema>;
+
+export const KEYWORD_GROUP_LABELS: Record<keyof typeof emptyKeywordGroups, string> = {
+  skills: "Skills",
+  tools: "Tools",
+  responsibilities: "Responsibilities",
+  industryLanguage: "Industry language",
+  certifications: "Certifications",
+  experienceTerms: "Experience terms",
+};

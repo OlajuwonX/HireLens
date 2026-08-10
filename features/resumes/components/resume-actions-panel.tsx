@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -40,12 +41,13 @@ export function ResumeActionsPanel({ resume }: { resume: Resume }) {
             Archive
           </Button>
         </form>
-        <form action={deleteResumeAction}>
-          <input type="hidden" name="publicId" value={resume.publicId} />
-          <Button type="submit" variant="danger">
-            Delete
-          </Button>
-        </form>
+        <DeleteConfirmButton
+          action={deleteResumeAction}
+          publicId={resume.publicId}
+          title={`Delete ${resume.title}?`}
+          description="This will permanently delete the resume record, versions, related files and analysis history. This action cannot be undone."
+          confirmLabel="Delete resume"
+        />
       </div>
     </div>
   );

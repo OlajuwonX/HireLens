@@ -1,5 +1,6 @@
 "use server";
 
+import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
@@ -8,6 +9,8 @@ import {
   updateDocumentSchema,
 } from "../schemas/document.schema";
 import {
+  addImprovedResumeToLibrary,
+  deleteOwnedDocument,
   generateOwnedDocument,
   updateOwnedDocument,
 } from "../server/document.service";
@@ -35,7 +38,7 @@ export async function generateDocumentAction(
     return {
       status: "error",
       message:
-        parsed.error.issues[0]?.message ?? "Check the form and try again.",
+        firstIssueMessage(parsed.error, "Check the form and try again."),
     };
   }
 
@@ -52,6 +55,10 @@ export async function generateDocumentAction(
   redirect(`/dashboard/documents/${result.document.publicId}`);
 }
 
+export async function quickGenerateDocumentAction(formData: FormData) {
+  await generateDocumentAction({ status: "idle", message: "" }, formData);
+}
+
 export async function updateDocumentAction(
   _state: DocumentFormState,
   formData: FormData,
@@ -66,7 +73,7 @@ export async function updateDocumentAction(
     return {
       status: "error",
       message:
-        parsed.error.issues[0]?.message ?? "Check the document and try again.",
+        firstIssueMessage(parsed.error, "Check the document and try again."),
     };
   }
 
@@ -83,4 +90,39 @@ export async function updateDocumentAction(
   revalidatePath(`/dashboard/documents/${parsed.data.publicId}`);
 
   return { status: "saved", message: "Document saved." };
+}
+
+export async function deleteDocumentAction(formData: FormData) {
+  const user = await requireDatabaseUser();
+  const publicId = getString(formData, "publicId");
+  const result = await deleteOwnedDocument({ userId: user.id, publicId });
+
+  if (!result.ok) {
+    return;
+  }
+
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/jobs");
+  redirect("/dashboard/documents");
+}
+
+export async function addImprovedResumeToLibraryAction(
+  _state: DocumentFormState,
+  formData: FormData,
+): Promise<DocumentFormState> {
+  const user = await requireDatabaseUser();
+  const publicId = getString(formData, "publicId");
+  const result = await addImprovedResumeToLibrary({ userId: user.id, publicId });
+
+  if (!result.ok) {
+    return { status: "error", message: result.message };
+  }
+
+  revalidatePath("/dashboard/resumes");
+  revalidatePath(`/dashboard/documents/${publicId}`);
+
+  return {
+    status: "saved",
+    message: `Added to your library as "${result.version.label}".`,
+  };
 }

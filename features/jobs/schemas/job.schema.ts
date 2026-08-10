@@ -1,13 +1,11 @@
 import { z } from "zod";
+import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 import {
   EMPLOYMENT_TYPES,
   JOB_SORT_OPTIONS,
   JOB_STATUSES,
   WORK_ARRANGEMENTS,
 } from "../constants";
-
-const blankToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
 
 const optionalText = (max: number) =>
   z.preprocess(blankToUndefined, z.string().trim().max(max).optional());

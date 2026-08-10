@@ -16,16 +16,22 @@ export type DocumentRow = {
   document: GeneratedDocument;
   jobTitle: string | null;
   jobCompany: string | null;
+  jobPublicId: string | null;
   resumeTitle: string | null;
+  resumeId: string | null;
   versionLabel: string | null;
+  versionPublicId: string | null;
 };
 
 const rowShape = {
   document: generatedDocuments,
   jobTitle: jobs.title,
   jobCompany: jobs.company,
+  jobPublicId: jobs.publicId,
   resumeTitle: resumes.title,
+  resumeId: resumes.id,
   versionLabel: resumeVersions.label,
+  versionPublicId: resumeVersions.publicId,
 };
 
 export async function listDocumentsForUser(userId: string): Promise<DocumentRow[]> {
@@ -89,6 +95,23 @@ export async function updateGeneratedDocumentForUser(input: {
   const [document] = await db
     .update(generatedDocuments)
     .set({ editedContent: input.editedContent, updatedAt: new Date() })
+    .where(
+      and(
+        eq(generatedDocuments.userId, input.userId),
+        eq(generatedDocuments.publicId, input.publicId),
+      ),
+    )
+    .returning();
+
+  return document ?? null;
+}
+
+export async function deleteGeneratedDocumentForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
+  const [document] = await db
+    .delete(generatedDocuments)
     .where(
       and(
         eq(generatedDocuments.userId, input.userId),

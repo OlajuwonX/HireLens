@@ -620,6 +620,7 @@ export type NewApplication = typeof applications.$inferInsert;
 export type ApplicationActivity = typeof applicationActivities.$inferSelect;
 export type ResumeAnalysis = typeof resumeAnalyses.$inferSelect;
 export type RequirementMatch = typeof requirementMatches.$inferSelect;
+export type AnalysisSuggestion = typeof analysisSuggestions.$inferSelect;
 export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
