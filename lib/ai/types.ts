@@ -41,4 +41,5 @@ export interface ApplicationIntelligenceProvider {
   analyzeApplication(
     input: ApplicationIntelligenceInput,
   ): Promise<AIProviderResult>;
+  extractJobPosting(input: { content: string }): Promise<AIProviderResult>;
 }

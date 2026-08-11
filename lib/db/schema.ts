@@ -92,6 +92,7 @@ export const documentType = pgEnum("document_type", [
 export const usageAction = pgEnum("usage_action", [
   "APPLICATION_ANALYSIS",
   "APPLICATION_REGENERATE",
+  "JOB_EXTRACTION",
   "GENERAL_ANALYSIS",
   "JOB_ANALYSIS",
   "COVER_LETTER",

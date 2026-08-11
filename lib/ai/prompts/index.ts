@@ -1,5 +1,9 @@
 export { BASE_SYSTEM_PROMPT } from "./base-system.prompt";
 export {
+  JOB_EXTRACTION_PROMPT,
+  JOB_EXTRACTION_PROMPT_VERSION,
+} from "./job-extraction.prompt";
+export {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   createApplicationIntelligencePrompt,
   formatEvidenceCorrections,

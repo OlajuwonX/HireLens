@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
 } from "@/features/jobs/constants";
 import { saveAndAnalyzeAction } from "@/features/applications/actions/application-actions";
 import { initialApplicationFormState } from "@/features/applications/actions/application-form-state";
+import { JobPasteDialog } from "./job-paste-dialog";
+import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
 
 export type VersionOption = {
   publicId: string;
@@ -84,6 +86,67 @@ export function SaveAndAnalyzeForm({
   const [arrangement, setArrangement] = useState("NOT_SPECIFIED");
   const [employment, setEmployment] = useState("NOT_SPECIFIED");
   const [deadline, setDeadline] = useState("");
+  const [imported, setImported] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const applyExtraction = useCallback((job: ExtractedJob) => {
+    const form = formRef.current;
+
+    if (!form) {
+      return;
+    }
+
+    const fill = (name: string, value: string | number | null) => {
+      const field = form.elements.namedItem(name);
+
+      if (
+        value === null ||
+        value === "" ||
+        !(
+          field instanceof HTMLInputElement ||
+          field instanceof HTMLTextAreaElement
+        ) ||
+        field.value.trim() !== ""
+      ) {
+        return;
+      }
+
+      field.value = String(value);
+    };
+
+    fill("title", job.title);
+    fill("company", job.company);
+    fill("location", job.location);
+    fill("salaryMin", job.salaryMin);
+    fill("salaryMax", job.salaryMax);
+    fill("currency", job.currency);
+    fill("source", job.source);
+    fill("sourceUrl", job.sourceUrl);
+    fill("description", job.description);
+    fill("requirements", job.requirements);
+
+    if (job.workArrangement) {
+      setArrangement((current) =>
+        current === "NOT_SPECIFIED" ? job.workArrangement! : current,
+      );
+    }
+
+    if (job.employmentType) {
+      setEmployment((current) =>
+        current === "NOT_SPECIFIED" ? job.employmentType! : current,
+      );
+    }
+
+    setImported(true);
+  }, []);
+
+  const clearImport = () => {
+    formRef.current?.reset();
+    setArrangement("NOT_SPECIFIED");
+    setEmployment("NOT_SPECIFIED");
+    setDeadline("");
+    setImported(false);
+  };
 
   if (versions.length === 0) {
     return (
@@ -99,9 +162,34 @@ export function SaveAndAnalyzeForm({
     versions[0].publicId;
 
   return (
-    <form action={formAction} className="mx-auto w-full max-w-reading space-y-8">
+    <form
+      ref={formRef}
+      action={formAction}
+      className="mx-auto w-full max-w-reading space-y-8"
+    >
       {state.status === "error" ? (
         <Alert tone="error">{state.message}</Alert>
+      ) : null}
+
+      <div className="flex flex-col gap-3 rounded-card border border-border bg-surface-secondary p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <p className="text-meta text-text-secondary">
+          Copied a posting already? Paste it once and HireLens fills the form.
+        </p>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <JobPasteDialog onExtracted={applyExtraction} />
+          {imported ? (
+            <Button type="button" variant="ghost" onClick={clearImport}>
+              Clear imported details
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      {imported ? (
+        <Alert tone="info">
+          Job details extracted. Review every field before saving. Anything we
+          could not detect has been left blank.
+        </Alert>
       ) : null}
 
       <section className="space-y-4">

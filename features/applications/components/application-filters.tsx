@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { DateRangePicker } from "@/components/ui/date-picker";
 import { Dropdown } from "@/components/ui/dropdown";
 import { DebouncedSearch } from "@/components/ui/debounced-search";
 import {
@@ -56,7 +57,7 @@ export function ApplicationFilters({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 lg:flex-nowrap">
         <Dropdown
           label="Sort saved jobs"
           className="sm:w-44"
@@ -81,6 +82,14 @@ export function ApplicationFilters({
             label: applicationTabLabels[tab],
             hint: `${tab === "ALL" ? totalCount : (counts[tab] ?? 0)} saved`,
           }))}
+        />
+
+        <DateRangePicker
+          className="col-span-2 sm:w-56"
+          placeholder="Any date added"
+          from={params.get("from") ?? ""}
+          to={params.get("to") ?? ""}
+          onChange={({ from, to }) => apply({ from, to })}
         />
       </div>
     </div>

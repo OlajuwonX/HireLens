@@ -3,8 +3,10 @@ import { toGeminiResponseSchema } from "../gemini-json-schema";
 import { applicationIntelligenceSchema } from "../schemas/application-intelligence.schema";
 import {
   BASE_SYSTEM_PROMPT,
+  JOB_EXTRACTION_PROMPT,
   createApplicationIntelligencePrompt,
 } from "../prompts";
+import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
@@ -63,6 +65,45 @@ export class GeminiApplicationIntelligenceProvider
 
   constructor(private readonly config: GeminiProviderConfig) {
     this.client = new GoogleGenAI({ apiKey: config.apiKey });
+  }
+
+  async extractJobPosting(input: {
+    content: string;
+  }): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+
+    const response = await this.client.models.generateContent({
+      model: this.config.model,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `<job_posting_document>\n${input.content}\n</job_posting_document>`,
+            },
+          ],
+        },
+      ],
+      config: {
+        systemInstruction: JOB_EXTRACTION_PROMPT,
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiResponseSchema(extractedJobSchema),
+      },
+    });
+
+    const durationMs = Math.round(performance.now() - startedAt);
+    const text = response.text;
+
+    if (!text) {
+      throw new Error(describeEmptyResponse(response));
+    }
+
+    return {
+      provider: "gemini",
+      model: this.config.model,
+      rawResponse: text,
+      durationMs,
+    };
   }
 
   async analyzeApplication(

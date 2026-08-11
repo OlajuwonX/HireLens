@@ -1,6 +1,17 @@
 import "server-only";
 
-import { and, asc, desc, eq, ilike, isNotNull, or, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNotNull,
+  lt,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   applicationActivities,
@@ -101,6 +112,17 @@ export async function listApplicationsForUser(input: {
     if (match) {
       conditions.push(match);
     }
+  }
+
+  if (input.filters.from) {
+    conditions.push(gte(applications.createdAt, new Date(input.filters.from)));
+  }
+
+  if (input.filters.to) {
+    const end = new Date(input.filters.to);
+
+    end.setDate(end.getDate() + 1);
+    conditions.push(lt(applications.createdAt, end));
   }
 
   if (input.filters.sort === "deadline_asc") {

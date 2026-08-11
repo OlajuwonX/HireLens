@@ -5,6 +5,7 @@ export const AI_RESERVATION_TTL_SECONDS = 180;
 export const AI_USAGE_ACTIONS = [
   "APPLICATION_ANALYSIS",
   "APPLICATION_REGENERATE",
+  "JOB_EXTRACTION",
 ] as const;
 
 export type AiUsageAction = (typeof AI_USAGE_ACTIONS)[number];
@@ -12,11 +13,13 @@ export type AiUsageAction = (typeof AI_USAGE_ACTIONS)[number];
 export const usageActionLabels: Record<AiUsageAction, string> = {
   APPLICATION_ANALYSIS: "Application analyses",
   APPLICATION_REGENERATE: "Regenerated analyses",
+  JOB_EXTRACTION: "Job posting imports",
 };
 
 export const AI_USAGE_DEFAULTS = {
   AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 3,
   AI_DAILY_REGENERATE_LIMIT: 1,
+  AI_DAILY_JOB_EXTRACTION_LIMIT: 10,
   AI_GLOBAL_DAILY_SAFETY_LIMIT: 18,
 } as const;
 
@@ -27,9 +30,15 @@ function readLimit(key: keyof typeof AI_USAGE_DEFAULTS) {
 }
 
 export function getDailyAllowance(action: AiUsageAction) {
-  return action === "APPLICATION_REGENERATE"
-    ? readLimit("AI_DAILY_REGENERATE_LIMIT")
-    : readLimit("AI_DAILY_APPLICATION_ANALYSIS_LIMIT");
+  if (action === "APPLICATION_REGENERATE") {
+    return readLimit("AI_DAILY_REGENERATE_LIMIT");
+  }
+
+  if (action === "JOB_EXTRACTION") {
+    return readLimit("AI_DAILY_JOB_EXTRACTION_LIMIT");
+  }
+
+  return readLimit("AI_DAILY_APPLICATION_ANALYSIS_LIMIT");
 }
 
 export function getGlobalDailySafetyLimit() {

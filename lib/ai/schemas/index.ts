@@ -20,3 +20,11 @@ export {
   type RequirementMatch,
 } from "./requirements.schema";
 export { scoringSchema, type Scoring } from "./scoring.schema";
+export {
+  extractedJobSchema,
+  jobExtractionInputSchema,
+  JOB_CONTENT_MAX_LENGTH,
+  JOB_CONTENT_MIN_LENGTH,
+  type ExtractedJob,
+  type JobExtractionInput,
+} from "./job-extraction.schema";

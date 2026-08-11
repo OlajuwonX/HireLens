@@ -35,6 +35,8 @@ export default async function SavedJobsPage({
     q: raw.q,
     tab: raw.tab ?? "PENDING",
     sort: raw.sort ?? "activity_desc",
+    from: raw.from,
+    to: raw.to,
   });
 
   const filters = parsed.success

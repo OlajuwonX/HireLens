@@ -7,6 +7,33 @@ import type {
 export class MockApplicationIntelligenceProvider
   implements ApplicationIntelligenceProvider
 {
+  async extractJobPosting(input: {
+    content: string;
+  }): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+    const firstLine = input.content.split(/\n/).find((line) => line.trim());
+
+    return {
+      provider: "mock",
+      model: "mock-job-extraction",
+      durationMs: Math.round(performance.now() - startedAt),
+      rawResponse: JSON.stringify({
+        title: firstLine?.trim() ?? null,
+        company: null,
+        location: null,
+        workArrangement: null,
+        employmentType: null,
+        salaryMin: null,
+        salaryMax: null,
+        currency: null,
+        source: null,
+        sourceUrl: null,
+        description: input.content,
+        requirements: null,
+      }),
+    };
+  }
+
   async analyzeApplication(
     input: ApplicationIntelligenceInput,
   ): Promise<AIProviderResult> {
@@ -94,7 +121,9 @@ export class MockApplicationIntelligenceProvider
               location: null,
               startDate: "[verified start]",
               endDate: "Present",
-              bullets: ["Delivered [verified outcome] against [verified scope]."],
+              bullets: [
+                "Delivered [verified outcome] against [verified scope].",
+              ],
             },
           ],
           projects: [],

@@ -23,6 +23,7 @@ import {
 } from "@/features/jobs/constants";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
+import { ReanalyzeButton } from "./reanalyze-button";
 import { StatusSelectForm } from "./status-select-form";
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -73,12 +74,19 @@ export async function SavedJobDrawer({
 
   const overview = (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <ApplicationStatusBadge status={row.application.status} />
-        <StatusSelectForm
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <ApplicationStatusBadge status={row.application.status} />
+          <StatusSelectForm
+            publicId={row.application.publicId}
+            status={row.application.status}
+            selectId={`status-drawer-${row.application.publicId}`}
+          />
+        </div>
+
+        <ReanalyzeButton
           publicId={row.application.publicId}
-          status={row.application.status}
-          selectId={`status-drawer-${row.application.publicId}`}
+          hasAnalysis={Boolean(result)}
         />
       </div>
 
