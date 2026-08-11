@@ -36,6 +36,7 @@ export function JobPasteDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
+  const [html, setHtml] = useState("");
   const [clipboardBlocked, setClipboardBlocked] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -65,6 +66,38 @@ export function JobPasteDialog({
     }
   }, [state, onExtracted]);
 
+  useEffect(() => {
+    function onDocumentPaste(event: ClipboardEvent) {
+      if (open) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const text = event.clipboardData?.getData("text/plain") ?? "";
+
+      if (text.trim().length < 50) {
+        return;
+      }
+
+      event.preventDefault();
+      setContent(text);
+      setHtml(event.clipboardData?.getData("text/html") ?? "");
+      setOpen(true);
+    }
+
+    document.addEventListener("paste", onDocumentPaste);
+    return () => document.removeEventListener("paste", onDocumentPaste);
+  }, [open]);
+
   async function pasteFromClipboard() {
     try {
       const text = await navigator.clipboard.readText();
@@ -77,6 +110,7 @@ export function JobPasteDialog({
       }
 
       setContent(text);
+      setHtml("");
       setClipboardBlocked(false);
     } catch {
       setClipboardBlocked(true);
@@ -128,6 +162,8 @@ export function JobPasteDialog({
             </p>
           ) : null}
 
+          <input type="hidden" name="html" value={html} />
+
           <div className="space-y-1.5">
             <Label htmlFor="job-posting-content">Job posting</Label>
             <Textarea
@@ -137,6 +173,13 @@ export function JobPasteDialog({
               rows={10}
               value={content}
               onChange={(event) => setContent(event.target.value)}
+              onPaste={(event) => {
+                const rich = event.clipboardData.getData("text/html");
+
+                if (rich) {
+                  setHtml(rich);
+                }
+              }}
               placeholder="Paste the full job listing here..."
               aria-describedby="job-posting-hint"
               className="min-h-44"

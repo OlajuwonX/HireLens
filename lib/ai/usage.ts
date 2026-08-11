@@ -19,7 +19,7 @@ export const usageActionLabels: Record<AiUsageAction, string> = {
 export const AI_USAGE_DEFAULTS = {
   AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 3,
   AI_DAILY_REGENERATE_LIMIT: 1,
-  AI_DAILY_JOB_EXTRACTION_LIMIT: 10,
+  AI_DAILY_JOB_EXTRACTION_LIMIT: 3,
   AI_GLOBAL_DAILY_SAFETY_LIMIT: 18,
 } as const;
 

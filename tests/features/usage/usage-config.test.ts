@@ -37,7 +37,7 @@ describe("daily allowances", () => {
   it("defaults to three analyses and one regenerate a day", () => {
     expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(3);
     expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(1);
-    expect(getDailyAllowance("JOB_EXTRACTION")).toBe(10);
+    expect(getDailyAllowance("JOB_EXTRACTION")).toBe(3);
   });
 
   it("defaults the global safety limit below a twenty-request provider cap", () => {

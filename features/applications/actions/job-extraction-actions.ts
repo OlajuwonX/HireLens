@@ -10,10 +10,12 @@ export async function extractJobPostingAction(
 ): Promise<JobExtractionState> {
   const user = await requireDatabaseUser();
   const raw = formData.get("content");
+  const html = formData.get("html");
 
   const result = await extractJobPosting({
     userId: user.id,
     content: typeof raw === "string" ? raw : "",
+    html: typeof html === "string" ? html : null,
   });
 
   if (!result.ok) {
@@ -22,7 +24,10 @@ export async function extractJobPostingAction(
 
   return {
     status: "extracted",
-    message: "Job details extracted. Review them before saving.",
+    message:
+      result.method === "PARSED"
+        ? "Job details read from the posting. Review them before saving."
+        : "Job details extracted. Review them before saving.",
     job: result.job,
   };
 }

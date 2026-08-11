@@ -73,16 +73,11 @@ async function countCompletedToday(input: { userId: string; action: AiUsageActio
   return row?.value ?? 0;
 }
 
-async function countAllCompletedToday(userId: string) {
+async function countEveryUserCompletedToday() {
   const [row] = await db
     .select({ value: count() })
     .from(aiUsageEvents)
-    .where(
-      and(
-        eq(aiUsageEvents.userId, userId),
-        gte(aiUsageEvents.createdAt, startOfUtcDay()),
-      ),
-    );
+    .where(gte(aiUsageEvents.createdAt, startOfUtcDay()));
 
   return row?.value ?? 0;
 }
@@ -158,14 +153,14 @@ export async function checkAllowance(input: {
     };
   }
 
-  const globalUsed = await countAllCompletedToday(input.userId);
+  const globalUsed = await countEveryUserCompletedToday();
 
   if (globalUsed >= getGlobalDailySafetyLimit()) {
     return {
       ok: false,
       reason: "GLOBAL_LIMIT",
       message:
-        "HireLens has used its daily AI safety budget. Try again tomorrow.",
+        "HireLens has used its shared daily AI budget. Try again tomorrow.",
       resetAt: nextUtcDay(),
     };
   }

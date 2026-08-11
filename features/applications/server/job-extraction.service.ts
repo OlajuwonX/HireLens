@@ -10,6 +10,8 @@ import {
   type ExtractedJob,
 } from "@/lib/ai/schemas/job-extraction.schema";
 import type { ApplicationIntelligenceProvider } from "@/lib/ai/types";
+import { clipboardHtmlToText } from "@/lib/jobs/clipboard-html";
+import { parseJobPosting } from "@/lib/jobs/parse-job-posting";
 import {
   completeUsage,
   failUsage,
@@ -17,12 +19,29 @@ import {
 } from "@/features/usage/server/ai-usage.service";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 
+export type ExtractionMethod = "PARSED" | "ASSISTED";
+
 export type JobExtractionResult =
-  | { ok: true; job: ExtractedJob }
+  | { ok: true; job: ExtractedJob; method: ExtractionMethod }
   | { ok: false; message: string };
 
-function trimOrNull(value: string | null, max: number) {
-  if (value === null) {
+const EMPTY_JOB: ExtractedJob = {
+  title: null,
+  company: null,
+  location: null,
+  workArrangement: null,
+  employmentType: null,
+  salaryMin: null,
+  salaryMax: null,
+  currency: null,
+  source: null,
+  sourceUrl: null,
+  description: null,
+  requirements: null,
+};
+
+function trimOrNull(value: string | null | undefined, max: number) {
+  if (!value) {
     return null;
   }
 
@@ -31,7 +50,7 @@ function trimOrNull(value: string | null, max: number) {
   return trimmed ? trimmed.slice(0, max) : null;
 }
 
-function safeUrl(value: string | null) {
+function safeUrl(value: string | null | undefined) {
   const trimmed = trimOrNull(value, 2048);
 
   if (!trimmed) {
@@ -49,20 +68,20 @@ function safeUrl(value: string | null) {
   }
 }
 
-function sanitize(job: ExtractedJob): ExtractedJob {
+function sanitize(job: Partial<ExtractedJob>): ExtractedJob {
   const salaryMin = job.salaryMin ?? null;
   const salaryMax = job.salaryMax ?? null;
-  const ordered =
+  const inverted =
     salaryMin !== null && salaryMax !== null && salaryMin > salaryMax;
 
   return {
     title: trimOrNull(job.title, 200),
     company: trimOrNull(job.company, 200),
     location: trimOrNull(job.location, 200),
-    workArrangement: job.workArrangement,
-    employmentType: job.employmentType,
-    salaryMin: ordered ? salaryMax : salaryMin,
-    salaryMax: ordered ? salaryMin : salaryMax,
+    workArrangement: job.workArrangement ?? null,
+    employmentType: job.employmentType ?? null,
+    salaryMin: inverted ? salaryMax : salaryMin,
+    salaryMax: inverted ? salaryMin : salaryMax,
     currency: trimOrNull(job.currency, 8),
     source: trimOrNull(job.source, 120),
     sourceUrl: safeUrl(job.sourceUrl),
@@ -71,22 +90,55 @@ function sanitize(job: ExtractedJob): ExtractedJob {
   };
 }
 
+function preferParsed(parsed: ExtractedJob, assisted: ExtractedJob) {
+  return sanitize({
+    title: parsed.title ?? assisted.title,
+    company: parsed.company ?? assisted.company,
+    location: parsed.location ?? assisted.location,
+    workArrangement: parsed.workArrangement ?? assisted.workArrangement,
+    employmentType: parsed.employmentType ?? assisted.employmentType,
+    salaryMin: parsed.salaryMin ?? assisted.salaryMin,
+    salaryMax: parsed.salaryMax ?? assisted.salaryMax,
+    currency: parsed.currency ?? assisted.currency,
+    source: parsed.source ?? assisted.source,
+    sourceUrl: parsed.sourceUrl ?? assisted.sourceUrl,
+    description: assisted.description ?? parsed.description,
+    requirements: assisted.requirements ?? parsed.requirements,
+  });
+}
+
 export async function extractJobPosting(input: {
   userId: string;
   content: string;
+  html?: string | null;
   provider?: ApplicationIntelligenceProvider;
 }): Promise<JobExtractionResult> {
-  const normalized = normalizePastedText(input.content);
-  const parsed = jobExtractionInputSchema.safeParse({ content: normalized });
+  const fromHtml = input.html ? clipboardHtmlToText(input.html) : "";
+  const normalized = normalizePastedText(
+    fromHtml.length > input.content.length ? fromHtml : input.content,
+  );
+  const parsedInput = jobExtractionInputSchema.safeParse({
+    content: normalized,
+  });
 
-  if (!parsed.success) {
+  if (!parsedInput.success) {
     return {
       ok: false,
       message: firstIssueMessage(
-        parsed.error,
+        parsedInput.error,
         "Paste the job posting and try again.",
       ),
     };
+  }
+
+  const { job: rules, missing } = parseJobPosting({
+    text: parsedInput.data.content,
+    html: input.html ?? null,
+  });
+  const parsed = sanitize(rules);
+
+  if (missing.length === 0) {
+    return { ok: true, job: parsed, method: "PARSED" };
   }
 
   const reservation = await reserveUsage({
@@ -95,16 +147,20 @@ export async function extractJobPosting(input: {
   });
 
   if (!reservation.ok) {
+    if (parsed.title || parsed.description) {
+      return { ok: true, job: parsed, method: "PARSED" };
+    }
+
     return { ok: false, message: reservation.message };
   }
 
   try {
     const provider = input.provider ?? getApplicationIntelligenceProvider();
     const result = await provider.extractJobPosting({
-      content: parsed.data.content,
+      content: parsedInput.data.content,
     });
 
-    const job = sanitize(
+    const assisted = sanitize(
       normalizeJsonModelOutput(result.rawResponse, extractedJobSchema),
     );
 
@@ -116,6 +172,8 @@ export async function extractJobPosting(input: {
       model: result.model,
     });
 
+    const job = preferParsed(parsed, assisted);
+
     if (!job.title && !job.company && !job.description) {
       return {
         ok: false,
@@ -124,13 +182,13 @@ export async function extractJobPosting(input: {
       };
     }
 
-    return { ok: true, job };
+    return { ok: true, job, method: "ASSISTED" };
   } catch (error) {
     const failureReason = describeAiFailure(error);
 
     console.error("Job extraction failed", {
       userId: input.userId,
-      contentLength: parsed.data.content.length,
+      contentLength: parsedInput.data.content.length,
       failureReason,
     });
 
@@ -141,6 +199,10 @@ export async function extractJobPosting(input: {
       failureReason,
     });
 
+    if (parsed.title || parsed.description) {
+      return { ok: true, job: parsed, method: "PARSED" };
+    }
+
     return {
       ok: false,
       message: aiFailureMessage(
@@ -150,3 +212,5 @@ export async function extractJobPosting(input: {
     };
   }
 }
+
+export const EMPTY_EXTRACTED_JOB = EMPTY_JOB;
