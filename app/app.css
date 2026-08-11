@@ -188,3 +188,12 @@
 @utility no-scrollbar {
   scrollbar-width: none;
 }
+
+@layer base {
+  html:has([data-app-shell]),
+  body:has([data-app-shell]) {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}

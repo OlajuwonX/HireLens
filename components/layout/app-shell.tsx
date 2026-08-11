@@ -34,7 +34,7 @@ export function AppShell({
   const title = pageTitle ?? titleFromPathname(pathname);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div data-app-shell className="flex h-dvh overflow-hidden bg-background">
       <DashboardSidebar
         footer={sidebarFooter}
         mobileOpen={mobileOpen}

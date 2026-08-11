@@ -1,13 +1,4 @@
-import {
-  FileText,
-  ListChecks,
-  Mail,
-  MessageSquare,
-  Search,
-  Sparkles,
-  UserRound,
-} from "lucide-react";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { KeywordGapPanel } from "@/features/analyses/components/keyword-gap-panel";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
 import {
@@ -22,19 +13,6 @@ import { AiDocumentModal, PlainTextPanel } from "./ai-document-modal";
 import { BulletRewritePanel } from "./bullet-rewrite-panel";
 import { ImprovedResumePanel } from "./improved-resume-panel";
 
-const icons: Record<
-  AiView,
-  ComponentType<{ className?: string; "aria-hidden"?: boolean }>
-> = {
-  RECOMMENDATIONS: ListChecks,
-  KEYWORD_ANALYSIS: Search,
-  IMPROVED_RESUME: Sparkles,
-  BULLET_REWRITE: FileText,
-  PROFESSIONAL_SUMMARY: UserRound,
-  COVER_LETTER: FileText,
-  APPLICATION_EMAIL: Mail,
-  FOLLOW_UP_MESSAGE: MessageSquare,
-};
 
 function panelFor(
   view: AiView,
@@ -69,7 +47,6 @@ function AiResultCard({
     <AiDocumentModal
       title={aiViewLabels[view]}
       content={viewToPlainText(result, view)}
-      icon={icons[view]}
       disabled={!viewIsPopulated(result, view)}
       applicationPublicId={applicationPublicId}
       view={view}

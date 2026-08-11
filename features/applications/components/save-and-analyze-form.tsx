@@ -238,9 +238,8 @@ export function SaveAndAnalyzeForm({
             id="description"
             name="description"
             required
-            rows={12}
+            rows={10}
             maxLength={50_000}
-            className="min-h-64"
           />
         </Field>
 
@@ -248,9 +247,8 @@ export function SaveAndAnalyzeForm({
           <Textarea
             id="requirements"
             name="requirements"
-            rows={8}
+            rows={6}
             maxLength={20_000}
-            className="min-h-40"
           />
         </Field>
 

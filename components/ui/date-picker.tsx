@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Button } from "./button";
-import { CalendarDays, X } from "lucide-react";
-import { Calendar, type CalendarSelection } from "./calendar";
 import { formatDisplayDate, formatRangeLabel } from "@/lib/date/calendar";
 import { cn } from "@/lib/utils";
+import { CalendarDays, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "./button";
+import { Calendar, type CalendarSelection } from "./calendar";
 
 function useDismiss(open: boolean, close: () => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,7 +43,41 @@ const triggerClass =
   "flex h-10 w-full items-center justify-between gap-2 rounded-control border border-border bg-surface px-3 text-meta text-text-primary transition-colors hover:border-border-strong focus-visible:border-accent-hover disabled:cursor-not-allowed disabled:opacity-50";
 
 const popoverClass =
-  "absolute left-0 z-50 mt-1 w-max rounded-card border border-border bg-surface p-3 shadow-lg max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:top-auto max-sm:mt-0 max-sm:w-auto";
+  "absolute z-50 mt-1 w-max rounded-card border border-border bg-surface p-3 shadow-lg max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:top-auto max-sm:mt-0 max-sm:w-auto";
+
+function useEdgeAlignment(open: boolean) {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [align, setAlign] = useState<"left" | "right">("left");
+
+  useEffect(() => {
+    if (!open || !anchorRef.current) {
+      return;
+    }
+
+    function measure() {
+      const anchor = anchorRef.current;
+
+      if (!anchor || window.innerWidth < 640) {
+        return;
+      }
+
+      const rect = anchor.getBoundingClientRect();
+      const estimatedWidth = 328;
+      const overflowsRight =
+        rect.left + estimatedWidth > window.innerWidth - 12;
+      const fitsWhenRightAligned = rect.right - estimatedWidth > 12;
+
+      setAlign(overflowsRight && fitsWhenRightAligned ? "right" : "left");
+    }
+
+    measure();
+    window.addEventListener("resize", measure);
+
+    return () => window.removeEventListener("resize", measure);
+  }, [open]);
+
+  return { anchorRef, align };
+}
 
 export function DatePicker({
   value,
@@ -66,9 +100,11 @@ export function DatePicker({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useDismiss(open, () => setOpen(false));
+  const { anchorRef, align } = useEdgeAlignment(open);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
+      <div ref={anchorRef} className="absolute inset-x-0 top-0" aria-hidden />
       {name ? <input type="hidden" name={name} value={value} /> : null}
 
       <button
@@ -109,7 +145,11 @@ export function DatePicker({
       </button>
 
       {open ? (
-        <div role="dialog" aria-label="Choose a date" className={popoverClass}>
+        <div
+          role="dialog"
+          aria-label="Choose a date"
+          className={cn(popoverClass, align === "right" ? "right-0" : "left-0")}
+        >
           <Calendar
             mode="single"
             minIso={minIso}
@@ -146,6 +186,7 @@ export function DateRangePicker({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState({ from, to });
   const ref = useDismiss(open, () => setOpen(false));
+  const { anchorRef, align } = useEdgeAlignment(open);
   const label = formatRangeLabel(from || null, to || null);
 
   useEffect(() => {
@@ -156,6 +197,7 @@ export function DateRangePicker({
 
   return (
     <div ref={ref} className={cn("relative", className)}>
+      <div ref={anchorRef} className="absolute inset-x-0 top-0" aria-hidden />
       {fromName ? <input type="hidden" name={fromName} value={from} /> : null}
       {toName ? <input type="hidden" name={toName} value={to} /> : null}
 
@@ -198,7 +240,7 @@ export function DateRangePicker({
         <div
           role="dialog"
           aria-label="Choose a date range"
-          className={popoverClass}
+          className={cn(popoverClass, align === "right" ? "right-0" : "left-0")}
         >
           <Calendar
             mode="range"

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState, type ComponentType, type ReactNode } from "react";
-import { Check, Copy, Download } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Download,
+  FileText,
+  ListChecks,
+  Mail,
+  MessageSquare,
+  Search,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +23,20 @@ import {
 import { notify } from "@/components/ui/toast";
 import type { AiView } from "@/features/analyses/server/analysis.mapper";
 import { SaveDocumentButton } from "./save-document-button";
+
+const icons: Record<
+  AiView,
+  ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+> = {
+  RECOMMENDATIONS: ListChecks,
+  KEYWORD_ANALYSIS: Search,
+  IMPROVED_RESUME: Sparkles,
+  BULLET_REWRITE: FileText,
+  PROFESSIONAL_SUMMARY: UserRound,
+  COVER_LETTER: FileText,
+  APPLICATION_EMAIL: Mail,
+  FOLLOW_UP_MESSAGE: MessageSquare,
+};
 
 export function CopyContentButton({
   content,
@@ -64,7 +89,6 @@ export function PlainTextPanel({ content }: { content: string }) {
 export function AiDocumentModal({
   title,
   content,
-  icon: Icon,
   disabled,
   applicationPublicId,
   view,
@@ -73,13 +97,13 @@ export function AiDocumentModal({
 }: {
   title: string;
   content: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   disabled: boolean;
   applicationPublicId: string;
   view: AiView;
   savedDocumentId: string | null;
   children: ReactNode;
 }) {
+  const Icon = icons[view];
   const downloadHref =
     view === "IMPROVED_RESUME" && savedDocumentId
       ? `/dashboard/documents/${savedDocumentId}/download`

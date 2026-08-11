@@ -66,9 +66,9 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
         inLibrary={inLibrary}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <Card>
-          <CardContent className="p-5">
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
+        <Card className="min-w-0">
+          <CardContent className="p-4 sm:p-5">
             <DocumentEditForm
               publicId={document.publicId}
               content={document.editedContent}
@@ -76,11 +76,11 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="flex max-h-[calc(100vh-8rem)] flex-col overflow-hidden lg:sticky lg:top-0">
+          <CardHeader className="shrink-0">
             <CardTitle>Source</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-meta text-text-secondary">
+          <CardContent className="hl-scroll min-h-0 flex-1 space-y-3 overflow-y-auto text-meta text-text-secondary">
             <p>
               <span className="font-medium text-text-primary">Job: </span>
               {jobTitle && jobCompany ? `${jobTitle} at ${jobCompany}` : "None"}
