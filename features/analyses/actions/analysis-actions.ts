@@ -1,14 +1,15 @@
 "use server";
 
-import {
-  deleteEvidenceCorrection,
-  upsertEvidenceCorrection,
-} from "@/features/analyses/server/evidence-correction.repository";
-import { findRequirementMatchForUser } from "@/features/analyses/server/requirement-match.repository";
-import { evidenceCorrectionSchema } from "@/features/analyses/schemas/analysis.schema";
+import { revalidatePath } from "next/cache";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
-import { revalidatePath } from "next/cache";
+import { evidenceCorrectionSchema } from "../schemas/analysis.schema";
+import {
+  deleteEvidenceCorrection,
+  findAnalysisById,
+  upsertEvidenceCorrection,
+} from "../server/analysis.repository";
+import { readStoredIntelligence } from "../server/analysis.mapper";
 import type { AnalysisFormState } from "./analysis-form-state";
 
 function getString(formData: FormData, key: string) {
@@ -22,8 +23,8 @@ export async function saveEvidenceCorrectionAction(
 ): Promise<AnalysisFormState> {
   const user = await requireDatabaseUser();
   const parsed = evidenceCorrectionSchema.safeParse({
-    matchId: getString(formData, "matchId"),
-    analysisPublicId: getString(formData, "analysisPublicId"),
+    analysisId: getString(formData, "analysisId"),
+    requirementKey: getString(formData, "requirementKey"),
     markedIncorrect: formData.get("markedIncorrect") === "on",
     evidence: formData.get("evidence"),
     notes: formData.get("notes"),
@@ -36,10 +37,19 @@ export async function saveEvidenceCorrectionAction(
     };
   }
 
-  const match = await findRequirementMatchForUser({
+  const analysis = await findAnalysisById({
     userId: user.id,
-    matchId: parsed.data.matchId,
+    analysisId: parsed.data.analysisId,
   });
+
+  if (!analysis) {
+    return { status: "error", message: "That analysis could not be found." };
+  }
+
+  const result = readStoredIntelligence(analysis);
+  const match = result?.requirementMatches.find(
+    (candidate) => candidate.key === parsed.data.requirementKey,
+  );
 
   if (!match) {
     return { status: "error", message: "That requirement could not be found." };
@@ -51,12 +61,15 @@ export async function saveEvidenceCorrectionAction(
   if (isEmpty) {
     await deleteEvidenceCorrection({
       userId: user.id,
-      requirementMatchId: match.id,
+      analysisId: analysis.id,
+      requirementKey: match.key,
     });
   } else {
     await upsertEvidenceCorrection({
       userId: user.id,
-      requirementMatchId: match.id,
+      analysisId: analysis.id,
+      requirementKey: match.key,
+      requirement: match.requirement,
       markedIncorrect: parsed.data.markedIncorrect,
       evidence: parsed.data.evidence ?? null,
       notes: parsed.data.notes ?? null,

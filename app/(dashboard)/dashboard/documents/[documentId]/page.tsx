@@ -29,10 +29,8 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     document,
     jobTitle,
     jobCompany,
-    jobPublicId,
     resumeTitle,
     versionLabel,
-    versionPublicId,
   } = row;
 
   return (
@@ -51,9 +49,6 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
         type={document.type as (typeof DOCUMENT_TYPES)[number]}
         content={document.editedContent}
         hasFile={Boolean(document.fileAssetId)}
-        jobPublicId={jobPublicId}
-        versionPublicId={versionPublicId}
-        applicationPublicId={null}
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">

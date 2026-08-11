@@ -1,16 +1,7 @@
 import "server-only";
 
-import { normalizeJsonModelOutput } from "@/lib/ai";
-import { getResumeAIProvider } from "@/lib/ai/provider";
-import {
-  improvedResumeSchema,
-  type ImprovedResume,
-} from "@/lib/ai/schemas/improved-resume.schema";
+import type { ImprovedResume } from "@/lib/ai/schemas/improved-resume.schema";
 import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
-import {
-  improvedResumeFilename,
-  improvedResumeToText,
-} from "../improved-resume-format";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { StorageProvider } from "@/lib/storage";
 import {
@@ -19,15 +10,12 @@ import {
   markFileAssetDeleted,
 } from "@/features/files/server/file-asset.repository";
 import { createResumeVersionWithFileAsset } from "@/features/resumes/server/resume-version.repository";
-import type { Job, ResumeVersion } from "@/lib/db/schema";
+import {
+  improvedResumeFilename,
+  improvedResumeVersionLabel,
+} from "../improved-resume-format";
 
-export type ImprovedResumeArtifact = {
-  resume: ImprovedResume;
-  content: string;
-  fileAssetId: string;
-  provider: string;
-  model: string;
-};
+export { improvedResumeFilename, improvedResumeVersionLabel };
 
 export async function storeImprovedResumePdf(input: {
   userId: string;
@@ -36,8 +24,7 @@ export async function storeImprovedResumePdf(input: {
   storageProvider?: StorageProvider;
 }) {
   const storage = input.storageProvider ?? getStorageProvider();
-  const buffer = new Uint8Array(input.bytes);
-  const file = new File([buffer], input.filename, {
+  const file = new File([new Uint8Array(input.bytes)], input.filename, {
     type: "application/pdf",
   });
 
@@ -51,49 +38,21 @@ export async function storeImprovedResumePdf(input: {
   return { stored, storage };
 }
 
-export async function buildImprovedResume(input: {
+export async function buildImprovedResumePdf(input: {
   userId: string;
-  job: Job;
-  version: ResumeVersion;
-  notes: string | null;
+  resume: ImprovedResume;
+  jobTitle: string | null;
   storageProvider?: StorageProvider;
-}): Promise<ImprovedResumeArtifact> {
-  const fileAsset = await findFileAssetById({
-    userId: input.userId,
-    id: input.version.fileAssetId,
-  });
-
-  if (!fileAsset || fileAsset.deletedAt) {
-    throw new Error("The source resume file is unavailable");
-  }
-
-  const storage = input.storageProvider ?? getStorageProvider();
-  const sourcePdf = await storage.readFile(fileAsset.storageKey);
-
-  const providerResult = await getResumeAIProvider().generateImprovedResume({
-    resume: {
-      pdfBase64: Buffer.from(sourcePdf).toString("base64"),
-      filename: fileAsset.originalFilename ?? "resume.pdf",
-      text: input.version.extractedText,
-    },
-    jobTitle: input.job.title,
-    company: input.job.company,
-    jobDescription: input.job.description,
-    requirements: input.job.requirements,
-    notes: input.notes,
-  });
-
-  const resume = normalizeJsonModelOutput(
-    providerResult.rawResponse,
-    improvedResumeSchema,
-  );
-
-  const pdfBytes = await renderImprovedResumePdf(resume);
+}) {
+  const bytes = await renderImprovedResumePdf(input.resume);
   const { stored } = await storeImprovedResumePdf({
     userId: input.userId,
-    bytes: pdfBytes,
-    filename: improvedResumeFilename(resume.fullName, input.job.title),
-    storageProvider: storage,
+    bytes,
+    filename: improvedResumeFilename(
+      input.resume.header.name,
+      input.jobTitle ?? input.resume.header.headline,
+    ),
+    storageProvider: input.storageProvider,
   });
 
   const asset = await createFileAsset({
@@ -106,13 +65,7 @@ export async function buildImprovedResume(input: {
     sizeBytes: stored.sizeBytes,
   });
 
-  return {
-    resume,
-    content: improvedResumeToText(resume),
-    fileAssetId: asset.id,
-    provider: providerResult.provider,
-    model: providerResult.model,
-  };
+  return asset.id;
 }
 
 export async function createImprovedResumeReadUrl(input: {

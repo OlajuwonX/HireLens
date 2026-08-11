@@ -13,47 +13,32 @@ export type ResumeDocumentInput = {
   text: string | null;
 };
 
-export type EvidenceCorrection = {
-  requirement: string;
-  markedIncorrect: boolean;
-  evidence: string | null;
-  notes: string | null;
+export type JobPostingInput = {
+  title: string;
+  company: string;
+  location: string | null;
+  workArrangement: string;
+  employmentType: string;
+  deadline: string | null;
+  source: string | null;
+  sourceUrl: string | null;
+  description: string;
+  requirements: string | null;
 };
 
-export type JobSpecificAnalysisInput = {
+export type ApplicationIntelligenceInput = {
   resume: ResumeDocumentInput;
-  jobTitle: string;
-  company: string;
-  jobDescription: string;
-  requirements: string | null;
-  priorCorrections: EvidenceCorrection[];
+  job: JobPostingInput;
+  priorCorrections: {
+    requirement: string;
+    markedIncorrect: boolean;
+    evidence: string | null;
+    notes: string | null;
+  }[];
 };
 
-export type ApplicationDocumentInput = {
-  documentType: string;
-  jobTitle: string;
-  company: string;
-  jobDescription: string;
-  requirements: string | null;
-  resumeLabel: string | null;
-  resumeText: string | null;
-  applicationStatus: string | null;
-  notes: string | null;
-};
-
-export type ImprovedResumeInput = {
-  resume: ResumeDocumentInput;
-  jobTitle: string;
-  company: string;
-  jobDescription: string;
-  requirements: string | null;
-  notes: string | null;
-};
-
-export interface ResumeAIProvider {
-  generateImprovedResume(input: ImprovedResumeInput): Promise<AIProviderResult>;
-  analyzeResumeForJob(input: JobSpecificAnalysisInput): Promise<AIProviderResult>;
-  generateApplicationDocument(
-    input: ApplicationDocumentInput,
+export interface ApplicationIntelligenceProvider {
+  analyzeApplication(
+    input: ApplicationIntelligenceInput,
   ): Promise<AIProviderResult>;
 }

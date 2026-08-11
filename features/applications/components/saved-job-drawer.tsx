@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { AnalysisReport } from "@/features/analyses/components/analysis-report";
 import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
-import { getAnalysisReport } from "@/features/analyses/server/analysis-report.service";
+import { RecommendationList } from "@/features/analyses/components/recommendation-list";
+import { ScorePanel } from "@/features/analyses/components/score-panel";
+import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
 import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
 import { documentTypeLabels } from "@/features/documents/constants";
 import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
@@ -42,14 +43,12 @@ export async function SavedJobDrawer({
   }
 
   const [report, activities, documents] = await Promise.all([
-    row.application.analysisId
-      ? getAnalysisReport({ userId, analysisId: row.application.analysisId })
-      : Promise.resolve(null),
+    getApplicationAnalysis({ userId, applicationId: row.application.id }),
     getApplicationTimeline({ userId, publicId }),
     listDocumentsForApplication({ userId, applicationId: row.application.id }),
   ]);
 
-  const matches = report?.matches ?? [];
+  const result = report?.result ?? null;
 
   const overview = (
     <div className="space-y-6">
@@ -137,24 +136,31 @@ export async function SavedJobDrawer({
       ) : null}
 
       <ApplicationAiActions
-        jobPublicId={row.job.publicId}
         applicationPublicId={row.application.publicId}
-        resumeVersionPublicId={row.versionPublicId}
+        result={result}
       />
     </div>
   );
 
-  const analysis = row.analysisPublicId ? (
+  const analysis = result ? (
     <div className="space-y-6">
-      <AnalysisReport
-        result={report?.result ?? null}
-        suggestions={report?.suggestions ?? []}
+      <ScorePanel scoring={result.scoring} />
+
+      <section className="space-y-3">
+        <h3 className="text-section-title font-semibold text-text-primary">
+          Recommendations
+        </h3>
+        <RecommendationList items={result.recommendations} />
+      </section>
+
+      <RequirementMatrix
+        rows={report?.requirements ?? []}
+        analysisId={report?.analysis.id ?? ""}
       />
-      <RequirementMatrix rows={matches} analysisPublicId={row.analysisPublicId} />
+
       <ApplicationAiActions
-        jobPublicId={row.job.publicId}
         applicationPublicId={row.application.publicId}
-        resumeVersionPublicId={row.versionPublicId}
+        result={result}
       />
     </div>
   ) : (
@@ -163,9 +169,8 @@ export async function SavedJobDrawer({
         No analysis is attached to this application yet.
       </p>
       <ApplicationAiActions
-        jobPublicId={row.job.publicId}
         applicationPublicId={row.application.publicId}
-        resumeVersionPublicId={row.versionPublicId}
+        result={null}
       />
     </div>
   );

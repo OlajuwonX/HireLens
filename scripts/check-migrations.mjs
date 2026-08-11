@@ -66,7 +66,11 @@ function acknowledgementsOf(sql) {
   const found = new Map();
 
   for (const match of sql.matchAll(ACK)) {
-    found.set(match[1].toLowerCase(), (match[2] ?? "").trim());
+    const rule = match[1].toLowerCase();
+    const reasons = found.get(rule) ?? [];
+
+    reasons.push((match[2] ?? "").trim());
+    found.set(rule, reasons);
   }
 
   return found;
@@ -91,7 +95,10 @@ for (const file of files) {
         continue;
       }
 
-      const reason = acknowledgements.get(rule.id);
+      const reasons = acknowledgements.get(rule.id);
+      const reason = reasons
+        ? (reasons.length > 1 ? reasons.shift() : reasons[0])
+        : undefined;
       const entry = {
         file,
         rule: rule.id,

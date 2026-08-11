@@ -1,18 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { normalizeJsonModelOutput } from "@/lib/ai/normalize-ai-response";
-import { jobFitAnalysisSchema } from "@/lib/ai/schemas/job-fit-analysis.schema";
-import { MockResumeAIProvider } from "@/lib/ai/providers/mock-resume-ai-provider";
+import { normalizeJsonModelOutput } from "@/lib/ai/normalize";
+import { applicationIntelligenceSchema } from "@/lib/ai/schemas/application-intelligence.schema";
+import { MockApplicationIntelligenceProvider } from "@/lib/ai/providers/mock-application-intelligence-provider";
 
 const schema = z.object({ value: z.string() });
 
 async function mockAnalysis() {
-  const result = await new MockResumeAIProvider().analyzeResumeForJob({
+  const result = await new MockApplicationIntelligenceProvider().analyzeApplication({
     resume: { pdfBase64: "", filename: "resume.pdf", text: null },
-    jobTitle: "Site Manager",
-    company: "Turner",
-    jobDescription: "Run the site.",
-    requirements: null,
+    job: {
+      title: "Site Manager",
+      company: "Turner",
+      location: null,
+      workArrangement: "On site",
+      employmentType: "Full time",
+      deadline: null,
+      source: null,
+      sourceUrl: null,
+      description: "Run the site.",
+      requirements: null,
+    },
     priorCorrections: [],
   });
 
@@ -62,8 +70,11 @@ describe("normalizeJsonModelOutput", () => {
 
     expect(() =>
       normalizeJsonModelOutput(
-        JSON.stringify({ ...analysis, overallScore: 140 }),
-        jobFitAnalysisSchema,
+        JSON.stringify({
+          ...analysis,
+          scoring: { ...(analysis.scoring as object), overallScore: 140 },
+        }),
+        applicationIntelligenceSchema,
       ),
     ).toThrow();
   });
@@ -72,8 +83,8 @@ describe("normalizeJsonModelOutput", () => {
     const analysis = await mockAnalysis();
 
     expect(
-      normalizeJsonModelOutput(JSON.stringify(analysis), jobFitAnalysisSchema)
-        .overallScore,
+      normalizeJsonModelOutput(JSON.stringify(analysis), applicationIntelligenceSchema)
+        .scoring.overallScore,
     ).toBe(70);
   });
 });

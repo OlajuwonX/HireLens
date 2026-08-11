@@ -1,165 +1,157 @@
- "use client";
-
-import type { ComponentType } from "react";
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
-import { FileText, Mail, MessageSquare, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { analyzeApplicationFormAction } from "@/features/applications/actions/application-actions";
-import { initialApplicationFormState } from "@/features/applications/actions/application-form-state";
-import { generateDocumentAction } from "../actions/document-actions";
-import { initialDocumentFormState } from "../actions/document-form-state";
-import { DOCUMENT_TYPES, documentTypeLabels } from "../constants";
+import { KeywordGapPanel } from "@/features/analyses/components/keyword-gap-panel";
+import { RecommendationList } from "@/features/analyses/components/recommendation-list";
+import {
+  AI_VIEWS,
+  aiViewLabels,
+  viewIsPopulated,
+  viewToPlainText,
+  type AiView,
+} from "@/features/analyses/server/analysis.mapper";
+import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
+import {
+  FileDown,
+  FileText,
+  ListChecks,
+  Mail,
+  MessageSquare,
+  Search,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import type { ComponentType, ReactNode } from "react";
+import { AiDocumentModal, PlainTextPanel } from "./ai-document-modal";
+import { BulletRewritePanel } from "./bullet-rewrite-panel";
+import { ImprovedResumePanel } from "./improved-resume-panel";
+import { SaveDocumentButton } from "./save-document-button";
 
-type DocumentType = (typeof DOCUMENT_TYPES)[number];
+const icons: Record<
+  AiView,
+  ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+> = {
+  RECOMMENDATIONS: ListChecks,
+  KEYWORD_ANALYSIS: Search,
+  IMPROVED_RESUME: Sparkles,
+  BULLET_REWRITE: FileText,
+  PROFESSIONAL_SUMMARY: UserRound,
+  COVER_LETTER: FileText,
+  APPLICATION_EMAIL: Mail,
+  FOLLOW_UP_MESSAGE: MessageSquare,
+};
 
-const actions: {
-  type: DocumentType;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  helper: string;
-}[] = [
-  {
-    type: "IMPROVED_RESUME",
-    icon: Sparkles,
-    helper: "Rewrite resume content against this job.",
-  },
-  {
-    type: "COVER_LETTER",
-    icon: FileText,
-    helper: "Create a focused cover letter.",
-  },
-  {
-    type: "APPLICATION_EMAIL",
-    icon: Mail,
-    helper: "Draft a concise application email.",
-  },
-  {
-    type: "PROFESSIONAL_SUMMARY",
-    icon: FileText,
-    helper: "Write a summary aimed at this role.",
-  },
-  {
-    type: "KEYWORD_ANALYSIS",
-    icon: Search,
-    helper: "Find missing keywords and fit gaps.",
-  },
-  {
-    type: "BULLET_REWRITE",
-    icon: Sparkles,
-    helper: "Improve resume bullets for this role.",
-  },
-  {
-    type: "FOLLOW_UP_MESSAGE",
-    icon: MessageSquare,
-    helper: "Draft a follow-up message.",
-  },
-];
+const descriptions: Record<AiView, string> = {
+  RECOMMENDATIONS: "What to change on this resume for this role.",
+  KEYWORD_ANALYSIS:
+    "Which posting keywords your resume proves, and which it does not.",
+  IMPROVED_RESUME:
+    "A rewritten resume built only from evidence already on yours.",
+  BULLET_REWRITE: "Weak bullets rewritten without changing the facts.",
+  PROFESSIONAL_SUMMARY: "A summary aimed at this posting.",
+  COVER_LETTER: "A cover letter drawn from your verified experience.",
+  APPLICATION_EMAIL: "A short application email with a subject line.",
+  FOLLOW_UP_MESSAGE: "A follow-up you can send after applying.",
+};
 
-function AnalyzeButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" size="primary" block disabled={pending}>
-      <Search className="size-4" aria-hidden />
-      {pending ? "Analyzing..." : "Analyze match"}
-    </Button>
-  );
-}
-
-function GenerateButton({
-  icon: Icon,
-  type,
-  helper,
-}: {
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  type: DocumentType;
-  helper: string;
-}) {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button
-      type="submit"
-      variant="outline"
-      size="row"
-      align="start"
-      block
-      disabled={pending}
-      className="h-auto min-h-12 items-start py-2"
-    >
-      <Icon className="mt-0.5 size-4" aria-hidden />
-      <span className="min-w-0">
-        <span className="block text-meta font-semibold">
-          {documentTypeLabels[type]}
-        </span>
-        <span className="block text-label font-normal text-text-secondary">
-          {pending ? "Generating..." : helper}
-        </span>
-      </span>
-    </Button>
-  );
+function panelFor(
+  view: AiView,
+  result: StoredApplicationIntelligence,
+): ReactNode {
+  switch (view) {
+    case "RECOMMENDATIONS":
+      return <RecommendationList items={result.recommendations} />;
+    case "KEYWORD_ANALYSIS":
+      return <KeywordGapPanel analysis={result.keywordAnalysis} />;
+    case "IMPROVED_RESUME":
+      return <ImprovedResumePanel resume={result.improvedResume} />;
+    case "BULLET_REWRITE":
+      return <BulletRewritePanel items={result.bulletRewrites} />;
+    default:
+      return <PlainTextPanel content={viewToPlainText(result, view)} />;
+  }
 }
 
 export function ApplicationAiActions({
-  jobPublicId,
   applicationPublicId,
-  resumeVersionPublicId,
+  result,
 }: {
-  jobPublicId: string;
   applicationPublicId: string;
-  resumeVersionPublicId: string | null;
+  result: StoredApplicationIntelligence | null;
 }) {
-  const [analysisState, analysisAction] = useActionState(
-    analyzeApplicationFormAction,
-    initialApplicationFormState,
-  );
-  const [documentState, documentAction] = useActionState(
-    generateDocumentAction,
-    initialDocumentFormState,
-  );
+  if (!result) {
+    return (
+      <section className="space-y-2 border-t border-border pt-5">
+        <h3 className="text-section-title font-semibold text-text-primary">
+          AI results
+        </h3>
+        <p className="text-meta text-text-secondary">
+          Run the analysis to unlock every AI result for this application.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-3 border-t border-border pt-5">
       <div>
         <h3 className="text-section-title font-semibold text-text-primary">
-          Analyze and generate
+          AI results
         </h3>
         <p className="text-meta text-text-secondary">
-          Run AI actions using this job, application and attached resume context.
+          Everything below came from the single analysis already run for this
+          application. Opening any of these costs no AI usage.
         </p>
       </div>
 
-      {analysisState.status === "error" ? (
-        <p className="text-meta text-danger">{analysisState.message}</p>
-      ) : null}
-      {documentState.status === "error" ? (
-        <p className="text-meta text-danger">{documentState.message}</p>
-      ) : null}
-
-      <form action={analysisAction}>
-        <input type="hidden" name="publicId" value={applicationPublicId} />
-        <AnalyzeButton />
-      </form>
-
       <div className="grid gap-2 sm:grid-cols-2">
-        {actions.map(({ type, icon: Icon, helper }) => (
-          <form key={type} action={documentAction}>
-            <input type="hidden" name="type" value={type} />
-            <input type="hidden" name="jobPublicId" value={jobPublicId} />
-            <input
-              type="hidden"
-              name="applicationPublicId"
-              value={applicationPublicId}
-            />
-            <input
-              type="hidden"
-              name="resumeVersionPublicId"
-              value={resumeVersionPublicId ?? ""}
-            />
-            <GenerateButton icon={Icon} type={type} helper={helper} />
-          </form>
-        ))}
+        {AI_VIEWS.map((view) => {
+          const Icon = icons[view];
+          const populated = viewIsPopulated(result, view);
+          const content = viewToPlainText(result, view);
+
+          return (
+            <AiDocumentModal
+              key={view}
+              title={aiViewLabels[view]}
+              description={descriptions[view]}
+              content={content}
+              footer={
+                <SaveDocumentButton
+                  applicationPublicId={applicationPublicId}
+                  view={view}
+                />
+              }
+              trigger={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="row"
+                  align="start"
+                  block
+                  disabled={!populated}
+                  className="h-auto min-h-12 items-start py-2"
+                >
+                  <Icon className="mt-0.5 size-4" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block text-meta font-semibold">
+                      {aiViewLabels[view]}
+                    </span>
+                    <span className="block text-label font-normal text-text-secondary">
+                      {populated ? descriptions[view] : "Not returned"}
+                    </span>
+                  </span>
+                </Button>
+              }
+            >
+              {panelFor(view, result)}
+            </AiDocumentModal>
+          );
+        })}
       </div>
+
+      <p className="flex items-center gap-1.5 text-label text-text-muted">
+        <FileDown className="size-3.5" aria-hidden />
+        Save any result to AI Documents to edit, download or keep it.
+      </p>
     </section>
   );
 }

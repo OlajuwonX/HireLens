@@ -55,6 +55,15 @@ const optionalStringWithDefault = (fallback: string) =>
     z.string().min(1).default(fallback),
   );
 
+const optionalIntWithDefault = (fallback: number) =>
+  z.preprocess(
+    (value) =>
+      typeof value === "string"
+        ? blankAsUndefined(stripWrappingQuotes(value.trim()))
+        : blankAsUndefined(value),
+    z.coerce.number().int().positive().default(fallback),
+  );
+
 const optionalBooleanWithDefault = (fallback: boolean) =>
   z.preprocess((value) => {
     if (typeof value !== "string") {
@@ -80,7 +89,11 @@ const serverEnvSchema = z.object({
     .default("development"),
 
   GEMINI_API_KEY: optionalString,
-  GEMINI_MODEL: optionalStringWithDefault("gemini-3.6-flash"),
+  GEMINI_MODEL: optionalStringWithDefault("gemini-3.5-flash-lite"),
+
+  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: optionalIntWithDefault(3),
+  AI_DAILY_REGENERATE_LIMIT: optionalIntWithDefault(1),
+  AI_GLOBAL_DAILY_SAFETY_LIMIT: optionalIntWithDefault(18),
 
   STORAGE_PROVIDER: z.enum(["backblaze"]).default("backblaze"),
   STORAGE_BUCKET: optionalString,

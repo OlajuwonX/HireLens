@@ -1,17 +1,18 @@
 "use server";
 
+import {
+  AI_VIEWS,
+  type AiView,
+} from "@/features/analyses/server/analysis.mapper";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import {
-  generateDocumentSchema,
-  updateDocumentSchema,
-} from "../schemas/document.schema";
+import { updateDocumentSchema } from "../schemas/document.schema";
 import {
   addImprovedResumeToLibrary,
   deleteOwnedDocument,
-  generateOwnedDocument,
+  saveApplicationView,
   updateOwnedDocument,
 } from "../server/document.service";
 import type { DocumentFormState } from "./document-form-state";
@@ -21,30 +22,27 @@ function getString(formData: FormData, key: string) {
   return typeof value === "string" ? value : "";
 }
 
-export async function generateDocumentAction(
+function readView(formData: FormData): AiView | null {
+  const raw = getString(formData, "view");
+
+  return AI_VIEWS.includes(raw as AiView) ? (raw as AiView) : null;
+}
+
+export async function saveAnalysisViewAction(
   _state: DocumentFormState,
   formData: FormData,
 ): Promise<DocumentFormState> {
   const user = await requireDatabaseUser();
-  const parsed = generateDocumentSchema.safeParse({
-    type: getString(formData, "type"),
-    jobPublicId: getString(formData, "jobPublicId"),
-    resumeVersionPublicId: formData.get("resumeVersionPublicId"),
-    applicationPublicId: formData.get("applicationPublicId"),
-    notes: formData.get("notes"),
-  });
+  const view = readView(formData);
 
-  if (!parsed.success) {
-    return {
-      status: "error",
-      message:
-        firstIssueMessage(parsed.error, "Check the form and try again."),
-    };
+  if (!view) {
+    return { status: "error", message: "That AI result is not recognised." };
   }
 
-  const result = await generateOwnedDocument({
+  const result = await saveApplicationView({
     userId: user.id,
-    values: parsed.data,
+    applicationPublicId: getString(formData, "applicationPublicId"),
+    view,
   });
 
   if (!result.ok) {
@@ -52,11 +50,9 @@ export async function generateDocumentAction(
   }
 
   revalidatePath("/dashboard/documents");
-  redirect(`/dashboard/documents/${result.document.publicId}`);
-}
+  revalidatePath("/dashboard/jobs");
 
-export async function quickGenerateDocumentAction(formData: FormData) {
-  await generateDocumentAction({ status: "idle", message: "" }, formData);
+  return { status: "saved", message: "Saved to AI Documents." };
 }
 
 export async function updateDocumentAction(
@@ -72,8 +68,10 @@ export async function updateDocumentAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message:
-        firstIssueMessage(parsed.error, "Check the document and try again."),
+      message: firstIssueMessage(
+        parsed.error,
+        "Check the document and try again.",
+      ),
     };
   }
 
@@ -112,7 +110,10 @@ export async function addImprovedResumeToLibraryAction(
 ): Promise<DocumentFormState> {
   const user = await requireDatabaseUser();
   const publicId = getString(formData, "publicId");
-  const result = await addImprovedResumeToLibrary({ userId: user.id, publicId });
+  const result = await addImprovedResumeToLibrary({
+    userId: user.id,
+    publicId,
+  });
 
   if (!result.ok) {
     return { status: "error", message: result.message };

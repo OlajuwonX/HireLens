@@ -1,26 +1,24 @@
 import "server-only";
 
-import { hashAnalysisInput, IMPROVED_RESUME_PROMPT_VERSION } from "@/lib/ai";
-import { getResumeAIProvider } from "@/lib/ai/provider";
+import { describeAiFailure } from "@/lib/ai/errors";
+import {
+  findAnalysisById,
+  findAnalysisForApplication,
+} from "@/features/analyses/server/analysis.repository";
+import {
+  readStoredIntelligence,
+  viewToPlainText,
+  type AiView,
+} from "@/features/analyses/server/analysis.mapper";
 import { getOwnedApplication } from "@/features/applications/server/application.service";
-import { getOwnedJob } from "@/features/jobs/server/job.service";
-import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
+import type { UpdateDocumentInput } from "../schemas/document.schema";
+import { documentTypeForView } from "../constants";
 import {
-  completeUsage,
-  failUsage,
-  reserveUsage,
-} from "@/features/usage/server/ai-usage.service";
-import type { UsageAction } from "@/lib/db/schema";
-import { aiFailureMessage, describeAiFailure } from "@/lib/ai/ai-failure";
-import {
-  buildImprovedResume,
+  buildImprovedResumePdf,
   copyImprovedResumeToVersion,
-  createImprovedResumeReadUrl,
+  improvedResumeVersionLabel,
   removeImprovedResumeFile,
 } from "./improved-resume.service";
-import { improvedResumeVersionLabel } from "../improved-resume-format";
-import type { GenerateDocumentInput, UpdateDocumentInput } from "../schemas/document.schema";
-import { documentTypeLabels } from "../constants";
 import {
   createGeneratedDocument,
   deleteGeneratedDocumentForUser,
@@ -30,21 +28,14 @@ import {
   updateGeneratedDocumentForUser,
 } from "./document.repository";
 
-const documentUsageAction: Record<GenerateDocumentInput["type"], UsageAction> = {
-  IMPROVED_RESUME: "IMPROVED_RESUME",
-  COVER_LETTER: "COVER_LETTER",
-  APPLICATION_EMAIL: "APPLICATION_MESSAGE",
-  PROFESSIONAL_SUMMARY: "PROFESSIONAL_SUMMARY",
-  KEYWORD_ANALYSIS: "KEYWORD_ANALYSIS",
-  BULLET_REWRITE: "BULLET_REWRITE",
-  FOLLOW_UP_MESSAGE: "FOLLOW_UP_MESSAGE",
-};
-
 export async function getDocumentBoard(userId: string) {
   return listDocumentsForUser(userId);
 }
 
-export async function getOwnedDocument(input: { userId: string; publicId: string }) {
+export async function getOwnedDocument(input: {
+  userId: string;
+  publicId: string;
+}) {
   return findDocumentRowForUser(input);
 }
 
@@ -52,152 +43,112 @@ export async function getDocumentApplicationOptions(userId: string) {
   return listDocumentApplicationOptions(userId);
 }
 
-export async function generateOwnedDocument(input: {
+export async function saveAnalysisView(input: {
   userId: string;
-  values: GenerateDocumentInput;
+  analysisId: string;
+  view: AiView;
+  jobTitle: string | null;
 }) {
-  const job = await getOwnedJob({
+  const analysis = await findAnalysisById({
     userId: input.userId,
-    publicId: input.values.jobPublicId,
+    analysisId: input.analysisId,
   });
 
-  if (!job) {
-    return { ok: false as const, message: "That job could not be found." };
+  if (!analysis) {
+    return { ok: false as const, message: "That analysis could not be found." };
   }
 
-  const version = input.values.resumeVersionPublicId
-    ? await getOwnedResumeVersion({
-        userId: input.userId,
-        versionPublicId: input.values.resumeVersionPublicId,
-      })
-    : null;
+  const result = readStoredIntelligence(analysis);
 
-  if (input.values.resumeVersionPublicId && !version) {
-    return { ok: false as const, message: "That resume version could not be found." };
-  }
-
-  const application = input.values.applicationPublicId
-    ? await getOwnedApplication({
-        userId: input.userId,
-        publicId: input.values.applicationPublicId,
-      })
-    : null;
-
-  if (input.values.applicationPublicId && !application) {
-    return { ok: false as const, message: "That application could not be found." };
-  }
-
-  const isImprovedResume = input.values.type === "IMPROVED_RESUME";
-
-  if (isImprovedResume && !version) {
+  if (!result) {
     return {
       ok: false as const,
-      message: "Attach a resume version before rewriting it for this job.",
+      message: "That analysis has no stored result to save.",
     };
   }
 
-  const action = documentUsageAction[input.values.type];
-  const promptVersion = isImprovedResume
-    ? IMPROVED_RESUME_PROMPT_VERSION
-    : "application-document-v1";
-  const inputHash = await hashAnalysisInput({
-    aiAction: action,
-    promptVersion,
-    documentType: input.values.type,
-    jobId: job.id,
-    jobUpdatedAt: job.updatedAt.toISOString(),
-    resumeVersionId: version?.id ?? null,
-    applicationId: application?.application.id ?? null,
-    notes: input.values.notes ?? null,
-  });
-  const reservation = await reserveUsage({ userId: input.userId, action });
+  const content = viewToPlainText(result, input.view).trim();
 
-  if (!reservation.ok) {
-    return { ok: false as const, message: reservation.message };
+  if (!content) {
+    return {
+      ok: false as const,
+      message: "There is nothing stored for that section.",
+    };
   }
 
-  let content: string;
   let fileAssetId: string | null = null;
-  let result: { provider: string; model: string };
 
-  try {
-    if (isImprovedResume && version) {
-      const artifact = await buildImprovedResume({
+  if (input.view === "IMPROVED_RESUME") {
+    try {
+      fileAssetId = await buildImprovedResumePdf({
         userId: input.userId,
-        job,
-        version,
-        notes: input.values.notes ?? null,
+        resume: result.improvedResume,
+        jobTitle: input.jobTitle,
+      });
+    } catch (error) {
+      console.error("Improved resume PDF failed", {
+        userId: input.userId,
+        analysisId: analysis.id,
+        failureReason: describeAiFailure(error),
       });
 
-      content = artifact.content;
-      fileAssetId = artifact.fileAssetId;
-      result = { provider: artifact.provider, model: artifact.model };
-    } else {
-      const generated = await getResumeAIProvider().generateApplicationDocument({
-        documentType: documentTypeLabels[input.values.type],
-        jobTitle: job.title,
-        company: job.company,
-        jobDescription: job.description,
-        requirements: job.requirements,
-        resumeLabel: version?.label ?? null,
-        resumeText: version?.extractedText ?? null,
-        applicationStatus: application?.application.status ?? null,
-        notes: input.values.notes ?? null,
-      });
-
-      content = String(generated.rawResponse).trim();
-      result = { provider: generated.provider, model: generated.model };
+      return {
+        ok: false as const,
+        message: "The resume PDF could not be produced. Try again.",
+      };
     }
-
-    await completeUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action,
-      provider: result.provider,
-      model: result.model,
-      inputHash,
-    });
-  } catch (error) {
-    const failureReason = describeAiFailure(error);
-
-    console.error("Document generation failed", {
-      userId: input.userId,
-      type: input.values.type,
-      jobPublicId: input.values.jobPublicId,
-      applicationPublicId: input.values.applicationPublicId ?? null,
-      failureReason,
-    });
-
-    await failUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action,
-      inputHash,
-      failureReason,
-    });
-
-    return {
-      ok: false as const,
-      message: aiFailureMessage(
-        error,
-        "The document could not be generated. Try again.",
-      ),
-    };
   }
 
   const document = await createGeneratedDocument({
     userId: input.userId,
-    type: input.values.type,
-    jobId: job.id,
-    applicationId: application?.application.id ?? null,
-    resumeVersionId: version?.id ?? null,
+    type: documentTypeForView[input.view],
+    jobId: analysis.jobId,
+    applicationId: analysis.applicationId,
+    resumeVersionId: analysis.resumeVersionId,
     fileAssetId,
-    promptVersion,
+    promptVersion: analysis.promptVersion,
     originalContent: content,
     editedContent: content,
   });
 
   return { ok: true as const, document };
+}
+
+export async function saveApplicationView(input: {
+  userId: string;
+  applicationPublicId: string;
+  view: AiView;
+}) {
+  const row = await getOwnedApplication({
+    userId: input.userId,
+    publicId: input.applicationPublicId,
+  });
+
+  if (!row) {
+    return {
+      ok: false as const,
+      message: "That application could not be found.",
+    };
+  }
+
+  const analysis = await findAnalysisForApplication({
+    userId: input.userId,
+    applicationId: row.application.id,
+  });
+
+  if (!analysis) {
+    return {
+      ok: false as const,
+      message: "Run the analysis for this application first.",
+    };
+  }
+
+  return saveAnalysisView({
+    userId: input.userId,
+    analysisId: analysis.id,
+    view: input.view,
+    jobTitle: row.job.title,
+  });
 }
 
 export async function deleteOwnedDocument(input: {
@@ -220,22 +171,6 @@ export async function deleteOwnedDocument(input: {
   }
 
   return { ok: true as const };
-}
-
-export async function createOwnedDocumentReadUrl(input: {
-  userId: string;
-  publicId: string;
-}) {
-  const row = await findDocumentRowForUser(input);
-
-  if (!row?.document.fileAssetId) {
-    return null;
-  }
-
-  return createImprovedResumeReadUrl({
-    userId: input.userId,
-    fileAssetId: row.document.fileAssetId,
-  });
 }
 
 export async function addImprovedResumeToLibrary(input: {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hashAnalysisInput } from "@/lib/ai/hash-analysis-input";
+import { hashAnalysisInput } from "@/lib/ai/hash";
 
 describe("hashAnalysisInput", () => {
   it("returns a stable hash for identical input", async () => {

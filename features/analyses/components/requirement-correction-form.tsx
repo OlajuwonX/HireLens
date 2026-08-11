@@ -20,14 +20,14 @@ function SubmitButton() {
 }
 
 export function RequirementCorrectionForm({
-  matchId,
-  analysisPublicId,
+  analysisId,
+  requirementKey,
   markedIncorrect,
   evidence,
   notes,
 }: {
-  matchId: string;
-  analysisPublicId: string;
+  analysisId: string;
+  requirementKey: string;
   markedIncorrect: boolean;
   evidence: string | null;
   notes: string | null;
@@ -54,25 +54,25 @@ export function RequirementCorrectionForm({
 
   return (
     <form action={formAction} className="space-y-3 border-t border-border pt-4">
-      <input type="hidden" name="matchId" value={matchId} />
-      <input type="hidden" name="analysisPublicId" value={analysisPublicId} />
+      <input type="hidden" name="analysisId" value={analysisId} />
+      <input type="hidden" name="requirementKey" value={requirementKey} />
 
       <div className="flex items-start gap-2.5">
         <Checkbox
-          id={`incorrect-${matchId}`}
+          id={`incorrect-${requirementKey}`}
           name="markedIncorrect"
           defaultChecked={markedIncorrect}
           className="mt-0.5"
         />
-        <Label htmlFor={`incorrect-${matchId}`} className="text-meta">
+        <Label htmlFor={`incorrect-${requirementKey}`} className="text-meta">
           This conclusion is wrong
         </Label>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor={`evidence-${matchId}`}>Your evidence</Label>
+        <Label htmlFor={`evidence-${requirementKey}`}>Your evidence</Label>
         <Textarea
-          id={`evidence-${matchId}`}
+          id={`evidence-${requirementKey}`}
           name="evidence"
           rows={3}
           maxLength={5_000}
@@ -82,9 +82,9 @@ export function RequirementCorrectionForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor={`notes-${matchId}`}>Note</Label>
+        <Label htmlFor={`notes-${requirementKey}`}>Note</Label>
         <Textarea
-          id={`notes-${matchId}`}
+          id={`notes-${requirementKey}`}
           name="notes"
           rows={2}
           maxLength={2_000}

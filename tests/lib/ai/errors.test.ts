@@ -3,7 +3,7 @@ import {
   aiFailureMessage,
   classifyAiFailure,
   describeAiFailure,
-} from "@/lib/ai/ai-failure";
+} from "@/lib/ai/errors";
 
 const dailyQuotaError = Object.assign(
   new Error(

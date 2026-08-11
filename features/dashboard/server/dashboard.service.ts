@@ -7,15 +7,15 @@ import {
   aiUsageEvents,
   generatedDocuments,
   jobs,
-  resumeAnalyses,
+  applicationAnalyses,
   resumes,
   resumeVersions,
-  type UsageAction,
 } from "@/lib/db/schema";
 import {
-  defaultDailyAllowance,
+  AI_USAGE_ACTIONS,
+  getDailyAllowance,
   usageActionLabels,
-} from "@/features/usage/constants";
+} from "@/lib/ai/usage";
 
 function startOfUtcDay(date = new Date()) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -90,12 +90,12 @@ export async function getDashboardSummary(userId: string) {
       .orderBy(desc(generatedDocuments.createdAt))
       .limit(5),
     db
-      .select({ value: avg(resumeAnalyses.overallScore) })
-      .from(resumeAnalyses)
+      .select({ value: avg(applicationAnalyses.overallScore) })
+      .from(applicationAnalyses)
       .where(
         and(
-          eq(resumeAnalyses.userId, userId),
-          eq(resumeAnalyses.status, "SUCCEEDED"),
+          eq(applicationAnalyses.userId, userId),
+          eq(applicationAnalyses.status, "SUCCEEDED"),
         ),
       ),
     db
@@ -113,16 +113,12 @@ export async function getDashboardSummary(userId: string) {
     acc[row.status] = row.value;
     return acc;
   }, {});
-  const usage = Object.entries(defaultDailyAllowance).map(([action, limit]) => {
-    const used = usageRows.filter((row) => row.action === action).length;
-
-    return {
-      action: action as UsageAction,
-      label: usageActionLabels[action as UsageAction],
-      used,
-      limit,
-    };
-  });
+  const usage = AI_USAGE_ACTIONS.map((action) => ({
+    action,
+    label: usageActionLabels[action],
+    used: usageRows.filter((row) => row.action === action).length,
+    limit: getDailyAllowance(action),
+  }));
 
   return {
     resumeGroupCount,

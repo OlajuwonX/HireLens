@@ -65,44 +65,11 @@ export const applicationStatus = pgEnum("application_stage", [
   "REJECTED",
 ]);
 
-export const analysisType = pgEnum("analysis_type", [
-  "GENERAL",
-  "JOB_SPECIFIC",
-]);
-
 export const analysisStatus = pgEnum("analysis_status", [
   "PENDING",
   "PROCESSING",
   "SUCCEEDED",
   "FAILED",
-]);
-
-export const requirementCategory = pgEnum("requirement_category", [
-  "SKILL",
-  "EXPERIENCE",
-  "EDUCATION",
-  "CERTIFICATION",
-  "RESPONSIBILITY",
-  "LOCATION",
-  "OTHER",
-]);
-
-export const requirementImportance = pgEnum("requirement_importance", [
-  "REQUIRED",
-  "PREFERRED",
-]);
-
-export const requirementMatchStatus = pgEnum("requirement_match_status", [
-  "STRONG",
-  "PARTIAL",
-  "MISSING",
-  "UNCLEAR",
-]);
-
-export const suggestionSeverity = pgEnum("suggestion_severity", [
-  "LOW",
-  "MEDIUM",
-  "HIGH",
 ]);
 
 export const documentType = pgEnum("document_type", [
@@ -123,6 +90,8 @@ export const documentType = pgEnum("document_type", [
 ]);
 
 export const usageAction = pgEnum("usage_action", [
+  "APPLICATION_ANALYSIS",
+  "APPLICATION_REGENERATE",
   "GENERAL_ANALYSIS",
   "JOB_ANALYSIS",
   "COVER_LETTER",
@@ -319,24 +288,24 @@ export const jobs = pgTable(
   ],
 );
 
-export const resumeAnalyses = pgTable(
-  "resume_analyses",
+export const applicationAnalyses = pgTable(
+  "application_analyses",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     publicId: uuid("public_id").notNull().defaultRandom(),
     ...userOwned,
+    applicationId: uuid("application_id"),
     resumeVersionId: uuid("resume_version_id")
       .notNull()
       .references(() => resumeVersions.id, { onDelete: "cascade" }),
     jobId: uuid("job_id").references(() => jobs.id, { onDelete: "set null" }),
-    type: analysisType("type").notNull(),
     status: analysisStatus("status").notNull().default("PENDING"),
     provider: text("provider").notNull(),
     model: text("model").notNull(),
     promptVersion: text("prompt_version").notNull(),
     inputHash: text("input_hash").notNull(),
+    resultJson: jsonb("result_json"),
     rawResponse: jsonb("raw_response"),
-    normalizedResult: jsonb("normalized_result"),
     overallScore: integer("overall_score"),
     atsScore: integer("ats_score"),
     durationMs: integer("duration_ms"),
@@ -344,54 +313,13 @@ export const resumeAnalyses = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("resume_analyses_public_id_idx").on(table.publicId),
-    uniqueIndex("resume_analyses_user_input_hash_idx").on(table.userId, table.inputHash),
-    index("resume_analyses_user_status_idx").on(table.userId, table.status),
-  ],
-);
-
-export const requirementMatches = pgTable(
-  "requirement_matches",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    ...userOwned,
-    analysisId: uuid("analysis_id")
-      .notNull()
-      .references(() => resumeAnalyses.id, { onDelete: "cascade" }),
-    requirement: text("requirement").notNull(),
-    category: requirementCategory("category").notNull(),
-    importance: requirementImportance("importance").notNull(),
-    status: requirementMatchStatus("status").notNull(),
-    resumeEvidence: text("resume_evidence"),
-    explanation: text("explanation").notNull(),
-    recommendation: text("recommendation"),
-    ...timestamps,
-  },
-  (table) => [
-    index("requirement_matches_analysis_idx").on(table.analysisId),
-    index("requirement_matches_user_status_idx").on(table.userId, table.status),
-  ],
-);
-
-export const analysisSuggestions = pgTable(
-  "analysis_suggestions",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    ...userOwned,
-    analysisId: uuid("analysis_id")
-      .notNull()
-      .references(() => resumeAnalyses.id, { onDelete: "cascade" }),
-    category: text("category").notNull(),
-    severity: suggestionSeverity("severity").notNull(),
-    problem: text("problem").notNull(),
-    reason: text("reason").notNull(),
-    action: text("action").notNull(),
-    completedAt: timestamp("completed_at", { withTimezone: true }),
-    ...timestamps,
-  },
-  (table) => [
-    index("analysis_suggestions_analysis_idx").on(table.analysisId),
-    index("analysis_suggestions_user_severity_idx").on(table.userId, table.severity),
+    uniqueIndex("application_analyses_public_id_idx").on(table.publicId),
+    uniqueIndex("application_analyses_user_input_hash_idx").on(
+      table.userId,
+      table.inputHash,
+    ),
+    index("application_analyses_user_status_idx").on(table.userId, table.status),
+    index("application_analyses_application_idx").on(table.applicationId),
   ],
 );
 
@@ -400,9 +328,11 @@ export const userEvidenceCorrections = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ...userOwned,
-    requirementMatchId: uuid("requirement_match_id")
+    analysisId: uuid("analysis_id")
       .notNull()
-      .references(() => requirementMatches.id, { onDelete: "cascade" }),
+      .references(() => applicationAnalyses.id, { onDelete: "cascade" }),
+    requirementKey: text("requirement_key").notNull(),
+    requirement: text("requirement").notNull(),
     markedIncorrect: boolean("marked_incorrect").notNull().default(false),
     evidence: text("evidence"),
     notes: text("notes"),
@@ -410,11 +340,10 @@ export const userEvidenceCorrections = pgTable(
   },
   (table) => [
     index("user_evidence_corrections_user_idx").on(table.userId),
-    uniqueIndex("user_evidence_corrections_user_requirement_idx").on(
-      table.userId,
-      table.requirementMatchId,
+    uniqueIndex("user_evidence_corrections_analysis_requirement_idx").on(
+      table.analysisId,
+      table.requirementKey,
     ),
-    index("user_evidence_corrections_requirement_idx").on(table.requirementMatchId),
   ],
 );
 
@@ -430,7 +359,7 @@ export const applications = pgTable(
     resumeVersionId: uuid("resume_version_id").references(() => resumeVersions.id, {
       onDelete: "set null",
     }),
-    analysisId: uuid("analysis_id").references(() => resumeAnalyses.id, {
+    analysisId: uuid("analysis_id").references(() => applicationAnalyses.id, {
       onDelete: "set null",
     }),
     status: applicationStatus("stage").notNull().default("PENDING"),
@@ -578,13 +507,13 @@ export const resumeVersionsRelations = relations(resumeVersions, ({ one, many })
     fields: [resumeVersions.fileAssetId],
     references: [fileAssets.id],
   }),
-  analyses: many(resumeAnalyses),
+  analyses: many(applicationAnalyses),
 }));
 
 export const jobsRelations = relations(jobs, ({ one, many }) => ({
   user: one(users, { fields: [jobs.userId], references: [users.id] }),
   applications: many(applications),
-  analyses: many(resumeAnalyses),
+  analyses: many(applicationAnalyses),
 }));
 
 export const applicationsRelations = relations(applications, ({ one, many }) => ({
@@ -594,16 +523,23 @@ export const applicationsRelations = relations(applications, ({ one, many }) => 
   documents: many(generatedDocuments),
 }));
 
-export const resumeAnalysesRelations = relations(resumeAnalyses, ({ one, many }) => ({
-  user: one(users, { fields: [resumeAnalyses.userId], references: [users.id] }),
-  resumeVersion: one(resumeVersions, {
-    fields: [resumeAnalyses.resumeVersionId],
-    references: [resumeVersions.id],
+export const applicationAnalysesRelations = relations(
+  applicationAnalyses,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [applicationAnalyses.userId],
+      references: [users.id],
+    }),
+    resumeVersion: one(resumeVersions, {
+      fields: [applicationAnalyses.resumeVersionId],
+      references: [resumeVersions.id],
+    }),
+    job: one(jobs, {
+      fields: [applicationAnalyses.jobId],
+      references: [jobs.id],
+    }),
   }),
-  job: one(jobs, { fields: [resumeAnalyses.jobId], references: [jobs.id] }),
-  requirementMatches: many(requirementMatches),
-  suggestions: many(analysisSuggestions),
-}));
+);
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -618,9 +554,8 @@ export type NewJob = typeof jobs.$inferInsert;
 export type Application = typeof applications.$inferSelect;
 export type NewApplication = typeof applications.$inferInsert;
 export type ApplicationActivity = typeof applicationActivities.$inferSelect;
-export type ResumeAnalysis = typeof resumeAnalyses.$inferSelect;
-export type RequirementMatch = typeof requirementMatches.$inferSelect;
-export type AnalysisSuggestion = typeof analysisSuggestions.$inferSelect;
+export type ApplicationAnalysis = typeof applicationAnalyses.$inferSelect;
+export type NewApplicationAnalysis = typeof applicationAnalyses.$inferInsert;
 export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;

@@ -8,7 +8,7 @@ import {
   jobs,
   resumeVersions,
   resumes,
-  resumeAnalyses,
+  applicationAnalyses,
   type Application,
   type NewApplication,
   type NewJob,
@@ -21,8 +21,8 @@ const rowShape = {
   versionLabel: resumeVersions.label,
   versionPublicId: resumeVersions.publicId,
   resumeTitle: resumes.title,
-  matchScore: resumeAnalyses.overallScore,
-  analysisPublicId: resumeAnalyses.publicId,
+  matchScore: applicationAnalyses.overallScore,
+  analysisPublicId: applicationAnalyses.publicId,
 };
 
 export type ApplicationRow = {
@@ -45,7 +45,7 @@ function baseQuery() {
       eq(resumeVersions.id, applications.resumeVersionId),
     )
     .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
-    .leftJoin(resumeAnalyses, eq(resumeAnalyses.id, applications.analysisId));
+    .leftJoin(applicationAnalyses, eq(applicationAnalyses.id, applications.analysisId));
 }
 
 export async function findApplicationForUser(input: {
@@ -106,14 +106,14 @@ export async function listApplicationsForUser(input: {
   }
 
   if (input.filters.sort === "score_desc") {
-    conditions.push(isNotNull(resumeAnalyses.overallScore));
+    conditions.push(isNotNull(applicationAnalyses.overallScore));
   }
 
   const orderBy = {
     activity_desc: [desc(applications.lastActivityAt)],
     created_desc: [desc(applications.createdAt)],
     deadline_asc: [asc(jobs.deadlineAt)],
-    score_desc: [desc(resumeAnalyses.overallScore)],
+    score_desc: [desc(applicationAnalyses.overallScore)],
     company_asc: [asc(jobs.company), asc(jobs.title)],
   }[input.filters.sort];
 

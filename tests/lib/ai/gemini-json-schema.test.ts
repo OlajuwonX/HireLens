@@ -3,7 +3,7 @@ import {
   pruneToSupportedKeywords,
   toGeminiResponseSchema,
 } from "@/lib/ai/gemini-json-schema";
-import { jobFitAnalysisSchema, storedJobFitAnalysisSchema } from "@/lib/ai/schemas/job-fit-analysis.schema";
+import { applicationIntelligenceSchema } from "@/lib/ai/schemas/application-intelligence.schema";
 
 function collectKeys(value: unknown, found = new Set<string>()) {
   if (Array.isArray(value)) {
@@ -68,22 +68,15 @@ describe("pruneToSupportedKeywords", () => {
 });
 
 describe("toGeminiResponseSchema", () => {
-  it("emits only supported keywords for the stored analysis schema", () => {
-    const keys = collectKeys(toGeminiResponseSchema(storedJobFitAnalysisSchema));
-
-    expect(keys.has("$schema")).toBe(false);
-    expect(keys.has("minLength")).toBe(false);
-  });
-
   it("emits only supported keywords for the job fit schema", () => {
-    const keys = collectKeys(toGeminiResponseSchema(jobFitAnalysisSchema));
+    const keys = collectKeys(toGeminiResponseSchema(applicationIntelligenceSchema));
 
     expect(keys.has("$schema")).toBe(false);
     expect(keys.has("minLength")).toBe(false);
   });
 
   it("preserves the analysis shape the service depends on", () => {
-    const schema = toGeminiResponseSchema(jobFitAnalysisSchema) as {
+    const schema = toGeminiResponseSchema(applicationIntelligenceSchema) as {
       type: string;
       required: string[];
       properties: Record<string, unknown>;
@@ -92,30 +85,27 @@ describe("toGeminiResponseSchema", () => {
     expect(schema.type).toBe("object");
     expect(schema.required).toEqual(
       expect.arrayContaining([
-        "overallScore",
-        "atsScore",
-        "summary",
+        "scoring",
         "recommendations",
+        "keywordAnalysis",
+        "requirementMatches",
+        "improvedResume",
+        "coverLetter",
       ]),
     );
-    expect(schema.properties.overallScore).toEqual({
-      type: "integer",
-      minimum: 0,
-      maximum: 100,
-    });
   });
 
-  it("preserves enum values on recommendation severity", () => {
-    const schema = toGeminiResponseSchema(jobFitAnalysisSchema) as {
+  it("preserves enum values on recommendation priority", () => {
+    const schema = toGeminiResponseSchema(applicationIntelligenceSchema) as {
       properties: {
         recommendations: {
-          items: { properties: { severity: { enum: string[] } } };
+          items: { properties: { priority: { enum: string[] } } };
         };
       };
     };
 
-    expect(schema.properties.recommendations.items.properties.severity.enum).toEqual(
-      ["LOW", "MEDIUM", "HIGH"],
+    expect(schema.properties.recommendations.items.properties.priority.enum).toEqual(
+      ["HIGH", "MEDIUM", "LOW"],
     );
   });
 });

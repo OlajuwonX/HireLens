@@ -43,6 +43,27 @@
       "when": 1786309590425,
       "tag": "0005_spicy_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786391621247,
+      "tag": "0006_fluffy_lightspeed",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786391653499,
+      "tag": "0007_bright_peter_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786391693694,
+      "tag": "0008_thin_sue_storm",
+      "breakpoints": true
     }
   ]
 }

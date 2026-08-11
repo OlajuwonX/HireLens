@@ -170,22 +170,22 @@ export async function renderImprovedResumePdf(
     bold: await doc.embedFont(StandardFonts.HelveticaBold),
   };
 
-  doc.setTitle(`${sanitizePdfText(resume.fullName)} - Resume`);
+  doc.setTitle(`${sanitizePdfText(resume.header.name)} - Resume`);
   doc.setProducer("HireLens");
   doc.setCreator("HireLens");
 
   const canvas = new ResumeCanvas(doc, fonts);
 
-  canvas.text(resume.fullName, { size: 20, bold: true });
+  canvas.text(resume.header.name, { size: 20, bold: true });
   canvas.space(2);
-  canvas.text(resume.headline, { size: 11, color: muted });
+  canvas.text(resume.header.headline, { size: 11, color: muted });
 
   const contactLine = joinNonEmpty(
     [
-      resume.contact.email,
-      resume.contact.phone,
-      resume.contact.location,
-      ...resume.contact.links,
+      resume.header.email,
+      resume.header.phone,
+      resume.header.location,
+      ...resume.header.links,
     ],
     "  |  ",
   );
@@ -195,9 +195,9 @@ export async function renderImprovedResumePdf(
     canvas.text(contactLine, { size: 9, color: muted });
   }
 
-  if (resume.summary) {
+  if (resume.professionalSummary) {
     canvas.sectionHeading("Summary");
-    canvas.text(resume.summary, { size: 10, lineHeight: 14 });
+    canvas.text(resume.professionalSummary, { size: 10, lineHeight: 14 });
   }
 
   if (resume.skills.length > 0) {
@@ -225,13 +225,13 @@ export async function renderImprovedResumePdf(
       }
 
       canvas.splitRow(
-        entry.role,
+        entry.title,
         formatDateRange(entry.startDate, entry.endDate),
         11,
         true,
       );
 
-      const context = joinNonEmpty([entry.organisation, entry.location], " - ");
+      const context = joinNonEmpty([entry.company, entry.location], " - ");
 
       if (context) {
         canvas.text(context, { size: 9.5, color: muted });
@@ -245,6 +245,31 @@ export async function renderImprovedResumePdf(
     });
   }
 
+  if (resume.projects.length > 0) {
+    canvas.sectionHeading("Projects");
+
+    resume.projects.forEach((project, index) => {
+      if (index > 0) {
+        canvas.space(6);
+      }
+
+      canvas.text(project.name, { size: 10.5, bold: true });
+
+      if (project.technologies.length > 0) {
+        canvas.text(project.technologies.join(", "), {
+          size: 9.5,
+          color: muted,
+        });
+      }
+
+      canvas.space(3);
+
+      for (const bullet of project.bullets) {
+        canvas.bullet(bullet, 10);
+      }
+    });
+  }
+
   if (resume.education.length > 0) {
     canvas.sectionHeading("Education");
 
@@ -253,26 +278,9 @@ export async function renderImprovedResumePdf(
         canvas.space(6);
       }
 
-      canvas.splitRow(entry.credential, entry.completedOn ?? "", 10.5, true);
-
-      const context = joinNonEmpty([entry.institution, entry.location], " - ");
-
-      if (context) {
-        canvas.text(context, { size: 9.5, color: muted });
-      }
-
-      if (entry.detail) {
-        canvas.text(entry.detail, { size: 9.5, color: muted });
-      }
+      canvas.splitRow(entry.qualification, entry.date ?? "", 10.5, true);
+      canvas.text(entry.institution, { size: 9.5, color: muted });
     });
-  }
-
-  if (resume.certifications.length > 0) {
-    canvas.sectionHeading("Certifications");
-
-    for (const certification of resume.certifications) {
-      canvas.bullet(certification, 10);
-    }
   }
 
   return doc.save();

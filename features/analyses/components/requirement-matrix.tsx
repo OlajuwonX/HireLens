@@ -1,10 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequirementCorrectionForm } from "./requirement-correction-form";
-import type {
-  RequirementMatch,
-  UserEvidenceCorrection,
-} from "@/lib/db/schema";
+import type { RequirementMatch } from "@/lib/ai/schemas/requirements.schema";
+import type { UserEvidenceCorrection } from "@/lib/db/schema";
 
 export type RequirementMatrixRow = {
   match: RequirementMatch;
@@ -44,10 +42,10 @@ function summarise(rows: RequirementMatrixRow[]) {
 
 export function RequirementMatrix({
   rows,
-  analysisPublicId,
+  analysisId,
 }: {
   rows: RequirementMatrixRow[];
-  analysisPublicId: string;
+  analysisId: string;
 }) {
   if (rows.length === 0) {
     return null;
@@ -67,7 +65,7 @@ export function RequirementMatrix({
       <CardContent className="p-0">
         <ul className="divide-y divide-border border-t border-border">
           {rows.map(({ match, correction }) => (
-            <li key={match.id} className="space-y-3 px-5 py-4">
+            <li key={match.key} className="space-y-3 px-5 py-4">
               <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                 <p className="min-w-0 flex-1 text-meta font-medium text-text-primary">
                   {match.requirement}
@@ -114,8 +112,8 @@ export function RequirementMatrix({
               ) : null}
 
               <RequirementCorrectionForm
-                matchId={match.id}
-                analysisPublicId={analysisPublicId}
+                analysisId={analysisId}
+                requirementKey={match.key}
                 markedIncorrect={correction?.markedIncorrect ?? false}
                 evidence={correction?.evidence ?? null}
                 notes={correction?.notes ?? null}

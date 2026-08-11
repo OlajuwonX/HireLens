@@ -1,14 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Check, Copy, Download, Library, RefreshCw } from "lucide-react";
+import { Check, Copy, Download, Library } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import {
   addImprovedResumeToLibraryAction,
   deleteDocumentAction,
-  generateDocumentAction,
 } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
 import type { DOCUMENT_TYPES } from "../constants";
@@ -41,28 +40,17 @@ export function DocumentActions({
   type,
   content,
   hasFile,
-  jobPublicId,
-  versionPublicId,
-  applicationPublicId,
 }: {
   publicId: string;
   type: (typeof DOCUMENT_TYPES)[number];
   content: string;
   hasFile: boolean;
-  jobPublicId: string | null;
-  versionPublicId: string | null;
-  applicationPublicId: string | null;
 }) {
   const [libraryState, addToLibrary] = useActionState(
     addImprovedResumeToLibraryAction,
     initialDocumentFormState,
   );
-  const [regenerateState, regenerate] = useActionState(
-    generateDocumentAction,
-    initialDocumentFormState,
-  );
-  const notice =
-    libraryState.status !== "idle" ? libraryState : regenerateState;
+  const notice = libraryState;
 
   return (
     <div className="space-y-3">
@@ -76,27 +64,6 @@ export function DocumentActions({
               Download PDF
             </Link>
           </Button>
-        ) : null}
-
-        {jobPublicId ? (
-          <form action={regenerate}>
-            <input type="hidden" name="type" value={type} />
-            <input type="hidden" name="jobPublicId" value={jobPublicId} />
-            <input
-              type="hidden"
-              name="resumeVersionPublicId"
-              value={versionPublicId ?? ""}
-            />
-            <input
-              type="hidden"
-              name="applicationPublicId"
-              value={applicationPublicId ?? ""}
-            />
-            <Button type="submit" variant="outline">
-              <RefreshCw className="size-4" aria-hidden />
-              Regenerate
-            </Button>
-          </form>
         ) : null}
 
         {type === "IMPROVED_RESUME" && hasFile ? (

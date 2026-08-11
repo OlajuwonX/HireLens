@@ -2,23 +2,27 @@ import "server-only";
 
 import { and, count, eq, gt, gte, isNull, lt } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import {
-  aiUsageEvents,
-  aiUsageReservations,
-  type UsageAction,
-} from "@/lib/db/schema";
+import { aiUsageEvents, aiUsageReservations } from "@/lib/db/schema";
 import {
   AI_BURST_LIMIT,
   AI_BURST_WINDOW_SECONDS,
   AI_RESERVATION_TTL_SECONDS,
-  defaultDailyAllowance,
-} from "../constants";
+  getDailyAllowance,
+  getGlobalDailySafetyLimit,
+  type AiUsageAction,
+} from "@/lib/ai/usage";
+
+export type UsageDenialReason =
+  | "BURST_LIMIT"
+  | "DAILY_LIMIT"
+  | "GLOBAL_LIMIT"
+  | "ACTIVE_REQUEST";
 
 export type UsageAllowanceResult =
   | { ok: true; remaining: number; resetAt: Date }
   | {
       ok: false;
-      reason: "BURST_LIMIT" | "DAILY_LIMIT" | "ACTIVE_REQUEST";
+      reason: UsageDenialReason;
       message: string;
       resetAt: Date;
     };
@@ -27,7 +31,7 @@ export type UsageReservation =
   | { ok: true; reservationId: string }
   | {
       ok: false;
-      reason: "BURST_LIMIT" | "DAILY_LIMIT" | "ACTIVE_REQUEST";
+      reason: UsageDenialReason;
       message: string;
       resetAt: Date;
     };
@@ -54,17 +58,7 @@ function isUniqueConstraintError(error: unknown) {
   );
 }
 
-export function getDailyAllowance(action: UsageAction) {
-  const envKey = `AI_DAILY_LIMIT_${action}`;
-  const raw = process.env[envKey];
-  const parsed = raw ? Number.parseInt(raw, 10) : NaN;
-
-  return Number.isFinite(parsed) && parsed >= 0
-    ? parsed
-    : defaultDailyAllowance[action];
-}
-
-async function countCompletedToday(input: { userId: string; action: UsageAction }) {
+async function countCompletedToday(input: { userId: string; action: AiUsageAction }) {
   const [row] = await db
     .select({ value: count() })
     .from(aiUsageEvents)
@@ -72,6 +66,20 @@ async function countCompletedToday(input: { userId: string; action: UsageAction 
       and(
         eq(aiUsageEvents.userId, input.userId),
         eq(aiUsageEvents.action, input.action),
+        gte(aiUsageEvents.createdAt, startOfUtcDay()),
+      ),
+    );
+
+  return row?.value ?? 0;
+}
+
+async function countAllCompletedToday(userId: string) {
+  const [row] = await db
+    .select({ value: count() })
+    .from(aiUsageEvents)
+    .where(
+      and(
+        eq(aiUsageEvents.userId, userId),
         gte(aiUsageEvents.createdAt, startOfUtcDay()),
       ),
     );
@@ -128,7 +136,7 @@ async function expireStaleReservations(userId: string) {
 
 export async function checkAllowance(input: {
   userId: string;
-  action: UsageAction;
+  action: AiUsageAction;
 }): Promise<UsageAllowanceResult> {
   await expireStaleReservations(input.userId);
 
@@ -150,6 +158,18 @@ export async function checkAllowance(input: {
     };
   }
 
+  const globalUsed = await countAllCompletedToday(input.userId);
+
+  if (globalUsed >= getGlobalDailySafetyLimit()) {
+    return {
+      ok: false,
+      reason: "GLOBAL_LIMIT",
+      message:
+        "HireLens has used its daily AI safety budget. Try again tomorrow.",
+      resetAt: nextUtcDay(),
+    };
+  }
+
   const used = await countCompletedToday(input);
   const limit = getDailyAllowance(input.action);
 
@@ -167,7 +187,7 @@ export async function checkAllowance(input: {
 
 export async function reserveUsage(input: {
   userId: string;
-  action: UsageAction;
+  action: AiUsageAction;
 }): Promise<UsageReservation> {
   const allowance = await checkAllowance(input);
 
@@ -203,7 +223,7 @@ export async function reserveUsage(input: {
 export async function completeUsage(input: {
   userId: string;
   reservationId: string;
-  action: UsageAction;
+  action: AiUsageAction;
   provider?: string | null;
   model?: string | null;
   inputHash?: string | null;
@@ -233,7 +253,7 @@ export async function completeUsage(input: {
 export async function failUsage(input: {
   userId: string;
   reservationId: string;
-  action: UsageAction;
+  action: AiUsageAction;
   provider?: string | null;
   model?: string | null;
   inputHash?: string | null;

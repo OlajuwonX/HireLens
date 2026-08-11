@@ -8,37 +8,34 @@ const longBullet =
 
 function resumeWith(overrides: Record<string, unknown> = {}) {
   return improvedResumeSchema.parse({
-    fullName: "Ada Okonkwo",
-    headline: "Site Manager",
-    contact: {
+    header: {
+      name: "Ada Okonkwo",
+      headline: "Site Manager",
+      location: "Leeds",
       email: "ada@example.com",
       phone: null,
-      location: "Leeds",
       links: [],
     },
-    summary: longBullet,
+    professionalSummary: longBullet,
     skills: [{ category: "Delivery", items: ["Programme planning"] }],
     experience: [
       {
-        role: "Site Manager",
-        organisation: "Turner",
+        company: "Turner",
+        title: "Site Manager",
         location: "Leeds",
         startDate: "2019",
-        endDate: null,
+        endDate: "Present",
         bullets: [longBullet],
       },
     ],
+    projects: [],
     education: [
       {
-        credential: "BSc Construction Management",
+        qualification: "BSc Construction Management",
         institution: "University of Leeds",
-        location: null,
-        completedOn: "2018",
-        detail: null,
+        date: "2018",
       },
     ],
-    certifications: ["SMSTS"],
-    changeNotes: ["Led with site leadership."],
     ...overrides,
   });
 }
@@ -76,8 +73,8 @@ describe("renderImprovedResumePdf", () => {
       await renderImprovedResumePdf(
         resumeWith({
           experience: Array.from({ length: 10 }, (_, index) => ({
-            role: `Site Manager ${index + 1}`,
-            organisation: "Turner",
+            company: "Turner",
+            title: `Site Manager ${index + 1}`,
             location: "Leeds",
             startDate: "2019",
             endDate: "2024",
@@ -95,9 +92,8 @@ describe("renderImprovedResumePdf", () => {
       resumeWith({
         skills: [],
         experience: [],
+        projects: [],
         education: [],
-        certifications: [],
-        changeNotes: [],
       }),
     );
 
@@ -106,7 +102,17 @@ describe("renderImprovedResumePdf", () => {
 
   it("does not throw on characters outside WinAnsi", async () => {
     const bytes = await renderImprovedResumePdf(
-      resumeWith({ fullName: "Ada Okonkwo 🚀", summary: "Built “things” — fast…" }),
+      resumeWith({
+        header: {
+          name: "Ada Okonkwo 🚀",
+          headline: "Site Manager",
+          location: null,
+          email: null,
+          phone: null,
+          links: [],
+        },
+        professionalSummary: "Built “things” — fast…",
+      }),
     );
 
     await expect(PDFDocument.load(bytes)).resolves.toBeDefined();

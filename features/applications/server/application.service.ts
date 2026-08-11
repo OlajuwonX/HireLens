@@ -1,7 +1,8 @@
 import "server-only";
 
-import { runJobFitAnalysis } from "@/features/analyses/server/job-fit.service";
+import { analyzeApplication } from "@/features/analyses/server/analysis.service";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
+import { attachAnalysisApplication } from "@/features/analyses/server/analysis.repository";
 import { applicationStatusLabels } from "../constants";
 import type {
   ApplicationFilters,
@@ -115,18 +116,26 @@ export async function saveAndAnalyze(input: {
     },
   });
 
-  const analysis = await runJobFitAnalysis({
+  const analysis = await analyzeApplication({
     userId: input.userId,
-    versionPublicId: input.values.resumeVersionPublicId,
-    jobPublicId: job.publicId,
+    job,
+    version,
+    applicationId: application.id,
   });
 
   if (analysis.ok) {
-    await attachAnalysisToApplication({
-      userId: input.userId,
-      applicationId: application.id,
-      analysisId: analysis.analysisId,
-    });
+    await Promise.all([
+      attachAnalysisToApplication({
+        userId: input.userId,
+        applicationId: application.id,
+        analysisId: analysis.analysisId,
+      }),
+      attachAnalysisApplication({
+        userId: input.userId,
+        analysisId: analysis.analysisId,
+        applicationId: application.id,
+      }),
+    ]);
   }
 
   return {
@@ -202,10 +211,25 @@ export async function analyzeOwnedApplication(input: {
     };
   }
 
-  const analysis = await runJobFitAnalysis({
+  const version = await getOwnedResumeVersion({
     userId: input.userId,
     versionPublicId: row.versionPublicId,
-    jobPublicId: row.job.publicId,
+  });
+
+  if (!version) {
+    return {
+      ok: false,
+      error: "NOT_FOUND",
+      message: "That resume version could not be found.",
+    };
+  }
+
+  const analysis = await analyzeApplication({
+    userId: input.userId,
+    job: row.job,
+    version,
+    applicationId: row.application.id,
+    regenerate: true,
   });
 
   if (!analysis.ok) {

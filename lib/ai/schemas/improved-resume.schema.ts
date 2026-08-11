@@ -1,9 +1,11 @@
 import { z } from "zod";
 
-export const improvedResumeContactSchema = z.object({
+export const improvedResumeHeaderSchema = z.object({
+  name: z.string().min(1),
+  headline: z.string().min(1),
+  location: z.string().nullable(),
   email: z.string().nullable(),
   phone: z.string().nullable(),
-  location: z.string().nullable(),
   links: z.array(z.string().min(1)),
 });
 
@@ -13,32 +15,33 @@ export const improvedResumeSkillGroupSchema = z.object({
 });
 
 export const improvedResumeExperienceSchema = z.object({
-  role: z.string().min(1),
-  organisation: z.string().min(1),
+  company: z.string().min(1),
+  title: z.string().min(1),
   location: z.string().nullable(),
-  startDate: z.string().nullable(),
-  endDate: z.string().nullable(),
+  startDate: z.string(),
+  endDate: z.string(),
+  bullets: z.array(z.string().min(1)),
+});
+
+export const improvedResumeProjectSchema = z.object({
+  name: z.string().min(1),
+  technologies: z.array(z.string().min(1)),
   bullets: z.array(z.string().min(1)),
 });
 
 export const improvedResumeEducationSchema = z.object({
-  credential: z.string().min(1),
+  qualification: z.string().min(1),
   institution: z.string().min(1),
-  location: z.string().nullable(),
-  completedOn: z.string().nullable(),
-  detail: z.string().nullable(),
+  date: z.string().nullable(),
 });
 
 export const improvedResumeSchema = z.object({
-  fullName: z.string().min(1),
-  headline: z.string().min(1),
-  contact: improvedResumeContactSchema,
-  summary: z.string().min(1),
+  header: improvedResumeHeaderSchema,
+  professionalSummary: z.string().min(1),
   skills: z.array(improvedResumeSkillGroupSchema),
   experience: z.array(improvedResumeExperienceSchema),
+  projects: z.array(improvedResumeProjectSchema),
   education: z.array(improvedResumeEducationSchema),
-  certifications: z.array(z.string().min(1)),
-  changeNotes: z.array(z.string().min(1)),
 });
 
 export type ImprovedResume = z.infer<typeof improvedResumeSchema>;
