@@ -8,7 +8,6 @@ import {
   UserRound,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { KeywordGapPanel } from "@/features/analyses/components/keyword-gap-panel";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
 import {
@@ -22,7 +21,6 @@ import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application
 import { AiDocumentModal, PlainTextPanel } from "./ai-document-modal";
 import { BulletRewritePanel } from "./bullet-rewrite-panel";
 import { ImprovedResumePanel } from "./improved-resume-panel";
-import { SaveDocumentButton } from "./save-document-button";
 
 const icons: Record<
   AiView,
@@ -67,39 +65,15 @@ function AiResultCard({
   result: StoredApplicationIntelligence;
   savedDocumentId: string | null;
 }) {
-  const Icon = icons[view];
-  const populated = viewIsPopulated(result, view);
-
   return (
     <AiDocumentModal
       title={aiViewLabels[view]}
       content={viewToPlainText(result, view)}
-      downloadHref={
-        view === "IMPROVED_RESUME" && savedDocumentId
-          ? `/dashboard/documents/${savedDocumentId}/download`
-          : undefined
-      }
-      footer={
-        <SaveDocumentButton
-          applicationPublicId={applicationPublicId}
-          view={view}
-          alreadySaved={Boolean(savedDocumentId)}
-        />
-      }
-      trigger={
-        <Button
-          type="button"
-          variant="outline"
-          size="row"
-          align="start"
-          block
-          disabled={!populated}
-          className="gap-2"
-        >
-          <Icon className="size-4 shrink-0" aria-hidden />
-          <span className="truncate">{aiViewLabels[view]}</span>
-        </Button>
-      }
+      icon={icons[view]}
+      disabled={!viewIsPopulated(result, view)}
+      applicationPublicId={applicationPublicId}
+      view={view}
+      savedDocumentId={savedDocumentId}
     >
       {panelFor(view, result)}
     </AiDocumentModal>

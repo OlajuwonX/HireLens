@@ -54,7 +54,10 @@ export default async function ResumeDetailPage({
             </CardHeader>
             <CardContent className="p-0">
               <div className="border-t border-border">
-                <ResumeVersionList versions={versionResult.versions} />
+                <ResumeVersionList
+                  versions={versionResult.versions}
+                  resumePublicId={resume.publicId}
+                />
               </div>
             </CardContent>
           </Card>

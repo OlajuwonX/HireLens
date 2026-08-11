@@ -425,6 +425,30 @@ export const generatedDocuments = pgTable(
   ],
 );
 
+export const documentActivityKind = pgEnum("document_activity_kind", [
+  "CREATED",
+  "EDITED",
+  "ADDED_TO_LIBRARY",
+]);
+
+export const documentActivities = pgTable(
+  "document_activities",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => generatedDocuments.id, { onDelete: "cascade" }),
+    kind: documentActivityKind("kind").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("document_activities_document_idx").on(table.documentId, table.createdAt),
+  ],
+);
+
 export const aiUsageEvents = pgTable(
   "ai_usage_events",
   {
@@ -557,6 +581,7 @@ export type ApplicationActivity = typeof applicationActivities.$inferSelect;
 export type ApplicationAnalysis = typeof applicationAnalyses.$inferSelect;
 export type NewApplicationAnalysis = typeof applicationAnalyses.$inferInsert;
 export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
+export type DocumentActivity = typeof documentActivities.$inferSelect;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
 export type UsageAction = (typeof usageAction.enumValues)[number];

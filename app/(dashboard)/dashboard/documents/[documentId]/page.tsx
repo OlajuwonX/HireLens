@@ -8,8 +8,10 @@ import { DocumentEditForm } from "@/features/documents/components/document-edit-
 import { documentTypeLabels, type DOCUMENT_TYPES } from "@/features/documents/constants";
 import {
   documentIsInResumeLibrary,
+  getDocumentActivity,
   getOwnedDocument,
 } from "@/features/documents/server/document.service";
+import { DocumentActivityLog } from "@/features/documents/components/document-activity";
 import { BackButton } from "@/components/layout/back-button";
 
 export const metadata: Metadata = {
@@ -29,7 +31,10 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     notFound();
   }
 
-  const inLibrary = await documentIsInResumeLibrary({ userId: user.id, row });
+  const [inLibrary, activities] = await Promise.all([
+    documentIsInResumeLibrary({ userId: user.id, row }),
+    getDocumentActivity({ userId: user.id, documentId: row.document.id }),
+  ]);
 
   const {
     document,
@@ -90,6 +95,13 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
               <span className="font-medium text-text-primary">Created: </span>
               {document.createdAt.toLocaleDateString()}
             </p>
+
+            <div className="space-y-2 border-t border-border pt-3">
+              <p className="font-mono text-system uppercase text-text-muted">
+                Activity
+              </p>
+              <DocumentActivityLog activities={activities} />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -10,8 +11,10 @@ import type { ResumeVersion } from "@/lib/db/schema";
 
 export function ResumeVersionList({
   versions,
+  resumePublicId,
 }: {
   versions: ResumeVersion[];
+  resumePublicId: string;
 }) {
   if (versions.length === 0) {
     return (
@@ -56,7 +59,18 @@ export function ResumeVersionList({
               </p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Button asChild variant="outline" size="compact">
+                <a
+                  href={`/dashboard/resumes/${resumePublicId}/versions/${version.publicId}/view`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Eye className="size-4" aria-hidden />
+                  View
+                </a>
+              </Button>
+
               {version.isDefault ? null : (
                 <form action={setDefaultResumeVersionAction}>
                   <input

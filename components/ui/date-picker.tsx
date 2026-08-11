@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./button";
 import { CalendarDays, X } from "lucide-react";
 import { Calendar, type CalendarSelection } from "./calendar";
 import { formatDisplayDate, formatRangeLabel } from "@/lib/date/calendar";
@@ -143,8 +144,15 @@ export function DateRangePicker({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState({ from, to });
   const ref = useDismiss(open, () => setOpen(false));
   const label = formatRangeLabel(from || null, to || null);
+
+  useEffect(() => {
+    if (open) {
+      setDraft({ from, to });
+    }
+  }, [open, from, to]);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
@@ -194,21 +202,50 @@ export function DateRangePicker({
         >
           <Calendar
             mode="range"
-            selection={{ from: from || null, to: to || null }}
-            onSelect={(next) => {
-              onChange({ from: next.from ?? "", to: next.to ?? "" });
-
-              if (next.from && next.to) {
-                setOpen(false);
-              }
-            }}
+            selection={{ from: draft.from || null, to: draft.to || null }}
+            onSelect={(next) =>
+              setDraft({ from: next.from ?? "", to: next.to ?? "" })
+            }
             className="max-sm:max-w-none"
           />
-          <p className="mt-2 border-t border-border pt-2 text-label text-text-muted">
-            {from && !to
-              ? "Pick the end of the range."
-              : "Pick a start and end date."}
-          </p>
+
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="text-label text-text-muted">
+              {draft.from && !draft.to
+                ? "Pick the end of the range."
+                : draft.from && draft.to
+                  ? formatRangeLabel(draft.from, draft.to)
+                  : "Select a date range."}
+            </p>
+            <div className="flex shrink-0 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="compact"
+                onClick={() => {
+                  setDraft({ from: "", to: "" });
+                  onChange({ from: "", to: "" });
+                  setOpen(false);
+                }}
+              >
+                Clear
+              </Button>
+              <Button
+                type="button"
+                size="compact"
+                disabled={!draft.from}
+                onClick={() => {
+                  onChange({
+                    from: draft.from,
+                    to: draft.to || draft.from,
+                  });
+                  setOpen(false);
+                }}
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

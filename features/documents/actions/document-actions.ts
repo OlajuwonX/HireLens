@@ -87,7 +87,10 @@ export async function updateDocumentAction(
   revalidatePath("/dashboard/documents");
   revalidatePath(`/dashboard/documents/${parsed.data.publicId}`);
 
-  return { status: "saved", message: "Document saved." };
+  return {
+    status: "saved",
+    message: result.changed ? "Document saved." : "No changes to save.",
+  };
 }
 
 export async function deleteDocumentAction(formData: FormData) {

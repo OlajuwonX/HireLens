@@ -4,6 +4,8 @@ import { and, desc, eq, gte, ilike, inArray, lt, or, type SQL } from "drizzle-or
 import { db } from "@/lib/db/client";
 import {
   applications,
+  documentActivities,
+  documentActivityKind,
   generatedDocuments,
   jobs,
   resumes,
@@ -179,4 +181,77 @@ export async function listDocumentApplicationOptions(userId: string) {
     .innerJoin(jobs, eq(jobs.id, applications.jobId))
     .where(eq(applications.userId, userId))
     .orderBy(desc(applications.lastActivityAt));
+}
+
+export async function listDocumentActivities(input: {
+  userId: string;
+  documentId: string;
+}) {
+  return db
+    .select()
+    .from(documentActivities)
+    .where(
+      and(
+        eq(documentActivities.userId, input.userId),
+        eq(documentActivities.documentId, input.documentId),
+      ),
+    )
+    .orderBy(desc(documentActivities.createdAt));
+}
+
+export async function recordDocumentActivity(input: {
+  userId: string;
+  documentId: string;
+  kind: (typeof documentActivityKind.enumValues)[number];
+}) {
+  await db.insert(documentActivities).values(input);
+}
+
+export async function updateGeneratedDocumentIfChanged(input: {
+  userId: string;
+  publicId: string;
+  editedContent: string;
+}) {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({
+        id: generatedDocuments.id,
+        editedContent: generatedDocuments.editedContent,
+      })
+      .from(generatedDocuments)
+      .where(
+        and(
+          eq(generatedDocuments.userId, input.userId),
+          eq(generatedDocuments.publicId, input.publicId),
+        ),
+      )
+      .limit(1);
+
+    if (!current) {
+      return { document: null, changed: false };
+    }
+
+    if (current.editedContent === input.editedContent) {
+      return { document: current, changed: false };
+    }
+
+    const [document] = await tx
+      .update(generatedDocuments)
+      .set({ editedContent: input.editedContent, updatedAt: new Date() })
+      .where(
+        and(
+          eq(generatedDocuments.userId, input.userId),
+          eq(generatedDocuments.publicId, input.publicId),
+        ),
+      )
+      .returning();
+
+    await tx.insert(documentActivities).values({
+      userId: input.userId,
+      documentId: current.id,
+      kind: "EDITED",
+    });
+
+    return { document, changed: true };
+  });
 }

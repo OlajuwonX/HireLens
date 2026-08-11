@@ -67,28 +67,30 @@ export function ApplicationDrawer({
           </IconButton>
         </header>
 
-        <div
-          role="tablist"
-          aria-label="Application sections"
-          className="hl-scroll flex gap-1 overflow-x-auto border-b border-border px-3"
-        >
-          {TABS.map((name) => (
-            <button
-              key={name}
-              type="button"
-              role="tab"
-              aria-selected={tab === name}
-              onClick={() => setTab(name)}
-              className={cn(
-                "h-10 shrink-0 px-3 text-meta font-medium transition-colors",
-                tab === name
-                  ? "border-b-2 border-accent text-text-primary"
-                  : "text-text-secondary hover:text-text-primary",
-              )}
-            >
-              {name}
-            </button>
-          ))}
+        <div className="shrink-0 border-b border-border bg-surface-secondary p-2 sm:px-4">
+          <div
+            role="tablist"
+            aria-label="Application sections"
+            className="hl-scroll flex gap-1 overflow-x-auto rounded-control border border-border bg-surface p-1"
+          >
+            {TABS.map((name) => (
+              <button
+                key={name}
+                type="button"
+                role="tab"
+                aria-selected={tab === name}
+                onClick={() => setTab(name)}
+                className={cn(
+                  "h-9 flex-1 shrink-0 whitespace-nowrap rounded-control px-3 text-meta font-semibold transition-colors",
+                  tab === name
+                    ? "bg-accent text-accent-text"
+                    : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary",
+                )}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="hl-scroll flex-1 overflow-y-auto p-4 sm:p-5">

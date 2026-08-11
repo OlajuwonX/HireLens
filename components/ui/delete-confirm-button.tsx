@@ -1,5 +1,7 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+import { useState, useTransition, type ComponentType } from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { notify } from "@/components/ui/toast";
-import { Trash2 } from "lucide-react";
-import type { ComponentType } from "react";
+import { cn } from "@/lib/utils";
 
 export function DeleteConfirmButton({
   action,
@@ -22,6 +23,7 @@ export function DeleteConfirmButton({
   fieldName = "publicId",
   toastLabel,
   icon: Icon = Trash2,
+  className,
 }: {
   action: (formData: FormData) => void | Promise<void>;
   publicId: string;
@@ -31,14 +33,23 @@ export function DeleteConfirmButton({
   fieldName?: string;
   toastLabel?: string;
   icon?: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  if (removed) {
+    return null;
+  }
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <IconButton
           label={confirmLabel}
           variant="danger"
-          className="rounded-none bg-danger text-danger-text hover:bg-danger/90"
+          className={cn("rounded-none", className)}
         >
           <Icon className="size-4" aria-hidden />
         </IconButton>
@@ -52,26 +63,51 @@ export function DeleteConfirmButton({
             {description}
           </DialogDescription>
         </div>
-        <form
-          action={async (formData: FormData) => {
-            await action(formData);
-
-            if (toastLabel) {
-              notify.deleted(toastLabel);
-            }
-          }}
-          className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
-        >
-          <input type="hidden" name={fieldName} value={publicId} />
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={pending}>
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" variant="danger">
+          <Button
+            type="button"
+            variant="danger"
+            disabled={pending}
+            onClick={() => {
+              const formData = new FormData();
+
+              formData.set(fieldName, publicId);
+              setOpen(false);
+              setRemoved(true);
+
+              startTransition(async () => {
+                try {
+                  await action(formData);
+
+                  if (toastLabel) {
+                    notify.deleted(toastLabel);
+                  }
+                } catch (error) {
+                  if (
+                    error instanceof Error &&
+                    error.message.includes("NEXT_REDIRECT")
+                  ) {
+                    return;
+                  }
+
+                  setRemoved(false);
+                  notify.error(
+                    toastLabel
+                      ? `${toastLabel} could not be deleted.`
+                      : "That item could not be deleted.",
+                  );
+                }
+              });
+            }}
+          >
             {confirmLabel}
           </Button>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

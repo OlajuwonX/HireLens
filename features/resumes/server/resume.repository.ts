@@ -62,10 +62,18 @@ export async function renameResumeForUser(input: {
   return resume ?? null;
 }
 
-export async function archiveResumeForUser(input: { userId: string; publicId: string }) {
+export async function archiveResumeForUser(input: {
+  userId: string;
+  publicId: string;
+  archived: boolean;
+}) {
   const [resume] = await db
     .update(resumes)
-    .set({ status: "ARCHIVED", archivedAt: new Date(), updatedAt: new Date() })
+    .set({
+      status: input.archived ? "ARCHIVED" : "READY",
+      archivedAt: input.archived ? new Date() : null,
+      updatedAt: new Date(),
+    })
     .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
     .returning();
 

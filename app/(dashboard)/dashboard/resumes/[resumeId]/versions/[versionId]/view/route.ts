@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { findDocumentRowForUser } from "@/features/documents/server/document.repository";
+import { findResumeVersionForUser } from "@/features/resumes/server/resume-version.repository";
 import { readImprovedResumeBytes } from "@/features/documents/server/improved-resume.service";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ documentId: string }> },
+  { params }: { params: Promise<{ versionId: string }> },
 ) {
   const user = await requireDatabaseUser();
-  const { documentId } = await params;
+  const { versionId } = await params;
 
-  const row = await findDocumentRowForUser({
+  const version = await findResumeVersionForUser({
     userId: user.id,
-    publicId: documentId,
+    publicId: versionId,
   });
 
-  if (!row?.document.fileAssetId) {
+  if (!version) {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const file = await readImprovedResumeBytes({
     userId: user.id,
-    fileAssetId: row.document.fileAssetId,
+    fileAssetId: version.fileAssetId,
   });
 
   if (!file) {
@@ -32,7 +32,7 @@ export async function GET(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Length": String(file.bytes.byteLength),
-      "Content-Disposition": `attachment; filename="${file.filename.replace(/"/g, "")}"`,
+      "Content-Disposition": `inline; filename="${file.filename.replace(/"/g, "")}"`,
       "Cache-Control": "private, no-store",
     },
   });

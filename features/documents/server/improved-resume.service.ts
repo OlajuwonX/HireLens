@@ -154,3 +154,23 @@ export async function copyImprovedResumeToVersion(input: {
     throw error;
   }
 }
+
+export async function readImprovedResumeBytes(input: {
+  userId: string;
+  fileAssetId: string;
+  storageProvider?: StorageProvider;
+}) {
+  const asset = await findFileAssetById({
+    userId: input.userId,
+    id: input.fileAssetId,
+  });
+
+  if (!asset || asset.deletedAt) {
+    return null;
+  }
+
+  const storage = input.storageProvider ?? getStorageProvider();
+  const bytes = await storage.readFile(asset.storageKey);
+
+  return { bytes, filename: asset.originalFilename ?? "resume.pdf" };
+}

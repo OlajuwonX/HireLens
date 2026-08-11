@@ -238,7 +238,7 @@ export function SaveAndAnalyzeForm({
             id="description"
             name="description"
             required
-            rows={14}
+            rows={12}
             maxLength={50_000}
             className="min-h-64"
           />

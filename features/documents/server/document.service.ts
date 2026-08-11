@@ -25,9 +25,11 @@ import {
   createGeneratedDocument,
   deleteGeneratedDocumentForUser,
   findDocumentRowForUser,
+  listDocumentActivities,
+  recordDocumentActivity,
+  updateGeneratedDocumentIfChanged,
   listDocumentApplicationOptions,
   listDocumentsForUser,
-  updateGeneratedDocumentForUser,
 } from "./document.repository";
 
 export async function getDocumentBoard(input: {
@@ -121,6 +123,12 @@ export async function saveAnalysisView(input: {
     promptVersion: analysis.promptVersion,
     originalContent: content,
     editedContent: content,
+  });
+
+  await recordDocumentActivity({
+    userId: input.userId,
+    documentId: document.id,
+    kind: "CREATED",
   });
 
   return { ok: true as const, document };
@@ -217,6 +225,12 @@ export async function addImprovedResumeToLibrary(input: {
       label: improvedResumeVersionLabel(row.jobTitle),
     });
 
+    await recordDocumentActivity({
+      userId: input.userId,
+      documentId: row.document.id,
+      kind: "ADDED_TO_LIBRARY",
+    });
+
     return { ok: true as const, version };
   } catch (error) {
     console.error("Improved resume add-back failed", {
@@ -236,17 +250,24 @@ export async function updateOwnedDocument(input: {
   userId: string;
   values: UpdateDocumentInput;
 }) {
-  const document = await updateGeneratedDocumentForUser({
+  const result = await updateGeneratedDocumentIfChanged({
     userId: input.userId,
     publicId: input.values.publicId,
     editedContent: input.values.editedContent,
   });
 
-  if (!document) {
+  if (!result.document) {
     return { ok: false as const, message: "That document could not be found." };
   }
 
-  return { ok: true as const, document };
+  return { ok: true as const, changed: result.changed };
+}
+
+export async function getDocumentActivity(input: {
+  userId: string;
+  documentId: string;
+}) {
+  return listDocumentActivities(input);
 }
 
 export async function documentIsInResumeLibrary(input: {

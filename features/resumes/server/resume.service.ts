@@ -37,7 +37,11 @@ export async function renameOwnedResume(input: {
   return renameResumeForUser(input);
 }
 
-export async function archiveOwnedResume(input: { userId: string; publicId: string }) {
+export async function archiveOwnedResume(input: {
+  userId: string;
+  publicId: string;
+  archived: boolean;
+}) {
   return archiveResumeForUser(input);
 }
 

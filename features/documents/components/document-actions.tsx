@@ -79,7 +79,7 @@ export function DocumentActions({
 
       {hasFile ? (
         <Button asChild variant="outline">
-          <a href={`/dashboard/documents/${publicId}/download`} rel="noopener">
+          <a href={`/dashboard/documents/${publicId}/download`} download>
             <Download className="size-4" aria-hidden />
             Download PDF
           </a>

@@ -54,7 +54,11 @@ export async function archiveResumeAction(formData: FormData) {
     publicId: getRequiredFormValue(formData, "publicId"),
   });
 
-  await archiveOwnedResume({ userId: user.id, publicId: input.publicId });
+  await archiveOwnedResume({
+    userId: user.id,
+    publicId: input.publicId,
+    archived: formData.get("archived") !== "false",
+  });
   revalidatePath("/dashboard/resumes");
   revalidatePath(`/dashboard/resumes/${input.publicId}`);
 }
