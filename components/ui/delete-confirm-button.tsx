@@ -33,7 +33,7 @@ export function DeleteConfirmButton({
         <IconButton
           label={confirmLabel}
           variant="danger"
-          className="rounded-none bg-danger text-white hover:bg-danger/90"
+          className="rounded-none bg-danger text-danger-text hover:bg-danger/90"
         >
           <Icon className="size-4" aria-hidden />
         </IconButton>

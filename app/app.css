@@ -22,8 +22,11 @@
   --color-action-dark: var(--hl-action-dark);
   --color-action-dark-text: var(--hl-action-dark-text);
   --color-danger: var(--hl-danger);
+  --color-danger-text: var(--hl-danger-text);
   --color-warning: var(--hl-warning);
+  --color-warning-text: var(--hl-warning-text);
   --color-info: var(--hl-info);
+  --color-info-text: var(--hl-info-text);
 
   --text-display: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
   --text-display--line-height: 1.08;
@@ -73,9 +76,12 @@
   --hl-accent-text: #142006;
   --hl-action-dark: #161a18;
   --hl-action-dark-text: #ffffff;
-  --hl-danger: #d94848;
-  --hl-warning: #d79b2e;
-  --hl-info: #4e7cbd;
+  --hl-danger: #da2b2b;
+  --hl-danger-text: #ffffff;
+  --hl-warning: #8a5a00;
+  --hl-warning-text: #ffffff;
+  --hl-info: #2c5fa8;
+  --hl-info-text: #ffffff;
   color-scheme: light;
 }
 
@@ -95,6 +101,12 @@
   --hl-accent-text: #11180a;
   --hl-action-dark: #f3f5f2;
   --hl-action-dark-text: #11180a;
+  --hl-danger: #f2a3a0;
+  --hl-danger-text: #3d0a0a;
+  --hl-warning: #e8bd6d;
+  --hl-warning-text: #2b1d00;
+  --hl-info: #9cc0f5;
+  --hl-info-text: #0b1f3d;
   color-scheme: dark;
 }
 

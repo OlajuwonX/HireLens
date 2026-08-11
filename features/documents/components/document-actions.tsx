@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { Check, Copy, Download, Library } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import {
@@ -59,10 +58,13 @@ export function DocumentActions({
 
         {hasFile ? (
           <Button asChild variant="outline">
-            <Link href={`/dashboard/documents/${publicId}/download`}>
+            <a
+              href={`/dashboard/documents/${publicId}/download`}
+              rel="noopener"
+            >
               <Download className="size-4" aria-hidden />
               Download PDF
-            </Link>
+            </a>
           </Button>
         ) : null}
 

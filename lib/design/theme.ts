@@ -17,8 +17,11 @@ export type ColorRole =
   | "actionDark"
   | "actionDarkText"
   | "danger"
+  | "dangerText"
   | "warning"
-  | "info";
+  | "warningText"
+  | "info"
+  | "infoText";
 
 export type Palette = Record<ColorRole, string>;
 
@@ -38,9 +41,12 @@ export const light: Palette = {
   accentText: "#142006",
   actionDark: "#161A18",
   actionDarkText: "#FFFFFF",
-  danger: "#D94848",
-  warning: "#D79B2E",
-  info: "#4E7CBD",
+  danger: "#DA2B2B",
+  dangerText: "#FFFFFF",
+  warning: "#8A5A00",
+  warningText: "#FFFFFF",
+  info: "#2C5FA8",
+  infoText: "#FFFFFF",
 };
 
 export const dark: Palette = {
@@ -59,9 +65,12 @@ export const dark: Palette = {
   accentText: "#11180A",
   actionDark: "#F3F5F2",
   actionDarkText: "#11180A",
-  danger: "#D94848",
-  warning: "#D79B2E",
-  info: "#4E7CBD",
+  danger: "#F2A3A0",
+  dangerText: "#3D0A0A",
+  warning: "#E8BD6D",
+  warningText: "#2B1D00",
+  info: "#9CC0F5",
+  infoText: "#0B1F3D",
 };
 
 export const palettes: Record<ThemeMode, Palette> = { light, dark };

@@ -70,6 +70,57 @@ function panelFor(
   }
 }
 
+function AiResultCard({
+  view,
+  applicationPublicId,
+  result,
+}: {
+  view: AiView;
+  applicationPublicId: string;
+  result: StoredApplicationIntelligence;
+}) {
+  const Icon = icons[view];
+  const populated = viewIsPopulated(result, view);
+  const content = viewToPlainText(result, view);
+
+  return (
+    <AiDocumentModal
+      title={aiViewLabels[view]}
+      description={descriptions[view]}
+      content={content}
+      footer={
+        <SaveDocumentButton
+          applicationPublicId={applicationPublicId}
+          view={view}
+        />
+      }
+      trigger={
+        <Button
+          type="button"
+          variant="outline"
+          size="row"
+          align="start"
+          block
+          disabled={!populated}
+          className="h-auto min-h-12 items-start py-2"
+        >
+          <Icon className="mt-0.5 size-4" aria-hidden />
+          <span className="min-w-0">
+            <span className="block text-meta font-semibold">
+              {aiViewLabels[view]}
+            </span>
+            <span className="block text-label font-normal text-text-secondary">
+              {populated ? descriptions[view] : "Not returned"}
+            </span>
+          </span>
+        </Button>
+      }
+    >
+      {panelFor(view, result)}
+    </AiDocumentModal>
+  );
+}
+
 export function ApplicationAiActions({
   applicationPublicId,
   result,
@@ -103,49 +154,14 @@ export function ApplicationAiActions({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        {AI_VIEWS.map((view) => {
-          const Icon = icons[view];
-          const populated = viewIsPopulated(result, view);
-          const content = viewToPlainText(result, view);
-
-          return (
-            <AiDocumentModal
-              key={view}
-              title={aiViewLabels[view]}
-              description={descriptions[view]}
-              content={content}
-              footer={
-                <SaveDocumentButton
-                  applicationPublicId={applicationPublicId}
-                  view={view}
-                />
-              }
-              trigger={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="row"
-                  align="start"
-                  block
-                  disabled={!populated}
-                  className="h-auto min-h-12 items-start py-2"
-                >
-                  <Icon className="mt-0.5 size-4" aria-hidden />
-                  <span className="min-w-0">
-                    <span className="block text-meta font-semibold">
-                      {aiViewLabels[view]}
-                    </span>
-                    <span className="block text-label font-normal text-text-secondary">
-                      {populated ? descriptions[view] : "Not returned"}
-                    </span>
-                  </span>
-                </Button>
-              }
-            >
-              {panelFor(view, result)}
-            </AiDocumentModal>
-          );
-        })}
+        {AI_VIEWS.map((view) => (
+          <AiResultCard
+            key={view}
+            view={view}
+            applicationPublicId={applicationPublicId}
+            result={result}
+          />
+        ))}
       </div>
 
       <p className="flex items-center gap-1.5 text-label text-text-muted">

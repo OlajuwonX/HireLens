@@ -1,20 +1,21 @@
-import * as React from "react";
+import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-2 whitespace-nowrap font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center gap-2 cursor-pointer whitespace-nowrap font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        primary: "rounded-none bg-accent text-accent-text hover:bg-accent-hover",
+        primary:
+          "rounded-none bg-accent text-accent-text hover:bg-accent-hover",
         dark: "rounded-none bg-action-dark text-action-dark-text hover:opacity-90",
         outline:
           "rounded-none border border-border-strong bg-surface text-text-primary hover:bg-surface-elevated",
         ghost:
           "rounded-control text-text-secondary hover:bg-surface-secondary hover:text-text-primary",
-        danger: "rounded-none bg-danger text-white hover:opacity-90",
+        danger: "rounded-none bg-danger text-danger-text hover:opacity-90",
         segment:
           "rounded-none text-text-secondary hover:bg-surface-elevated hover:text-text-primary",
         segmentActive: "rounded-none bg-accent text-accent-text",
