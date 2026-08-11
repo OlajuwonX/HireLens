@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/layout/back-button";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
@@ -35,6 +36,8 @@ export default async function ResumeDetailPage({
 
   return (
     <div className="space-y-6">
+      <BackButton href="/dashboard/resumes" label="Resumes" />
+
       <PageHeader
         title={resume.title}
         description="Every version in this resume group. The default is used when you create an application."

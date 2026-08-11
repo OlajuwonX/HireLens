@@ -1,5 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+"use client";
+
+import { useState, useTransition } from "react";
+import { Dropdown } from "@/components/ui/dropdown";
+import { notify } from "@/components/ui/toast";
 import { changeApplicationStatusAction } from "@/features/applications/actions/application-actions";
 import {
   APPLICATION_STATUSES,
@@ -16,27 +19,41 @@ export function StatusSelectForm({
   status: ApplicationStatus;
   selectId: string;
 }) {
+  const [current, setCurrent] = useState<ApplicationStatus>(status);
+  const [pending, startTransition] = useTransition();
+
   return (
-    <form action={changeApplicationStatusAction} className="flex gap-2">
-      <input type="hidden" name="publicId" value={publicId} />
-      <label className="sr-only" htmlFor={selectId}>
-        Application status
-      </label>
-      <Select
-        id={selectId}
-        name="status"
-        defaultValue={status}
-        className="h-8 w-auto min-w-28 text-meta"
-      >
-        {APPLICATION_STATUSES.map((value) => (
-          <option key={value} value={value}>
-            {applicationStatusLabels[value]}
-          </option>
-        ))}
-      </Select>
-      <Button type="submit" variant="outline" size="compact">
-        Update
-      </Button>
-    </form>
+    <Dropdown
+      id={selectId}
+      label="Application status"
+      className="w-40"
+      disabled={pending}
+      value={current}
+      onChange={(next) => {
+        const previous = current;
+
+        setCurrent(next as ApplicationStatus);
+
+        const formData = new FormData();
+        formData.set("publicId", publicId);
+        formData.set("status", next);
+
+        startTransition(async () => {
+          try {
+            await changeApplicationStatusAction(formData);
+            notify.success(
+              `Status updated to ${applicationStatusLabels[next as ApplicationStatus]}.`,
+            );
+          } catch {
+            setCurrent(previous);
+            notify.error("That status could not be updated.");
+          }
+        });
+      }}
+      options={APPLICATION_STATUSES.map((value) => ({
+        value,
+        label: applicationStatusLabels[value],
+      }))}
+    />
   );
 }

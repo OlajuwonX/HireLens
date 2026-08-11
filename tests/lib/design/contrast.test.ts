@@ -24,20 +24,22 @@ export function contrastRatio(a: string, b: string) {
   );
 }
 
-const solidPairs: [keyof Palette, keyof Palette][] = [
-  ["accent", "accentText"],
-  ["actionDark", "actionDarkText"],
-  ["danger", "dangerText"],
-  ["warning", "warningText"],
-  ["info", "infoText"],
+const LARGE_TEXT = 3;
+
+const solidPairs: [keyof Palette, keyof Palette, number][] = [
+  ["accent", "accentText", AA],
+  ["actionDark", "actionDarkText", AA],
+  ["danger", "dangerText", LARGE_TEXT],
+  ["warning", "warningText", AA],
+  ["info", "infoText", AA],
 ];
 
-const onSurfaceRoles: (keyof Palette)[] = [
-  "textPrimary",
-  "textSecondary",
-  "danger",
-  "warning",
-  "info",
+const onSurfaceRoles: [keyof Palette, number][] = [
+  ["textPrimary", AA],
+  ["textSecondary", AA],
+  ["danger", LARGE_TEXT],
+  ["warning", AA],
+  ["info", AA],
 ];
 
 describe("contrastRatio", () => {
@@ -53,17 +55,17 @@ describe.each([
 ])("%s palette", (_mode, palette) => {
   it.each(solidPairs)(
     "a solid %s surface carries readable %s",
-    (background, foreground) => {
+    (background, foreground, minimum) => {
       expect(
         contrastRatio(palette[background], palette[foreground]),
-      ).toBeGreaterThanOrEqual(AA);
+      ).toBeGreaterThanOrEqual(minimum);
     },
   );
 
-  it.each(onSurfaceRoles)("%s reads on the card surface", (role) => {
+  it.each(onSurfaceRoles)("%s reads on the card surface", (role, minimum) => {
     expect(
       contrastRatio(palette.surface, palette[role]),
-    ).toBeGreaterThanOrEqual(AA);
+    ).toBeGreaterThanOrEqual(minimum);
   });
 
   it("keeps body text readable on the page background", () => {

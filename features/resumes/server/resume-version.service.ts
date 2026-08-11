@@ -5,8 +5,11 @@ import { StorageProviderError } from "@/lib/storage";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { ResumeVersion } from "@/lib/db/schema";
 import { getOwnedResume } from "./resume.service";
+import { findFileAssetById } from "@/features/files/server/file-asset.repository";
 import {
+  countResumeVersions,
   createResumeVersionWithFileAsset,
+  deleteResumeVersionForUser,
   findResumeVersionForUser,
   listAllResumeVersionsForUser,
   listResumeVersionsForUser,
@@ -156,4 +159,53 @@ export async function setOwnedDefaultResumeVersion(input: {
     resumeId: version.resumeId,
     versionId: version.id,
   });
+}
+
+export async function deleteOwnedResumeVersion(input: {
+  userId: string;
+  versionPublicId: string;
+  storageProvider?: StorageProvider;
+}) {
+  const version = await findResumeVersionForUser({
+    userId: input.userId,
+    publicId: input.versionPublicId,
+  });
+
+  if (!version) {
+    return { ok: false as const, message: "That version could not be found." };
+  }
+
+  const remaining = await countResumeVersions({
+    userId: input.userId,
+    resumeId: version.resumeId,
+  });
+
+  if (remaining <= 1) {
+    return {
+      ok: false as const,
+      message: "A resume group needs at least one version.",
+    };
+  }
+
+  const fileAsset = await findFileAssetById({
+    userId: input.userId,
+    id: version.fileAssetId,
+  });
+
+  const deleted = await deleteResumeVersionForUser({
+    userId: input.userId,
+    versionId: version.id,
+  });
+
+  if (!deleted) {
+    return { ok: false as const, message: "That version could not be deleted." };
+  }
+
+  if (fileAsset) {
+    const storage = input.storageProvider ?? getStorageProvider();
+
+    await storage.deleteFile(fileAsset.storageKey).catch(() => undefined);
+  }
+
+  return { ok: true as const, label: version.label };
 }

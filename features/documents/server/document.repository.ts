@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, lt, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   applications,
@@ -34,15 +34,59 @@ const rowShape = {
   versionPublicId: resumeVersions.publicId,
 };
 
-export async function listDocumentsForUser(userId: string): Promise<DocumentRow[]> {
+export type DocumentFilters = {
+  q?: string;
+  type?: string;
+  from?: string;
+  to?: string;
+};
+
+export async function listDocumentsForUser(
+  userId: string,
+  filters: DocumentFilters = {},
+  limit = 24,
+  cursor?: string,
+): Promise<DocumentRow[]> {
+  const conditions: (SQL | undefined)[] = [eq(generatedDocuments.userId, userId)];
+
+  if (filters.q) {
+    const term = `%${filters.q}%`;
+
+    conditions.push(or(ilike(jobs.title, term), ilike(jobs.company, term)));
+  }
+
+  if (filters.type) {
+    conditions.push(
+      inArray(generatedDocuments.type, [
+        filters.type as (typeof generatedDocuments.type.enumValues)[number],
+      ]),
+    );
+  }
+
+  if (filters.from) {
+    conditions.push(gte(generatedDocuments.createdAt, new Date(filters.from)));
+  }
+
+  if (filters.to) {
+    const end = new Date(filters.to);
+
+    end.setDate(end.getDate() + 1);
+    conditions.push(lt(generatedDocuments.createdAt, end));
+  }
+
+  if (cursor) {
+    conditions.push(lt(generatedDocuments.createdAt, new Date(cursor)));
+  }
+
   return db
     .select(rowShape)
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
     .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
     .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
-    .where(eq(generatedDocuments.userId, userId))
-    .orderBy(desc(generatedDocuments.updatedAt));
+    .where(and(...conditions))
+    .orderBy(desc(generatedDocuments.createdAt))
+    .limit(limit);
 }
 
 export async function listDocumentsForApplication(input: {

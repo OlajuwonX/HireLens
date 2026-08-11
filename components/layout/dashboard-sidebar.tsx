@@ -4,6 +4,7 @@ import { Button, IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { SidebarNav } from "./sidebar-nav";
@@ -12,12 +13,21 @@ function Brand({ collapsed }: { collapsed: boolean }) {
   return (
     <Link
       href="/dashboard"
+      aria-label="HireLens"
       className={cn(
-        "flex h-10 items-center text-section-title font-semibold text-text-primary",
+        "flex h-10 items-center gap-2 text-section-title font-semibold text-text-primary",
         collapsed ? "justify-center px-0" : "px-3",
       )}
     >
-      {collapsed ? "HL" : "HireLens"}
+      <Image
+        src="/hllogo.png"
+        alt=""
+        width={28}
+        height={28}
+        priority
+        className="size-7 shrink-0 rounded-control object-contain"
+      />
+      {collapsed ? null : <span className="truncate">HireLens</span>}
     </Link>
   );
 }

@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { notify } from "@/components/ui/toast";
 
-export function CopyContentButton({ content }: { content: string }) {
+export function CopyContentButton({
+  content,
+  label,
+}: {
+  content: string;
+  label: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -22,6 +28,7 @@ export function CopyContentButton({ content }: { content: string }) {
       disabled={!content}
       onClick={async () => {
         await navigator.clipboard.writeText(content);
+        notify.copied(label);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
@@ -55,35 +62,42 @@ export function PlainTextPanel({ content }: { content: string }) {
 export function AiDocumentModal({
   trigger,
   title,
-  description,
   content,
   children,
   footer,
+  downloadHref,
 }: {
   trigger: ReactNode;
   title: string;
-  description: string;
   content: string;
   children: ReactNode;
   footer?: ReactNode;
+  downloadHref?: string;
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <div className="space-y-1.5 pr-8">
+      <DialogContent className="flex max-h-[88vh] flex-col gap-0 p-0 sm:max-w-2xl">
+        <div className="border-b border-border p-4 pr-12 sm:p-5">
           <DialogTitle className="text-section-title font-semibold text-text-primary">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-meta text-text-secondary">
-            {description}
-          </DialogDescription>
         </div>
 
-        <div className="mt-5">{children}</div>
+        <div className="hl-scroll min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+          {children}
+        </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-          <CopyContentButton content={content} />
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border p-4 sm:p-5">
+          <CopyContentButton content={content} label={title} />
+          {downloadHref ? (
+            <Button asChild variant="outline" size="compact">
+              <a href={downloadHref} rel="noopener">
+                <Download className="size-4" aria-hidden />
+                Download PDF
+              </a>
+            </Button>
+          ) : null}
           {footer}
         </div>
       </DialogContent>

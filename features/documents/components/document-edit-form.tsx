@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { notify } from "@/components/ui/toast";
 import { updateDocumentAction } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
 
@@ -28,6 +29,21 @@ export function DocumentEditForm({
     updateDocumentAction,
     initialDocumentFormState,
   );
+  const announced = useRef(initialDocumentFormState);
+
+  useEffect(() => {
+    if (state === announced.current || state.status === "idle") {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "error") {
+      notify.error(state.message);
+    } else {
+      notify.saved("Document");
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="space-y-4">

@@ -1,7 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { setDefaultResumeVersionAction } from "@/features/resumes/actions/resume-version-actions";
+import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
+import {
+  deleteResumeVersionAction,
+  setDefaultResumeVersionAction,
+} from "@/features/resumes/actions/resume-version-actions";
 import type { ResumeVersion } from "@/lib/db/schema";
 
 export function ResumeVersionList({
@@ -52,18 +56,31 @@ export function ResumeVersionList({
               </p>
             </div>
 
-            {version.isDefault ? null : (
-              <form action={setDefaultResumeVersionAction}>
-                <input
-                  type="hidden"
-                  name="versionPublicId"
-                  value={version.publicId}
+            <div className="flex shrink-0 items-center gap-2">
+              {version.isDefault ? null : (
+                <form action={setDefaultResumeVersionAction}>
+                  <input
+                    type="hidden"
+                    name="versionPublicId"
+                    value={version.publicId}
+                  />
+                  <Button type="submit" variant="outline" size="compact">
+                    Make default
+                  </Button>
+                </form>
+              )}
+
+              {versions.length > 1 ? (
+                <DeleteConfirmButton
+                  action={deleteResumeVersionAction}
+                  publicId={version.publicId}
+                  fieldName="versionPublicId"
+                  title={`Delete "${version.label}"?`}
+                  description="This removes the version and its stored PDF. Applications already analysed against it keep their results."
+                  toastLabel={version.label}
                 />
-                <Button type="submit" variant="outline" size="compact">
-                  Make default
-                </Button>
-              </form>
-            )}
+              ) : null}
+            </div>
           </li>
         );
       })}

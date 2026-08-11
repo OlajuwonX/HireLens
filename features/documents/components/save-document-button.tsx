@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { Save } from "lucide-react";
+import { Check, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { notify } from "@/components/ui/toast";
 import type { AiView } from "@/features/analyses/server/analysis.mapper";
 import { saveAnalysisViewAction } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
@@ -22,28 +23,43 @@ function SubmitButton() {
 export function SaveDocumentButton({
   applicationPublicId,
   view,
+  alreadySaved,
 }: {
   applicationPublicId: string;
   view: AiView;
+  alreadySaved: boolean;
 }) {
   const [state, action] = useActionState(
     saveAnalysisViewAction,
     initialDocumentFormState,
   );
+  const announced = useRef(initialDocumentFormState);
+
+  useEffect(() => {
+    if (state === announced.current || state.status === "idle") {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "error") {
+      notify.error(state.message);
+    } else {
+      notify.success(state.message);
+    }
+  }, [state]);
+
+  if (alreadySaved || state.status === "saved") {
+    return (
+      <Button type="button" size="compact" variant="outline" disabled>
+        <Check className="size-4" aria-hidden />
+        Saved to AI Documents
+      </Button>
+    );
+  }
 
   return (
-    <form action={action} className="flex items-center gap-3">
-      {state.status !== "idle" ? (
-        <span
-          className={
-            state.status === "error"
-              ? "text-label text-danger"
-              : "text-label text-text-secondary"
-          }
-        >
-          {state.message}
-        </span>
-      ) : null}
+    <form action={action}>
       <input type="hidden" name="view" value={view} />
       <input
         type="hidden"

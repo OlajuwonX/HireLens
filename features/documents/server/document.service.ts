@@ -11,7 +11,9 @@ import {
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
 import { getOwnedApplication } from "@/features/applications/server/application.service";
+import { resumeVersionExistsWithLabel } from "@/features/resumes/server/resume-version.repository";
 import type { UpdateDocumentInput } from "../schemas/document.schema";
+import type { DocumentFilters } from "./document.repository";
 import { documentTypeForView } from "../constants";
 import {
   buildImprovedResumePdf,
@@ -28,8 +30,18 @@ import {
   updateGeneratedDocumentForUser,
 } from "./document.repository";
 
-export async function getDocumentBoard(userId: string) {
-  return listDocumentsForUser(userId);
+export async function getDocumentBoard(input: {
+  userId: string;
+  filters?: DocumentFilters;
+  limit?: number;
+  cursor?: string;
+}) {
+  return listDocumentsForUser(
+    input.userId,
+    input.filters,
+    input.limit,
+    input.cursor,
+  );
 }
 
 export async function getOwnedDocument(input: {
@@ -235,4 +247,21 @@ export async function updateOwnedDocument(input: {
   }
 
   return { ok: true as const, document };
+}
+
+export async function documentIsInResumeLibrary(input: {
+  userId: string;
+  row: Awaited<ReturnType<typeof findDocumentRowForUser>>;
+}) {
+  const { row } = input;
+
+  if (!row || row.document.type !== "IMPROVED_RESUME" || !row.resumeId) {
+    return false;
+  }
+
+  return resumeVersionExistsWithLabel({
+    userId: input.userId,
+    resumeId: row.resumeId,
+    label: improvedResumeVersionLabel(row.jobTitle),
+  });
 }

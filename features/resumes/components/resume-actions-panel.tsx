@@ -47,6 +47,7 @@ export function ResumeActionsPanel({ resume }: { resume: Resume }) {
           title={`Delete ${resume.title}?`}
           description="This will permanently delete the resume record, versions, related files and analysis history. This action cannot be undone."
           confirmLabel="Delete resume"
+          toastLabel={resume.title}
         />
       </div>
     </div>

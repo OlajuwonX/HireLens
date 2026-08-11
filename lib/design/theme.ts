@@ -41,7 +41,7 @@ export const light: Palette = {
   accentText: "#142006",
   actionDark: "#161A18",
   actionDarkText: "#FFFFFF",
-  danger: "#DA2B2B",
+  danger: "#D94848",
   dangerText: "#FFFFFF",
   warning: "#8A5A00",
   warningText: "#FFFFFF",

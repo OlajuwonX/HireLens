@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, max } from "drizzle-orm";
+import { and, count, desc, eq, max } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   fileAssets,
@@ -173,4 +173,84 @@ export async function setDefaultResumeVersionForUser(input: {
 
     return version;
   });
+}
+
+export async function countResumeVersions(input: {
+  userId: string;
+  resumeId: string;
+}) {
+  const [row] = await db
+    .select({ value: count() })
+    .from(resumeVersions)
+    .where(
+      and(
+        eq(resumeVersions.userId, input.userId),
+        eq(resumeVersions.resumeId, input.resumeId),
+      ),
+    );
+
+  return row?.value ?? 0;
+}
+
+export async function deleteResumeVersionForUser(input: {
+  userId: string;
+  versionId: string;
+}) {
+  return db.transaction(async (tx) => {
+    const [version] = await tx
+      .delete(resumeVersions)
+      .where(
+        and(
+          eq(resumeVersions.userId, input.userId),
+          eq(resumeVersions.id, input.versionId),
+        ),
+      )
+      .returning();
+
+    if (!version) {
+      return null;
+    }
+
+    await tx
+      .update(resumes)
+      .set({ defaultVersionId: null, updatedAt: new Date() })
+      .where(
+        and(
+          eq(resumes.userId, input.userId),
+          eq(resumes.defaultVersionId, input.versionId),
+        ),
+      );
+
+    await tx
+      .update(fileAssets)
+      .set({ deletedAt: new Date() })
+      .where(
+        and(
+          eq(fileAssets.userId, input.userId),
+          eq(fileAssets.id, version.fileAssetId),
+        ),
+      );
+
+    return version;
+  });
+}
+
+export async function resumeVersionExistsWithLabel(input: {
+  userId: string;
+  resumeId: string;
+  label: string;
+}) {
+  const [row] = await db
+    .select({ id: resumeVersions.id })
+    .from(resumeVersions)
+    .where(
+      and(
+        eq(resumeVersions.userId, input.userId),
+        eq(resumeVersions.resumeId, input.resumeId),
+        eq(resumeVersions.label, input.label),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(row);
 }

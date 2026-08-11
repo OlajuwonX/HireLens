@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import {
   createOwnedResumeVersionFromUpload,
+  deleteOwnedResumeVersion,
   setOwnedDefaultResumeVersion,
 } from "@/features/resumes/server/resume-version.service";
 import {
@@ -82,6 +83,22 @@ export async function setDefaultResumeVersionAction(formData: FormData) {
   });
 
   if (version) {
+    revalidatePath("/dashboard/resumes");
+  }
+}
+
+export async function deleteResumeVersionAction(formData: FormData) {
+  const user = await requireDatabaseUser();
+  const input = defaultResumeVersionSchema.parse({
+    versionPublicId: getString(formData, "versionPublicId"),
+  });
+
+  const result = await deleteOwnedResumeVersion({
+    userId: user.id,
+    versionPublicId: input.versionPublicId,
+  });
+
+  if (result.ok) {
     revalidatePath("/dashboard/resumes");
   }
 }

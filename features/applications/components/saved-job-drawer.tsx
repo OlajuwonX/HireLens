@@ -4,7 +4,14 @@ import { RecommendationList } from "@/features/analyses/components/recommendatio
 import { ScorePanel } from "@/features/analyses/components/score-panel";
 import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
 import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
-import { documentTypeLabels } from "@/features/documents/constants";
+import {
+  documentTypeForView,
+  documentTypeLabels,
+} from "@/features/documents/constants";
+import {
+  AI_VIEWS,
+  type AiView,
+} from "@/features/analyses/server/analysis.mapper";
 import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
 import {
   getApplicationTimeline,
@@ -49,6 +56,20 @@ export async function SavedJobDrawer({
   ]);
 
   const result = report?.result ?? null;
+  const savedDocuments = AI_VIEWS.reduce<Partial<Record<AiView, string>>>(
+    (found, view) => {
+      const match = documents.find(
+        (document) => document.type === documentTypeForView[view],
+      );
+
+      if (match) {
+        found[view] = match.publicId;
+      }
+
+      return found;
+    },
+    {},
+  );
 
   const overview = (
     <div className="space-y-6">
@@ -138,6 +159,7 @@ export async function SavedJobDrawer({
       <ApplicationAiActions
         applicationPublicId={row.application.publicId}
         result={result}
+        savedDocuments={savedDocuments}
       />
     </div>
   );
@@ -161,6 +183,7 @@ export async function SavedJobDrawer({
       <ApplicationAiActions
         applicationPublicId={row.application.publicId}
         result={result}
+        savedDocuments={savedDocuments}
       />
     </div>
   ) : (
@@ -171,6 +194,7 @@ export async function SavedJobDrawer({
       <ApplicationAiActions
         applicationPublicId={row.application.publicId}
         result={null}
+        savedDocuments={savedDocuments}
       />
     </div>
   );

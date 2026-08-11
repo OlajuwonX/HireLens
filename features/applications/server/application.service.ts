@@ -44,6 +44,8 @@ async function resolveVersionId(input: {
 export async function getApplicationBoard(input: {
   userId: string;
   filters: ApplicationFilters;
+  limit?: number;
+  offset?: number;
 }) {
   return listApplicationsForUser(input);
 }

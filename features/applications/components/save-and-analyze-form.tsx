@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Dropdown } from "@/components/ui/dropdown";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   EMPLOYMENT_TYPES,
@@ -39,17 +40,27 @@ function Field({
   label,
   error,
   hint,
+  required,
   children,
 }: {
   id: string;
   label: string;
   error?: string;
   hint?: string;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        {label}
+        {required ? (
+          <span aria-hidden className="ml-0.5 text-danger">
+            *
+          </span>
+        ) : null}
+        {required ? <span className="sr-only"> (required)</span> : null}
+      </Label>
       {children}
       {hint && !error ? (
         <p className="text-label text-text-muted">{hint}</p>
@@ -69,6 +80,10 @@ export function SaveAndAnalyzeForm({
     initialApplicationFormState,
   );
   const errors = state.fieldErrors;
+  const [versionId, setVersionId] = useState("");
+  const [arrangement, setArrangement] = useState("NOT_SPECIFIED");
+  const [employment, setEmployment] = useState("NOT_SPECIFIED");
+  const [deadline, setDeadline] = useState("");
 
   if (versions.length === 0) {
     return (
@@ -97,20 +112,20 @@ export function SaveAndAnalyzeForm({
           id="resumeVersionPublicId"
           label="Which resume should HireLens use?"
           error={errors.resumeVersionPublicId}
-          hint="Defaults to your default version, or the latest if none is set."
+          required
         >
-          <Select
+          <Dropdown
             id="resumeVersionPublicId"
             name="resumeVersionPublicId"
-            defaultValue={preselected}
-          >
-            {versions.map((version) => (
-              <option key={version.publicId} value={version.publicId}>
-                {version.resumeTitle} — {version.label}
-                {version.isDefault ? " (default)" : ""}
-              </option>
-            ))}
-          </Select>
+            label="Resume version"
+            value={versionId || preselected}
+            onChange={setVersionId}
+            options={versions.map((version) => ({
+              value: version.publicId,
+              label: `${version.resumeTitle} - ${version.label}`,
+              hint: version.isDefault ? "Default version" : undefined,
+            }))}
+          />
         </Field>
       </section>
 
@@ -120,11 +135,11 @@ export function SaveAndAnalyzeForm({
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field id="title" label="Job title" error={errors.title}>
+          <Field id="title" label="Job title" error={errors.title} required>
             <Input id="title" name="title" required maxLength={200} />
           </Field>
 
-          <Field id="company" label="Company" error={errors.company}>
+          <Field id="company" label="Company" error={errors.company} required>
             <Input id="company" name="company" required maxLength={200} />
           </Field>
 
@@ -133,35 +148,41 @@ export function SaveAndAnalyzeForm({
           </Field>
 
           <Field id="workArrangement" label="Work arrangement">
-            <Select
+            <Dropdown
               id="workArrangement"
               name="workArrangement"
-              defaultValue="NOT_SPECIFIED"
-            >
-              {WORK_ARRANGEMENTS.map((value) => (
-                <option key={value} value={value}>
-                  {workArrangementLabels[value]}
-                </option>
-              ))}
-            </Select>
+              label="Work arrangement"
+              value={arrangement}
+              onChange={setArrangement}
+              options={WORK_ARRANGEMENTS.map((value) => ({
+                value,
+                label: workArrangementLabels[value],
+              }))}
+            />
           </Field>
 
           <Field id="employmentType" label="Employment type">
-            <Select
+            <Dropdown
               id="employmentType"
               name="employmentType"
-              defaultValue="NOT_SPECIFIED"
-            >
-              {EMPLOYMENT_TYPES.map((value) => (
-                <option key={value} value={value}>
-                  {employmentTypeLabels[value]}
-                </option>
-              ))}
-            </Select>
+              label="Employment type"
+              value={employment}
+              onChange={setEmployment}
+              options={EMPLOYMENT_TYPES.map((value) => ({
+                value,
+                label: employmentTypeLabels[value],
+              }))}
+            />
           </Field>
 
           <Field id="deadlineAt" label="Application deadline">
-            <Input id="deadlineAt" name="deadlineAt" type="date" />
+            <DatePicker
+              id="deadlineAt"
+              name="deadlineAt"
+              value={deadline}
+              onChange={setDeadline}
+              placeholder="No deadline"
+            />
           </Field>
 
           <Field id="source" label="Source">
@@ -211,7 +232,7 @@ export function SaveAndAnalyzeForm({
           id="description"
           label="Job description"
           error={errors.description}
-          hint="Paste the posting. Stored and shown as plain text."
+          required
         >
           <Textarea
             id="description"
@@ -238,7 +259,7 @@ export function SaveAndAnalyzeForm({
         </Field>
       </section>
 
-      <div className="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 py-4 backdrop-blur sm:mx-0 sm:px-0">
+      <div className="flex justify-end border-t border-border pt-5">
         <SubmitButton />
       </div>
     </form>

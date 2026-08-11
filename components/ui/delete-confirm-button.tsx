@@ -1,7 +1,5 @@
 "use client";
 
-import type { ComponentType } from "react";
-import { Trash2 } from "lucide-react";
 import { Button, IconButton } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { notify } from "@/components/ui/toast";
+import { Trash2 } from "lucide-react";
+import type { ComponentType } from "react";
 
 export function DeleteConfirmButton({
   action,
@@ -18,6 +19,8 @@ export function DeleteConfirmButton({
   title,
   description,
   confirmLabel = "Delete",
+  fieldName = "publicId",
+  toastLabel,
   icon: Icon = Trash2,
 }: {
   action: (formData: FormData) => void | Promise<void>;
@@ -25,6 +28,8 @@ export function DeleteConfirmButton({
   title: string;
   description: string;
   confirmLabel?: string;
+  fieldName?: string;
+  toastLabel?: string;
   icon?: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 }) {
   return (
@@ -47,8 +52,17 @@ export function DeleteConfirmButton({
             {description}
           </DialogDescription>
         </div>
-        <form action={action} className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <input type="hidden" name="publicId" value={publicId} />
+        <form
+          action={async (formData: FormData) => {
+            await action(formData);
+
+            if (toastLabel) {
+              notify.deleted(toastLabel);
+            }
+          }}
+          className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
+        >
+          <input type="hidden" name={fieldName} value={publicId} />
           <DialogClose asChild>
             <Button type="button" variant="outline">
               Cancel

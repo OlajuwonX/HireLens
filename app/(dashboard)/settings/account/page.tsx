@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/layout/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,8 @@ export default async function AccountSettingsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton href="/dashboard" label="Dashboard" />
+
       <PageHeader
         title="Account settings"
         description="Your profile and the ways you can sign in to HireLens."

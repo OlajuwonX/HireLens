@@ -2,10 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { SearchInput } from "@/components/ui/search-input";
-import { Select } from "@/components/ui/select";
+import { Dropdown } from "@/components/ui/dropdown";
+import { DebouncedSearch } from "@/components/ui/debounced-search";
 import {
   APPLICATION_SORT_OPTIONS,
   APPLICATION_TABS,
@@ -21,11 +19,15 @@ export function ApplicationFilters({
   const router = useRouter();
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
+
   const activeTab = params.get("tab") ?? "PENDING";
+  const activeSort = params.get("sort") ?? "activity_desc";
+  const totalCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
   function apply(next: Record<string, string>) {
     const search = new URLSearchParams(params.toString());
     search.delete("open");
+    search.delete("cursor");
 
     for (const [key, value] of Object.entries(next)) {
       if (value) {
@@ -40,62 +42,46 @@ export function ApplicationFilters({
     });
   }
 
-  const totalCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
-
   return (
-    <div className="space-y-3" aria-busy={pending}>
-      <div
-        role="tablist"
-        aria-label="Application status"
-        className="flex flex-wrap gap-1 overflow-x-auto rounded-control border border-border bg-surface p-1"
-      >
-        {APPLICATION_TABS.map((tab) => {
-          const count = tab === "ALL" ? totalCount : (counts[tab] ?? 0);
-
-          return (
-            <Button
-              key={tab}
-              role="tab"
-              aria-selected={activeTab === tab}
-              variant={activeTab === tab ? "segmentActive" : "segment"}
-              size="compact"
-              onClick={() => apply({ tab: tab === "PENDING" ? "" : tab })}
-              className="gap-2 rounded-control"
-            >
-              {applicationTabLabels[tab]}
-              <span className="font-mono text-system tabular-nums opacity-70">
-                {count}
-              </span>
-            </Button>
-          );
-        })}
+    <div
+      aria-busy={pending}
+      className="flex flex-col gap-2 sm:flex-row sm:items-center"
+    >
+      <div className="min-w-0 flex-1">
+        <DebouncedSearch
+          label="Search saved jobs"
+          placeholder="Search title or company"
+          value={params.get("q") ?? ""}
+          onSearch={(value) => apply({ q: value })}
+        />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="application-search">Search</Label>
-          <SearchInput
-            id="application-search"
-            placeholder="Job title or company"
-            defaultValue={params.get("q") ?? ""}
-            onChange={(event) => apply({ q: event.target.value })}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
+        <Dropdown
+          label="Sort saved jobs"
+          className="sm:w-44"
+          value={activeSort}
+          onChange={(value) =>
+            apply({ sort: value === "activity_desc" ? "" : value })
+          }
+          options={APPLICATION_SORT_OPTIONS.map((value) => ({
+            value,
+            label: applicationSortLabels[value],
+          }))}
+        />
 
-        <div className="space-y-1.5">
-          <Label htmlFor="application-sort">Sort</Label>
-          <Select
-            id="application-sort"
-            defaultValue={params.get("sort") ?? "activity_desc"}
-            onChange={(event) => apply({ sort: event.target.value })}
-          >
-            {APPLICATION_SORT_OPTIONS.map((value) => (
-              <option key={value} value={value}>
-                {applicationSortLabels[value]}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <Dropdown
+          label="Filter by status"
+          className="sm:w-40"
+          align="end"
+          value={activeTab}
+          onChange={(value) => apply({ tab: value === "PENDING" ? "" : value })}
+          options={APPLICATION_TABS.map((tab) => ({
+            value: tab,
+            label: applicationTabLabels[tab],
+            hint: `${tab === "ALL" ? totalCount : (counts[tab] ?? 0)} saved`,
+          }))}
+        />
       </div>
     </div>
   );

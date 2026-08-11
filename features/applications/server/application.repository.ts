@@ -85,6 +85,8 @@ export async function findApplicationRowForUser(input: {
 export async function listApplicationsForUser(input: {
   userId: string;
   filters: ApplicationFilters;
+  limit?: number;
+  offset?: number;
 }): Promise<ApplicationRow[]> {
   const conditions: SQL[] = [eq(applications.userId, input.userId)];
 
@@ -119,7 +121,9 @@ export async function listApplicationsForUser(input: {
 
   return baseQuery()
     .where(and(...conditions))
-    .orderBy(...orderBy);
+    .orderBy(...orderBy)
+    .limit(input.limit ?? 1000)
+    .offset(input.offset ?? 0);
 }
 
 export async function countApplicationsByStatus(userId: string) {

@@ -1,3 +1,13 @@
+import {
+  FileText,
+  ListChecks,
+  Mail,
+  MessageSquare,
+  Search,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import type { ComponentType, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { KeywordGapPanel } from "@/features/analyses/components/keyword-gap-panel";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
@@ -9,17 +19,6 @@ import {
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
 import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
-import {
-  FileDown,
-  FileText,
-  ListChecks,
-  Mail,
-  MessageSquare,
-  Search,
-  Sparkles,
-  UserRound,
-} from "lucide-react";
-import type { ComponentType, ReactNode } from "react";
 import { AiDocumentModal, PlainTextPanel } from "./ai-document-modal";
 import { BulletRewritePanel } from "./bullet-rewrite-panel";
 import { ImprovedResumePanel } from "./improved-resume-panel";
@@ -37,19 +36,6 @@ const icons: Record<
   COVER_LETTER: FileText,
   APPLICATION_EMAIL: Mail,
   FOLLOW_UP_MESSAGE: MessageSquare,
-};
-
-const descriptions: Record<AiView, string> = {
-  RECOMMENDATIONS: "What to change on this resume for this role.",
-  KEYWORD_ANALYSIS:
-    "Which posting keywords your resume proves, and which it does not.",
-  IMPROVED_RESUME:
-    "A rewritten resume built only from evidence already on yours.",
-  BULLET_REWRITE: "Weak bullets rewritten without changing the facts.",
-  PROFESSIONAL_SUMMARY: "A summary aimed at this posting.",
-  COVER_LETTER: "A cover letter drawn from your verified experience.",
-  APPLICATION_EMAIL: "A short application email with a subject line.",
-  FOLLOW_UP_MESSAGE: "A follow-up you can send after applying.",
 };
 
 function panelFor(
@@ -74,24 +60,30 @@ function AiResultCard({
   view,
   applicationPublicId,
   result,
+  savedDocumentId,
 }: {
   view: AiView;
   applicationPublicId: string;
   result: StoredApplicationIntelligence;
+  savedDocumentId: string | null;
 }) {
   const Icon = icons[view];
   const populated = viewIsPopulated(result, view);
-  const content = viewToPlainText(result, view);
 
   return (
     <AiDocumentModal
       title={aiViewLabels[view]}
-      description={descriptions[view]}
-      content={content}
+      content={viewToPlainText(result, view)}
+      downloadHref={
+        view === "IMPROVED_RESUME" && savedDocumentId
+          ? `/dashboard/documents/${savedDocumentId}/download`
+          : undefined
+      }
       footer={
         <SaveDocumentButton
           applicationPublicId={applicationPublicId}
           view={view}
+          alreadySaved={Boolean(savedDocumentId)}
         />
       }
       trigger={
@@ -102,17 +94,10 @@ function AiResultCard({
           align="start"
           block
           disabled={!populated}
-          className="h-auto min-h-12 items-start py-2"
+          className="gap-2"
         >
-          <Icon className="mt-0.5 size-4" aria-hidden />
-          <span className="min-w-0">
-            <span className="block text-meta font-semibold">
-              {aiViewLabels[view]}
-            </span>
-            <span className="block text-label font-normal text-text-secondary">
-              {populated ? descriptions[view] : "Not returned"}
-            </span>
-          </span>
+          <Icon className="size-4 shrink-0" aria-hidden />
+          <span className="truncate">{aiViewLabels[view]}</span>
         </Button>
       }
     >
@@ -124,9 +109,11 @@ function AiResultCard({
 export function ApplicationAiActions({
   applicationPublicId,
   result,
+  savedDocuments,
 }: {
   applicationPublicId: string;
   result: StoredApplicationIntelligence | null;
+  savedDocuments: Partial<Record<AiView, string>>;
 }) {
   if (!result) {
     return (
@@ -148,8 +135,8 @@ export function ApplicationAiActions({
           AI results
         </h3>
         <p className="text-meta text-text-secondary">
-          Everything below came from the single analysis already run for this
-          application. Opening any of these costs no AI usage.
+          Everything here came from the single analysis already run. Opening any
+          of these costs no AI usage.
         </p>
       </div>
 
@@ -160,14 +147,10 @@ export function ApplicationAiActions({
             view={view}
             applicationPublicId={applicationPublicId}
             result={result}
+            savedDocumentId={savedDocuments[view] ?? null}
           />
         ))}
       </div>
-
-      <p className="flex items-center gap-1.5 text-label text-text-muted">
-        <FileDown className="size-3.5" aria-hidden />
-        Save any result to AI Documents to edit, download or keep it.
-      </p>
     </section>
   );
 }

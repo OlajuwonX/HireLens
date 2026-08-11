@@ -76,7 +76,7 @@
   --hl-accent-text: #142006;
   --hl-action-dark: #161a18;
   --hl-action-dark-text: #ffffff;
-  --hl-danger: #da2b2b;
+  --hl-danger: #d94848;
   --hl-danger-text: #ffffff;
   --hl-warning: #8a5a00;
   --hl-warning-text: #ffffff;
@@ -148,4 +148,43 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@utility hl-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
 }
