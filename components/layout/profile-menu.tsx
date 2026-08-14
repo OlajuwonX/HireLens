@@ -1,5 +1,6 @@
 "use client";
 
+import { useCloseMobileNav } from "./mobile-nav-context";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -47,6 +48,7 @@ export function ProfileMenu({
   lastLoginAt: string | null;
   signOutSlot: React.ReactNode;
 }) {
+  const closeMobileNav = useCloseMobileNav();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -101,7 +103,10 @@ export function ProfileMenu({
           <Link
             href="/settings/account"
             role="menuitem"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              closeMobileNav();
+            }}
             className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
           >
             <Settings aria-hidden="true" className="size-4" />
@@ -111,7 +116,10 @@ export function ProfileMenu({
           <Link
             href="/dashboard/help"
             role="menuitem"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              closeMobileNav();
+            }}
             className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
           >
             <CircleHelp aria-hidden="true" className="size-4" />

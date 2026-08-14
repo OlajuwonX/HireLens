@@ -4,8 +4,9 @@ import { IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
+import { MobileNavProvider } from "./mobile-nav-context";
 import { isActivePath, primaryNavigation, utilityRoutes } from "./navigation";
 
 function titleFromPathname(pathname: string) {
@@ -27,18 +28,25 @@ export function AppShell({
   const pathname = usePathname();
   const pageTitle = useUiStore((state) => state.pageTitle);
 
+  const closeMobileNav = useCallback(() => setMobileOpen(false), []);
+
   useEffect(() => {
     useUiStore.persist.rehydrate();
   }, []);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   const title = pageTitle ?? titleFromPathname(pathname);
 
   return (
+    <MobileNavProvider value={closeMobileNav}>
     <div data-app-shell className="flex h-dvh overflow-hidden bg-background">
       <DashboardSidebar
         footer={sidebarFooter}
         mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
+        onMobileClose={closeMobileNav}
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -64,5 +72,6 @@ export function AppShell({
         </main>
       </div>
     </div>
+    </MobileNavProvider>
   );
 }
