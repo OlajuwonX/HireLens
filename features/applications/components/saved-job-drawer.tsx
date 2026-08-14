@@ -180,7 +180,7 @@ export async function SavedJobDrawer({
 
       <RequirementMatrix
         rows={report?.requirements ?? []}
-        analysisId={report?.analysis.id ?? ""}
+        analysisPublicId={report?.analysis.publicId ?? ""}
       />
 
       <ApplicationAiActions

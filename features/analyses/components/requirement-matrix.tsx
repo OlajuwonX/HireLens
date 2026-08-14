@@ -42,10 +42,10 @@ function summarise(rows: RequirementMatrixRow[]) {
 
 export function RequirementMatrix({
   rows,
-  analysisId,
+  analysisPublicId,
 }: {
   rows: RequirementMatrixRow[];
-  analysisId: string;
+  analysisPublicId: string;
 }) {
   if (rows.length === 0) {
     return null;
@@ -112,7 +112,7 @@ export function RequirementMatrix({
               ) : null}
 
               <RequirementCorrectionForm
-                analysisId={analysisId}
+                analysisPublicId={analysisPublicId}
                 requirementKey={match.key}
                 markedIncorrect={correction?.markedIncorrect ?? false}
                 evidence={correction?.evidence ?? null}

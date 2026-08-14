@@ -53,6 +53,37 @@ const RULES = [
     remedy:
       "add a new column, dual-write, migrate reads, then drop the old one",
   },
+  {
+    id: "drop-type",
+    test: (s) => /\bDROP\s+TYPE\b/i.test(s),
+    message: "drops an enum type that deployed code may still reference",
+    remedy: "leave the type in place; stop using it instead",
+  },
+  {
+    id: "drop-enum-value",
+    test: (s) => /\bALTER\s+TYPE\b/i.test(s) && /\bDROP\s+VALUE\b/i.test(s),
+    message: "removes an enum value that stored rows may still hold",
+    remedy: "stop writing the value; never remove it",
+  },
+  {
+    id: "delete-without-where",
+    test: (s) =>
+      /\bDELETE\s+FROM\b/i.test(s) && !/\bWHERE\b/i.test(s),
+    message: "deletes every row in a table",
+    remedy: "scope the delete with a WHERE clause",
+  },
+  {
+    id: "truncate",
+    test: (s) => /\bTRUNCATE\b/i.test(s),
+    message: "truncates a table",
+    remedy: "never truncate in a migration",
+  },
+  {
+    id: "drop-database",
+    test: (s) => /\bDROP\s+(DATABASE|SCHEMA)\b/i.test(s),
+    message: "drops a database or schema",
+    remedy: "never do this in a migration",
+  },
 ];
 
 function statementsOf(sql) {

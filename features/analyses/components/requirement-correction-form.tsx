@@ -20,13 +20,13 @@ function SubmitButton() {
 }
 
 export function RequirementCorrectionForm({
-  analysisId,
+  analysisPublicId,
   requirementKey,
   markedIncorrect,
   evidence,
   notes,
 }: {
-  analysisId: string;
+  analysisPublicId: string;
   requirementKey: string;
   markedIncorrect: boolean;
   evidence: string | null;
@@ -54,7 +54,7 @@ export function RequirementCorrectionForm({
 
   return (
     <form action={formAction} className="space-y-3 border-t border-border pt-4">
-      <input type="hidden" name="analysisId" value={analysisId} />
+      <input type="hidden" name="analysisPublicId" value={analysisPublicId} />
       <input type="hidden" name="requirementKey" value={requirementKey} />
 
       <div className="flex items-start gap-2.5">

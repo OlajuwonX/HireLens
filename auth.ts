@@ -58,11 +58,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           emailVerified: profile.email_verified === true,
         });
 
+        token.dbUserId = record.id;
         token.lastLoginAt = record.lastLoginAt?.toISOString() ?? null;
         token.onboardingCompleted = record.onboardingCompleted;
       }
 
       if (account?.provider === "credentials" && user) {
+        token.dbUserId =
+          typeof user.id === "string" ? user.id : token.dbUserId;
         token.lastLoginAt = new Date().toISOString();
         token.onboardingCompleted = Boolean(token.onboardingCompleted);
       }
@@ -70,6 +73,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session({ session, token }) {
+      session.dbUserId =
+        typeof token.dbUserId === "string" ? token.dbUserId : null;
       session.account = {
         lastLoginAt:
           typeof token.lastLoginAt === "string" ? token.lastLoginAt : null,

@@ -238,3 +238,21 @@ export async function deleteEvidenceCorrection(input: {
       ),
     );
 }
+
+export async function findAnalysisByPublicId(input: {
+  userId: string;
+  publicId: string;
+}) {
+  const [analysis] = await db
+    .select()
+    .from(applicationAnalyses)
+    .where(
+      and(
+        eq(applicationAnalyses.userId, input.userId),
+        eq(applicationAnalyses.publicId, input.publicId),
+      ),
+    )
+    .limit(1);
+
+  return analysis ?? null;
+}

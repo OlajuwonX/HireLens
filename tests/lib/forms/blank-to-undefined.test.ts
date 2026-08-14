@@ -66,7 +66,7 @@ describe("form schemas tolerate absent optional fields", () => {
 
   it("saves an evidence correction when the form omits evidence and notes", () => {
     const parsed = evidenceCorrectionSchema.safeParse({
-      analysisId: jobPublicId,
+      analysisPublicId: jobPublicId,
       requirementKey: "relevant-experience",
       markedIncorrect: true,
       evidence: null,

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 
 export const evidenceCorrectionSchema = z.object({
-  analysisId: z.string().uuid(),
+  analysisPublicId: z.string().uuid(),
   requirementKey: z.string().min(1).max(200),
   markedIncorrect: z.coerce.boolean().default(false),
   evidence: z.preprocess(

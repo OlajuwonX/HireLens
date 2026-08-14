@@ -1,8 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import {
+  createResumeMetadataSchema,
+  renameResumeSchema,
+  resumeActionSchema,
+} from "@/features/resumes/schemas/resume.schema";
 import {
   archiveOwnedResume,
   createResumeRecord,
@@ -10,11 +13,8 @@ import {
   renameOwnedResume,
   retryOwnedResumeProcessing,
 } from "@/features/resumes/server/resume.service";
-import {
-  createResumeMetadataSchema,
-  renameResumeSchema,
-  resumeActionSchema,
-} from "@/features/resumes/schemas/resume.schema";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 function getRequiredFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -80,7 +80,10 @@ export async function retryResumeProcessingAction(formData: FormData) {
     publicId: getRequiredFormValue(formData, "publicId"),
   });
 
-  await retryOwnedResumeProcessing({ userId: user.id, publicId: input.publicId });
+  await retryOwnedResumeProcessing({
+    userId: user.id,
+    publicId: input.publicId,
+  });
   revalidatePath("/dashboard/resumes");
   revalidatePath(`/dashboard/resumes/${input.publicId}`);
 }

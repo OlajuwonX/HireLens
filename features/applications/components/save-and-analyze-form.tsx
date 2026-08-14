@@ -1,24 +1,24 @@
 "use client";
 
-import { useActionState, useCallback, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Dropdown } from "@/components/ui/dropdown";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dropdown } from "@/components/ui/dropdown";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
+import { saveAndAnalyzeAction } from "@/features/applications/actions/application-actions";
+import { initialApplicationFormState } from "@/features/applications/actions/application-form-state";
 import {
   EMPLOYMENT_TYPES,
   WORK_ARRANGEMENTS,
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
-import { saveAndAnalyzeAction } from "@/features/applications/actions/application-actions";
-import { initialApplicationFormState } from "@/features/applications/actions/application-form-state";
-import { JobPasteDialog } from "./job-paste-dialog";
 import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
+import { useActionState, useCallback, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { JobPasteDialog } from "./job-paste-dialog";
 
 export type VersionOption = {
   publicId: string;
@@ -312,7 +312,12 @@ export function SaveAndAnalyzeForm({
           </Field>
 
           <Field id="currency" label="Currency">
-            <Input id="currency" name="currency" maxLength={8} placeholder="GBP" />
+            <Input
+              id="currency"
+              name="currency"
+              maxLength={8}
+              placeholder="GBP"
+            />
           </Field>
         </div>
 

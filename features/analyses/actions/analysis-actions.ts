@@ -6,7 +6,7 @@ import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { evidenceCorrectionSchema } from "../schemas/analysis.schema";
 import {
   deleteEvidenceCorrection,
-  findAnalysisById,
+  findAnalysisByPublicId,
   upsertEvidenceCorrection,
 } from "../server/analysis.repository";
 import { readStoredIntelligence } from "../server/analysis.mapper";
@@ -23,7 +23,7 @@ export async function saveEvidenceCorrectionAction(
 ): Promise<AnalysisFormState> {
   const user = await requireDatabaseUser();
   const parsed = evidenceCorrectionSchema.safeParse({
-    analysisId: getString(formData, "analysisId"),
+    analysisPublicId: getString(formData, "analysisPublicId"),
     requirementKey: getString(formData, "requirementKey"),
     markedIncorrect: formData.get("markedIncorrect") === "on",
     evidence: formData.get("evidence"),
@@ -37,9 +37,9 @@ export async function saveEvidenceCorrectionAction(
     };
   }
 
-  const analysis = await findAnalysisById({
+  const analysis = await findAnalysisByPublicId({
     userId: user.id,
-    analysisId: parsed.data.analysisId,
+    publicId: parsed.data.analysisPublicId,
   });
 
   if (!analysis) {

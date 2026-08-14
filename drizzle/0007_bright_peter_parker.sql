@@ -1,3 +1,8 @@
+-- migration-check: allow drop-type analysis_type belonged to resume_analyses, dropped in this migration; already applied pre-production
+-- migration-check: allow drop-type requirement_category belonged to requirement_matches, dropped in this migration; already applied pre-production
+-- migration-check: allow drop-type requirement_importance belonged to requirement_matches, dropped in this migration; already applied pre-production
+-- migration-check: allow drop-type requirement_match_status belonged to requirement_matches, dropped in this migration; already applied pre-production
+-- migration-check: allow drop-type suggestion_severity belonged to analysis_suggestions, dropped in this migration; already applied pre-production
 -- migration-check: allow drop-table analysis_suggestions is replaced by result_json.recommendations
 -- migration-check: allow drop-table requirement_matches is replaced by result_json.requirementMatches
 -- migration-check: allow drop-table resume_analyses is replaced by application_analyses
