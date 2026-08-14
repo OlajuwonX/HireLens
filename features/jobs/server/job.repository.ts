@@ -1,6 +1,15 @@
 import "server-only";
 
-import { and, asc, desc, eq, ilike, isNotNull, or, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  ilike,
+  isNotNull,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { jobs, type Job, type NewJob } from "@/lib/db/schema";
 import type { JobFilters } from "../schemas/job.schema";
@@ -12,7 +21,9 @@ export async function findJobForUser(input: {
   const [job] = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)))
+    .where(
+      and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)),
+    )
     .limit(1);
 
   return job ?? null;
@@ -77,7 +88,9 @@ export async function updateJobForUser(input: {
   const [job] = await db
     .update(jobs)
     .set({ ...input.values, updatedAt: new Date() })
-    .where(and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)))
+    .where(
+      and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)),
+    )
     .returning();
 
   return job ?? null;
@@ -95,7 +108,9 @@ export async function setJobStatusForUser(input: {
       archivedAt: input.status === "ARCHIVED" ? new Date() : null,
       updatedAt: new Date(),
     })
-    .where(and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)))
+    .where(
+      and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)),
+    )
     .returning();
 
   return job ?? null;
@@ -107,7 +122,9 @@ export async function deleteJobForUser(input: {
 }) {
   const [job] = await db
     .delete(jobs)
-    .where(and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)))
+    .where(
+      and(eq(jobs.userId, input.userId), eq(jobs.publicId, input.publicId)),
+    )
     .returning();
 
   return job ?? null;

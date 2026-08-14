@@ -10,7 +10,6 @@ import type {
 
 const MEMORY_READ_URL_TTL_SECONDS = 300;
 
-
 export class MemoryStorageProvider implements StorageProvider {
   private readonly files = new Map<string, Uint8Array>();
 

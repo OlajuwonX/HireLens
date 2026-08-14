@@ -36,7 +36,10 @@ export async function signInWithCredentials(
   if (!parsed.success) {
     return {
       status: "error",
-      message: firstIssueMessage(parsed.error, "Check your details and try again."),
+      message: firstIssueMessage(
+        parsed.error,
+        "Check your details and try again.",
+      ),
     };
   }
 
@@ -69,7 +72,10 @@ export async function signUpWithCredentials(
   if (!parsed.success) {
     return {
       status: "error",
-      message: firstIssueMessage(parsed.error, "Check your details and try again."),
+      message: firstIssueMessage(
+        parsed.error,
+        "Check your details and try again.",
+      ),
     };
   }
 

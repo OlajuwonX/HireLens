@@ -7,9 +7,7 @@ export function CreateResumeForm() {
   return (
     <form action={createResumeMetadataAction} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">
-          Resume name
-        </Label>
+        <Label htmlFor="title">Resume name</Label>
         <Input
           id="title"
           name="title"

@@ -15,7 +15,12 @@ export type NavItem = {
 };
 
 const allNavigation: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", Icon: LayoutDashboard, ready: true },
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    Icon: LayoutDashboard,
+    ready: true,
+  },
   { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true },
   {
     label: "Applications",

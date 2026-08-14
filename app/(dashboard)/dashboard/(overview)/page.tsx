@@ -31,12 +31,12 @@ export default async function DashboardPage() {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-        <p className="text-page-title font-semibold text-text-primary">
-          {greeting(user.name)}
-        </p>
-        <p className="mt-1 text-meta text-text-secondary">
-          Here&rsquo;s where your job search stands.
-        </p>
+          <p className="text-page-title font-semibold text-text-primary">
+            {greeting(user.name)}
+          </p>
+          <p className="mt-1 text-meta text-text-secondary">
+            Here&rsquo;s where your job search stands.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
@@ -49,10 +49,30 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricCard label="Resumes" value={summary.resumeGroupCount} hint={`${summary.resumeVersionCount} versions`} />
-        <MetricCard label="Applications" value={summary.applicationCount} hint={`${summary.pendingCount} pending`} />
-        <MetricCard label="Accepted" value={summary.acceptedCount} hint={`${summary.rejectedCount} rejected`} />
-        <MetricCard label="Avg Match" value={summary.averageMatchScore ?? "—"} hint={summary.averageMatchScore === null ? "Run an analysis" : "Latest analyses"} />
+        <MetricCard
+          label="Resumes"
+          value={summary.resumeGroupCount}
+          hint={`${summary.resumeVersionCount} versions`}
+        />
+        <MetricCard
+          label="Applications"
+          value={summary.applicationCount}
+          hint={`${summary.pendingCount} pending`}
+        />
+        <MetricCard
+          label="Accepted"
+          value={summary.acceptedCount}
+          hint={`${summary.rejectedCount} rejected`}
+        />
+        <MetricCard
+          label="Avg Match"
+          value={summary.averageMatchScore ?? "—"}
+          hint={
+            summary.averageMatchScore === null
+              ? "Run an analysis"
+              : "Latest analyses"
+          }
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -62,7 +82,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {summary.recentApplications.length === 0 ? (
-              <p className="text-meta text-text-secondary">No applications yet.</p>
+              <p className="text-meta text-text-secondary">
+                No applications yet.
+              </p>
             ) : (
               summary.recentApplications.map((application) => (
                 <Link
@@ -83,7 +105,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {summary.recentDocuments.length === 0 ? (
-              <p className="text-meta text-text-secondary">No AI documents yet.</p>
+              <p className="text-meta text-text-secondary">
+                No AI documents yet.
+              </p>
             ) : (
               summary.recentDocuments.map((document) => (
                 <Link
@@ -104,7 +128,10 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {summary.usage.slice(0, 4).map((item) => (
-              <div key={item.action} className="flex justify-between gap-3 text-meta">
+              <div
+                key={item.action}
+                className="flex justify-between gap-3 text-meta"
+              >
                 <span className="text-text-secondary">{item.label}</span>
                 <span className="font-mono text-text-primary">
                   {item.used} / {item.limit}

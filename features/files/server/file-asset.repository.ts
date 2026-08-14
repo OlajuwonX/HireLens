@@ -9,14 +9,13 @@ export async function createFileAsset(input: NewFileAsset) {
   return fileAsset;
 }
 
-export async function findFileAssetById(input: {
-  userId: string;
-  id: string;
-}) {
+export async function findFileAssetById(input: { userId: string; id: string }) {
   const [fileAsset] = await db
     .select()
     .from(fileAssets)
-    .where(and(eq(fileAssets.userId, input.userId), eq(fileAssets.id, input.id)))
+    .where(
+      and(eq(fileAssets.userId, input.userId), eq(fileAssets.id, input.id)),
+    )
     .limit(1);
 
   return fileAsset ?? null;

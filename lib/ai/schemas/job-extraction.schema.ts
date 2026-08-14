@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  EMPLOYMENT_TYPES,
-  WORK_ARRANGEMENTS,
-} from "@/features/jobs/constants";
+import { EMPLOYMENT_TYPES, WORK_ARRANGEMENTS } from "@/features/jobs/constants";
 
 export const JOB_CONTENT_MIN_LENGTH = 50;
 export const JOB_CONTENT_MAX_LENGTH = 60_000;

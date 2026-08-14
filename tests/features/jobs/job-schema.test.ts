@@ -43,7 +43,9 @@ describe("createJobSchema", () => {
 
   it("rejects a source URL that is not a URL", () => {
     expect(parse({ sourceUrl: "careers.turner.com" }).success).toBe(false);
-    expect(parse({ sourceUrl: "https://careers.turner.com" }).success).toBe(true);
+    expect(parse({ sourceUrl: "https://careers.turner.com" }).success).toBe(
+      true,
+    );
   });
 
   it("rejects an unknown work arrangement", () => {

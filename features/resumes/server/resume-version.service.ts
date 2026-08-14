@@ -22,7 +22,11 @@ export async function listOwnedVersionOptions(userId: string) {
 
 export type CreateResumeVersionResult =
   | { ok: true; version: ResumeVersion }
-  | { ok: false; error: "RESUME_NOT_FOUND" | "INVALID_FILE" | "UPLOAD_FAILED"; message: string };
+  | {
+      ok: false;
+      error: "RESUME_NOT_FOUND" | "INVALID_FILE" | "UPLOAD_FAILED";
+      message: string;
+    };
 
 export async function listOwnedResumeVersions(input: {
   userId: string;
@@ -198,7 +202,10 @@ export async function deleteOwnedResumeVersion(input: {
   });
 
   if (!deleted) {
-    return { ok: false as const, message: "That version could not be deleted." };
+    return {
+      ok: false as const,
+      message: "That version could not be deleted.",
+    };
   }
 
   if (fileAsset) {

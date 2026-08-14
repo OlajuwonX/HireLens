@@ -12,10 +12,7 @@ export default function Loading() {
         description="Enter the job you are preparing for. HireLens saves it and analyses your resume against it in one step."
       />
 
-      <div
-        aria-hidden
-        className="mx-auto w-full max-w-reading space-y-8"
-      >
+      <div aria-hidden className="mx-auto w-full max-w-reading space-y-8">
         <section className="space-y-4">
           <h2 className="text-section-title font-semibold text-text-primary">
             Resume

@@ -48,9 +48,7 @@ export default async function ResumeDetailPage({
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>
-                Versions ({versionResult.versions.length})
-              </CardTitle>
+              <CardTitle>Versions ({versionResult.versions.length})</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="border-t border-border">

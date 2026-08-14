@@ -37,7 +37,9 @@ export type UsageReservation =
     };
 
 function startOfUtcDay(date = new Date()) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 }
 
 function nextUtcDay(date = new Date()) {
@@ -58,7 +60,10 @@ function isUniqueConstraintError(error: unknown) {
   );
 }
 
-async function countCompletedToday(input: { userId: string; action: AiUsageAction }) {
+async function countCompletedToday(input: {
+  userId: string;
+  action: AiUsageAction;
+}) {
   const [row] = await db
     .select({ value: count() })
     .from(aiUsageEvents)
@@ -148,7 +153,8 @@ export async function checkAllowance(input: {
     return {
       ok: false,
       reason: "BURST_LIMIT",
-      message: "You have reached the short-term AI request limit. Try again in about a minute.",
+      message:
+        "You have reached the short-term AI request limit. Try again in about a minute.",
       resetAt: secondsFromNow(AI_BURST_WINDOW_SECONDS),
     };
   }
@@ -177,7 +183,11 @@ export async function checkAllowance(input: {
     };
   }
 
-  return { ok: true, remaining: Math.max(0, limit - used), resetAt: nextUtcDay() };
+  return {
+    ok: true,
+    remaining: Math.max(0, limit - used),
+    resetAt: nextUtcDay(),
+  };
 }
 
 export async function reserveUsage(input: {

@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   AI_VIEWS,
   improvedResumeToText,
@@ -7,12 +6,13 @@ import {
   viewIsPopulated,
   viewToPlainText,
 } from "@/features/analyses/server/analysis.mapper";
+import { MockApplicationIntelligenceProvider } from "@/lib/ai/providers/mock-application-intelligence-provider";
 import {
   applicationIntelligenceSchema,
   storedApplicationIntelligenceSchema,
 } from "@/lib/ai/schemas/application-intelligence.schema";
-import { MockApplicationIntelligenceProvider } from "@/lib/ai/providers/mock-application-intelligence-provider";
 import type { UserEvidenceCorrection } from "@/lib/db/schema";
+import { describe, expect, it } from "vitest";
 
 async function mockResult() {
   const provider = new MockApplicationIntelligenceProvider();
@@ -33,7 +33,9 @@ async function mockResult() {
     priorCorrections: [],
   });
 
-  return applicationIntelligenceSchema.parse(JSON.parse(String(output.rawResponse)));
+  return applicationIntelligenceSchema.parse(
+    JSON.parse(String(output.rawResponse)),
+  );
 }
 
 describe("the mock provider satisfies the single schema", () => {
@@ -44,7 +46,9 @@ describe("the mock provider satisfies the single schema", () => {
 
 describe("readStoredIntelligence", () => {
   it("returns null for an analysis that has not succeeded", () => {
-    expect(readStoredIntelligence({ status: "PENDING", resultJson: {} })).toBeNull();
+    expect(
+      readStoredIntelligence({ status: "PENDING", resultJson: {} }),
+    ).toBeNull();
   });
 
   it("returns null when there is no stored result", () => {
@@ -75,7 +79,9 @@ describe("readStoredIntelligence", () => {
 
 describe("viewToPlainText", () => {
   it("produces copyable text for every view", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
 
     for (const view of AI_VIEWS) {
       expect(viewToPlainText(result, view).length).toBeGreaterThan(0);
@@ -83,7 +89,9 @@ describe("viewToPlainText", () => {
   });
 
   it("puts the subject line above the email body", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
     const text = viewToPlainText(result, "APPLICATION_EMAIL");
 
     expect(text.startsWith("Subject: ")).toBe(true);
@@ -91,7 +99,9 @@ describe("viewToPlainText", () => {
   });
 
   it("keeps the before and after of a bullet rewrite", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
     const text = viewToPlainText(result, "BULLET_REWRITE");
 
     expect(text).toContain("Before: Managed projects.");
@@ -101,7 +111,9 @@ describe("viewToPlainText", () => {
 
 describe("viewIsPopulated", () => {
   it("is true for every view the mock returns", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
 
     for (const view of AI_VIEWS) {
       expect(viewIsPopulated(result, view)).toBe(true);
@@ -155,7 +167,9 @@ describe("mergeCorrections", () => {
   } as UserEvidenceCorrection;
 
   it("attaches a correction to its requirement by key", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
     const rows = mergeCorrections(result, [correction]);
     const corrected = rows.find(
       (row) => row.match.key === "formal-certification",
@@ -165,7 +179,9 @@ describe("mergeCorrections", () => {
   });
 
   it("leaves uncorrected requirements alone", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
     const rows = mergeCorrections(result, [correction]);
 
     expect(
@@ -174,7 +190,9 @@ describe("mergeCorrections", () => {
   });
 
   it("returns one row per requirement", async () => {
-    const result = storedApplicationIntelligenceSchema.parse(await mockResult());
+    const result = storedApplicationIntelligenceSchema.parse(
+      await mockResult(),
+    );
 
     expect(mergeCorrections(result, []).length).toBe(
       result.requirementMatches.length,

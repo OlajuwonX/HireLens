@@ -52,13 +52,17 @@ describe("aiFailureMessage", () => {
   });
 
   it("falls back for unrecognised failures", () => {
-    expect(aiFailureMessage(new Error("boom"), "Try again.")).toBe("Try again.");
+    expect(aiFailureMessage(new Error("boom"), "Try again.")).toBe(
+      "Try again.",
+    );
   });
 });
 
 describe("describeAiFailure", () => {
   it("keeps the message, not just the error name", () => {
-    const described = describeAiFailure(new Error("Failed query: insert into x"));
+    const described = describeAiFailure(
+      new Error("Failed query: insert into x"),
+    );
 
     expect(described).toContain("Failed query: insert into x");
   });

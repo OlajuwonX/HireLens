@@ -157,8 +157,8 @@ export function JobPasteDialog({
 
           {clipboardBlocked ? (
             <p role="status" className="text-label text-text-secondary">
-              Clipboard access was blocked. Long-press or press Ctrl+V in the box
-              below.
+              Clipboard access was blocked. Long-press or press Ctrl+V in the
+              box below.
             </p>
           ) : null}
 

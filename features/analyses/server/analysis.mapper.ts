@@ -2,7 +2,10 @@ import {
   storedApplicationIntelligenceSchema,
   type StoredApplicationIntelligence,
 } from "@/lib/ai/schemas/application-intelligence.schema";
-import type { ApplicationAnalysis, UserEvidenceCorrection } from "@/lib/db/schema";
+import type {
+  ApplicationAnalysis,
+  UserEvidenceCorrection,
+} from "@/lib/db/schema";
 
 export const AI_VIEWS = [
   "RECOMMENDATIONS",
@@ -101,10 +104,15 @@ export function viewToPlainText(
           : null,
         missing.length
           ? `MISSING\n${missing
-              .map((item) => `${item.keyword} (${item.gapType}): ${item.explanation}`)
+              .map(
+                (item) =>
+                  `${item.keyword} (${item.gapType}): ${item.explanation}`,
+              )
               .join("\n")}`
           : null,
-        avoidForcing.length ? `AVOID FORCING\n${avoidForcing.join(", ")}` : null,
+        avoidForcing.length
+          ? `AVOID FORCING\n${avoidForcing.join(", ")}`
+          : null,
       ]
         .filter(Boolean)
         .join("\n\n");
@@ -112,9 +120,11 @@ export function viewToPlainText(
     case "BULLET_REWRITE":
       return result.bulletRewrites
         .map((item) =>
-          [`Before: ${item.original}`, `After: ${item.improved}`, `Why: ${item.reason}`].join(
-            "\n",
-          ),
+          [
+            `Before: ${item.original}`,
+            `After: ${item.improved}`,
+            `Why: ${item.reason}`,
+          ].join("\n"),
         )
         .join("\n\n");
     case "PROFESSIONAL_SUMMARY":
@@ -166,8 +176,12 @@ export function improvedResumeToText(
     lines.push("", "EXPERIENCE");
 
     for (const entry of resume.experience) {
-      const dates = [entry.startDate, entry.endDate].filter(Boolean).join(" - ");
-      const context = [entry.company, entry.location].filter(Boolean).join(" - ");
+      const dates = [entry.startDate, entry.endDate]
+        .filter(Boolean)
+        .join(" - ");
+      const context = [entry.company, entry.location]
+        .filter(Boolean)
+        .join(" - ");
 
       lines.push("", [entry.title, dates].filter(Boolean).join("  "));
 

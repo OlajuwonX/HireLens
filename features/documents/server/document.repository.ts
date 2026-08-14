@@ -1,6 +1,16 @@
 import "server-only";
 
-import { and, desc, eq, gte, ilike, inArray, lt, or, type SQL } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lt,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   applications,
@@ -69,7 +79,9 @@ export async function listDocumentsForUser(
   limit = 24,
   cursor?: string,
 ): Promise<DocumentListRow[]> {
-  const conditions: (SQL | undefined)[] = [eq(generatedDocuments.userId, userId)];
+  const conditions: (SQL | undefined)[] = [
+    eq(generatedDocuments.userId, userId),
+  ];
 
   if (filters.q) {
     const term = `%${filters.q}%`;
@@ -104,7 +116,10 @@ export async function listDocumentsForUser(
     .select(listRowShape)
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
-    .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
+    .leftJoin(
+      resumeVersions,
+      eq(resumeVersions.id, generatedDocuments.resumeVersionId),
+    )
     .where(and(...conditions))
     .orderBy(desc(generatedDocuments.createdAt))
     .limit(limit);
@@ -138,7 +153,10 @@ export async function findDocumentRowForUser(input: {
     .select(rowShape)
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
-    .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
+    .leftJoin(
+      resumeVersions,
+      eq(resumeVersions.id, generatedDocuments.resumeVersionId),
+    )
     .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
     .where(
       and(
@@ -152,7 +170,10 @@ export async function findDocumentRowForUser(input: {
 }
 
 export async function createGeneratedDocument(input: NewGeneratedDocument) {
-  const [document] = await db.insert(generatedDocuments).values(input).returning();
+  const [document] = await db
+    .insert(generatedDocuments)
+    .values(input)
+    .returning();
   return document;
 }
 

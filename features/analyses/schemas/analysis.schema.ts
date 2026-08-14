@@ -9,7 +9,10 @@ export const evidenceCorrectionSchema = z.object({
     blankToUndefined,
     z.string().trim().max(5_000).optional(),
   ),
-  notes: z.preprocess(blankToUndefined, z.string().trim().max(2_000).optional()),
+  notes: z.preprocess(
+    blankToUndefined,
+    z.string().trim().max(2_000).optional(),
+  ),
 });
 
 export type EvidenceCorrectionInput = z.infer<typeof evidenceCorrectionSchema>;

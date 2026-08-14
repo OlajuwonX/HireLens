@@ -49,7 +49,11 @@ export function ApplicationCardGrid({
                 size={44}
                 className="max-sm:hidden"
               />
-              <ScoreRing score={row.matchScore} size={38} className="sm:hidden" />
+              <ScoreRing
+                score={row.matchScore}
+                size={38}
+                className="sm:hidden"
+              />
             </div>
 
             <dl className="grid grid-cols-2 gap-x-3 gap-y-2">

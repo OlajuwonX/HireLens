@@ -1,13 +1,25 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useUiStore } from "@/lib/stores/ui-store";
 
 export default function Error({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const setLastErrorEventId = useUiStore((state) => state.setLastErrorEventId);
+
+  useEffect(() => {
+    const eventId = Sentry.captureException(error);
+
+    setLastErrorEventId(eventId ?? null);
+  }, [error, setLastErrorEventId]);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-text-primary">
       <section className="max-w-md text-center">

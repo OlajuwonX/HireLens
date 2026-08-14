@@ -78,6 +78,13 @@
       "when": 1786461430672,
       "tag": "0010_massive_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786728256236,
+      "tag": "0011_wooden_edwin_jarvis",
+      "breakpoints": true
     }
   ]
 }

@@ -169,7 +169,9 @@ export async function setDefaultResumeVersionForUser(input: {
     await tx
       .update(resumes)
       .set({ defaultVersionId: input.versionId, updatedAt: new Date() })
-      .where(and(eq(resumes.userId, input.userId), eq(resumes.id, input.resumeId)));
+      .where(
+        and(eq(resumes.userId, input.userId), eq(resumes.id, input.resumeId)),
+      );
 
     return version;
   });

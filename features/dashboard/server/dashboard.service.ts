@@ -18,7 +18,9 @@ import {
 } from "@/lib/ai/usage";
 
 function startOfUtcDay(date = new Date()) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 }
 
 async function countResumeGroups(userId: string) {

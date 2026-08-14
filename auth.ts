@@ -64,8 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (account?.provider === "credentials" && user) {
-        token.dbUserId =
-          typeof user.id === "string" ? user.id : token.dbUserId;
+        token.dbUserId = typeof user.id === "string" ? user.id : token.dbUserId;
         token.lastLoginAt = new Date().toISOString();
         token.onboardingCompleted = Boolean(token.onboardingCompleted);
       }

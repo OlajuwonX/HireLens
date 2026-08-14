@@ -37,7 +37,8 @@ export function Calendar({
   const today = startOfDay(new Date());
 
   const [month, setMonth] = useState(
-    () => new Date((from ?? today).getFullYear(), (from ?? today).getMonth(), 1),
+    () =>
+      new Date((from ?? today).getFullYear(), (from ?? today).getMonth(), 1),
   );
 
   const days = useMemo(() => buildMonth(month), [month]);
@@ -127,7 +128,8 @@ export function Calendar({
                 isSameDay(day.date, today) &&
                   !isEdge &&
                   "ring-1 ring-inset ring-border-strong",
-                disabled && "cursor-not-allowed opacity-30 hover:bg-transparent",
+                disabled &&
+                  "cursor-not-allowed opacity-30 hover:bg-transparent",
               )}
             >
               {day.dayOfMonth}

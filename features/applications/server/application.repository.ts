@@ -73,7 +73,10 @@ function listQuery() {
     .select(listRowShape)
     .from(applications)
     .innerJoin(jobs, eq(jobs.id, applications.jobId))
-    .leftJoin(resumeVersions, eq(resumeVersions.id, applications.resumeVersionId))
+    .leftJoin(
+      resumeVersions,
+      eq(resumeVersions.id, applications.resumeVersionId),
+    )
     .leftJoin(
       applicationAnalyses,
       eq(applicationAnalyses.id, applications.analysisId),
@@ -90,7 +93,10 @@ function baseQuery() {
       eq(resumeVersions.id, applications.resumeVersionId),
     )
     .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
-    .leftJoin(applicationAnalyses, eq(applicationAnalyses.id, applications.analysisId));
+    .leftJoin(
+      applicationAnalyses,
+      eq(applicationAnalyses.id, applications.analysisId),
+    );
 }
 
 export async function findApplicationForUser(input: {

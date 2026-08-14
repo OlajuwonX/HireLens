@@ -38,7 +38,9 @@ export function RecommendationList({ items }: { items: Recommendation[] }) {
               {item.evidence}
             </blockquote>
           ) : null}
-          <p className="text-label text-text-primary">{item.recommendedAction}</p>
+          <p className="text-label text-text-primary">
+            {item.recommendedAction}
+          </p>
           <p className="text-label text-text-secondary">{item.reason}</p>
         </li>
       ))}

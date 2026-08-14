@@ -10,6 +10,9 @@ type UiState = {
 
   pageTitle: string | null;
   setPageTitle: (title: string | null) => void;
+
+  lastErrorEventId: string | null;
+  setLastErrorEventId: (eventId: string | null) => void;
 };
 
 export const useUiStore = create<UiState>()(
@@ -22,6 +25,9 @@ export const useUiStore = create<UiState>()(
 
       pageTitle: null,
       setPageTitle: (pageTitle) => set({ pageTitle }),
+
+      lastErrorEventId: null,
+      setLastErrorEventId: (lastErrorEventId) => set({ lastErrorEventId }),
     }),
     {
       name: "hirelens-ui",

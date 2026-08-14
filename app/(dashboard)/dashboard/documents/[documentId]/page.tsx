@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { DocumentActions } from "@/features/documents/components/document-actions";
 import { DocumentEditForm } from "@/features/documents/components/document-edit-form";
-import { documentTypeLabels, type DOCUMENT_TYPES } from "@/features/documents/constants";
+import {
+  documentTypeLabels,
+  type DOCUMENT_TYPES,
+} from "@/features/documents/constants";
 import {
   documentIsInResumeLibrary,
   getDocumentActivity,
@@ -36,13 +39,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     getDocumentActivity({ userId: user.id, documentId: row.document.id }),
   ]);
 
-  const {
-    document,
-    jobTitle,
-    jobCompany,
-    resumeTitle,
-    versionLabel,
-  } = row;
+  const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
 
   return (
     <div className="space-y-6">

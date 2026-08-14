@@ -87,7 +87,9 @@ export default async function SavedJobsPage({
 
       {visible.length === 0 ? (
         <EmptyState
-          title={filters.q ? "Nothing matches that search" : "No applications yet"}
+          title={
+            filters.q ? "Nothing matches that search" : "No applications yet"
+          }
           description={
             filters.q
               ? "Try a different search or another status tab."

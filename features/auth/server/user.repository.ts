@@ -94,11 +94,7 @@ export async function completeUserOnboarding(input: { userId: string }) {
 }
 
 export async function findUserById(id: string) {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, id))
-    .limit(1);
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
 
   return user ?? null;
 }

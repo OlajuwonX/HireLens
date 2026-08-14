@@ -81,7 +81,11 @@ export function ReanalyzeButton({
           className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
         >
           <input type="hidden" name="publicId" value={publicId} />
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
           <ConfirmButton />

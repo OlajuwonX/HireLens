@@ -32,28 +32,25 @@ export const salaryRangeIssue = {
 
 export const jobFieldsSchema = z.object({
   title: z.string().trim().min(1, "Job title is required").max(200),
-    company: z.string().trim().min(1, "Company is required").max(200),
-    location: optionalText(200),
-    workArrangement: z.enum(WORK_ARRANGEMENTS).default("NOT_SPECIFIED"),
-    employmentType: z.enum(EMPLOYMENT_TYPES).default("NOT_SPECIFIED"),
-    salaryMin: optionalMoney,
-    salaryMax: optionalMoney,
-    currency: optionalText(8),
-    source: optionalText(120),
-    sourceUrl: z.preprocess(
-      blankToUndefined,
-      z.url("Enter a valid URL, including https://").max(2048).optional(),
-    ),
-    description: z
-      .string()
-      .trim()
-      .min(1, "Job description is required")
-      .max(50_000),
-    requirements: optionalText(20_000),
-    deadlineAt: z.preprocess(
-      blankToUndefined,
-      z.coerce.date().optional(),
-    ),
+  company: z.string().trim().min(1, "Company is required").max(200),
+  location: optionalText(200),
+  workArrangement: z.enum(WORK_ARRANGEMENTS).default("NOT_SPECIFIED"),
+  employmentType: z.enum(EMPLOYMENT_TYPES).default("NOT_SPECIFIED"),
+  salaryMin: optionalMoney,
+  salaryMax: optionalMoney,
+  currency: optionalText(8),
+  source: optionalText(120),
+  sourceUrl: z.preprocess(
+    blankToUndefined,
+    z.url("Enter a valid URL, including https://").max(2048).optional(),
+  ),
+  description: z
+    .string()
+    .trim()
+    .min(1, "Job description is required")
+    .max(50_000),
+  requirements: optionalText(20_000),
+  deadlineAt: z.preprocess(blankToUndefined, z.coerce.date().optional()),
   notes: optionalText(10_000),
 });
 

@@ -1,7 +1,10 @@
 import * as React from "react";
 import { Button, type ButtonProps } from "./button";
 
-export type AccessibleIconButtonProps = Omit<ButtonProps, "children" | "size"> & {
+export type AccessibleIconButtonProps = Omit<
+  ButtonProps,
+  "children" | "size"
+> & {
   label: string;
   icon: React.ReactNode;
 };

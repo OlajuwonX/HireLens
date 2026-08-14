@@ -21,7 +21,10 @@ export default function Loading() {
 
       <FiltersRowSkeleton trailing={2} />
 
-      <ul aria-hidden className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+      <ul
+        aria-hidden
+        className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3"
+      >
         {Array.from({ length: 6 }).map((_, index) => (
           <li key={index}>
             <DocumentCardSkeleton />

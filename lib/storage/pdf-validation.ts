@@ -4,7 +4,11 @@ import { StorageValidationError } from "./errors";
 export const MAX_RESUME_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 
 export const resumePdfMetadataSchema = z.object({
-  filename: z.string().min(1).max(255).regex(/\.pdf$/i, "File must use a .pdf extension"),
+  filename: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/\.pdf$/i, "File must use a .pdf extension"),
   mimeType: z.literal("application/pdf"),
   sizeBytes: z.number().int().positive().max(MAX_RESUME_PDF_SIZE_BYTES),
 });
@@ -19,7 +23,9 @@ export function validateResumePdfMetadata(input: {
   const result = resumePdfMetadataSchema.safeParse(input);
 
   if (!result.success) {
-    throw new StorageValidationError(result.error.issues[0]?.message ?? "Invalid PDF metadata");
+    throw new StorageValidationError(
+      result.error.issues[0]?.message ?? "Invalid PDF metadata",
+    );
   }
 
   return result.data;

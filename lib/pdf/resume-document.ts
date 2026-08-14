@@ -1,4 +1,10 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  type PDFFont,
+  type PDFPage,
+} from "pdf-lib";
 import type { ImprovedResume } from "@/lib/ai/schemas/improved-resume.schema";
 import {
   formatDateRange,

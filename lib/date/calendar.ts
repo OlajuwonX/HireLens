@@ -68,9 +68,7 @@ export function isWithin(date: Date, from: Date | null, to: Date | null) {
 
   const time = startOfDay(date).getTime();
 
-  return (
-    time > startOfDay(from).getTime() && time < startOfDay(to).getTime()
-  );
+  return time > startOfDay(from).getTime() && time < startOfDay(to).getTime();
 }
 
 export function buildMonth(month: Date): CalendarDay[] {

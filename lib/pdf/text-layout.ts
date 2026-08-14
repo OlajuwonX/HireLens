@@ -95,7 +95,10 @@ export function wrapText(
   return lines;
 }
 
-export function joinNonEmpty(parts: (string | null | undefined)[], separator: string) {
+export function joinNonEmpty(
+  parts: (string | null | undefined)[],
+  separator: string,
+) {
   return parts
     .map((part) => (part ? sanitizePdfText(part) : ""))
     .filter(Boolean)

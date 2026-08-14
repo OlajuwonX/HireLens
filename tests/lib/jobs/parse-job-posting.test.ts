@@ -215,19 +215,21 @@ We move fast and value clear written communication across the team.`,
 
 describe("clipboardHtmlToText", () => {
   it("turns list items into bullets", () => {
-    expect(clipboardHtmlToText("<ul><li>React</li><li>TypeScript</li></ul>")).toContain(
-      "- React",
-    );
+    expect(
+      clipboardHtmlToText("<ul><li>React</li><li>TypeScript</li></ul>"),
+    ).toContain("- React");
   });
 
   it("breaks on block elements", () => {
-    expect(clipboardHtmlToText("<p>One</p><p>Two</p>").trim().split("\n")).toContain(
-      "One",
-    );
+    expect(
+      clipboardHtmlToText("<p>One</p><p>Two</p>").trim().split("\n"),
+    ).toContain("One");
   });
 
   it("decodes entities", () => {
-    expect(clipboardHtmlToText("<p>R&amp;D&nbsp;team</p>")).toContain("R&D team");
+    expect(clipboardHtmlToText("<p>R&amp;D&nbsp;team</p>")).toContain(
+      "R&D team",
+    );
   });
 
   it("drops scripts and styles", () => {

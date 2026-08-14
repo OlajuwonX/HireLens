@@ -69,7 +69,9 @@ describe("pruneToSupportedKeywords", () => {
 
 describe("toGeminiResponseSchema", () => {
   it("emits only supported keywords for the job fit schema", () => {
-    const keys = collectKeys(toGeminiResponseSchema(applicationIntelligenceSchema));
+    const keys = collectKeys(
+      toGeminiResponseSchema(applicationIntelligenceSchema),
+    );
 
     expect(keys.has("$schema")).toBe(false);
     expect(keys.has("minLength")).toBe(false);
@@ -104,8 +106,8 @@ describe("toGeminiResponseSchema", () => {
       };
     };
 
-    expect(schema.properties.recommendations.items.properties.priority.enum).toEqual(
-      ["HIGH", "MEDIUM", "LOW"],
-    );
+    expect(
+      schema.properties.recommendations.items.properties.priority.enum,
+    ).toEqual(["HIGH", "MEDIUM", "LOW"]);
   });
 });

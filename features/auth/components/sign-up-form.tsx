@@ -33,7 +33,13 @@ export function SignUpForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="name">Full name</Label>
-        <Input id="name" name="name" autoComplete="name" required maxLength={120} />
+        <Input
+          id="name"
+          name="name"
+          autoComplete="name"
+          required
+          maxLength={120}
+        />
       </div>
 
       <div className="space-y-1.5">

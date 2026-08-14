@@ -4,9 +4,18 @@ export {
   type ApplicationIntelligence,
   type StoredApplicationIntelligence,
 } from "./application-intelligence.schema";
-export { applicationEmailSchema, type ApplicationEmail } from "./application-email.schema";
-export { bulletRewriteSchema, type BulletRewrite } from "./bullet-rewrites.schema";
-export { improvedResumeSchema, type ImprovedResume } from "./improved-resume.schema";
+export {
+  applicationEmailSchema,
+  type ApplicationEmail,
+} from "./application-email.schema";
+export {
+  bulletRewriteSchema,
+  type BulletRewrite,
+} from "./bullet-rewrites.schema";
+export {
+  improvedResumeSchema,
+  type ImprovedResume,
+} from "./improved-resume.schema";
 export { keywordAnalysisSchema, type KeywordAnalysis } from "./keywords.schema";
 export {
   recommendationSchema,

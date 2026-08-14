@@ -26,7 +26,9 @@ export const AI_USAGE_DEFAULTS = {
 function readLimit(key: keyof typeof AI_USAGE_DEFAULTS) {
   const parsed = Number.parseInt(process.env[key] ?? "", 10);
 
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : AI_USAGE_DEFAULTS[key];
+  return Number.isFinite(parsed) && parsed > 0
+    ? parsed
+    : AI_USAGE_DEFAULTS[key];
 }
 
 export function getDailyAllowance(action: AiUsageAction) {

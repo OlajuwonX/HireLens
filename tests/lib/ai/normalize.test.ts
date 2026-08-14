@@ -7,22 +7,23 @@ import { MockApplicationIntelligenceProvider } from "@/lib/ai/providers/mock-app
 const schema = z.object({ value: z.string() });
 
 async function mockAnalysis() {
-  const result = await new MockApplicationIntelligenceProvider().analyzeApplication({
-    resume: { pdfBase64: "", filename: "resume.pdf", text: null },
-    job: {
-      title: "Site Manager",
-      company: "Turner",
-      location: null,
-      workArrangement: "On site",
-      employmentType: "Full time",
-      deadline: null,
-      source: null,
-      sourceUrl: null,
-      description: "Run the site.",
-      requirements: null,
-    },
-    priorCorrections: [],
-  });
+  const result =
+    await new MockApplicationIntelligenceProvider().analyzeApplication({
+      resume: { pdfBase64: "", filename: "resume.pdf", text: null },
+      job: {
+        title: "Site Manager",
+        company: "Turner",
+        location: null,
+        workArrangement: "On site",
+        employmentType: "Full time",
+        deadline: null,
+        source: null,
+        sourceUrl: null,
+        description: "Run the site.",
+        requirements: null,
+      },
+      priorCorrections: [],
+    });
 
   return JSON.parse(String(result.rawResponse)) as Record<string, unknown>;
 }
@@ -41,9 +42,9 @@ describe("normalizeJsonModelOutput", () => {
   });
 
   it("strips a bare code fence", () => {
-    expect(normalizeJsonModelOutput('```\n{"value":"ok"}\n```', schema)).toEqual(
-      { value: "ok" },
-    );
+    expect(
+      normalizeJsonModelOutput('```\n{"value":"ok"}\n```', schema),
+    ).toEqual({ value: "ok" });
   });
 
   it("reads content from a message wrapper", () => {
@@ -83,8 +84,10 @@ describe("normalizeJsonModelOutput", () => {
     const analysis = await mockAnalysis();
 
     expect(
-      normalizeJsonModelOutput(JSON.stringify(analysis), applicationIntelligenceSchema)
-        .scoring.overallScore,
+      normalizeJsonModelOutput(
+        JSON.stringify(analysis),
+        applicationIntelligenceSchema,
+      ).scoring.overallScore,
     ).toBe(70);
   });
 });

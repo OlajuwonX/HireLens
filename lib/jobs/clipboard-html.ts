@@ -23,7 +23,10 @@ const ENTITIES: Record<string, string> = {
 
 function decodeEntities(value: string) {
   return value
-    .replace(/&[a-z#0-9]+;/gi, (entity) => ENTITIES[entity.toLowerCase()] ?? entity)
+    .replace(
+      /&[a-z#0-9]+;/gi,
+      (entity) => ENTITIES[entity.toLowerCase()] ?? entity,
+    )
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
 }
 

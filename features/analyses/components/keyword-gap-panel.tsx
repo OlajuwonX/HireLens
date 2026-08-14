@@ -74,7 +74,9 @@ export function KeywordGapPanel({ analysis }: { analysis: KeywordAnalysis }) {
                     {item.keyword}
                   </span>
                   <Badge
-                    tone={item.gapType === "QUALIFICATION_GAP" ? "red" : "yellow"}
+                    tone={
+                      item.gapType === "QUALIFICATION_GAP" ? "red" : "yellow"
+                    }
                   >
                     {item.gapType === "QUALIFICATION_GAP"
                       ? "Qualification gap"

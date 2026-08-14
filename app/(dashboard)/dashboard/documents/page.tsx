@@ -73,7 +73,9 @@ export default async function DocumentsPage({
 
       {page.length === 0 ? (
         <EmptyState
-          title={hasFilters ? "Nothing matches those filters" : "No documents yet"}
+          title={
+            hasFilters ? "Nothing matches those filters" : "No documents yet"
+          }
           description={
             hasFilters
               ? "Try a different search, type or date range."

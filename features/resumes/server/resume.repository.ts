@@ -14,11 +14,19 @@ export async function createResume(input: NewResume) {
   return resume;
 }
 
-export async function findResumeForUser(input: { userId: string; publicId: string }) {
+export async function findResumeForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
   const [resume] = await db
     .select()
     .from(resumes)
-    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.publicId, input.publicId),
+      ),
+    )
     .limit(1);
 
   return resume ?? null;
@@ -56,7 +64,12 @@ export async function renameResumeForUser(input: {
   const [resume] = await db
     .update(resumes)
     .set({ title: input.title, updatedAt: new Date() })
-    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.publicId, input.publicId),
+      ),
+    )
     .returning();
 
   return resume ?? null;
@@ -74,16 +87,29 @@ export async function archiveResumeForUser(input: {
       archivedAt: input.archived ? new Date() : null,
       updatedAt: new Date(),
     })
-    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.publicId, input.publicId),
+      ),
+    )
     .returning();
 
   return resume ?? null;
 }
 
-export async function deleteResumeForUser(input: { userId: string; publicId: string }) {
+export async function deleteResumeForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
   const [resume] = await db
     .delete(resumes)
-    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.publicId, input.publicId),
+      ),
+    )
     .returning();
 
   return resume ?? null;
@@ -96,7 +122,12 @@ export async function retryResumeProcessingForUser(input: {
   const [resume] = await db
     .update(resumes)
     .set({ status: "PROCESSING", updatedAt: new Date() })
-    .where(and(eq(resumes.userId, input.userId), eq(resumes.publicId, input.publicId)))
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.publicId, input.publicId),
+      ),
+    )
     .returning();
 
   return resume ?? null;

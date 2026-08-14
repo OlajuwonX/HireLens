@@ -34,7 +34,9 @@ export function ImprovedResumePanel({ resume }: { resume: ImprovedResume }) {
         <p className="text-section-title font-semibold text-text-primary">
           {resume.header.name}
         </p>
-        <p className="text-meta text-text-secondary">{resume.header.headline}</p>
+        <p className="text-meta text-text-secondary">
+          {resume.header.headline}
+        </p>
         {contact.length > 0 ? (
           <p className="text-label text-text-muted">{contact.join("  |  ")}</p>
         ) : null}
@@ -71,7 +73,9 @@ export function ImprovedResumePanel({ resume }: { resume: ImprovedResume }) {
                     {entry.title}
                   </p>
                   <p className="font-mono text-system text-text-muted">
-                    {[entry.startDate, entry.endDate].filter(Boolean).join(" - ")}
+                    {[entry.startDate, entry.endDate]
+                      .filter(Boolean)
+                      .join(" - ")}
                   </p>
                 </div>
                 <p className="text-label text-text-secondary">
@@ -79,7 +83,10 @@ export function ImprovedResumePanel({ resume }: { resume: ImprovedResume }) {
                 </p>
                 <ul className="space-y-1">
                   {entry.bullets.map((bullet, bulletIndex) => (
-                    <li key={bulletIndex} className="text-meta text-text-primary">
+                    <li
+                      key={bulletIndex}
+                      className="text-meta text-text-primary"
+                    >
                       {bullet}
                     </li>
                   ))}

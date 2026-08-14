@@ -35,7 +35,10 @@ export function ScoreBlock({
       <p className="text-meta text-text-secondary">
         {caption ?? bandFor(safeScore)}
       </p>
-      <Progress value={safeScore} aria-label={`${label} ${safeScore} out of 100`} />
+      <Progress
+        value={safeScore}
+        aria-label={`${label} ${safeScore} out of 100`}
+      />
     </div>
   );
 }

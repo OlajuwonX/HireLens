@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createResumeStorageKey, sanitizeFilename } from "@/lib/storage/storage-keys";
+import {
+  createResumeStorageKey,
+  sanitizeFilename,
+} from "@/lib/storage/storage-keys";
 
 describe("sanitizeFilename", () => {
   it("strips path separators so a key cannot traverse", () => {

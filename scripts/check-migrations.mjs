@@ -67,8 +67,7 @@ const RULES = [
   },
   {
     id: "delete-without-where",
-    test: (s) =>
-      /\bDELETE\s+FROM\b/i.test(s) && !/\bWHERE\b/i.test(s),
+    test: (s) => /\bDELETE\s+FROM\b/i.test(s) && !/\bWHERE\b/i.test(s),
     message: "deletes every row in a table",
     remedy: "scope the delete with a WHERE clause",
   },

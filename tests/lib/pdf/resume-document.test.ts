@@ -49,7 +49,9 @@ describe("renderImprovedResumePdf", () => {
   });
 
   it("uses US Letter pages", async () => {
-    const doc = await PDFDocument.load(await renderImprovedResumePdf(resumeWith()));
+    const doc = await PDFDocument.load(
+      await renderImprovedResumePdf(resumeWith()),
+    );
     const [page] = doc.getPages();
 
     expect(page.getWidth()).toBe(612);
@@ -57,13 +59,17 @@ describe("renderImprovedResumePdf", () => {
   });
 
   it("titles the document with the candidate name", async () => {
-    const doc = await PDFDocument.load(await renderImprovedResumePdf(resumeWith()));
+    const doc = await PDFDocument.load(
+      await renderImprovedResumePdf(resumeWith()),
+    );
 
     expect(doc.getTitle()).toBe("Ada Okonkwo - Resume");
   });
 
   it("fits a short resume on one page", async () => {
-    const doc = await PDFDocument.load(await renderImprovedResumePdf(resumeWith()));
+    const doc = await PDFDocument.load(
+      await renderImprovedResumePdf(resumeWith()),
+    );
 
     expect(doc.getPageCount()).toBe(1);
   });

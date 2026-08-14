@@ -15,9 +15,14 @@ import type {
 
 function describeEmptyResponse(response: {
   candidates?: { finishReason?: unknown }[];
-  usageMetadata?: { thoughtsTokenCount?: number; candidatesTokenCount?: number };
+  usageMetadata?: {
+    thoughtsTokenCount?: number;
+    candidatesTokenCount?: number;
+  };
 }) {
-  const finishReason = String(response.candidates?.[0]?.finishReason ?? "unknown");
+  const finishReason = String(
+    response.candidates?.[0]?.finishReason ?? "unknown",
+  );
   const thoughts = response.usageMetadata?.thoughtsTokenCount ?? 0;
   const output = response.usageMetadata?.candidatesTokenCount ?? 0;
 
@@ -134,7 +139,9 @@ export class GeminiApplicationIntelligenceProvider
           createApplicationIntelligencePrompt(input.priorCorrections),
         ].join("\n"),
         responseMimeType: "application/json",
-        responseJsonSchema: toGeminiResponseSchema(applicationIntelligenceSchema),
+        responseJsonSchema: toGeminiResponseSchema(
+          applicationIntelligenceSchema,
+        ),
       },
     });
 

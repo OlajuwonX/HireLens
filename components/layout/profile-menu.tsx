@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
-import { LogOut, Settings } from "lucide-react";
+import { CircleHelp, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -106,6 +106,16 @@ export function ProfileMenu({
           >
             <Settings aria-hidden="true" className="size-4" />
             Settings
+          </Link>
+
+          <Link
+            href="/dashboard/help"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
+          >
+            <CircleHelp aria-hidden="true" className="size-4" />
+            Help &amp; report a problem
           </Link>
 
           <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2.5">

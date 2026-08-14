@@ -17,7 +17,9 @@ function blockFor(selector: string) {
 function customPropertiesIn(block: string) {
   const found = new Map<string, string>();
 
-  for (const match of block.matchAll(/--hl-([a-z-]+):\s*(#[0-9a-fA-F]{3,8});/g)) {
+  for (const match of block.matchAll(
+    /--hl-([a-z-]+):\s*(#[0-9a-fA-F]{3,8});/g,
+  )) {
     found.set(match[1], match[2].toLowerCase());
   }
 
@@ -33,29 +35,34 @@ const modes: [string, string, Palette][] = [
   ["dark", ".dark", dark],
 ];
 
-describe.each(modes)("%s palette matches app.css", (_mode, selector, palette) => {
-  const declared = customPropertiesIn(blockFor(selector));
+describe.each(modes)(
+  "%s palette matches app.css",
+  (_mode, selector, palette) => {
+    const declared = customPropertiesIn(blockFor(selector));
 
-  it("declares every role the palette defines", () => {
-    const missing = (Object.keys(palette) as (keyof Palette)[])
-      .map(cssNameFor)
-      .filter((name) => !declared.has(name));
+    it("declares every role the palette defines", () => {
+      const missing = (Object.keys(palette) as (keyof Palette)[])
+        .map(cssNameFor)
+        .filter((name) => !declared.has(name));
 
-    expect(missing).toEqual([]);
-  });
+      expect(missing).toEqual([]);
+    });
 
-  it("uses the same hex value for every role", () => {
-    const drift = (Object.keys(palette) as (keyof Palette)[])
-      .map((role) => ({
-        role,
-        token: palette[role].toLowerCase(),
-        css: declared.get(cssNameFor(role)),
-      }))
-      .filter((entry) => entry.css !== undefined && entry.css !== entry.token);
+    it("uses the same hex value for every role", () => {
+      const drift = (Object.keys(palette) as (keyof Palette)[])
+        .map((role) => ({
+          role,
+          token: palette[role].toLowerCase(),
+          css: declared.get(cssNameFor(role)),
+        }))
+        .filter(
+          (entry) => entry.css !== undefined && entry.css !== entry.token,
+        );
 
-    expect(drift).toEqual([]);
-  });
-});
+      expect(drift).toEqual([]);
+    });
+  },
+);
 
 describe("the theme layer", () => {
   it("maps every --hl- custom property to a --color- token", () => {

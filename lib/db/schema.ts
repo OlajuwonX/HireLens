@@ -13,8 +13,12 @@ import {
 import { relations, sql } from "drizzle-orm";
 
 const timestamps = {
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 };
 
 const userOwned = {
@@ -37,10 +41,7 @@ export const fileAssetKind = pgEnum("file_asset_kind", [
   "GENERATED_DOCUMENT",
 ]);
 
-export const jobStatus = pgEnum("job_status", [
-  "SAVED",
-  "ARCHIVED",
-]);
+export const jobStatus = pgEnum("job_status", ["SAVED", "ARCHIVED"]);
 
 export const workArrangement = pgEnum("work_arrangement", [
   "REMOTE",
@@ -104,6 +105,22 @@ export const usageAction = pgEnum("usage_action", [
   "FOLLOW_UP_MESSAGE",
 ]);
 
+export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
+
+export const bugCategory = pgEnum("bug_category", [
+  "BUG",
+  "AI_ISSUE",
+  "PERFORMANCE",
+  "UPLOAD",
+  "OTHER",
+]);
+
+export const bugStatus = pgEnum("bug_status", [
+  "OPEN",
+  "IN_REVIEW",
+  "RESOLVED",
+]);
+
 export const usageStatus = pgEnum("usage_status", [
   "RESERVED",
   "COMPLETED",
@@ -121,7 +138,10 @@ export const users = pgTable(
     passwordHash: text("password_hash"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
-    onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
+    onboardingCompleted: boolean("onboarding_completed")
+      .notNull()
+      .default(false),
+    role: userRole("role").notNull().default("USER"),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     ...timestamps,
   },
@@ -267,8 +287,12 @@ export const jobs = pgTable(
     title: text("title").notNull(),
     company: text("company").notNull(),
     location: text("location"),
-    workArrangement: workArrangement("work_arrangement").notNull().default("NOT_SPECIFIED"),
-    employmentType: employmentType("employment_type").notNull().default("NOT_SPECIFIED"),
+    workArrangement: workArrangement("work_arrangement")
+      .notNull()
+      .default("NOT_SPECIFIED"),
+    employmentType: employmentType("employment_type")
+      .notNull()
+      .default("NOT_SPECIFIED"),
     salaryMin: integer("salary_min"),
     salaryMax: integer("salary_max"),
     currency: text("currency"),
@@ -284,8 +308,16 @@ export const jobs = pgTable(
   },
   (table) => [
     uniqueIndex("jobs_public_id_idx").on(table.publicId),
-    index("jobs_user_status_created_idx").on(table.userId, table.status, table.createdAt),
-    index("jobs_user_title_company_idx").on(table.userId, table.title, table.company),
+    index("jobs_user_status_created_idx").on(
+      table.userId,
+      table.status,
+      table.createdAt,
+    ),
+    index("jobs_user_title_company_idx").on(
+      table.userId,
+      table.title,
+      table.company,
+    ),
   ],
 );
 
@@ -319,7 +351,10 @@ export const applicationAnalyses = pgTable(
       table.userId,
       table.inputHash,
     ),
-    index("application_analyses_user_status_idx").on(table.userId, table.status),
+    index("application_analyses_user_status_idx").on(
+      table.userId,
+      table.status,
+    ),
     index("application_analyses_application_idx").on(table.applicationId),
   ],
 );
@@ -357,9 +392,12 @@ export const applications = pgTable(
     jobId: uuid("job_id")
       .notNull()
       .references(() => jobs.id, { onDelete: "cascade" }),
-    resumeVersionId: uuid("resume_version_id").references(() => resumeVersions.id, {
-      onDelete: "set null",
-    }),
+    resumeVersionId: uuid("resume_version_id").references(
+      () => resumeVersions.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     analysisId: uuid("analysis_id").references(() => applicationAnalyses.id, {
       onDelete: "set null",
     }),
@@ -368,7 +406,9 @@ export const applications = pgTable(
     followUpAt: timestamp("follow_up_at", { withTimezone: true }),
     interviewAt: timestamp("interview_at", { withTimezone: true }),
     notes: text("notes"),
-    lastActivityAt: timestamp("last_activity_at", { withTimezone: true }).notNull().defaultNow(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     ...timestamps,
   },
   (table) => [
@@ -394,7 +434,10 @@ export const applicationActivities = pgTable(
   },
   (table) => [
     index("application_activities_application_idx").on(table.applicationId),
-    index("application_activities_user_created_idx").on(table.userId, table.createdAt),
+    index("application_activities_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
   ],
 );
 
@@ -409,9 +452,12 @@ export const generatedDocuments = pgTable(
     applicationId: uuid("application_id").references(() => applications.id, {
       onDelete: "set null",
     }),
-    resumeVersionId: uuid("resume_version_id").references(() => resumeVersions.id, {
-      onDelete: "set null",
-    }),
+    resumeVersionId: uuid("resume_version_id").references(
+      () => resumeVersions.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     fileAssetId: uuid("file_asset_id").references(() => fileAssets.id, {
       onDelete: "set null",
     }),
@@ -446,7 +492,10 @@ export const documentActivities = pgTable(
       .defaultNow(),
   },
   (table) => [
-    index("document_activities_document_idx").on(table.documentId, table.createdAt),
+    index("document_activities_document_idx").on(
+      table.documentId,
+      table.createdAt,
+    ),
   ],
 );
 
@@ -480,15 +529,41 @@ export const aiUsageReservations = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     ...userOwned,
     action: usageAction("action").notNull(),
-    reservedAt: timestamp("reserved_at", { withTimezone: true }).notNull().defaultNow(),
+    reservedAt: timestamp("reserved_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     failedAt: timestamp("failed_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
-    index("ai_usage_reservations_user_action_idx").on(table.userId, table.action),
+    index("ai_usage_reservations_user_action_idx").on(
+      table.userId,
+      table.action,
+    ),
     index("ai_usage_reservations_active_idx").on(table.userId, table.expiresAt),
+  ],
+);
+
+export const bugReports = pgTable(
+  "bug_reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    category: bugCategory("category").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    route: text("route").notNull(),
+    sentryEventId: text("sentry_event_id"),
+    status: bugStatus("status").notNull().default("OPEN"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("bug_reports_public_id_idx").on(table.publicId),
+    index("bug_reports_user_created_idx").on(table.userId, table.createdAt),
+    index("bug_reports_status_created_idx").on(table.status, table.createdAt),
   ],
 );
 
@@ -504,7 +579,9 @@ export const userPreferences = pgTable(
     }),
     timezone: text("timezone").notNull().default("UTC"),
     reducedMotion: boolean("reduced_motion").notNull().default(false),
-    settings: jsonb("settings").notNull().default(sql`'{}'::jsonb`),
+    settings: jsonb("settings")
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     ...timestamps,
   },
   (table) => [uniqueIndex("user_preferences_user_idx").on(table.userId)],
@@ -523,17 +600,20 @@ export const resumesRelations = relations(resumes, ({ one, many }) => ({
   versions: many(resumeVersions),
 }));
 
-export const resumeVersionsRelations = relations(resumeVersions, ({ one, many }) => ({
-  resume: one(resumes, {
-    fields: [resumeVersions.resumeId],
-    references: [resumes.id],
+export const resumeVersionsRelations = relations(
+  resumeVersions,
+  ({ one, many }) => ({
+    resume: one(resumes, {
+      fields: [resumeVersions.resumeId],
+      references: [resumes.id],
+    }),
+    fileAsset: one(fileAssets, {
+      fields: [resumeVersions.fileAssetId],
+      references: [fileAssets.id],
+    }),
+    analyses: many(applicationAnalyses),
   }),
-  fileAsset: one(fileAssets, {
-    fields: [resumeVersions.fileAssetId],
-    references: [fileAssets.id],
-  }),
-  analyses: many(applicationAnalyses),
-}));
+);
 
 export const jobsRelations = relations(jobs, ({ one, many }) => ({
   user: one(users, { fields: [jobs.userId], references: [users.id] }),
@@ -541,12 +621,15 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
   analyses: many(applicationAnalyses),
 }));
 
-export const applicationsRelations = relations(applications, ({ one, many }) => ({
-  user: one(users, { fields: [applications.userId], references: [users.id] }),
-  job: one(jobs, { fields: [applications.jobId], references: [jobs.id] }),
-  activities: many(applicationActivities),
-  documents: many(generatedDocuments),
-}));
+export const applicationsRelations = relations(
+  applications,
+  ({ one, many }) => ({
+    user: one(users, { fields: [applications.userId], references: [users.id] }),
+    job: one(jobs, { fields: [applications.jobId], references: [jobs.id] }),
+    activities: many(applicationActivities),
+    documents: many(generatedDocuments),
+  }),
+);
 
 export const applicationAnalysesRelations = relations(
   applicationAnalyses,
@@ -581,8 +664,14 @@ export type NewApplication = typeof applications.$inferInsert;
 export type ApplicationActivity = typeof applicationActivities.$inferSelect;
 export type ApplicationAnalysis = typeof applicationAnalyses.$inferSelect;
 export type NewApplicationAnalysis = typeof applicationAnalyses.$inferInsert;
-export type UserEvidenceCorrection = typeof userEvidenceCorrections.$inferSelect;
+export type UserEvidenceCorrection =
+  typeof userEvidenceCorrections.$inferSelect;
 export type DocumentActivity = typeof documentActivities.$inferSelect;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
+export type BugReport = typeof bugReports.$inferSelect;
+export type NewBugReport = typeof bugReports.$inferInsert;
+export type BugCategory = (typeof bugCategory.enumValues)[number];
+export type BugStatus = (typeof bugStatus.enumValues)[number];
+export type UserRole = (typeof userRole.enumValues)[number];
 export type UsageAction = (typeof usageAction.enumValues)[number];

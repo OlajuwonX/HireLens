@@ -3,7 +3,11 @@ import { hashAnalysisInput } from "@/lib/ai/hash";
 
 describe("hashAnalysisInput", () => {
   it("returns a stable hash for identical input", async () => {
-    const input = { type: "GENERAL", resumeVersionId: "a", promptVersion: "v2" };
+    const input = {
+      type: "GENERAL",
+      resumeVersionId: "a",
+      promptVersion: "v2",
+    };
 
     expect(await hashAnalysisInput(input)).toBe(await hashAnalysisInput(input));
   });

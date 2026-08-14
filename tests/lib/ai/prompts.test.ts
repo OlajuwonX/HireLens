@@ -61,7 +61,9 @@ describe("createApplicationIntelligencePrompt", () => {
   });
 
   it("states that one response must carry all of it", () => {
-    expect(prompt).toContain("one complete HireLens application-intelligence response");
+    expect(prompt).toContain(
+      "one complete HireLens application-intelligence response",
+    );
     expect(prompt).toContain("must contain all requested sections");
   });
 

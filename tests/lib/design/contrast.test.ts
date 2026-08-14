@@ -19,9 +19,7 @@ export function contrastRatio(a: string, b: string) {
   const first = relativeLuminance(a);
   const second = relativeLuminance(b);
 
-  return (
-    (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
-  );
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
 }
 
 const LARGE_TEXT = 3;

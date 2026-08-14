@@ -13,7 +13,6 @@ import { AiDocumentModal, PlainTextPanel } from "./ai-document-modal";
 import { BulletRewritePanel } from "./bullet-rewrite-panel";
 import { ImprovedResumePanel } from "./improved-resume-panel";
 
-
 function panelFor(
   view: AiView,
   result: StoredApplicationIntelligence,

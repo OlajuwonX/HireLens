@@ -112,7 +112,10 @@ export async function SavedJobDrawer({
             value={row.job.deadlineAt.toLocaleDateString()}
           />
         ) : null}
-        <Row label="Added" value={row.application.createdAt.toLocaleDateString()} />
+        <Row
+          label="Added"
+          value={row.application.createdAt.toLocaleDateString()}
+        />
       </dl>
 
       {row.job.sourceUrl ? (
@@ -163,7 +166,6 @@ export async function SavedJobDrawer({
           </ol>
         </section>
       ) : null}
-
     </div>
   );
 

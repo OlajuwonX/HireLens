@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import {
-  FiltersRowSkeleton,
-  JobCardSkeleton,
-} from "@/components/ui/skeletons";
+import { FiltersRowSkeleton, JobCardSkeleton } from "@/components/ui/skeletons";
 
 export default function Loading() {
   return (

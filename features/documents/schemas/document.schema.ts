@@ -23,7 +23,11 @@ export const generateDocumentSchema = z.object({
 
 export const updateDocumentSchema = z.object({
   publicId: documentPublicIdSchema,
-  editedContent: z.string().trim().min(1, "Document content is required.").max(50_000),
+  editedContent: z
+    .string()
+    .trim()
+    .min(1, "Document content is required.")
+    .max(50_000),
 });
 
 export type GenerateDocumentInput = z.infer<typeof generateDocumentSchema>;

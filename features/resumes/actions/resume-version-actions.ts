@@ -39,8 +39,10 @@ export async function createResumeVersionAction(
   if (!parsedFields.success) {
     return {
       status: "error",
-      message:
-        firstIssueMessage(parsedFields.error, "Check the form and try again."),
+      message: firstIssueMessage(
+        parsedFields.error,
+        "Check the form and try again.",
+      ),
     };
   }
 
@@ -49,8 +51,10 @@ export async function createResumeVersionAction(
   if (!parsedFile.success) {
     return {
       status: "error",
-      message:
-        firstIssueMessage(parsedFile.error, "Select a resume PDF to upload."),
+      message: firstIssueMessage(
+        parsedFile.error,
+        "Select a resume PDF to upload.",
+      ),
     };
   }
 

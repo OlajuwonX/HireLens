@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils";
 
 type ToastTone = "success" | "error" | "info";
 
-const toneStyles: Record<ToastTone, { icon: typeof Check; className: string }> = {
-  success: { icon: Check, className: "bg-accent text-accent-text" },
-  error: { icon: AlertTriangle, className: "bg-danger text-danger-text" },
-  info: { icon: Info, className: "bg-action-dark text-action-dark-text" },
-};
+const toneStyles: Record<ToastTone, { icon: typeof Check; className: string }> =
+  {
+    success: { icon: Check, className: "bg-accent text-accent-text" },
+    error: { icon: AlertTriangle, className: "bg-danger text-danger-text" },
+    info: { icon: Info, className: "bg-action-dark text-action-dark-text" },
+  };
 
 function show(tone: ToastTone, message: string) {
   const { icon: Icon, className } = toneStyles[tone];

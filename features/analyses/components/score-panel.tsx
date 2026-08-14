@@ -18,8 +18,9 @@ export function ScorePanel({
 }) {
   const entries = labels
     .map(([key, label]) => ({ label, value: scoring[key] }))
-    .filter((entry): entry is { label: string; value: number } =>
-      typeof entry.value === "number",
+    .filter(
+      (entry): entry is { label: string; value: number } =>
+        typeof entry.value === "number",
     );
 
   if (entries.length === 0) {
@@ -30,7 +31,11 @@ export function ScorePanel({
     <div className="space-y-4">
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {entries.map((entry) => (
-          <ScoreBlock key={entry.label} label={entry.label} score={entry.value} />
+          <ScoreBlock
+            key={entry.label}
+            label={entry.label}
+            score={entry.value}
+          />
         ))}
       </div>
 
