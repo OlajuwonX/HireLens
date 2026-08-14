@@ -1,8 +1,8 @@
 import "server-only";
 
-import { auth } from "@/auth";
+import { notFound } from "next/navigation";
 import { findUserById } from "@/features/auth/server/user.repository";
-import { notFound, redirect } from "next/navigation";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { OPS_CONSOLE_PATH } from "../constants";
 
 export { OPS_CONSOLE_PATH };
@@ -13,35 +13,12 @@ export type AdminUser = {
 };
 
 export async function requireAdminUser(): Promise<AdminUser> {
-  const session = await auth();
-
-  if (!session?.user?.email) {
-    redirect("/sign-in");
-  }
-
-  const id = session.dbUserId;
-
-  if (!id) {
-    notFound();
-  }
-
-  const record = await findUserById(id);
+  const user = await requireDatabaseUser();
+  const record = await findUserById(user.id);
 
   if (!record || record.deletedAt || record.role !== "ADMIN") {
     notFound();
   }
 
   return { id: record.id, email: record.email };
-}
-
-export async function viewerIsAdmin() {
-  const session = await auth();
-
-  if (!session?.dbUserId) {
-    return false;
-  }
-
-  const record = await findUserById(session.dbUserId);
-
-  return Boolean(record && !record.deletedAt && record.role === "ADMIN");
 }
