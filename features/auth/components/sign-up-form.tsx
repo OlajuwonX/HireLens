@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { signUpWithCredentials } from "@/features/auth/actions/auth-actions";
 import { initialAuthFormState } from "@/features/auth/actions/auth-form-state";
@@ -55,10 +56,9 @@ export function SignUpForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="new-password"
           required
           aria-describedby="password-hint"

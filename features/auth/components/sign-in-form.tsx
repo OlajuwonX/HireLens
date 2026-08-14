@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { signInWithCredentials } from "@/features/auth/actions/auth-actions";
 import { initialAuthFormState } from "@/features/auth/actions/auth-form-state";
@@ -38,10 +39,9 @@ export function SignInForm() {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
         />
