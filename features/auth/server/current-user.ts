@@ -1,11 +1,11 @@
 import "server-only";
 
 import { auth } from "@/auth";
-import { mapSessionToPublicUser } from "./public-user";
 import type {
   PublicAccountState,
   PublicUser,
 } from "@/features/auth/types/public-user";
+import { mapSessionToPublicUser } from "./public-user";
 
 export type CurrentUser = {
   user: PublicUser;

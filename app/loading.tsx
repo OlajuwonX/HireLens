@@ -1,11 +1,17 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-text-primary">
-      <div className="mx-auto w-full max-w-5xl animate-pulse">
-        <div className="h-9 w-40 rounded bg-surface-elevated" />
-        <div className="mt-20 h-10 w-full max-w-2xl rounded bg-surface-elevated" />
-        <div className="mt-4 h-5 w-full max-w-xl rounded bg-surface-elevated" />
+    <div
+      aria-busy="true"
+      className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background px-6"
+    >
+      <div className="flex items-center gap-2.5">
+        <Skeleton className="size-8 rounded-control" />
+        <Skeleton className="h-5 w-28" />
       </div>
-    </main>
+      <Skeleton className="h-1 w-40 rounded-full" />
+      <span className="sr-only">Loading HireLens</span>
+    </div>
   );
 }

@@ -164,11 +164,6 @@ export async function SavedJobDrawer({
         </section>
       ) : null}
 
-      <ApplicationAiActions
-        applicationPublicId={row.application.publicId}
-        result={result}
-        savedDocuments={savedDocuments}
-      />
     </div>
   );
 

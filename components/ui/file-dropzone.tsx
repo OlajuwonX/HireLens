@@ -1,6 +1,6 @@
-import * as React from "react";
-import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Upload } from "lucide-react";
+import * as React from "react";
 
 export type FileDropzoneProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;

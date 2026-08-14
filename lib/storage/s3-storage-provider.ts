@@ -100,9 +100,7 @@ export class S3StorageProvider implements StorageProvider {
       };
     } catch (error) {
       console.error("Backblaze read URL failed", describeStorageError(error));
-      throw new StorageProviderError(
-        "Could not create a temporary file link.",
-      );
+      throw new StorageProviderError("Could not create a temporary file link.");
     }
   }
 
@@ -137,9 +135,7 @@ export class S3StorageProvider implements StorageProvider {
       );
     } catch (error) {
       console.error("Backblaze delete failed", describeStorageError(error));
-      throw new StorageProviderError(
-        "Could not delete the stored file.",
-      );
+      throw new StorageProviderError("Could not delete the stored file.");
     }
   }
 }

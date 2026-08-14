@@ -52,7 +52,7 @@ export default async function DocumentsPage({
   const page = documents.slice(0, PAGE_SIZE);
   const nextCursor =
     documents.length > PAGE_SIZE
-      ? page[page.length - 1]?.document.createdAt.toISOString()
+      ? page[page.length - 1]?.createdAt.toISOString()
       : null;
 
   return (

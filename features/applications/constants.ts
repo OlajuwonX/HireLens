@@ -1,4 +1,8 @@
-export const APPLICATION_STATUSES = ["PENDING", "ACCEPTED", "REJECTED"] as const;
+export const APPLICATION_STATUSES = [
+  "PENDING",
+  "ACCEPTED",
+  "REJECTED",
+] as const;
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 

@@ -43,12 +43,32 @@ export type DocumentFilters = {
   to?: string;
 };
 
+const listRowShape = {
+  publicId: generatedDocuments.publicId,
+  type: generatedDocuments.type,
+  fileAssetId: generatedDocuments.fileAssetId,
+  createdAt: generatedDocuments.createdAt,
+  jobTitle: jobs.title,
+  jobCompany: jobs.company,
+  versionLabel: resumeVersions.label,
+};
+
+export type DocumentListRow = {
+  publicId: string;
+  type: GeneratedDocument["type"];
+  fileAssetId: string | null;
+  createdAt: Date;
+  jobTitle: string | null;
+  jobCompany: string | null;
+  versionLabel: string | null;
+};
+
 export async function listDocumentsForUser(
   userId: string,
   filters: DocumentFilters = {},
   limit = 24,
   cursor?: string,
-): Promise<DocumentRow[]> {
+): Promise<DocumentListRow[]> {
   const conditions: (SQL | undefined)[] = [eq(generatedDocuments.userId, userId)];
 
   if (filters.q) {
@@ -81,11 +101,10 @@ export async function listDocumentsForUser(
   }
 
   return db
-    .select(rowShape)
+    .select(listRowShape)
     .from(generatedDocuments)
     .leftJoin(jobs, eq(jobs.id, generatedDocuments.jobId))
     .leftJoin(resumeVersions, eq(resumeVersions.id, generatedDocuments.resumeVersionId))
-    .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
     .where(and(...conditions))
     .orderBy(desc(generatedDocuments.createdAt))
     .limit(limit);
@@ -96,7 +115,11 @@ export async function listDocumentsForApplication(input: {
   applicationId: string;
 }) {
   return db
-    .select()
+    .select({
+      publicId: generatedDocuments.publicId,
+      type: generatedDocuments.type,
+      createdAt: generatedDocuments.createdAt,
+    })
     .from(generatedDocuments)
     .where(
       and(

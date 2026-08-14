@@ -46,6 +46,40 @@ export type ApplicationRow = {
   analysisPublicId: string | null;
 };
 
+const listRowShape = {
+  publicId: applications.publicId,
+  status: applications.status,
+  createdAt: applications.createdAt,
+  title: jobs.title,
+  company: jobs.company,
+  deadlineAt: jobs.deadlineAt,
+  versionLabel: resumeVersions.label,
+  matchScore: applicationAnalyses.overallScore,
+};
+
+export type ApplicationListRow = {
+  publicId: string;
+  status: Application["status"];
+  createdAt: Date;
+  title: string;
+  company: string;
+  deadlineAt: Date | null;
+  versionLabel: string | null;
+  matchScore: number | null;
+};
+
+function listQuery() {
+  return db
+    .select(listRowShape)
+    .from(applications)
+    .innerJoin(jobs, eq(jobs.id, applications.jobId))
+    .leftJoin(resumeVersions, eq(resumeVersions.id, applications.resumeVersionId))
+    .leftJoin(
+      applicationAnalyses,
+      eq(applicationAnalyses.id, applications.analysisId),
+    );
+}
+
 function baseQuery() {
   return db
     .select(rowShape)
@@ -98,7 +132,7 @@ export async function listApplicationsForUser(input: {
   filters: ApplicationFilters;
   limit?: number;
   offset?: number;
-}): Promise<ApplicationRow[]> {
+}): Promise<ApplicationListRow[]> {
   const conditions: SQL[] = [eq(applications.userId, input.userId)];
 
   if (input.filters.tab !== "ALL") {
@@ -141,7 +175,7 @@ export async function listApplicationsForUser(input: {
     company_asc: [asc(jobs.company), asc(jobs.title)],
   }[input.filters.sort];
 
-  return baseQuery()
+  return listQuery()
     .where(and(...conditions))
     .orderBy(...orderBy)
     .limit(input.limit ?? 1000)

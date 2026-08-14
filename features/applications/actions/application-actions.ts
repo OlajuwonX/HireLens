@@ -1,9 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import type { z } from "zod";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import {
   applicationActionSchema,
   changeStatusSchema,
@@ -17,6 +13,10 @@ import {
   saveAndAnalyze,
   updateOwnedApplication,
 } from "@/features/applications/server/application.service";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import type { z } from "zod";
 import type { ApplicationFormState } from "./application-form-state";
 
 function getString(formData: FormData, key: string) {

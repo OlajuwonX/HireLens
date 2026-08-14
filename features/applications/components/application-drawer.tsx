@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { IconButton } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const TABS = ["Overview", "Analysis", "AI Documents"] as const;
 

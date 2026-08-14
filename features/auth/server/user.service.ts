@@ -1,8 +1,8 @@
 import "server-only";
 
-import type { PublicUser } from "@/features/auth/types/public-user";
-import type { SignUpInput } from "@/features/auth/schemas/credentials.schema";
 import { shouldClearUntrustedPassword } from "@/features/auth/policies/account-linking";
+import type { SignUpInput } from "@/features/auth/schemas/credentials.schema";
+import type { PublicUser } from "@/features/auth/types/public-user";
 import { normalizeEmail } from "./email";
 import { hashPassword, verifyPassword } from "./password";
 import {

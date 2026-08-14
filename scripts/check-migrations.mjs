@@ -97,7 +97,9 @@ for (const file of files) {
 
       const reasons = acknowledgements.get(rule.id);
       const reason = reasons
-        ? (reasons.length > 1 ? reasons.shift() : reasons[0])
+        ? reasons.length > 1
+          ? reasons.shift()
+          : reasons[0]
         : undefined;
       const entry = {
         file,
