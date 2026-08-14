@@ -13,10 +13,7 @@ import {
 } from "@/lib/ai/usage";
 
 export type UsageDenialReason =
-  | "BURST_LIMIT"
-  | "DAILY_LIMIT"
-  | "GLOBAL_LIMIT"
-  | "ACTIVE_REQUEST";
+  "BURST_LIMIT" | "DAILY_LIMIT" | "GLOBAL_LIMIT" | "ACTIVE_REQUEST";
 
 export type UsageAllowanceResult =
   | { ok: true; remaining: number; resetAt: Date }

@@ -4,9 +4,7 @@ import type {
   ApplicationIntelligenceProvider,
 } from "../types";
 
-export class MockApplicationIntelligenceProvider
-  implements ApplicationIntelligenceProvider
-{
+export class MockApplicationIntelligenceProvider implements ApplicationIntelligenceProvider {
   async extractJobPosting(input: {
     content: string;
   }): Promise<AIProviderResult> {

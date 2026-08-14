@@ -1,11 +1,10 @@
-import type { Metadata } from "next";
 import { MetricCard } from "@/components/data-display/metric-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadMore } from "@/components/ui/load-more";
 import {
-  requireAdminUser,
   OPS_CONSOLE_PATH,
+  requireAdminUser,
 } from "@/features/admin/server/require-admin";
 import { BugReportFilters } from "@/features/bug-reports/components/bug-report-filters";
 import { BugReportTable } from "@/features/bug-reports/components/bug-report-table";
@@ -14,6 +13,7 @@ import {
   countBugReportsByStatus,
   listBugReports,
 } from "@/features/bug-reports/server/bug-report.repository";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Bug reports",

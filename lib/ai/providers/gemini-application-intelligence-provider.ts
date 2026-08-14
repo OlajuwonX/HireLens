@@ -63,9 +63,7 @@ export type GeminiProviderConfig = {
   model: string;
 };
 
-export class GeminiApplicationIntelligenceProvider
-  implements ApplicationIntelligenceProvider
-{
+export class GeminiApplicationIntelligenceProvider implements ApplicationIntelligenceProvider {
   private readonly client: GoogleGenAI;
 
   constructor(private readonly config: GeminiProviderConfig) {

@@ -25,10 +25,7 @@ function statusCodeOf(error: unknown) {
 }
 
 export type AiFailureKind =
-  | "DAILY_QUOTA"
-  | "RATE_LIMIT"
-  | "OVERLOADED"
-  | "UNKNOWN";
+  "DAILY_QUOTA" | "RATE_LIMIT" | "OVERLOADED" | "UNKNOWN";
 
 export function classifyAiFailure(error: unknown): AiFailureKind {
   const raw = error instanceof Error ? error.message : String(error ?? "");

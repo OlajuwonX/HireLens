@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { BackButton } from "@/components/layout/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +8,8 @@ import { requireAdminUser } from "@/features/admin/server/require-admin";
 import { BugStatusControl } from "@/features/bug-reports/components/bug-status-control";
 import { bugCategoryLabels } from "@/features/bug-reports/constants";
 import { findBugReportByPublicId } from "@/features/bug-reports/server/bug-report.repository";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Bug report",
@@ -56,10 +56,7 @@ export default async function BugReportDetailPage({
 
       <div className="flex flex-wrap items-center gap-3">
         <Badge>{bugCategoryLabels[report.category]}</Badge>
-        <BugStatusControl
-          publicId={report.publicId}
-          status={report.status}
-        />
+        <BugStatusControl publicId={report.publicId} status={report.status} />
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
@@ -90,8 +87,17 @@ export default async function BugReportDetailPage({
                 Sentry
               </p>
               {sentryHref ? (
-                <Button asChild variant="outline" size="compact" className="mt-2">
-                  <a href={sentryHref} target="_blank" rel="noopener noreferrer">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="compact"
+                  className="mt-2"
+                >
+                  <a
+                    href={sentryHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Open in Sentry
                   </a>
                 </Button>

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { BackButton } from "@/components/layout/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { ReportProblemForm } from "@/features/bug-reports/components/report-problem-form";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Help",
@@ -92,7 +92,7 @@ export default async function HelpPage() {
           <CardContent className="space-y-4 p-4 pt-0 sm:p-5 sm:pt-0">
             <p className="text-meta text-text-secondary">
               Tell us what happened. We capture the page you were on
-              automatically — you do not need to include it.
+              automatically; you do not need to include it.
             </p>
             <ReportProblemForm />
           </CardContent>

@@ -1,8 +1,8 @@
 import "server-only";
 
-import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { findUserById } from "@/features/auth/server/user.repository";
+import { notFound, redirect } from "next/navigation";
 import { OPS_CONSOLE_PATH } from "../constants";
 
 export { OPS_CONSOLE_PATH };

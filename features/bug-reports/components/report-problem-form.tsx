@@ -1,8 +1,5 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Input } from "@/components/ui/input";
@@ -10,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { notify } from "@/components/ui/toast";
 import { useUiStore } from "@/lib/stores/ui-store";
+import { usePathname } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { submitBugReportAction } from "../actions/bug-report-actions";
 import { initialBugReportFormState } from "../actions/bug-report-form-state";
 import { BUG_CATEGORIES, bugCategoryLabels } from "../constants";

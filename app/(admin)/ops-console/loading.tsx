@@ -14,7 +14,10 @@ export default function Loading() {
         description="Everything reported from the Help screen, newest first."
       />
 
-      <div aria-hidden className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div
+        aria-hidden
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+      >
         {Array.from({ length: 4 }).map((_, index) => (
           <MetricCardSkeleton key={index} />
         ))}
