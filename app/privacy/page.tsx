@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  LegalLayout,
-  LegalSection,
-} from "@/components/marketing/legal-layout";
+import { LegalLayout, LegalSection } from "@/components/marketing/legal-layout";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description:
-    "What HireLens stores, why it stores it, and how to delete it.",
+  description: "What HireLens stores, why it stores it, and how to delete it.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -30,9 +26,9 @@ export default function PrivacyPage() {
 
       <LegalSection heading="Where files live">
         <p>
-          Resume and document files are stored in a private bucket. They are
-          not publicly addressable, and every request for one is checked
-          against your account before the file is served.
+          Resume and document files are stored in a private bucket. They are not
+          publicly addressable, and every request for one is checked against
+          your account before the file is served.
         </p>
       </LegalSection>
 
@@ -41,16 +37,16 @@ export default function PrivacyPage() {
           When you save and analyze a job, your resume text and the job posting
           are sent to Google Gemini to produce one analysis. That analysis is
           stored on your account and reused. Opening a cover letter or an
-          improved resume afterwards reads the stored result rather than
-          sending your data again.
+          improved resume afterwards reads the stored result rather than sending
+          your data again.
         </p>
       </LegalSection>
 
       <LegalSection heading="Errors and analytics">
         <p>
-          HireLens reports application errors to Sentry so problems can be
-          found and fixed. Resume text, document content, job postings and
-          request bodies are removed before an error leaves the server.
+          HireLens reports application errors to Sentry so problems can be found
+          and fixed. Resume text, document content, job postings and request
+          bodies are removed before an error leaves the server.
         </p>
         <p>
           If site analytics are enabled, Google Analytics records anonymized
@@ -68,13 +64,20 @@ export default function PrivacyPage() {
 
       <LegalSection heading="Deleting your data">
         <p>
-          Deleting a resume deletes its stored file. Deleting a document
-          removes it from your library and deletes the generated file. Deleting
-          your account removes your data from HireLens.
+          Deleting a resume deletes its stored file. Deleting a document removes
+          it from your library and deletes the generated file. Deleting your
+          account removes your data from HireLens.
         </p>
         <p>
           If something is not working the way this page describes, tell us
-          through <Link href="/dashboard/help" className="text-text-primary underline underline-offset-4">Help</Link>.
+          through{" "}
+          <Link
+            href="/dashboard/help"
+            className="text-text-primary underline underline-offset-4"
+          >
+            Help
+          </Link>
+          .
         </p>
       </LegalSection>
     </LegalLayout>

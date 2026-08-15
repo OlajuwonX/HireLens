@@ -20,8 +20,7 @@ const capabilities = [
   },
   {
     title: "Job targeting",
-    description:
-      "Turn a job description into clear, checkable requirements.",
+    description: "Turn a job description into clear, checkable requirements.",
   },
   {
     title: "Application documents",
@@ -30,8 +29,7 @@ const capabilities = [
   },
   {
     title: "Tracking",
-    description:
-      "Save opportunities and follow them from discovery to offer.",
+    description: "Save opportunities and follow them from discovery to offer.",
   },
 ];
 

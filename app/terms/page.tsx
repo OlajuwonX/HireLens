@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  LegalLayout,
-  LegalSection,
-} from "@/components/marketing/legal-layout";
+import { LegalLayout, LegalSection } from "@/components/marketing/legal-layout";
 
 export const metadata: Metadata = {
   title: "Terms",
@@ -16,9 +13,9 @@ export default function TermsPage() {
     <LegalLayout title="Terms" updated="August 2026">
       <LegalSection heading="What HireLens is">
         <p>
-          HireLens is a tool that helps you prepare job applications. It is
-          free to use and is offered as it is, without a guarantee of
-          availability or of any particular outcome in your job search.
+          HireLens is a tool that helps you prepare job applications. It is free
+          to use and is offered as it is, without a guarantee of availability or
+          of any particular outcome in your job search.
         </p>
       </LegalSection>
 
@@ -59,7 +56,10 @@ export default function TermsPage() {
         <p>
           These terms may change as HireLens changes. The date at the top shows
           the current version. Questions go through{" "}
-          <Link href="/dashboard/help" className="text-text-primary underline underline-offset-4">
+          <Link
+            href="/dashboard/help"
+            className="text-text-primary underline underline-offset-4"
+          >
             Help
           </Link>
           .
