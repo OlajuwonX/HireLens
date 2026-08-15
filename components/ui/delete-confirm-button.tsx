@@ -24,8 +24,6 @@ export function DeleteConfirmButton({
   toastLabel,
   icon: Icon = Trash2,
   className,
-  variant = "icon",
-  label = "Delete",
 }: {
   action: (formData: FormData) => void | Promise<void>;
   publicId: string;
@@ -36,8 +34,6 @@ export function DeleteConfirmButton({
   toastLabel?: string;
   icon?: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   className?: string;
-  variant?: "icon" | "menuitem";
-  label?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [removed, setRemoved] = useState(false);
@@ -50,27 +46,13 @@ export function DeleteConfirmButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {variant === "menuitem" ? (
-          <button
-            type="button"
-            role="menuitem"
-            className={cn(
-              "flex w-full items-center gap-2 rounded-control px-2.5 py-2 text-left text-meta text-danger transition-colors hover:bg-surface-elevated",
-              className,
-            )}
-          >
-            <Icon className="size-4 shrink-0" aria-hidden />
-            {label}
-          </button>
-        ) : (
-          <IconButton
-            label={confirmLabel}
-            variant="danger"
-            className={cn("rounded-none", className)}
-          >
-            <Icon className="size-4" aria-hidden />
-          </IconButton>
-        )}
+        <IconButton
+          label={confirmLabel}
+          variant="danger"
+          className={cn("rounded-none", className)}
+        >
+          <Icon className="size-4" aria-hidden />
+        </IconButton>
       </DialogTrigger>
       <DialogContent className="border border-border">
         <div className="space-y-2 pr-8">

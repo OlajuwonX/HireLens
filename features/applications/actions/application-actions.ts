@@ -146,7 +146,7 @@ export async function deleteApplicationAction(formData: FormData) {
 
   await deleteOwnedApplication({ userId: user.id, publicId: input.publicId });
   revalidatePath("/dashboard/jobs");
-  redirect("/dashboard/jobs");
+  revalidatePath("/dashboard/documents");
 }
 
 export async function archiveApplicationAction(formData: FormData) {
