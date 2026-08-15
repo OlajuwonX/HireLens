@@ -4,17 +4,15 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { LoadMore } from "@/components/ui/load-more";
 import { DocumentFilters } from "@/features/documents/components/document-filters";
-import { DocumentList } from "@/features/documents/components/document-list";
+import { DocumentFeed } from "@/features/documents/components/document-feed";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { getDocumentBoard } from "@/features/documents/server/document.service";
+import { DOCUMENT_PAGE_SIZE } from "@/features/documents/constants";
 
 export const metadata: Metadata = {
   title: "AI Documents",
 };
-
-const PAGE_SIZE = 24;
 
 function readParam(
   raw: Record<string, string | string[] | undefined>,
@@ -39,19 +37,17 @@ export default async function DocumentsPage({
     from: readParam(raw, "from"),
     to: readParam(raw, "to"),
   };
-  const cursor = readParam(raw, "cursor");
   const hasFilters = Object.values(filters).some(Boolean);
 
   const documents = await getDocumentBoard({
     userId: user.id,
     filters,
-    limit: PAGE_SIZE + 1,
-    cursor: cursor || undefined,
+    limit: DOCUMENT_PAGE_SIZE + 1,
   });
 
-  const page = documents.slice(0, PAGE_SIZE);
+  const page = documents.slice(0, DOCUMENT_PAGE_SIZE);
   const nextCursor =
-    documents.length > PAGE_SIZE
+    documents.length > DOCUMENT_PAGE_SIZE
       ? page[page.length - 1]?.createdAt.toISOString()
       : null;
 
@@ -90,12 +86,12 @@ export default async function DocumentsPage({
           }
         />
       ) : (
-        <>
-          <DocumentList rows={page} />
-          {nextCursor ? (
-            <LoadMore basePath="/dashboard/documents" cursor={nextCursor} />
-          ) : null}
-        </>
+        <DocumentFeed
+          key={JSON.stringify(filters)}
+          initialRows={page}
+          initialCursor={nextCursor}
+          filters={filters}
+        />
       )}
     </div>
   );

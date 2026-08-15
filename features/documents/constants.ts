@@ -39,3 +39,5 @@ export const documentTypeLabels: Record<string, string> = {
   CAREER_CHANGE_EXPLANATION: "Career-change note",
   ENTRY_LEVEL_NOTE: "Entry-level note",
 };
+
+export const DOCUMENT_PAGE_SIZE = 24;
