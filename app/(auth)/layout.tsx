@@ -10,7 +10,7 @@ export default function AuthLayout({
     <main className="flex min-h-screen flex-col bg-background px-6 py-10">
       <div className="flex gap-2">
         <Image
-          src="/hllogo.png"
+          src="/hllogo-64.png"
           alt=""
           width={26}
           height={26}

@@ -20,7 +20,7 @@ function Brand({ collapsed }: { collapsed: boolean }) {
       )}
     >
       <Image
-        src="/hllogo.png"
+        src="/hllogo-64.png"
         alt=""
         width={28}
         height={28}

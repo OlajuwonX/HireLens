@@ -1,6 +1,16 @@
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { Toaster } from "@/components/ui/toast";
-import type { Metadata } from "next";
+import {
+  AUTHOR,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_TITLE,
+  getGoogleSiteVerification,
+  getSiteUrl,
+} from "@/lib/seo/site";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./app.css";
 
@@ -16,15 +26,66 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "HireLens",
-    template: "%s | HireLens",
-  },
-  description: "AI-powered resume and job application workspace.",
-  icons: {
-    icon: "/hllogo.png",
-  },
+export function generateMetadata(): Metadata {
+  const siteUrl = getSiteUrl();
+  const googleVerification = getGoogleSiteVerification();
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: SITE_TITLE,
+      template: `%s | ${SITE_NAME}`,
+    },
+    description: SITE_DESCRIPTION,
+    keywords: [...SITE_KEYWORDS],
+    applicationName: SITE_NAME,
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
+    creator: AUTHOR.name,
+    publisher: AUTHOR.name,
+    alternates: {
+      canonical: "/",
+    },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      url: siteUrl,
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      creator: "@PhantomXDev",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    ...(googleVerification
+      ? { verification: { google: googleVerification } }
+      : {}),
+    formatDetection: {
+      telephone: false,
+      address: false,
+    },
+  };
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F8F6" },
+    { media: "(prefers-color-scheme: dark)", color: "#111312" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({
@@ -44,6 +105,7 @@ export default function RootLayout({
       <body>
         {children}
         <Toaster />
+        <GoogleAnalytics />
       </body>
     </html>
   );

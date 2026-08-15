@@ -14,6 +14,8 @@
     "db:push": "drizzle-kit push",
     "dev": "next dev --port 5000",
     "start": "next start --port 5000",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
@@ -31,7 +33,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
-    "isbot": "^5.1.27",
     "lucide-react": "^0.542.0",
     "next": "^15.5.0",
     "next-auth": "5.0.0-beta.32",
@@ -44,12 +45,16 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "4.3.3",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.23",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
     "vitest": "^4.1.10"

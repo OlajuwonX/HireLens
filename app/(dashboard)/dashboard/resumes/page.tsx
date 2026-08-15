@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { ResumeList } from "@/features/resumes/components/resume-list";
@@ -20,7 +21,7 @@ export default async function ResumesPage() {
         description="Manage resume records, processing states, and future resume versions."
         action={
           <Button asChild>
-            <a href="/dashboard/resumes/new">New resume</a>
+            <Link href="/dashboard/resumes/new">New resume</Link>
           </Button>
         }
       />

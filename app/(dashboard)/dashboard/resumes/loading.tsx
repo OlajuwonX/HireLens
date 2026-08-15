@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { ResumeCardSkeleton } from "@/components/ui/skeletons";
@@ -10,7 +11,7 @@ export default function Loading() {
         description="Manage resume records, processing states, and future resume versions."
         action={
           <Button asChild>
-            <a href="/dashboard/resumes/new">New resume</a>
+            <Link href="/dashboard/resumes/new">New resume</Link>
           </Button>
         }
       />
