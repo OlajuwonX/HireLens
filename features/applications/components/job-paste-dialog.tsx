@@ -58,6 +58,16 @@ export function JobPasteDialog({
       return;
     }
 
+    if (state.method === "MANUAL") {
+      if (state.job) {
+        onExtracted(state.job);
+      }
+
+      notify.info(state.message);
+      textareaRef.current?.focus();
+      return;
+    }
+
     if (state.job) {
       onExtracted(state.job);
       notify.success(state.message);
@@ -192,6 +202,10 @@ export function JobPasteDialog({
 
           {state.status === "error" ? (
             <p role="alert" className="text-label text-danger">
+              {state.message}
+            </p>
+          ) : state.method === "MANUAL" ? (
+            <p role="status" className="text-label text-text-secondary">
               {state.message}
             </p>
           ) : null}

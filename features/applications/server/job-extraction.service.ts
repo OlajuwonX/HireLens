@@ -5,7 +5,7 @@ import { getApplicationIntelligenceProvider } from "@/lib/ai/client";
 import { normalizeJsonModelOutput } from "@/lib/ai/normalize";
 import { normalizePastedText } from "@/lib/ai/normalize-pasted-text";
 import {
-  extractedJobSchema,
+  extractedJobResponseSchema,
   jobExtractionInputSchema,
   type ExtractedJob,
 } from "@/lib/ai/schemas/job-extraction.schema";
@@ -19,11 +19,60 @@ import {
 } from "@/features/usage/server/ai-usage.service";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 
-export type ExtractionMethod = "PARSED" | "ASSISTED";
+export type ExtractionMethod = "PARSED" | "ASSISTED" | "MANUAL";
 
 export type JobExtractionResult =
-  | { ok: true; job: ExtractedJob; method: ExtractionMethod }
+  | {
+      ok: true;
+      job: ExtractedJob;
+      method: ExtractionMethod;
+      notice?: string;
+    }
   | { ok: false; message: string };
+
+const EXTRACTION_TIMEOUT_MS = 12_000;
+
+function hasSomething(job: ExtractedJob) {
+  return Boolean(job.title || job.company || job.description);
+}
+
+async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("Job extraction timed out")),
+          ms,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function settleUsage(work: Promise<unknown>, stage: string) {
+  try {
+    await work;
+  } catch (error) {
+    console.error("Job extraction usage bookkeeping failed", {
+      stage,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+  }
+}
+
+function degrade(job: ExtractedJob, notice?: string): JobExtractionResult {
+  return {
+    ok: true,
+    job,
+    method: hasSomething(job) ? "PARSED" : "MANUAL",
+    notice,
+  };
+}
 
 const EMPTY_JOB: ExtractedJob = {
   title: null,
@@ -131,55 +180,76 @@ export async function extractJobPosting(input: {
     };
   }
 
-  const { job: rules, missing } = parseJobPosting({
-    text: parsedInput.data.content,
-    html: input.html ?? null,
-  });
-  const parsed = sanitize(rules);
+  let parsed = EMPTY_JOB;
+  let missing: string[] = ["title", "company", "description"];
+
+  try {
+    const rules = parseJobPosting({
+      text: parsedInput.data.content,
+      html: input.html ?? null,
+    });
+
+    parsed = sanitize(rules.job);
+    missing = rules.missing;
+  } catch (error) {
+    console.error("Job parser failed", {
+      contentLength: parsedInput.data.content.length,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+  }
 
   if (missing.length === 0) {
     return { ok: true, job: parsed, method: "PARSED" };
   }
 
-  const reservation = await reserveUsage({
-    userId: input.userId,
-    action: "JOB_EXTRACTION",
-  });
+  let reservation: Awaited<ReturnType<typeof reserveUsage>>;
+
+  try {
+    reservation = await reserveUsage({
+      userId: input.userId,
+      action: "JOB_EXTRACTION",
+    });
+  } catch (error) {
+    console.error("Job extraction could not reserve usage", {
+      userId: input.userId,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+
+    return degrade(parsed);
+  }
 
   if (!reservation.ok) {
-    if (parsed.title || parsed.description) {
-      return { ok: true, job: parsed, method: "PARSED" };
-    }
-
-    return { ok: false, message: reservation.message };
+    return degrade(parsed, reservation.message);
   }
+
+  const { reservationId } = reservation;
 
   try {
     const provider = input.provider ?? getApplicationIntelligenceProvider();
-    const result = await provider.extractJobPosting({
-      content: parsedInput.data.content,
-    });
-
-    const assisted = sanitize(
-      normalizeJsonModelOutput(result.rawResponse, extractedJobSchema),
+    const result = await withTimeout(
+      provider.extractJobPosting({ content: parsedInput.data.content }),
+      EXTRACTION_TIMEOUT_MS,
     );
 
-    await completeUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action: "JOB_EXTRACTION",
-      provider: result.provider,
-      model: result.model,
-    });
+    const assisted = sanitize(
+      normalizeJsonModelOutput(result.rawResponse, extractedJobResponseSchema),
+    );
+
+    await settleUsage(
+      completeUsage({
+        userId: input.userId,
+        reservationId,
+        action: "JOB_EXTRACTION",
+        provider: result.provider,
+        model: result.model,
+      }),
+      "complete",
+    );
 
     const job = preferParsed(parsed, assisted);
 
-    if (!job.title && !job.company && !job.description) {
-      return {
-        ok: false,
-        message:
-          "We could not identify a complete job posting from that text. Check what you copied and try again.",
-      };
+    if (!hasSomething(job)) {
+      return { ok: true, job, method: "MANUAL" };
     }
 
     return { ok: true, job, method: "ASSISTED" };
@@ -192,24 +262,23 @@ export async function extractJobPosting(input: {
       failureReason,
     });
 
-    await failUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action: "JOB_EXTRACTION",
-      failureReason,
-    });
+    await settleUsage(
+      failUsage({
+        userId: input.userId,
+        reservationId,
+        action: "JOB_EXTRACTION",
+        failureReason,
+      }),
+      "fail",
+    );
 
-    if (parsed.title || parsed.description) {
-      return { ok: true, job: parsed, method: "PARSED" };
-    }
-
-    return {
-      ok: false,
-      message: aiFailureMessage(
+    return degrade(
+      parsed,
+      aiFailureMessage(
         error,
-        "We could not extract the job details right now. You can still enter them manually.",
+        "AI assist was unavailable, so only what could be read directly was filled in.",
       ),
-    };
+    );
   }
 }
 

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { Button } from "@/components/ui/button";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/seo/site";
 import { FAQ, buildStructuredData } from "@/lib/seo/structured-data";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: SITE_TITLE,

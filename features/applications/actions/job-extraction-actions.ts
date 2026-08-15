@@ -19,15 +19,25 @@ export async function extractJobPostingAction(
   });
 
   if (!result.ok) {
-    return { status: "error", message: result.message, job: null };
+    return {
+      status: "error",
+      message: result.message,
+      job: null,
+      method: null,
+    };
   }
+
+  const message =
+    result.method === "MANUAL"
+      ? "We could not read a job posting from that. Try copying more of the page, or close this and type the details in."
+      : result.method === "PARSED"
+        ? "Job details read from the posting. Review them before saving."
+        : "Job details extracted. Review them before saving.";
 
   return {
     status: "extracted",
-    message:
-      result.method === "PARSED"
-        ? "Job details read from the posting. Review them before saving."
-        : "Job details extracted. Review them before saving.",
+    message: result.notice ? `${message} ${result.notice}` : message,
     job: result.job,
+    method: result.method,
   };
 }

@@ -21,6 +21,30 @@ export const extractedJobSchema = z.object({
 
 export type ExtractedJob = z.infer<typeof extractedJobSchema>;
 
+const nullableString = z.string().nullable().catch(null);
+const nullableSalary = z
+  .number()
+  .int()
+  .min(0)
+  .max(100_000_000)
+  .nullable()
+  .catch(null);
+
+export const extractedJobResponseSchema = z.object({
+  title: nullableString,
+  company: nullableString,
+  location: nullableString,
+  workArrangement: z.enum(WORK_ARRANGEMENTS).nullable().catch(null),
+  employmentType: z.enum(EMPLOYMENT_TYPES).nullable().catch(null),
+  salaryMin: nullableSalary,
+  salaryMax: nullableSalary,
+  currency: nullableString,
+  source: nullableString,
+  sourceUrl: nullableString,
+  description: nullableString,
+  requirements: nullableString,
+});
+
 export const jobExtractionInputSchema = z.object({
   content: z
     .string()
