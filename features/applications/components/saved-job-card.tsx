@@ -26,12 +26,16 @@ export function SavedJobCard({
   title,
   archived,
   statusBadge,
+  onLeave,
+  onReturn,
   children,
 }: {
   publicId: string;
   title: string;
   archived: boolean;
   statusBadge: React.ReactNode;
+  onLeave?: () => void;
+  onReturn?: () => void;
   children: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -80,6 +84,7 @@ export function SavedJobCard({
 
     setMenuOpen(false);
     setArchivedNow(next);
+    onLeave?.();
     notify.success(next ? `${title} archived.` : `${title} restored.`);
 
     startTransition(async () => {
@@ -91,6 +96,7 @@ export function SavedJobCard({
         }
 
         setArchivedNow(archived);
+        onReturn?.();
         notify.error(
           next
             ? `${title} could not be archived.`
@@ -107,6 +113,7 @@ export function SavedJobCard({
 
     setConfirmOpen(false);
     setRemoved(true);
+    onLeave?.();
     notify.deleted(title);
 
     startTransition(async () => {
@@ -118,6 +125,7 @@ export function SavedJobCard({
         }
 
         setRemoved(false);
+        onReturn?.();
         notify.error(`${title} could not be deleted.`);
       }
     });

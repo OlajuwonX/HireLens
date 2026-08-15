@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { JobCardSkeleton } from "@/components/ui/skeletons";
 import { ScoreRing } from "@/components/data-display/score-ring";
 import type { ApplicationListRow } from "../server/application.repository";
+import { shiftOffset } from "../feed-window";
 import {
   loadMoreApplicationsAction,
   type ApplicationFeedPage,
@@ -51,6 +52,10 @@ export function SavedJobFeed({
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const inFlight = useRef(false);
+
+  const shiftWindow = useCallback((delta: number) => {
+    setOffset((current) => shiftOffset(current, delta));
+  }, []);
 
   const loadMore = useCallback(async () => {
     if (inFlight.current || offset === null) {
@@ -118,6 +123,8 @@ export function SavedJobFeed({
             title={row.title}
             archived={Boolean(row.archivedAt)}
             statusBadge={<ApplicationStatusBadge status={row.status} />}
+            onLeave={() => shiftWindow(-1)}
+            onReturn={() => shiftWindow(1)}
           >
             <div className="flex items-start justify-between gap-2">
               <Link
