@@ -36,9 +36,7 @@ export async function listAllResumeVersionsForUser(userId: string) {
     })
     .from(resumeVersions)
     .innerJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
-    .where(
-      and(eq(resumeVersions.userId, userId), isNull(resumes.archivedAt)),
-    )
+    .where(and(eq(resumeVersions.userId, userId), isNull(resumes.archivedAt)))
     .orderBy(desc(resumeVersions.isDefault), desc(resumeVersions.createdAt));
 }
 

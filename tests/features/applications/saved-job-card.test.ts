@@ -34,7 +34,9 @@ describe("the confirm dialog survives the menu closing", () => {
   });
 
   it("closes the menu and opens the dialog rather than nesting them", () => {
-    expect(card).toContain("setMenuOpen(false);\n                  setConfirmOpen(true);");
+    expect(card).toContain(
+      "setMenuOpen(false);\n                  setConfirmOpen(true);",
+    );
   });
 });
 
