@@ -32,8 +32,8 @@ export default async function SignInPage() {
 
       <GoogleButton />
 
-      <p className="text-meta text-text-secondary">
-        New to HireLens?{" "}
+      <p className="flex flex-col items-center justify-center gap-1 text-center text-meta text-text-secondary sm:flex-row sm:flex-wrap sm:gap-x-1.5">
+        <span>New to HireLens?</span>
         <Link
           href="/sign-up"
           className="font-medium text-text-primary underline-offset-4 hover:underline"

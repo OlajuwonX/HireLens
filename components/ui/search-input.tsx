@@ -1,6 +1,6 @@
-import * as React from "react";
-import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
+import * as React from "react";
 
 export type SearchInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 

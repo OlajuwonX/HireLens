@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, type ComponentType, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from "react";
 import {
   Check,
   Copy,
@@ -22,7 +29,11 @@ import {
 } from "@/components/ui/dialog";
 import { notify } from "@/components/ui/toast";
 import type { AiView } from "@/features/analyses/server/analysis.mapper";
+import { saveAnalysisViewAction } from "../actions/document-actions";
+import { initialDocumentFormState } from "../actions/document-form-state";
 import { SaveDocumentButton } from "./save-document-button";
+
+const CLOSE_AFTER_SAVE_MS = 200;
 
 const icons: Record<
   AiView,
@@ -109,8 +120,47 @@ export function AiDocumentModal({
       ? `/dashboard/documents/${savedDocumentId}/download`
       : null;
 
+  const [open, setOpen] = useState(false);
+  const [optimisticSaved, setOptimisticSaved] = useState(false);
+  const [state, action] = useActionState(
+    saveAnalysisViewAction,
+    initialDocumentFormState,
+  );
+  const announced = useRef(initialDocumentFormState);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
+    if (state === announced.current || state.status === "idle") {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "error") {
+      setOptimisticSaved(false);
+      notify.error(
+        state.message
+          ? `${title} was not saved. ${state.message}`
+          : `${title} failed to save to AI Documents.`,
+      );
+      return;
+    }
+
+    notify.success(state.message);
+  }, [state, title]);
+
+  function handleOptimisticSave() {
+    setOptimisticSaved(true);
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), CLOSE_AFTER_SAVE_MS);
+  }
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -150,7 +200,9 @@ export function AiDocumentModal({
           <SaveDocumentButton
             applicationPublicId={applicationPublicId}
             view={view}
-            alreadySaved={Boolean(savedDocumentId)}
+            alreadySaved={Boolean(savedDocumentId) || optimisticSaved}
+            action={action}
+            onOptimisticSave={handleOptimisticSave}
           />
         </div>
       </DialogContent>

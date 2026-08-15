@@ -33,8 +33,8 @@ export default async function SignUpPage() {
 
       <GoogleButton />
 
-      <p className="text-meta text-text-secondary">
-        Already have an account?{" "}
+      <p className="flex flex-col items-center justify-center gap-1 text-center text-meta text-text-secondary sm:flex-row sm:flex-wrap sm:gap-x-1.5">
+        <span>Already have an account?</span>
         <Link
           href="/sign-in"
           className="font-medium text-text-primary underline-offset-4 hover:underline"

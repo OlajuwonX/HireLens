@@ -38,8 +38,8 @@ export default function ForgotPasswordPage() {
         email is not a Google account, contact support to recover access.
       </Alert>
 
-      <p className="text-meta text-text-secondary">
-        Remembered it?{" "}
+      <p className="flex flex-col items-center justify-center gap-1 text-center text-meta text-text-secondary sm:flex-row sm:flex-wrap sm:gap-x-1.5">
+        <span>Remembered it?</span>
         <Link
           href="/sign-in"
           className="font-medium text-text-primary underline-offset-4 hover:underline"

@@ -12,6 +12,8 @@ import {
 } from "@/features/analyses/server/analysis.mapper";
 import { getOwnedApplication } from "@/features/applications/server/application.service";
 import { resumeVersionExistsWithLabel } from "@/features/resumes/server/resume-version.repository";
+import { findOrCreateResumeGroupByTitle } from "@/features/resumes/server/resume.repository";
+import { IMPROVED_RESUMES_GROUP_TITLE } from "@/features/resumes/constants";
 import type { UpdateDocumentInput } from "../schemas/document.schema";
 import type { DocumentFilters } from "./document.repository";
 import { documentTypeForView } from "../constants";
@@ -210,18 +212,20 @@ export async function addImprovedResumeToLibrary(input: {
     };
   }
 
-  if (!row.resumeId) {
-    return {
-      ok: false as const,
-      message: "The resume group this was based on no longer exists.",
-    };
-  }
-
   try {
+    const resumeId =
+      row.resumeId ??
+      (
+        await findOrCreateResumeGroupByTitle({
+          userId: input.userId,
+          title: IMPROVED_RESUMES_GROUP_TITLE,
+        })
+      ).id;
+
     const version = await copyImprovedResumeToVersion({
       userId: input.userId,
       fileAssetId: row.document.fileAssetId,
-      resumeId: row.resumeId,
+      resumeId,
       label: improvedResumeVersionLabel(row.jobTitle),
     });
 

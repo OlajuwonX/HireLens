@@ -85,6 +85,13 @@
       "when": 1786728256236,
       "tag": "0011_wooden_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786783388607,
+      "tag": "0012_easy_chimera",
+      "breakpoints": true
     }
   ]
 }

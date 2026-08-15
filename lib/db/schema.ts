@@ -416,6 +416,10 @@ export const applications = pgTable(
     uniqueIndex("applications_user_job_idx").on(table.userId, table.jobId),
     index("applications_user_stage_idx").on(table.userId, table.status),
     index("applications_user_follow_up_idx").on(table.userId, table.followUpAt),
+    index("applications_user_created_idx").on(
+      table.userId,
+      table.createdAt.desc(),
+    ),
   ],
 );
 
@@ -469,6 +473,10 @@ export const generatedDocuments = pgTable(
   (table) => [
     uniqueIndex("generated_documents_public_id_idx").on(table.publicId),
     index("generated_documents_user_type_idx").on(table.userId, table.type),
+    index("generated_documents_user_created_idx").on(
+      table.userId,
+      table.createdAt.desc(),
+    ),
   ],
 );
 

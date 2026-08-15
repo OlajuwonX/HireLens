@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   fileAssets,
@@ -12,6 +12,34 @@ import {
 export async function createResume(input: NewResume) {
   const [resume] = await db.insert(resumes).values(input).returning();
   return resume;
+}
+
+export async function findOrCreateResumeGroupByTitle(input: {
+  userId: string;
+  title: string;
+}) {
+  const [existing] = await db
+    .select()
+    .from(resumes)
+    .where(
+      and(
+        eq(resumes.userId, input.userId),
+        eq(resumes.title, input.title),
+        isNull(resumes.archivedAt),
+      ),
+    )
+    .orderBy(desc(resumes.createdAt))
+    .limit(1);
+
+  if (existing) {
+    return existing;
+  }
+
+  return createResume({
+    userId: input.userId,
+    title: input.title,
+    status: "READY",
+  });
 }
 
 export async function findResumeForUser(input: {

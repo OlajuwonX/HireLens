@@ -23,11 +23,14 @@ export function FileDropzone({
       )}
     >
       <Upload aria-hidden="true" className="mx-auto size-5 text-text-muted" />
-      <span className="mt-3 block text-meta font-semibold text-text-primary">
+      <span
+        title={label}
+        className="mt-3 block line-clamp-2 max-w-full wrap-anywhere text-meta font-semibold text-text-primary"
+      >
         {label}
       </span>
       {description ? (
-        <span className="mt-1 block text-label text-text-secondary">
+        <span className="mt-1 block max-w-full wrap-anywhere text-label text-text-secondary">
           {description}
         </span>
       ) : null}

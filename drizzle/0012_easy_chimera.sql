@@ -1,0 +1,2 @@
+CREATE INDEX "applications_user_created_idx" ON "applications" USING btree ("user_id","created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "generated_documents_user_created_idx" ON "generated_documents" USING btree ("user_id","created_at" DESC NULLS LAST);
