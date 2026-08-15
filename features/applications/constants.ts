@@ -52,3 +52,5 @@ export const applicationSortLabels: Record<ApplicationSort, string> = {
   score_desc: "Best match",
   company_asc: "Company A–Z",
 };
+
+export const APPLICATION_PAGE_SIZE = 24;

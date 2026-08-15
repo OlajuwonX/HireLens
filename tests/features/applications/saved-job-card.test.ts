@@ -6,7 +6,7 @@ const card = readFileSync(
   "utf8",
 );
 const grid = readFileSync(
-  "features/applications/components/application-card-grid.tsx",
+  "features/applications/components/saved-job-feed.tsx",
   "utf8",
 );
 const repository = readFileSync(

@@ -5,17 +5,15 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { LoadMore } from "@/components/ui/load-more";
 import { ApplicationFilters } from "@/features/applications/components/application-filters";
-import { ApplicationCardGrid } from "@/features/applications/components/application-card-grid";
+import { SavedJobFeed } from "@/features/applications/components/saved-job-feed";
 import { SavedJobDrawer } from "@/features/applications/components/saved-job-drawer";
 import { applicationFiltersSchema } from "@/features/applications/schemas/application.schema";
 import {
   getApplicationBoard,
   getStatusCounts,
 } from "@/features/applications/server/application.service";
-
-const PAGE_SIZE = 24;
+import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
 
 export const metadata: Metadata = {
   title: "Saved Jobs",
@@ -43,18 +41,11 @@ export default async function SavedJobsPage({
     ? parsed.data
     : applicationFiltersSchema.parse({});
 
-  const page = Number.parseInt(
-    typeof raw.page === "string" ? raw.page : "1",
-    10,
-  );
-  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-
   const [rows, counts] = await Promise.all([
     getApplicationBoard({
       userId: user.id,
       filters,
-      limit: PAGE_SIZE + 1,
-      offset: (currentPage - 1) * PAGE_SIZE,
+      limit: APPLICATION_PAGE_SIZE + 1,
     }),
     getStatusCounts(user.id),
   ]);
@@ -66,8 +57,9 @@ export default async function SavedJobsPage({
 
   const openId = typeof raw.open === "string" ? raw.open : null;
 
-  const visible = rows.slice(0, PAGE_SIZE);
-  const hasMore = rows.length > PAGE_SIZE;
+  const visible = rows.slice(0, APPLICATION_PAGE_SIZE);
+  const nextOffset =
+    rows.length > APPLICATION_PAGE_SIZE ? APPLICATION_PAGE_SIZE : null;
 
   return (
     <div className="space-y-6">
@@ -104,16 +96,13 @@ export default async function SavedJobsPage({
           }
         />
       ) : (
-        <>
-          <ApplicationCardGrid rows={visible} query={query.toString()} />
-          {hasMore ? (
-            <LoadMore
-              basePath="/dashboard/jobs"
-              page={currentPage + 1}
-              label="Show more saved jobs"
-            />
-          ) : null}
-        </>
+        <SavedJobFeed
+          key={JSON.stringify(filters)}
+          initialRows={visible}
+          initialNextOffset={nextOffset}
+          filters={filters}
+          query={query.toString()}
+        />
       )}
 
       {openId ? (
