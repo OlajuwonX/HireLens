@@ -406,6 +406,7 @@ export const applications = pgTable(
     followUpAt: timestamp("follow_up_at", { withTimezone: true }),
     interviewAt: timestamp("interview_at", { withTimezone: true }),
     notes: text("notes"),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -413,6 +414,7 @@ export const applications = pgTable(
   },
   (table) => [
     uniqueIndex("applications_public_id_idx").on(table.publicId),
+    index("applications_user_archived_idx").on(table.userId, table.archivedAt),
     uniqueIndex("applications_user_job_idx").on(table.userId, table.jobId),
     index("applications_user_stage_idx").on(table.userId, table.status),
     index("applications_user_follow_up_idx").on(table.userId, table.followUpAt),

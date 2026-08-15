@@ -21,13 +21,18 @@ export const applicationStatusTone: Record<
   REJECTED: "red",
 };
 
-export const APPLICATION_TABS = ["ALL", ...APPLICATION_STATUSES] as const;
+export const APPLICATION_TABS = [
+  "ALL",
+  ...APPLICATION_STATUSES,
+  "ARCHIVED",
+] as const;
 
 export type ApplicationTab = (typeof APPLICATION_TABS)[number];
 
 export const applicationTabLabels: Record<ApplicationTab, string> = {
   ALL: "All",
   ...applicationStatusLabels,
+  ARCHIVED: "Archived",
 };
 
 export const APPLICATION_SORT_OPTIONS = [

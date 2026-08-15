@@ -23,7 +23,10 @@ export function ApplicationFilters({
 
   const activeTab = params.get("tab") ?? "PENDING";
   const activeSort = params.get("sort") ?? "activity_desc";
-  const totalCount = Object.values(counts).reduce((sum, n) => sum + n, 0);
+  const totalCount = Object.entries(counts).reduce(
+    (sum, [key, n]) => (key === "ARCHIVED" ? sum : sum + n),
+    0,
+  );
 
   function apply(next: Record<string, string>) {
     const search = new URLSearchParams(params.toString());

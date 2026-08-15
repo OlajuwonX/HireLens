@@ -13,6 +13,7 @@ import {
   saveAndAnalyze,
   updateOwnedApplication,
 } from "@/features/applications/server/application.service";
+import { setApplicationArchivedForUser } from "@/features/applications/server/application.repository";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -146,6 +147,21 @@ export async function deleteApplicationAction(formData: FormData) {
   await deleteOwnedApplication({ userId: user.id, publicId: input.publicId });
   revalidatePath("/dashboard/jobs");
   redirect("/dashboard/jobs");
+}
+
+export async function archiveApplicationAction(formData: FormData) {
+  const user = await requireDatabaseUser();
+  const input = applicationActionSchema.parse({
+    publicId: getString(formData, "publicId"),
+  });
+
+  await setApplicationArchivedForUser({
+    userId: user.id,
+    publicId: input.publicId,
+    archived: formData.get("archived") !== "false",
+  });
+
+  revalidatePath("/dashboard/jobs");
 }
 
 export async function analyzeApplicationAction(formData: FormData) {

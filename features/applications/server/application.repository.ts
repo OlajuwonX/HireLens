@@ -8,6 +8,7 @@ import {
   gte,
   ilike,
   isNotNull,
+  isNull,
   lt,
   or,
   type SQL,
@@ -49,6 +50,7 @@ export type ApplicationRow = {
 const listRowShape = {
   publicId: applications.publicId,
   status: applications.status,
+  archivedAt: applications.archivedAt,
   createdAt: applications.createdAt,
   title: jobs.title,
   company: jobs.company,
@@ -60,6 +62,7 @@ const listRowShape = {
 export type ApplicationListRow = {
   publicId: string;
   status: Application["status"];
+  archivedAt: Date | null;
   createdAt: Date;
   title: string;
   company: string;
@@ -141,8 +144,14 @@ export async function listApplicationsForUser(input: {
 }): Promise<ApplicationListRow[]> {
   const conditions: SQL[] = [eq(applications.userId, input.userId)];
 
-  if (input.filters.tab !== "ALL") {
-    conditions.push(eq(applications.status, input.filters.tab));
+  if (input.filters.tab === "ARCHIVED") {
+    conditions.push(isNotNull(applications.archivedAt));
+  } else {
+    conditions.push(isNull(applications.archivedAt));
+
+    if (input.filters.tab !== "ALL") {
+      conditions.push(eq(applications.status, input.filters.tab));
+    }
   }
 
   if (input.filters.q) {
@@ -190,14 +199,43 @@ export async function listApplicationsForUser(input: {
 
 export async function countApplicationsByStatus(userId: string) {
   const rows = await db
-    .select({ status: applications.status, id: applications.id })
+    .select({
+      status: applications.status,
+      archivedAt: applications.archivedAt,
+      id: applications.id,
+    })
     .from(applications)
     .where(eq(applications.userId, userId));
 
   return rows.reduce<Record<string, number>>((counts, row) => {
-    counts[row.status] = (counts[row.status] ?? 0) + 1;
+    const key = row.archivedAt ? "ARCHIVED" : row.status;
+
+    counts[key] = (counts[key] ?? 0) + 1;
+
     return counts;
   }, {});
+}
+
+export async function setApplicationArchivedForUser(input: {
+  userId: string;
+  publicId: string;
+  archived: boolean;
+}) {
+  const [application] = await db
+    .update(applications)
+    .set({
+      archivedAt: input.archived ? new Date() : null,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(applications.userId, input.userId),
+        eq(applications.publicId, input.publicId),
+      ),
+    )
+    .returning();
+
+  return application ?? null;
 }
 
 export async function createJobWithApplication(input: {

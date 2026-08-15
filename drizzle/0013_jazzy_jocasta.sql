@@ -1,0 +1,2 @@
+ALTER TABLE "applications" ADD COLUMN "archived_at" timestamp with time zone;--> statement-breakpoint
+CREATE INDEX "applications_user_archived_idx" ON "applications" USING btree ("user_id","archived_at");

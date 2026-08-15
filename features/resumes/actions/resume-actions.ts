@@ -61,6 +61,7 @@ export async function archiveResumeAction(formData: FormData) {
   });
   revalidatePath("/dashboard/resumes");
   revalidatePath(`/dashboard/resumes/${input.publicId}`);
+  revalidatePath("/dashboard/applications");
 }
 
 export async function deleteResumeAction(formData: FormData) {
@@ -71,6 +72,7 @@ export async function deleteResumeAction(formData: FormData) {
 
   await deleteOwnedResume({ userId: user.id, publicId: input.publicId });
   revalidatePath("/dashboard/resumes");
+  revalidatePath("/dashboard/applications");
   redirect("/dashboard/resumes");
 }
 

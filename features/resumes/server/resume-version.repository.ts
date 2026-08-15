@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, max } from "drizzle-orm";
+import { and, count, desc, eq, isNull, max } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   fileAssets,
@@ -36,7 +36,9 @@ export async function listAllResumeVersionsForUser(userId: string) {
     })
     .from(resumeVersions)
     .innerJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
-    .where(eq(resumeVersions.userId, userId))
+    .where(
+      and(eq(resumeVersions.userId, userId), isNull(resumes.archivedAt)),
+    )
     .orderBy(desc(resumeVersions.isDefault), desc(resumeVersions.createdAt));
 }
 
