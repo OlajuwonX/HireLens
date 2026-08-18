@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { signUpWithCredentials } from "@/features/auth/actions/auth-actions";
 import { initialAuthFormState } from "@/features/auth/actions/auth-form-state";
+import { PasswordRequirements } from "@/features/auth/components/password-requirements";
+import { unmetPasswordRules } from "@/features/auth/schemas/password-rules";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -25,9 +27,24 @@ export function SignUpForm() {
     signUpWithCredentials,
     initialAuthFormState,
   );
+  const [password, setPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const field = formRef.current?.elements.namedItem("password");
+
+    if (field instanceof HTMLInputElement) {
+      setPassword(field.value);
+    }
+  }, [state]);
+
+  const highlightUnmet =
+    unmetPasswordRules(password).length > 0 &&
+    (passwordTouched || state.status === "error");
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
       {state.status === "error" ? (
         <Alert tone="error">{state.message}</Alert>
       ) : null}
@@ -62,10 +79,15 @@ export function SignUpForm() {
           autoComplete="new-password"
           required
           aria-describedby="password-hint"
+          aria-invalid={highlightUnmet}
+          onChange={(event) => setPassword(event.target.value)}
+          onBlur={() => setPasswordTouched(true)}
         />
-        <p id="password-hint" className="text-label text-text-muted">
-          At least 10 characters, with upper and lower case and a number.
-        </p>
+        <PasswordRequirements
+          id="password-hint"
+          value={password}
+          highlightUnmet={highlightUnmet}
+        />
       </div>
 
       <SubmitButton />

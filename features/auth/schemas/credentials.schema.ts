@@ -1,16 +1,18 @@
 import { z } from "zod";
+import { PASSWORD_MAX_LENGTH, unmetPasswordRules } from "./password-rules";
 
 export const passwordSchema = z
   .string()
-  .min(10, "Password must be at least 10 characters")
-  .max(200, "Password is too long")
-  .regex(/[a-z]/, "Password must include a lowercase letter")
-  .regex(/[A-Z]/, "Password must include an uppercase letter")
-  .regex(/[0-9]/, "Password must include a number");
+  .max(PASSWORD_MAX_LENGTH, "Password is too long")
+  .superRefine((password, ctx) => {
+    for (const rule of unmetPasswordRules(password)) {
+      ctx.addIssue({ code: "custom", message: rule.label });
+    }
+  });
 
 export const signInSchema = z.object({
   email: z.email("Enter a valid email address").max(320),
-  password: z.string().min(1, "Enter your password").max(200),
+  password: z.string().min(1, "Enter your password").max(PASSWORD_MAX_LENGTH),
 });
 
 export const signUpSchema = z.object({

@@ -1,7 +1,7 @@
+import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
+import { shiftOffset } from "@/features/applications/feed-window";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { shiftOffset } from "@/features/applications/feed-window";
-import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
 
 describe("shiftOffset", () => {
   it("moves the window back when a row leaves", () => {
@@ -28,7 +28,13 @@ describe("shiftOffset", () => {
  * offset-paged feed. `server` is the source of truth; `loaded` is what the
  * user has accumulated on screen.
  */
-function simulate({ total, compensate }: { total: number; compensate: boolean }) {
+function simulate({
+  total,
+  compensate,
+}: {
+  total: number;
+  compensate: boolean;
+}) {
   const server = Array.from({ length: total }, (_, index) => `job-${index}`);
 
   const firstPage = server.slice(0, APPLICATION_PAGE_SIZE);

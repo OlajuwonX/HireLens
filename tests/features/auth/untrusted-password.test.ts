@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { shouldClearUntrustedPassword } from "@/features/auth/policies/account-linking";
+import { describe, expect, it } from "vitest";
 
 const VERIFIED = new Date("2026-01-01T00:00:00Z");
 

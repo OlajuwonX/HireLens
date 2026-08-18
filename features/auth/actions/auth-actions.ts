@@ -1,14 +1,15 @@
 "use server";
 
-import { firstIssueMessage } from "@/lib/forms/zod-error";
-import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/auth";
 import {
   signInSchema,
   signUpSchema,
 } from "@/features/auth/schemas/credentials.schema";
+import { passwordProblemMessage } from "@/features/auth/schemas/password-rules";
 import { registerCredentialsUser } from "@/features/auth/server/user.service";
+import { firstIssueMessage } from "@/lib/forms/zod-error";
+import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 import type { AuthFormState } from "./auth-form-state";
 
 function getString(formData: FormData, key: string) {
@@ -63,19 +64,24 @@ export async function signUpWithCredentials(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const password = getString(formData, "password");
   const parsed = signUpSchema.safeParse({
     name: getString(formData, "name"),
     email: getString(formData, "email"),
-    password: getString(formData, "password"),
+    password,
   });
 
   if (!parsed.success) {
+    const passwordProblem =
+      parsed.error.issues[0]?.path[0] === "password"
+        ? passwordProblemMessage(password)
+        : null;
+
     return {
       status: "error",
-      message: firstIssueMessage(
-        parsed.error,
-        "Check your details and try again.",
-      ),
+      message:
+        passwordProblem ??
+        firstIssueMessage(parsed.error, "Check your details and try again."),
     };
   }
 

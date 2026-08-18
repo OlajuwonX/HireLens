@@ -1,6 +1,6 @@
+import { DOCUMENT_PAGE_SIZE } from "@/features/documents/constants";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DOCUMENT_PAGE_SIZE } from "@/features/documents/constants";
 
 const feed = readFileSync(
   "features/documents/components/document-feed.tsx",
@@ -97,7 +97,9 @@ describe("the paging action is safe", () => {
 
   it("only exports async functions, as use-server requires", () => {
     const runtimeExports = [
-      ...action.matchAll(/^export (?!type\b)(?:const|function|async function|let|var)\s+(\w+)/gm),
+      ...action.matchAll(
+        /^export (?!type\b)(?:const|function|async function|let|var)\s+(\w+)/gm,
+      ),
     ].map((match) => match[0]);
 
     for (const declaration of runtimeExports) {
