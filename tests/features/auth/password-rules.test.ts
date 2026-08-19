@@ -31,7 +31,9 @@ describe("unmetPasswordRules", () => {
   });
 
   it("counts a short password as short even when it has every character class", () => {
-    expect(unmetPasswordRules("Ab1").map((rule) => rule.id)).toEqual(["length"]);
+    expect(unmetPasswordRules("Ab1").map((rule) => rule.id)).toEqual([
+      "length",
+    ]);
   });
 });
 

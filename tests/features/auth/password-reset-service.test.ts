@@ -39,9 +39,8 @@ vi.mock("@/lib/email/brevo", () => ({
   sendEmail: (input: unknown) => sendEmail(input),
 }));
 
-const { completePasswordReset, requestPasswordReset } = await import(
-  "@/features/auth/server/password-reset.service"
-);
+const { completePasswordReset, requestPasswordReset } =
+  await import("@/features/auth/server/password-reset.service");
 
 const CREDENTIALS_USER = {
   id: "user-1",

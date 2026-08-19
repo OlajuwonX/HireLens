@@ -17,9 +17,8 @@ vi.mock("@/features/auth/server/user.repository", async () => {
   };
 });
 
-const { registerCredentialsUser } = await import(
-  "@/features/auth/server/user.service"
-);
+const { registerCredentialsUser } =
+  await import("@/features/auth/server/user.service");
 
 const SIGN_UP = {
   name: "Ada",
