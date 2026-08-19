@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { passwordSchema } from "@/features/auth/schemas/credentials.schema";
 import {
   PASSWORD_MAX_LENGTH,
@@ -116,12 +117,19 @@ describe("the rules stay usable in a browser", () => {
     expect(source).not.toContain("zod");
   });
 
-  it("is the only rule source the sign-up client components read", () => {
-    for (const file of [
-      "features/auth/components/password-requirements.tsx",
-      "features/auth/components/sign-up-form.tsx",
-    ]) {
-      expect(readFileSync(file, "utf8")).not.toContain("credentials.schema");
-    }
+  it("is the only rule source any auth client component reads", () => {
+    const offenders = readdirSync("features/auth/components")
+      .filter((entry) => entry.endsWith(".tsx"))
+      .map((entry) => join("features/auth/components", entry))
+      .filter((file) => {
+        const source = readFileSync(file, "utf8");
+
+        return (
+          source.trimStart().startsWith('"use client"') &&
+          source.includes("credentials.schema")
+        );
+      });
+
+    expect(offenders).toEqual([]);
   });
 });

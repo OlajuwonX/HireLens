@@ -88,6 +88,10 @@ const serverEnvSchema = z.object({
   AI_DAILY_JOB_EXTRACTION_LIMIT: optionalIntWithDefault(3),
   AI_GLOBAL_DAILY_SAFETY_LIMIT: optionalIntWithDefault(18),
 
+  BREVO_API_KEY: optionalString,
+  BREVO_SENDER_EMAIL: optionalString,
+  BREVO_SENDER_NAME: optionalStringWithDefault("HireLens"),
+
   SITE_URL: optionalString,
   VERCEL_PROJECT_PRODUCTION_URL: optionalString,
   VERCEL_URL: optionalString,

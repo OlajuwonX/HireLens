@@ -8,6 +8,7 @@ import { hashPassword, verifyPassword } from "./password";
 import {
   createUser,
   findUserByEmail,
+  findUserById,
   markEmailVerified,
   setUserPasswordHash,
   touchUserLogin,
@@ -71,25 +72,49 @@ export async function registerCredentialsUser(
 ): Promise<RegisterResult> {
   const email = normalizeEmail(input.email);
   const existing = await findUserByEmail(email);
-  const passwordHash = await hashPassword(input.password);
 
   if (existing) {
-    if (existing.passwordHash) {
-      return {
-        ok: false,
-        message: "An account with that email already exists. Sign in instead.",
-      };
-    }
-
-    await setUserPasswordHash({ userId: existing.id, passwordHash });
-    return { ok: true };
+    return {
+      ok: false,
+      message: "An account with that email already exists. Sign in instead.",
+    };
   }
 
   await createUser({
     email,
     name: input.name,
-    passwordHash,
+    passwordHash: await hashPassword(input.password),
     lastLoginAt: null,
+  });
+
+  return { ok: true };
+}
+
+export async function setAccountPassword(input: {
+  userId: string;
+  currentPassword: string;
+  newPassword: string;
+}): Promise<RegisterResult> {
+  const user = await findUserById(input.userId);
+
+  if (!user || user.deletedAt) {
+    return { ok: false, message: "That account is no longer available." };
+  }
+
+  if (user.passwordHash) {
+    const valid = await verifyPassword(
+      input.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!valid) {
+      return { ok: false, message: "That current password is not correct." };
+    }
+  }
+
+  await setUserPasswordHash({
+    userId: user.id,
+    passwordHash: await hashPassword(input.newPassword),
   });
 
   return { ok: true };

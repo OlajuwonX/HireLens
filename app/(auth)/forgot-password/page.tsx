@@ -1,13 +1,20 @@
+import { Alert } from "@/components/ui/alert";
+import { AuthDivider } from "@/features/auth/components/auth-divider";
+import { GoogleButton } from "@/features/auth/components/google-button";
+import { RequestResetForm } from "@/features/auth/components/request-reset-form";
+import { isEmailEnabled } from "@/lib/email/brevo";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Alert } from "@/components/ui/alert";
-import { GoogleButton } from "@/features/auth/components/google-button";
 
 export const metadata: Metadata = {
   title: "Forgot password",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function ForgotPasswordPage() {
+  const emailEnabled = isEmailEnabled();
+
   return (
     <div className="space-y-6">
       <div>
@@ -15,10 +22,15 @@ export default function ForgotPasswordPage() {
           Forgotten your password?
         </h1>
         <p className="mt-1.5 text-meta text-text-secondary">
-          If your HireLens email is a Google account, you can get straight back
-          in.
+          {emailEnabled
+            ? "Enter your email and we will send you a link to choose a new password."
+            : "If your HireLens email is a Google account, you can get straight back in."}
         </p>
       </div>
+
+      {emailEnabled ? <RequestResetForm /> : null}
+
+      {emailEnabled ? <AuthDivider /> : null}
 
       <div className="space-y-3 rounded-card border border-border bg-surface p-5">
         <h2 className="text-section-title font-semibold text-text-primary">
@@ -33,10 +45,12 @@ export default function ForgotPasswordPage() {
         <GoogleButton />
       </div>
 
-      <Alert tone="info">
-        Email-based password resets are not available yet. If your HireLens
-        email is not a Google account, contact support to recover access.
-      </Alert>
+      {emailEnabled ? null : (
+        <Alert tone="info">
+          Email-based password resets are not available yet. If your HireLens
+          email is not a Google account, contact support to recover access.
+        </Alert>
+      )}
 
       <p className="flex flex-col items-center justify-center gap-1 text-center text-meta text-text-secondary sm:flex-row sm:flex-wrap sm:gap-x-1.5">
         <span>Remembered it?</span>

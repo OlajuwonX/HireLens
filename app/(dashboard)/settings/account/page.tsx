@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SetPasswordForm } from "@/features/auth/components/set-password-form";
 import { requireVerifiedDatabaseUser } from "@/features/auth/server/require-database-user";
 import type { Metadata } from "next";
 
@@ -59,10 +60,13 @@ export default async function AccountSettingsPage() {
               If you previously set a password and it is no longer listed here,
               it was removed when Google confirmed you own this email address. A
               password set before the address was verified cannot be trusted, so
-              HireLens clears it. You can keep signing in with Google, and set a
-              new password once password resets are available.
+              HireLens clears it. Set a new one below whenever you like.
             </Alert>
           )}
+
+          <div className="border-t border-border pt-4">
+            <SetPasswordForm hasPassword={hasPassword} />
+          </div>
         </CardContent>
       </Card>
     </div>
