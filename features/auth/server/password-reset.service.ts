@@ -1,14 +1,8 @@
 import "server-only";
 
-import {
-  isResetTokenExpired,
-  RESET_TOKEN_TTL_MINUTES,
-  resendCooldownThreshold,
-  resetTokenExpiry,
-} from "@/features/auth/policies/password-reset";
+import { TOKEN_TTL_MINUTES } from "@/features/auth/policies/verification-token";
 import { sendEmail } from "@/lib/email/brevo";
 import { absoluteUrl } from "@/lib/seo/site";
-import { createHash, randomBytes } from "node:crypto";
 import { normalizeEmail } from "./email";
 import { hashPassword } from "./password";
 import {
@@ -16,19 +10,11 @@ import {
   markEmailVerified,
   setUserPasswordHash,
 } from "./user.repository";
-import {
-  createVerificationToken,
-  deleteExpiredVerificationTokens,
-  deleteVerificationToken,
-  findVerificationTokenByHash,
-  hasVerificationTokenExpiringAfter,
-} from "./verification-token.repository";
+import { burnToken, issueToken, peekToken } from "./verification-token.service";
 
 export type ResetResult = { ok: true } | { ok: false; message: string };
 
-function hashToken(token: string) {
-  return createHash("sha256").update(token).digest("hex");
-}
+const EXPIRED_MESSAGE = "That reset link has expired. Request a new one.";
 
 function resetEmailHtml(link: string) {
   return `<!doctype html>
@@ -38,7 +24,7 @@ function resetEmailHtml(link: string) {
       <h1 style="margin:0 0 16px;font-size:20px;font-weight:600">Reset your password</h1>
       <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#646b67">
         Someone asked to reset the HireLens password for this address. Choose a new
-        password using the button below. This link expires in ${RESET_TOKEN_TTL_MINUTES} minutes.
+        password using the button below. This link expires in ${TOKEN_TTL_MINUTES.reset} minutes.
       </p>
       <a href="${link}" style="display:inline-block;padding:12px 20px;background:#161a18;color:#ffffff;text-decoration:none;border-radius:2px;font-size:15px;font-weight:500">
         Choose a new password
@@ -56,66 +42,44 @@ function resetEmailHtml(link: string) {
 }
 
 export async function requestPasswordReset(rawEmail: string) {
-  const identifier = normalizeEmail(rawEmail);
-
-  await deleteExpiredVerificationTokens(identifier);
-
-  const user = await findUserByEmail(identifier);
+  const email = normalizeEmail(rawEmail);
+  const user = await findUserByEmail(email);
 
   if (!user || user.deletedAt || !user.passwordHash) {
     return;
   }
 
-  const now = new Date();
+  const token = await issueToken("reset", email);
 
-  const alreadySent = await hasVerificationTokenExpiringAfter({
-    identifier,
-    threshold: resendCooldownThreshold(now),
-  });
-
-  if (alreadySent) {
+  if (!token) {
     return;
   }
 
-  const token = randomBytes(32).toString("base64url");
-
-  await createVerificationToken({
-    identifier,
-    tokenHash: hashToken(token),
-    expiresAt: resetTokenExpiry(now),
-  });
-
   await sendEmail({
-    to: identifier,
+    to: email,
     subject: "HireLens — Reset your password",
     html: resetEmailHtml(absoluteUrl(`/reset-password?token=${token}`)),
   });
 }
 
 export async function isResetTokenUsable(token: string) {
-  const record = await findVerificationTokenByHash(hashToken(token));
-
-  return Boolean(record && !isResetTokenExpired(record.expiresAt, new Date()));
+  return Boolean(await peekToken("reset", token));
 }
 
 export async function completePasswordReset(input: {
   token: string;
   password: string;
 }): Promise<ResetResult> {
-  const tokenHash = hashToken(input.token);
-  const record = await findVerificationTokenByHash(tokenHash);
+  const email = await peekToken("reset", input.token);
 
-  if (!record || isResetTokenExpired(record.expiresAt, new Date())) {
-    return {
-      ok: false,
-      message: "That reset link has expired. Request a new one.",
-    };
+  if (!email) {
+    return { ok: false, message: EXPIRED_MESSAGE };
   }
 
-  const user = await findUserByEmail(record.identifier);
+  const user = await findUserByEmail(email);
 
   if (!user || user.deletedAt) {
-    await deleteVerificationToken(tokenHash);
+    await burnToken(input.token);
 
     return {
       ok: false,
@@ -132,7 +96,7 @@ export async function completePasswordReset(input: {
     await markEmailVerified({ userId: user.id });
   }
 
-  await deleteVerificationToken(tokenHash);
+  await burnToken(input.token);
 
   return { ok: true };
 }

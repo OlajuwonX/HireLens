@@ -1,11 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { notify } from "@/components/ui/toast";
+import { requestEmailVerificationAction } from "@/features/auth/actions/email-verification-actions";
 import { initialPasswordFormState } from "@/features/auth/actions/password-form-state";
-import { requestPasswordResetAction } from "@/features/auth/actions/password-reset-actions";
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -13,15 +11,15 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" size="primary" block disabled={pending}>
-      {pending ? "Sending…" : "Email me a reset link"}
+    <Button type="submit" variant="outline" size="primary" disabled={pending}>
+      {pending ? "Sending…" : "Send confirmation link"}
     </Button>
   );
 }
 
-export function RequestResetForm() {
+export function VerifyEmailButton() {
   const [state, formAction] = useActionState(
-    requestPasswordResetAction,
+    requestEmailVerificationAction,
     initialPasswordFormState,
   );
   const handled = useRef(initialPasswordFormState);
@@ -42,18 +40,7 @@ export function RequestResetForm() {
   }, [state]);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-        />
-      </div>
-
+    <form action={formAction}>
       <SubmitButton />
     </form>
   );

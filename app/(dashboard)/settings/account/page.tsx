@@ -3,7 +3,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SetPasswordForm } from "@/features/auth/components/set-password-form";
+import { PasswordDialog } from "@/features/auth/components/password-dialog";
+import { VerifyEmailButton } from "@/features/auth/components/verify-email-button";
 import { requireVerifiedDatabaseUser } from "@/features/auth/server/require-database-user";
 import type { Metadata } from "next";
 
@@ -55,17 +56,18 @@ export default async function AccountSettingsPage() {
               : "You currently sign in with Google. There is no password on this account."}
           </p>
 
-          {hasPassword ? null : (
-            <Alert tone="info">
-              If you previously set a password and it is no longer listed here,
-              it was removed when Google confirmed you own this email address. A
-              password set before the address was verified cannot be trusted, so
-              HireLens clears it. Set a new one below whenever you like.
+          {hasPassword && !user.emailVerifiedAt ? (
+            <Alert tone="warning">
+              Your email address is not confirmed yet. If you sign in with
+              Google before confirming it, HireLens removes this password,
+              because a password set on an unconfirmed address cannot be
+              trusted. Confirm the address to keep both ways of signing in.
             </Alert>
-          )}
+          ) : null}
 
-          <div className="border-t border-border pt-4">
-            <SetPasswordForm hasPassword={hasPassword} />
+          <div className="flex flex-wrap gap-3 border-t border-border pt-4">
+            <PasswordDialog hasPassword={hasPassword} />
+            {user.emailVerifiedAt ? null : <VerifyEmailButton />}
           </div>
         </CardContent>
       </Card>

@@ -93,6 +93,7 @@ export async function registerCredentialsUser(
 export async function setAccountPassword(input: {
   userId: string;
   currentPassword: string;
+  confirmPassword: string;
   newPassword: string;
 }): Promise<RegisterResult> {
   const user = await findUserById(input.userId);
@@ -110,6 +111,8 @@ export async function setAccountPassword(input: {
     if (!valid) {
       return { ok: false, message: "That current password is not correct." };
     }
+  } else if (input.confirmPassword !== input.newPassword) {
+    return { ok: false, message: "Those two passwords do not match." };
   }
 
   await setUserPasswordHash({

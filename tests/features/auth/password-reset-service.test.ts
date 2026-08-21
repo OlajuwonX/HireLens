@@ -39,7 +39,7 @@ vi.mock("@/lib/email/brevo", () => ({
   sendEmail: (input: unknown) => sendEmail(input),
 }));
 
-const { completePasswordReset, requestPasswordReset } =
+const { completePasswordReset, isResetTokenUsable, requestPasswordReset } =
   await import("@/features/auth/server/password-reset.service");
 
 const CREDENTIALS_USER = {
@@ -49,6 +49,8 @@ const CREDENTIALS_USER = {
   emailVerifiedAt: null,
   deletedAt: null,
 };
+
+const future = () => new Date(Date.now() + 60_000);
 
 beforeEach(() => {
   for (const mock of [
@@ -80,7 +82,21 @@ describe("requestPasswordReset", () => {
     expect(sendEmail.mock.calls[0][0].to).toBe("ada@example.com");
   });
 
-  it("stores only a hash of the token", async () => {
+  it("files the token under the reset purpose", async () => {
+    findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
+
+    await requestPasswordReset("ada@example.com");
+
+    const stored = createVerificationToken.mock.calls[0][0] as {
+      identifier: string;
+      tokenHash: string;
+    };
+
+    expect(stored.identifier).toBe("reset:ada@example.com");
+    expect(stored.tokenHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("keeps the raw token out of the stored row", async () => {
     findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
 
     await requestPasswordReset("ada@example.com");
@@ -88,10 +104,9 @@ describe("requestPasswordReset", () => {
     const stored = createVerificationToken.mock.calls[0][0] as {
       tokenHash: string;
     };
-    const link = sendEmail.mock.calls[0][0].html as string;
+    const html = sendEmail.mock.calls[0][0].html as string;
 
-    expect(stored.tokenHash).toMatch(/^[a-f0-9]{64}$/);
-    expect(link).not.toContain(stored.tokenHash);
+    expect(html).not.toContain(stored.tokenHash);
   });
 
   it("sends nothing for a Google-only account", async () => {
@@ -111,7 +126,6 @@ describe("requestPasswordReset", () => {
 
     await requestPasswordReset("nobody@example.com");
 
-    expect(createVerificationToken).not.toHaveBeenCalled();
     expect(sendEmail).not.toHaveBeenCalled();
   });
 
@@ -135,27 +149,62 @@ describe("requestPasswordReset", () => {
     expect(createVerificationToken).not.toHaveBeenCalled();
     expect(sendEmail).not.toHaveBeenCalled();
   });
-
-  it("clears expired rows before issuing a new link", async () => {
-    findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
-
-    await requestPasswordReset("ada@example.com");
-
-    expect(deleteExpiredVerificationTokens).toHaveBeenCalledWith(
-      "ada@example.com",
-    );
-  });
 });
 
-describe("completePasswordReset", () => {
-  const future = () => new Date(Date.now() + 60_000);
+describe("a confirmation token is not a reset token", () => {
+  it("refuses to reset a password with a verify token", async () => {
+    findVerificationTokenByHash.mockResolvedValue({
+      identifier: "verify:ada@example.com",
+      tokenHash: "hash",
+      expiresAt: future(),
+    });
+    findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
 
-  it("sets the new password and burns the token", async () => {
+    const result = await completePasswordReset({
+      token: "raw-token",
+      password: "Str0ngPassword",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(setUserPasswordHash).not.toHaveBeenCalled();
+  });
+
+  it("does not treat a verify token as a usable reset link", async () => {
+    findVerificationTokenByHash.mockResolvedValue({
+      identifier: "verify:ada@example.com",
+      tokenHash: "hash",
+      expiresAt: future(),
+    });
+
+    expect(await isResetTokenUsable("raw-token")).toBe(false);
+  });
+
+  it("refuses a legacy row stored without a purpose", async () => {
     findVerificationTokenByHash.mockResolvedValue({
       identifier: "ada@example.com",
       tokenHash: "hash",
       expiresAt: future(),
     });
+
+    const result = await completePasswordReset({
+      token: "raw-token",
+      password: "Str0ngPassword",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(setUserPasswordHash).not.toHaveBeenCalled();
+  });
+});
+
+describe("completePasswordReset", () => {
+  const resetRow = () => ({
+    identifier: "reset:ada@example.com",
+    tokenHash: "hash",
+    expiresAt: future(),
+  });
+
+  it("sets the new password and burns the token", async () => {
+    findVerificationTokenByHash.mockResolvedValue(resetRow());
     findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
 
     const result = await completePasswordReset({
@@ -168,12 +217,20 @@ describe("completePasswordReset", () => {
     expect(deleteVerificationToken).toHaveBeenCalledTimes(1);
   });
 
-  it("treats a completed reset as proof of the email address", async () => {
-    findVerificationTokenByHash.mockResolvedValue({
-      identifier: "ada@example.com",
-      tokenHash: "hash",
-      expiresAt: future(),
+  it("looks the user up by the address inside the token", async () => {
+    findVerificationTokenByHash.mockResolvedValue(resetRow());
+    findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
+
+    await completePasswordReset({
+      token: "raw-token",
+      password: "Str0ngPassword",
     });
+
+    expect(findUserByEmail).toHaveBeenCalledWith("ada@example.com");
+  });
+
+  it("treats a completed reset as proof of the address", async () => {
+    findVerificationTokenByHash.mockResolvedValue(resetRow());
     findUserByEmail.mockResolvedValue(CREDENTIALS_USER);
 
     await completePasswordReset({
@@ -185,11 +242,7 @@ describe("completePasswordReset", () => {
   });
 
   it("leaves an already verified account alone", async () => {
-    findVerificationTokenByHash.mockResolvedValue({
-      identifier: "ada@example.com",
-      tokenHash: "hash",
-      expiresAt: future(),
-    });
+    findVerificationTokenByHash.mockResolvedValue(resetRow());
     findUserByEmail.mockResolvedValue({
       ...CREDENTIALS_USER,
       emailVerifiedAt: new Date("2026-01-01T00:00:00Z"),
@@ -205,7 +258,7 @@ describe("completePasswordReset", () => {
 
   it("rejects an expired token without touching the password", async () => {
     findVerificationTokenByHash.mockResolvedValue({
-      identifier: "ada@example.com",
+      identifier: "reset:ada@example.com",
       tokenHash: "hash",
       expiresAt: new Date(Date.now() - 1000),
     });

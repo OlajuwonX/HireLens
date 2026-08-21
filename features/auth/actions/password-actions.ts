@@ -30,6 +30,7 @@ export async function setAccountPasswordAction(
   const result = await setAccountPassword({
     userId: user.id,
     currentPassword: getString(formData, "currentPassword"),
+    confirmPassword: getString(formData, "confirmPassword"),
     newPassword: password,
   });
 
