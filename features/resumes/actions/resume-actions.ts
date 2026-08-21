@@ -13,7 +13,6 @@ import {
 } from "@/features/resumes/server/resume.service";
 import type { RenameResumeFormState } from "./resume-form-state";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 function getRequiredFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -75,9 +74,9 @@ export async function deleteResumeAction(formData: FormData) {
   });
 
   await deleteOwnedResume({ userId: user.id, publicId: input.publicId });
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/resumes");
   revalidatePath("/dashboard/applications");
-  redirect("/dashboard/resumes");
 }
 
 export async function retryResumeProcessingAction(formData: FormData) {

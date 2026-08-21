@@ -27,9 +27,11 @@ function SubmitButton() {
 export function RenameResumeForm({
   publicId,
   title,
+  onSuccess,
 }: {
   publicId: string;
   title: string;
+  onSuccess?: () => void;
 }) {
   const [state, formAction] = useActionState(
     renameResumeAction,
@@ -50,7 +52,8 @@ export function RenameResumeForm({
     }
 
     notify.success(state.message);
-  }, [state]);
+    onSuccess?.();
+  }, [state, onSuccess]);
 
   return (
     <form action={formAction} className="space-y-3">

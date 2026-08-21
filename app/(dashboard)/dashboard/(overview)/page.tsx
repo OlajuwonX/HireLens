@@ -4,6 +4,7 @@ import { PageTitle } from "@/components/layout/page-title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { AddResumeDialog } from "@/features/resumes/components/add-resume-dialog";
 import { getDashboardSummary } from "@/features/dashboard/server/dashboard.service";
 import { documentTypeLabels } from "@/features/documents/constants";
 import type { Metadata } from "next";
@@ -39,9 +40,12 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link href="/dashboard/resumes">Add Resume</Link>
-          </Button>
+          <AddResumeDialog
+            options={summary.resumeTitles}
+            label="Add Resume"
+            variant="outline"
+            redirectTo="/dashboard/resumes"
+          />
           <Button asChild>
             <Link href="/dashboard/applications">Create Application</Link>
           </Button>

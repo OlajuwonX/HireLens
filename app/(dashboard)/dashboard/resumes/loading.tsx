@@ -6,7 +6,7 @@ export default function Loading() {
     <div className="space-y-6" aria-busy="true">
       <PageHeader
         title="Resumes"
-        description="Upload a resume under a job title. Every version you add and every AI-improved resume for that role stays in the same place."
+        description="Every resume you upload sits under a job title. Versions you add and AI-improved resumes for that role stay in the same place."
       />
 
       <ul

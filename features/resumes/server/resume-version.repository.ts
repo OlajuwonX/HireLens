@@ -141,13 +141,20 @@ export async function createResumeVersionWithFileAsset(input: {
     if (isDefault) {
       await tx
         .update(resumes)
-        .set({
-          defaultVersionId: version.id,
-          status: "READY",
-          updatedAt: new Date(),
-        })
+        .set({ defaultVersionId: version.id, updatedAt: new Date() })
         .where(
           and(eq(resumes.userId, input.userId), eq(resumes.id, input.resumeId)),
+        );
+
+      await tx
+        .update(resumes)
+        .set({ status: "READY", updatedAt: new Date() })
+        .where(
+          and(
+            eq(resumes.userId, input.userId),
+            eq(resumes.id, input.resumeId),
+            isNull(resumes.archivedAt),
+          ),
         );
     }
 

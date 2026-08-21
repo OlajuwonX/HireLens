@@ -86,6 +86,14 @@ export async function listStorageKeysForResume(input: {
     );
 }
 
+export async function listActiveResumeTitles(userId: string) {
+  return db
+    .select({ publicId: resumes.publicId, title: resumes.title })
+    .from(resumes)
+    .where(and(eq(resumes.userId, userId), isNull(resumes.archivedAt)))
+    .orderBy(desc(resumes.createdAt));
+}
+
 export async function listResumesForUser(
   userId: string,
 ): Promise<ResumeLibraryItem[]> {

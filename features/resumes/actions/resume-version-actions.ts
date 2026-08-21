@@ -65,6 +65,7 @@ export async function uploadResumeAction(
     return { status: "error", message: result.message };
   }
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/resumes");
   revalidatePath(`/dashboard/resumes/${result.resume.publicId}`);
   revalidatePath("/dashboard/applications");

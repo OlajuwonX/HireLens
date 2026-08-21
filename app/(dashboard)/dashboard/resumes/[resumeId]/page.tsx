@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { ResumeActionsPanel } from "@/features/resumes/components/resume-actions-panel";
+import { ManageResumeDialog } from "@/features/resumes/components/manage-resume-dialog";
 import { ResumeStatusBadge } from "@/features/resumes/components/resume-status-badge";
 import { ResumeVersionList } from "@/features/resumes/components/resume-version-list";
 import { UpdateResumeDialog } from "@/features/resumes/components/update-resume-dialog";
@@ -40,47 +40,32 @@ export default async function ResumeDetailPage({
 
       <PageHeader
         title={resume.title}
-        description="Every resume filed under this job title. The default is used when you create an application."
-        action={<ResumeStatusBadge status={resume.status} />}
+        description="Every resume filed under this job title, including the ones improved by AI. The default is used when you create an application."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <ResumeStatusBadge status={resume.status} />
+            <UpdateResumeDialog
+              resumePublicId={resume.publicId}
+              resumeTitle={resume.title}
+            />
+            <ManageResumeDialog resume={resume} />
+          </div>
+        }
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Versions ({versionResult.versions.length})</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="border-t border-border">
-                <ResumeVersionList
-                  versions={versionResult.versions}
-                  resumePublicId={resume.publicId}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Update resume</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <UpdateResumeDialog
-                resumePublicId={resume.publicId}
-                resumeTitle={resume.title}
-              />
-              <p className="text-label text-text-muted">
-                Upload a new PDF without leaving this job title. The file name
-                becomes the version name.
-              </p>
-            </CardContent>
-          </Card>
-
-          <ResumeActionsPanel resume={resume} />
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumes ({versionResult.versions.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="border-t border-border">
+            <ResumeVersionList
+              versions={versionResult.versions}
+              resumePublicId={resume.publicId}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

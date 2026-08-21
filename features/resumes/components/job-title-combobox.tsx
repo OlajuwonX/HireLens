@@ -185,7 +185,7 @@ export function JobTitleCombobox({
           role="listbox"
           aria-label="Existing job titles"
           tabIndex={-1}
-          className="hl-scroll absolute left-0 z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-lg"
+          className="hl-scroll absolute left-0 z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-lg"
         >
           {matches.map((option, index) => {
             const isSelected = option.publicId === selectedId;

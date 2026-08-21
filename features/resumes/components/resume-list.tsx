@@ -44,7 +44,7 @@ export function ResumeList({ resumes }: { resumes: ResumeLibraryItem[] }) {
     return (
       <EmptyState
         title="No job titles yet"
-        description="Upload your first resume above. The job title you give it becomes the folder every version and AI-improved resume is filed under."
+        description="Use Add resume to upload your first one. The job title you give it becomes the folder every version and AI-improved resume is filed under."
       />
     );
   }
