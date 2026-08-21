@@ -7,7 +7,7 @@ import { requireDatabaseUser } from "@/features/auth/server/require-database-use
 import { ResumeActionsPanel } from "@/features/resumes/components/resume-actions-panel";
 import { ResumeStatusBadge } from "@/features/resumes/components/resume-status-badge";
 import { ResumeVersionList } from "@/features/resumes/components/resume-version-list";
-import { UploadVersionForm } from "@/features/resumes/components/upload-version-form";
+import { UpdateResumeDialog } from "@/features/resumes/components/update-resume-dialog";
 import { getOwnedResume } from "@/features/resumes/server/resume.service";
 import { listOwnedResumeVersions } from "@/features/resumes/server/resume-version.service";
 
@@ -16,7 +16,7 @@ type ResumeDetailPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Resume group",
+  title: "Job title",
 };
 
 export default async function ResumeDetailPage({
@@ -40,7 +40,7 @@ export default async function ResumeDetailPage({
 
       <PageHeader
         title={resume.title}
-        description="Every version in this resume group. The default is used when you create an application."
+        description="Every resume filed under this job title. The default is used when you create an application."
         action={<ResumeStatusBadge status={resume.status} />}
       />
 
@@ -64,10 +64,17 @@ export default async function ResumeDetailPage({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Add a version</CardTitle>
+              <CardTitle>Update resume</CardTitle>
             </CardHeader>
-            <CardContent>
-              <UploadVersionForm resumePublicId={resume.publicId} />
+            <CardContent className="space-y-3">
+              <UpdateResumeDialog
+                resumePublicId={resume.publicId}
+                resumeTitle={resume.title}
+              />
+              <p className="text-label text-text-muted">
+                Upload a new PDF without leaving this job title. The file name
+                becomes the version name.
+              </p>
             </CardContent>
           </Card>
 

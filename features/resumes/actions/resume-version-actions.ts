@@ -1,48 +1,46 @@
 "use server";
 
-import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import {
-  createOwnedResumeVersionFromUpload,
   deleteOwnedResumeVersion,
   setOwnedDefaultResumeVersion,
+  uploadResumeToJobTitle,
 } from "@/features/resumes/server/resume-version.service";
 import {
-  createResumeVersionSchema,
   defaultResumeVersionSchema,
   resumeUploadFileSchema,
+  uploadResumeSchema,
 } from "@/features/resumes/schemas/resume-version.schema";
-
-export type CreateResumeVersionFormState = {
-  status: "idle" | "error";
-  message: string;
-};
+import type { UploadResumeFormState } from "./resume-form-state";
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
 }
 
-export async function createResumeVersionAction(
-  _state: CreateResumeVersionFormState,
+function getOptionalString(formData: FormData, key: string) {
+  const value = getString(formData, key).trim();
+  return value === "" ? undefined : value;
+}
+
+export async function uploadResumeAction(
+  _state: UploadResumeFormState,
   formData: FormData,
-): Promise<CreateResumeVersionFormState> {
+): Promise<UploadResumeFormState> {
   const user = await requireDatabaseUser();
 
-  const parsedFields = createResumeVersionSchema.safeParse({
-    resumePublicId: getString(formData, "resumePublicId"),
-    label: getString(formData, "label"),
+  const parsedFields = uploadResumeSchema.safeParse({
+    resumePublicId: getOptionalString(formData, "resumePublicId"),
+    title: getOptionalString(formData, "title"),
   });
 
   if (!parsedFields.success) {
     return {
       status: "error",
-      message: firstIssueMessage(
-        parsedFields.error,
-        "Check the form and try again.",
-      ),
+      message:
+        parsedFields.error.issues[0]?.message ??
+        "Enter a job title or pick an existing one.",
     };
   }
 
@@ -51,17 +49,15 @@ export async function createResumeVersionAction(
   if (!parsedFile.success) {
     return {
       status: "error",
-      message: firstIssueMessage(
-        parsedFile.error,
-        "Select a resume PDF to upload.",
-      ),
+      message:
+        parsedFile.error.issues[0]?.message ?? "Select a resume PDF to upload.",
     };
   }
 
-  const result = await createOwnedResumeVersionFromUpload({
+  const result = await uploadResumeToJobTitle({
     userId: user.id,
     resumePublicId: parsedFields.data.resumePublicId,
-    label: parsedFields.data.label,
+    title: parsedFields.data.title,
     file: parsedFile.data,
   });
 
@@ -69,11 +65,14 @@ export async function createResumeVersionAction(
     return { status: "error", message: result.message };
   }
 
-  revalidatePath(`/dashboard/resumes/${parsedFields.data.resumePublicId}`);
   revalidatePath("/dashboard/resumes");
+  revalidatePath(`/dashboard/resumes/${result.resume.publicId}`);
   revalidatePath("/dashboard/applications");
 
-  redirect(`/dashboard/resumes/${parsedFields.data.resumePublicId}`);
+  return {
+    status: "success",
+    message: `"${result.version.label}" was added to ${result.resume.title}.`,
+  };
 }
 
 export async function setDefaultResumeVersionAction(formData: FormData) {

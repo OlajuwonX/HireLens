@@ -40,7 +40,7 @@ export default async function DashboardPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
-            <Link href="/dashboard/resumes/new">Add Resume</Link>
+            <Link href="/dashboard/resumes">Add Resume</Link>
           </Button>
           <Button asChild>
             <Link href="/dashboard/applications">Create Application</Link>

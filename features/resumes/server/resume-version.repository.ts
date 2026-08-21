@@ -1,7 +1,8 @@
 import "server-only";
 
-import { and, count, desc, eq, isNull, max } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, max } from "drizzle-orm";
 import { db } from "@/lib/db/client";
+import { withVersionSuffix } from "@/features/resumes/version-label";
 import {
   fileAssets,
   resumeVersions,
@@ -84,6 +85,7 @@ export async function createResumeVersionWithFileAsset(input: {
   userId: string;
   resumeId: string;
   label: string;
+  dedupeLabel?: boolean;
   fileAsset: Omit<NewFileAsset, "userId" | "kind">;
 }) {
   return db.transaction(async (tx) => {
@@ -104,6 +106,25 @@ export async function createResumeVersionWithFileAsset(input: {
 
     const versionNumber = (current?.value ?? 0) + 1;
     const isDefault = versionNumber === 1;
+    let label = input.label;
+
+    if (input.dedupeLabel) {
+      const [clash] = await tx
+        .select({ id: resumeVersions.id })
+        .from(resumeVersions)
+        .where(
+          and(
+            eq(resumeVersions.userId, input.userId),
+            eq(resumeVersions.resumeId, input.resumeId),
+            eq(resumeVersions.label, label),
+          ),
+        )
+        .limit(1);
+
+      if (clash) {
+        label = withVersionSuffix(label, versionNumber);
+      }
+    }
 
     const [version] = await tx
       .insert(resumeVersions)
@@ -111,7 +132,7 @@ export async function createResumeVersionWithFileAsset(input: {
         userId: input.userId,
         resumeId: input.resumeId,
         fileAssetId: asset.id,
-        label: input.label,
+        label,
         versionNumber,
         isDefault,
       })
@@ -237,11 +258,17 @@ export async function deleteResumeVersionForUser(input: {
   });
 }
 
-export async function resumeVersionExistsWithLabel(input: {
+export async function resumeVersionExistsWithAnyLabel(input: {
   userId: string;
   resumeId: string;
-  label: string;
+  labels: string[];
 }) {
+  const labels = Array.from(new Set(input.labels.filter(Boolean)));
+
+  if (labels.length === 0) {
+    return false;
+  }
+
   const [row] = await db
     .select({ id: resumeVersions.id })
     .from(resumeVersions)
@@ -249,7 +276,7 @@ export async function resumeVersionExistsWithLabel(input: {
       and(
         eq(resumeVersions.userId, input.userId),
         eq(resumeVersions.resumeId, input.resumeId),
-        eq(resumeVersions.label, input.label),
+        inArray(resumeVersions.label, labels),
       ),
     )
     .limit(1);

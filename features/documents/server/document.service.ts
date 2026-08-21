@@ -11,12 +11,13 @@ import {
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
 import { getOwnedApplication } from "@/features/applications/server/application.service";
-import { resumeVersionExistsWithLabel } from "@/features/resumes/server/resume-version.repository";
+import { resumeVersionExistsWithAnyLabel } from "@/features/resumes/server/resume-version.repository";
 import { findOrCreateResumeGroupByTitle } from "@/features/resumes/server/resume.repository";
 import { IMPROVED_RESUMES_GROUP_TITLE } from "@/features/resumes/constants";
 import type { UpdateDocumentInput } from "../schemas/document.schema";
 import type { DocumentFilters } from "./document.repository";
 import { documentTypeForView } from "../constants";
+import { legacyImprovedResumeVersionLabel } from "../improved-resume-format";
 import {
   buildImprovedResumePdf,
   copyImprovedResumeToVersion,
@@ -218,7 +219,7 @@ export async function addImprovedResumeToLibrary(input: {
       (
         await findOrCreateResumeGroupByTitle({
           userId: input.userId,
-          title: IMPROVED_RESUMES_GROUP_TITLE,
+          title: row.jobTitle?.trim() || IMPROVED_RESUMES_GROUP_TITLE,
         })
       ).id;
 
@@ -226,7 +227,7 @@ export async function addImprovedResumeToLibrary(input: {
       userId: input.userId,
       fileAssetId: row.document.fileAssetId,
       resumeId,
-      label: improvedResumeVersionLabel(row.jobTitle),
+      label: improvedResumeVersionLabel(row.jobTitle, row.jobCompany),
     });
 
     await recordDocumentActivity({
@@ -284,9 +285,12 @@ export async function documentIsInResumeLibrary(input: {
     return false;
   }
 
-  return resumeVersionExistsWithLabel({
+  return resumeVersionExistsWithAnyLabel({
     userId: input.userId,
     resumeId: row.resumeId,
-    label: improvedResumeVersionLabel(row.jobTitle),
+    labels: [
+      improvedResumeVersionLabel(row.jobTitle, row.jobCompany),
+      legacyImprovedResumeVersionLabel(row.jobTitle),
+    ],
   });
 }

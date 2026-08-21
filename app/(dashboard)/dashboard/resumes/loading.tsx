@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { ResumeCardSkeleton } from "@/components/ui/skeletons";
 
 export default function Loading() {
@@ -8,12 +6,7 @@ export default function Loading() {
     <div className="space-y-6" aria-busy="true">
       <PageHeader
         title="Resumes"
-        description="Manage resume records, processing states, and future resume versions."
-        action={
-          <Button asChild>
-            <Link href="/dashboard/resumes/new">New resume</Link>
-          </Button>
-        }
+        description="Upload a resume under a job title. Every version you add and every AI-improved resume for that role stays in the same place."
       />
 
       <ul
