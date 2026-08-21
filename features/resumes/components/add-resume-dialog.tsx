@@ -1,8 +1,5 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 import type { JobTitleOption } from "./job-title-combobox";
 import { ResumeUploadForm } from "./resume-upload-form";
 
@@ -19,11 +19,13 @@ export function AddResumeDialog({
   label = "Add resume",
   variant = "primary",
   redirectTo,
+  triggerClassName,
 }: {
   options: JobTitleOption[];
   label?: string;
   variant?: ButtonProps["variant"];
   redirectTo?: string;
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -39,7 +41,7 @@ export function AddResumeDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant={variant}>
+        <Button type="button" variant={variant} className={triggerClassName}>
           <Plus className="size-4" aria-hidden />
           {label}
         </Button>

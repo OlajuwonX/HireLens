@@ -1,15 +1,15 @@
 import { BackButton } from "@/components/layout/back-button";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { ManageResumeDialog } from "@/features/resumes/components/manage-resume-dialog";
-import { ResumeStatusBadge } from "@/features/resumes/components/resume-status-badge";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+// import { ResumeVersionList } from "@/features/resumes/components/resume-version-list";
 import { ResumeVersionList } from "@/features/resumes/components/resume-version-list";
 import { UpdateResumeDialog } from "@/features/resumes/components/update-resume-dialog";
-import { getOwnedResume } from "@/features/resumes/server/resume.service";
 import { listOwnedResumeVersions } from "@/features/resumes/server/resume-version.service";
+import { getOwnedResume } from "@/features/resumes/server/resume.service";
 
 type ResumeDetailPageProps = {
   params: Promise<{ resumeId: string }>;
@@ -42,13 +42,16 @@ export default async function ResumeDetailPage({
         title={resume.title}
         description="Every resume filed under this job title, including the ones improved by AI. The default is used when you create an application."
         action={
-          <div className="flex flex-wrap items-center gap-2">
-            <ResumeStatusBadge status={resume.status} />
+          <div className="flex items-center gap-2">
             <UpdateResumeDialog
               resumePublicId={resume.publicId}
               resumeTitle={resume.title}
+              triggerClassName="flex-1 justify-center sm:flex-none"
             />
-            <ManageResumeDialog resume={resume} />
+            <ManageResumeDialog
+              resume={resume}
+              triggerClassName="flex-1 justify-center sm:flex-none"
+            />
           </div>
         }
       />

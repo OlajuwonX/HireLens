@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Check, ChevronDown } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export type JobTitleOption = {
   publicId: string;
@@ -141,7 +141,7 @@ export function JobTitleCombobox({
           aria-autocomplete="list"
           disabled={disabled}
           value={query}
-          placeholder="Product Manager, Chef, Accountant..."
+          placeholder="Product Manager, Software Engineer, Accountant..."
           maxLength={120}
           onChange={(event) => {
             setQuery(event.target.value);

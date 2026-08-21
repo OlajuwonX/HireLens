@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
-import { Archive, ArchiveRestore, RotateCcw, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,9 +14,17 @@ import {
   retryResumeProcessingAction,
 } from "@/features/resumes/actions/resume-actions";
 import type { Resume } from "@/lib/db/schema";
+import { Archive, ArchiveRestore, RotateCcw, Settings2 } from "lucide-react";
+import { useCallback, useState, useTransition } from "react";
 import { RenameResumeForm } from "./rename-resume-form";
 
-export function ManageResumeDialog({ resume }: { resume: Resume }) {
+export function ManageResumeDialog({
+  resume,
+  triggerClassName,
+}: {
+  resume: Resume;
+  triggerClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const archived = resume.status === "ARCHIVED";
@@ -66,7 +72,7 @@ export function ManageResumeDialog({ resume }: { resume: Resume }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline">
+        <Button type="button" variant="outline" className={triggerClassName}>
           <Settings2 className="size-4" aria-hidden />
           Manage
         </Button>

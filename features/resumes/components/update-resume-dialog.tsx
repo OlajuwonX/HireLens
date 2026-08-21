@@ -15,9 +15,11 @@ import { ResumeUploadForm } from "./resume-upload-form";
 export function UpdateResumeDialog({
   resumePublicId,
   resumeTitle,
+  triggerClassName,
 }: {
   resumePublicId: string;
   resumeTitle: string;
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -25,7 +27,7 @@ export function UpdateResumeDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button">
+        <Button type="button" className={triggerClassName}>
           <Upload className="size-4" aria-hidden />
           Update resume
         </Button>

@@ -7,37 +7,31 @@ export default function Loading() {
     <div className="space-y-6" aria-busy="true">
       <BackButton href="/dashboard/resumes" label="Resumes" />
 
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-64" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <p className="max-w-reading text-meta text-text-secondary">
-          Every version in this resume group. The default is used when you
-          create an application.
+          Every resume filed under this job title, including the ones improved
+          by AI. The default is used when you create an application.
         </p>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="rounded-card border border-border bg-surface">
-            <div className="p-4">
-              <Skeleton className="h-4 w-28" />
-            </div>
-            <ListRowSkeleton rows={3} />
-          </div>
-        </div>
-
-        <div aria-hidden className="space-y-6">
-          <div className="space-y-3 rounded-card border border-border bg-surface p-4">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-          <div className="space-y-3 rounded-card border border-border bg-surface p-4">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full" />
+        <div aria-hidden className="flex flex-wrap items-center gap-2">
+          <Skeleton className="h-5 w-16 rounded-full" />
+          <div className="flex flex-1 gap-2 sm:flex-none">
+            <Skeleton className="h-10 flex-1 sm:w-40" />
+            <Skeleton className="h-10 flex-1 sm:w-28" />
           </div>
         </div>
       </div>
 
-      <span className="sr-only">Loading resume versions</span>
+      <div aria-hidden className="rounded-card border border-border bg-surface">
+        <div className="p-5">
+          <Skeleton className="h-5 w-32" />
+        </div>
+        <div className="border-t border-border">
+          <ListRowSkeleton rows={3} />
+        </div>
+      </div>
+
+      <span className="sr-only">Loading resumes for this job title</span>
     </div>
   );
 }

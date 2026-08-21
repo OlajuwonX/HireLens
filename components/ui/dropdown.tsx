@@ -175,7 +175,7 @@ export function Dropdown<T extends string = string>({
           role="listbox"
           aria-labelledby={triggerId}
           tabIndex={-1}
-          className="hl-scroll absolute z-50 mt-1 max-h-64 w-full min-w-max max-w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-lg"
+          className="hl-scroll absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-lg"
           style={align === "end" ? { right: 0 } : { left: 0 }}
         >
           {options.map((option, index) => {
@@ -200,10 +200,10 @@ export function Dropdown<T extends string = string>({
                   )}
                   aria-hidden
                 />
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block truncate">{option.label}</span>
                   {option.hint ? (
-                    <span className="block text-label text-text-muted">
+                    <span className="block truncate text-label text-text-muted">
                       {option.hint}
                     </span>
                   ) : null}
