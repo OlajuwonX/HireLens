@@ -3,6 +3,7 @@ import "server-only";
 import {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   applicationIntelligenceSchema,
+  AiProviderChainError,
   describeAiFailure,
   hashAnalysisInput,
   normalizeJsonModelOutput,
@@ -37,6 +38,17 @@ import {
 export type AnalysisOutcome =
   | { ok: true; analysisId: string; analysisPublicId: string; reused: boolean }
   | { ok: false; error: "FILE_MISSING" | "FAILED"; message: string };
+
+async function settleUsage(work: Promise<unknown>, stage: string) {
+  try {
+    await work;
+  } catch (error) {
+    console.error("Application analysis usage bookkeeping failed", {
+      stage,
+      reason: describeAiFailure(error),
+    });
+  }
+}
 
 function describeJobForHash(job: Job) {
   return {
@@ -193,15 +205,6 @@ export async function analyzeApplication(input: {
       applicationIntelligenceSchema,
     );
 
-    await completeUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action,
-      provider: providerResult.provider,
-      model: providerResult.model,
-      inputHash,
-    });
-
     const analysis = await markAnalysisSucceeded({
       analysisId: pending.id,
       userId: input.userId,
@@ -214,10 +217,23 @@ export async function analyzeApplication(input: {
       durationMs: providerResult.durationMs,
     });
 
+    if (!analysis) {
+      throw new Error("Analysis persistence failed");
+    }
+
+    await completeUsage({
+      userId: input.userId,
+      reservationId: reservation.reservationId,
+      action,
+      provider: providerResult.provider,
+      model: providerResult.model,
+      inputHash,
+    });
+
     return {
       ok: true,
-      analysisId: analysis?.id ?? pending.id,
-      analysisPublicId: analysis?.publicId ?? pending.publicId,
+      analysisId: analysis.id,
+      analysisPublicId: analysis.publicId,
       reused: false,
     };
   } catch (error) {
@@ -228,15 +244,20 @@ export async function analyzeApplication(input: {
       jobId: input.job.id,
       resumeVersionId: input.version.id,
       failureReason,
+      attempts:
+        error instanceof AiProviderChainError ? error.attempts.length : null,
     });
 
-    await failUsage({
-      userId: input.userId,
-      reservationId: reservation.reservationId,
-      action,
-      inputHash,
-      failureReason,
-    });
+    await settleUsage(
+      failUsage({
+        userId: input.userId,
+        reservationId: reservation.reservationId,
+        action,
+        inputHash,
+        failureReason,
+      }),
+      "fail",
+    );
 
     await markAnalysisFailed({
       analysisId: pending.id,
@@ -250,7 +271,7 @@ export async function analyzeApplication(input: {
       error: "FAILED",
       message: aiFailureMessage(
         error,
-        "The analysis could not be completed. Try again.",
+        "We couldn't analyze this application right now. Your AI analysis wasn't consumed. Please try again.",
       ),
     };
   }

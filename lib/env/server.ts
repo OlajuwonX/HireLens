@@ -82,11 +82,16 @@ const serverEnvSchema = z.object({
 
   GEMINI_API_KEY: optionalString,
   GEMINI_MODEL: optionalStringWithDefault("gemini-3.5-flash-lite"),
+  OPENROUTER_API_KEY: optionalString,
+  AI_PRIMARY_MODEL: optionalString,
+  AI_FALLBACK_MODELS: optionalStringWithDefault(""),
+  AI_REQUEST_TIMEOUT_MS: optionalIntWithDefault(25_000),
+  AI_MAX_RETRIES: optionalIntWithDefault(1),
 
-  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: optionalIntWithDefault(3),
+  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: optionalIntWithDefault(5),
   AI_DAILY_REGENERATE_LIMIT: optionalIntWithDefault(1),
   AI_DAILY_JOB_EXTRACTION_LIMIT: optionalIntWithDefault(3),
-  AI_GLOBAL_DAILY_SAFETY_LIMIT: optionalIntWithDefault(18),
+  AI_GLOBAL_DAILY_SAFETY_LIMIT: optionalIntWithDefault(250),
 
   BREVO_API_KEY: optionalString,
   BREVO_SENDER_EMAIL: optionalString,

@@ -34,15 +34,15 @@ describe("usage actions", () => {
 });
 
 describe("daily allowances", () => {
-  it("defaults to three analyses and one regenerate a day", () => {
-    expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(3);
+  it("defaults to five analyses and one regenerate a day", () => {
+    expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(5);
     expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(1);
     expect(getDailyAllowance("JOB_EXTRACTION")).toBe(3);
   });
 
-  it("defaults the global safety limit below a twenty-request provider cap", () => {
-    expect(getGlobalDailySafetyLimit()).toBe(18);
-    expect(getGlobalDailySafetyLimit()).toBeLessThan(20);
+  it("does not keep the old app-wide eighteen-request bottleneck", () => {
+    expect(getGlobalDailySafetyLimit()).toBe(250);
+    expect(getGlobalDailySafetyLimit()).toBeGreaterThan(18);
   });
 
   it("keeps the burst limit small", () => {

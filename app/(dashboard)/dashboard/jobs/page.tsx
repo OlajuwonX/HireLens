@@ -1,19 +1,19 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { ApplicationFilters } from "@/features/applications/components/application-filters";
-import { SavedJobFeed } from "@/features/applications/components/saved-job-feed";
 import { SavedJobDrawer } from "@/features/applications/components/saved-job-drawer";
+import { SavedJobFeed } from "@/features/applications/components/saved-job-feed";
+import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
 import { applicationFiltersSchema } from "@/features/applications/schemas/application.schema";
 import {
   getApplicationBoard,
   getStatusCounts,
 } from "@/features/applications/server/application.service";
-import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Saved Jobs",

@@ -1,4 +1,4 @@
-export type AIProviderName = "gemini" | "mock";
+export type AIProviderName = "gemini" | "openrouter" | "mock";
 
 export type AIProviderResult = {
   provider: AIProviderName;

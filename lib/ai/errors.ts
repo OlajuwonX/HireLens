@@ -1,11 +1,59 @@
+import { AiProviderChainError, AiProviderError } from "./provider-errors";
+
 export function describeAiFailure(error: unknown) {
   if (!(error instanceof Error)) {
     return "Unknown AI failure";
   }
 
+  const parts = [error.name];
   const detail = error.message?.trim();
 
-  return (detail ? `${error.name}: ${detail}` : error.name).slice(0, 1000);
+  if (detail) {
+    parts.push(detail);
+  }
+
+  if (error instanceof AiProviderError) {
+    parts.push(`provider=${error.provider}`);
+    parts.push(`model=${error.model}`);
+
+    if (error.status) {
+      parts.push(`status=${error.status}`);
+    }
+
+    if (error.code) {
+      parts.push(`code=${error.code}`);
+    }
+  }
+
+  if (error instanceof AiProviderChainError) {
+    parts.push(
+      `attempts=${error.attempts
+        .map((attempt) =>
+          [
+            attempt.provider,
+            attempt.model,
+            `#${attempt.attempt}`,
+            attempt.status ? `status=${attempt.status}` : null,
+            attempt.code ? `code=${attempt.code}` : null,
+          ]
+            .filter(Boolean)
+            .join(":"),
+        )
+        .join(",")}`,
+    );
+  }
+
+  const cause = error.cause;
+
+  if (cause instanceof Error) {
+    parts.push(`cause=${cause.name}:${cause.message}`);
+
+    if ("code" in cause) {
+      parts.push(`causeCode=${String((cause as { code?: unknown }).code)}`);
+    }
+  }
+
+  return parts.join(" ").slice(0, 1000);
 }
 
 function statusCodeOf(error: unknown) {

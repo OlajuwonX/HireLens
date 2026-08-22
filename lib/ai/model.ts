@@ -1,9 +1,13 @@
 import { getServerEnv } from "@/lib/env/server";
 
 export function getConfiguredModel() {
-  return getServerEnv().GEMINI_MODEL;
+  const env = getServerEnv();
+
+  return env.AI_PRIMARY_MODEL || env.GEMINI_MODEL;
 }
 
 export function hasProviderCredentials() {
-  return Boolean(getServerEnv().GEMINI_API_KEY);
+  const env = getServerEnv();
+
+  return Boolean(env.OPENROUTER_API_KEY || env.GEMINI_API_KEY);
 }

@@ -5,6 +5,11 @@ export {
   classifyAiFailure,
   describeAiFailure,
 } from "./errors";
+export {
+  AiProviderChainError,
+  AiProviderError,
+  isRetryableProviderError,
+} from "./provider-errors";
 export { getConfiguredModel, hasProviderCredentials } from "./model";
 export * from "./prompts";
 export * from "./schemas";

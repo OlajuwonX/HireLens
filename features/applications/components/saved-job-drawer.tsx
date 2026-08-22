@@ -1,26 +1,26 @@
-import Link from "next/link";
-import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
+import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
 import { ScorePanel } from "@/features/analyses/components/score-panel";
-import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
-import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
-import {
-  documentTypeForView,
-  documentTypeLabels,
-} from "@/features/documents/constants";
 import {
   AI_VIEWS,
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
-import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
+import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
 import {
   getApplicationTimeline,
   getOwnedApplication,
 } from "@/features/applications/server/application.service";
+import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
+import {
+  documentTypeForView,
+  documentTypeLabels,
+} from "@/features/documents/constants";
+import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
 import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import Link from "next/link";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { ReanalyzeButton } from "./reanalyze-button";

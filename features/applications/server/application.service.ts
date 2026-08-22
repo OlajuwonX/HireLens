@@ -138,6 +138,12 @@ export async function saveAndAnalyze(input: {
         applicationId: application.id,
       }),
     ]);
+  } else {
+    return {
+      ok: false,
+      error: "ANALYSIS_FAILED",
+      message: analysis.message,
+    };
   }
 
   return {
