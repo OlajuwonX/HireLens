@@ -121,9 +121,7 @@ async function readBody(response: Response) {
   }
 }
 
-export class OpenRouterApplicationIntelligenceProvider
-  implements ApplicationIntelligenceProvider
-{
+export class OpenRouterApplicationIntelligenceProvider implements ApplicationIntelligenceProvider {
   constructor(private readonly config: OpenRouterProviderConfig) {}
 
   private fail(

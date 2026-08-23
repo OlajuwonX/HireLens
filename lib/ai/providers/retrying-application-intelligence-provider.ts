@@ -72,9 +72,7 @@ async function withTimeout<T>(
   }
 }
 
-export class RetryingApplicationIntelligenceProvider
-  implements ApplicationIntelligenceProvider
-{
+export class RetryingApplicationIntelligenceProvider implements ApplicationIntelligenceProvider {
   private readonly baseDelayMs: number;
   private readonly totalBudgetMs: number;
 

@@ -148,7 +148,10 @@ describe("OpenRouterApplicationIntelligenceProvider", () => {
 
   it("classifies a quota response as a rate limit", async () => {
     mockFetch(
-      jsonResponse({ error: { message: "Rate limit exceeded", code: 429 } }, 429),
+      jsonResponse(
+        { error: { message: "Rate limit exceeded", code: 429 } },
+        429,
+      ),
     );
 
     const error = (await new OpenRouterApplicationIntelligenceProvider(config)

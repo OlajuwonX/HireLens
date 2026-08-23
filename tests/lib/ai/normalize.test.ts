@@ -9,7 +9,11 @@ const schema = z.object({ value: z.string() });
 async function mockAnalysis() {
   const result =
     await new MockApplicationIntelligenceProvider().analyzeApplication({
-      resume: { pdfBytes: new Uint8Array(), filename: "resume.pdf", text: null },
+      resume: {
+        pdfBytes: new Uint8Array(),
+        filename: "resume.pdf",
+        text: null,
+      },
       job: {
         title: "Site Manager",
         company: "Turner",

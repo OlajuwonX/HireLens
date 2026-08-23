@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { AiProviderChainError, AiProviderError } from "@/lib/ai/provider-errors";
+import {
+  AiProviderChainError,
+  AiProviderError,
+} from "@/lib/ai/provider-errors";
 import { RetryingApplicationIntelligenceProvider } from "@/lib/ai/providers/retrying-application-intelligence-provider";
 import type { ApplicationIntelligenceProvider } from "@/lib/ai/types";
 
