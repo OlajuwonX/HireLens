@@ -1,3 +1,4 @@
+import type { ImprovedResume } from "@/lib/ai/schemas/improved-resume.schema";
 import {
   PDFDocument,
   StandardFonts,
@@ -5,7 +6,6 @@ import {
   type PDFFont,
   type PDFPage,
 } from "pdf-lib";
-import type { ImprovedResume } from "@/lib/ai/schemas/improved-resume.schema";
 import {
   formatDateRange,
   joinNonEmpty,

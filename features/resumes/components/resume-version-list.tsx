@@ -42,7 +42,7 @@ export function ResumeVersionList({
             key={version.publicId}
             className="flex flex-wrap items-center justify-between gap-3 p-4"
           >
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1 basis-full sm:basis-auto">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate text-meta font-medium text-text-primary">
                   {version.label}

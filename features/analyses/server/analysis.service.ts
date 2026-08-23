@@ -3,13 +3,19 @@ import "server-only";
 import {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   applicationIntelligenceSchema,
+  AiProviderChainError,
   describeAiFailure,
   hashAnalysisInput,
   normalizeJsonModelOutput,
 } from "@/lib/ai";
 import { aiFailureMessage } from "@/lib/ai/errors";
 import { getApplicationIntelligenceProvider } from "@/lib/ai/client";
-import type { ApplicationIntelligenceProvider } from "@/lib/ai/types";
+import type {
+  AIProviderResult,
+  ApplicationIntelligenceProvider,
+} from "@/lib/ai/types";
+import type { ApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
+import { readResumeText } from "@/lib/pdf/extract-text";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { StorageProvider } from "@/lib/storage";
 import { findFileAssetById } from "@/features/files/server/file-asset.repository";
@@ -37,6 +43,17 @@ import {
 export type AnalysisOutcome =
   | { ok: true; analysisId: string; analysisPublicId: string; reused: boolean }
   | { ok: false; error: "FILE_MISSING" | "FAILED"; message: string };
+
+async function settleUsage(work: Promise<unknown>, stage: string) {
+  try {
+    await work;
+  } catch (error) {
+    console.error("Application analysis usage bookkeeping failed", {
+      stage,
+      reason: describeAiFailure(error),
+    });
+  }
+}
 
 function describeJobForHash(job: Job) {
   return {
@@ -160,13 +177,20 @@ export async function analyzeApplication(input: {
     return { ok: false, error: "FAILED", message: reservation.message };
   }
 
+  const resumeText =
+    input.version.extractedText?.trim() || (await readResumeText(pdfBytes));
+
+  let providerResult: AIProviderResult;
+  let result: ApplicationIntelligence;
+
   try {
     const provider = input.provider ?? getApplicationIntelligenceProvider();
-    const providerResult = await provider.analyzeApplication({
+
+    providerResult = await provider.analyzeApplication({
       resume: {
-        pdfBase64: Buffer.from(pdfBytes).toString("base64"),
+        pdfBytes,
         filename: fileAsset.originalFilename ?? "resume.pdf",
-        text: input.version.extractedText,
+        text: resumeText,
       },
       job: {
         title: input.job.title,
@@ -188,20 +212,56 @@ export async function analyzeApplication(input: {
       })),
     });
 
-    const result = normalizeJsonModelOutput(
+    result = normalizeJsonModelOutput(
       providerResult.rawResponse,
       applicationIntelligenceSchema,
     );
+  } catch (error) {
+    const failureReason = describeAiFailure(error);
 
-    await completeUsage({
+    console.error("Application analysis AI request failed", {
+      stage: "AI_REQUEST",
       userId: input.userId,
-      reservationId: reservation.reservationId,
-      action,
-      provider: providerResult.provider,
-      model: providerResult.model,
-      inputHash,
+      jobId: input.job.id,
+      resumeVersionId: input.version.id,
+      resumeTextAvailable: Boolean(resumeText),
+      failureReason,
+      attempts:
+        error instanceof AiProviderChainError ? error.attempts.length : null,
     });
 
+    await settleUsage(
+      failUsage({
+        userId: input.userId,
+        reservationId: reservation.reservationId,
+        action,
+        inputHash,
+        failureReason,
+      }),
+      "fail",
+    );
+
+    await settleUsage(
+      markAnalysisFailed({
+        analysisId: pending.id,
+        userId: input.userId,
+        durationMs: Math.round(performance.now() - startedAt),
+        failureReason,
+      }),
+      "markFailed",
+    );
+
+    return {
+      ok: false,
+      error: "FAILED",
+      message: aiFailureMessage(
+        error,
+        "We couldn't analyze this application right now. Your AI allowance was not used. Please try again.",
+      ),
+    };
+  }
+
+  try {
     const analysis = await markAnalysisSucceeded({
       analysisId: pending.id,
       userId: input.userId,
@@ -214,44 +274,64 @@ export async function analyzeApplication(input: {
       durationMs: providerResult.durationMs,
     });
 
-    return {
-      ok: true,
-      analysisId: analysis?.id ?? pending.id,
-      analysisPublicId: analysis?.publicId ?? pending.publicId,
-      reused: false,
-    };
-  } catch (error) {
-    const failureReason = describeAiFailure(error);
+    if (!analysis) {
+      throw new Error("The analysis row could not be written");
+    }
 
-    console.error("Application analysis failed", {
-      userId: input.userId,
-      jobId: input.job.id,
-      resumeVersionId: input.version.id,
-      failureReason,
-    });
-
-    await failUsage({
+    await completeUsage({
       userId: input.userId,
       reservationId: reservation.reservationId,
       action,
+      provider: providerResult.provider,
+      model: providerResult.model,
       inputHash,
+    });
+
+    return {
+      ok: true,
+      analysisId: analysis.id,
+      analysisPublicId: analysis.publicId,
+      reused: false,
+    };
+  } catch (error) {
+    const failureReason = `DatabaseFailure ${describeAiFailure(error)}`;
+
+    console.error("Application analysis persistence failed", {
+      stage: "PERSISTENCE",
+      userId: input.userId,
+      jobId: input.job.id,
+      resumeVersionId: input.version.id,
+      provider: providerResult.provider,
+      model: providerResult.model,
       failureReason,
     });
 
-    await markAnalysisFailed({
-      analysisId: pending.id,
-      userId: input.userId,
-      durationMs: Math.round(performance.now() - startedAt),
-      failureReason,
-    });
+    await settleUsage(
+      failUsage({
+        userId: input.userId,
+        reservationId: reservation.reservationId,
+        action,
+        inputHash,
+        failureReason,
+      }),
+      "fail",
+    );
+
+    await settleUsage(
+      markAnalysisFailed({
+        analysisId: pending.id,
+        userId: input.userId,
+        durationMs: Math.round(performance.now() - startedAt),
+        failureReason,
+      }),
+      "markFailed",
+    );
 
     return {
       ok: false,
       error: "FAILED",
-      message: aiFailureMessage(
-        error,
-        "The analysis could not be completed. Try again.",
-      ),
+      message:
+        "The analysis finished but could not be saved. Your AI allowance was not used. Please try again.",
     };
   }
 }

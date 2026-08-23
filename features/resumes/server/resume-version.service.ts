@@ -3,7 +3,13 @@ import "server-only";
 import { StorageValidationError, type StorageProvider } from "@/lib/storage";
 import { StorageProviderError } from "@/lib/storage";
 import { getStorageProvider } from "@/lib/storage/provider";
-import type { ResumeVersion } from "@/lib/db/schema";
+import type { Resume, ResumeVersion } from "@/lib/db/schema";
+import { resumeVersionLabelFromFilename } from "@/features/resumes/version-label";
+import {
+  createResume,
+  deleteResumeForUser,
+  findActiveResumeByTitle,
+} from "./resume.repository";
 import { getOwnedResume } from "./resume.service";
 import { findFileAssetById } from "@/features/files/server/file-asset.repository";
 import {
@@ -53,6 +59,7 @@ export async function createOwnedResumeVersionFromUpload(input: {
   userId: string;
   resumePublicId: string;
   label: string;
+  dedupeLabel?: boolean;
   file: File;
   storageProvider?: StorageProvider;
 }): Promise<CreateResumeVersionResult> {
@@ -107,6 +114,7 @@ export async function createOwnedResumeVersionFromUpload(input: {
       userId: input.userId,
       resumeId: resume.id,
       label: input.label,
+      dedupeLabel: input.dedupeLabel,
       fileAsset: {
         storageProvider: stored.provider,
         storageKey: stored.storageKey,
@@ -126,6 +134,80 @@ export async function createOwnedResumeVersionFromUpload(input: {
       message: "The version could not be saved. Please try again.",
     };
   }
+}
+
+export type UploadResumeResult =
+  | { ok: true; resume: Resume; version: ResumeVersion; createdGroup: boolean }
+  | {
+      ok: false;
+      error:
+        "RESUME_NOT_FOUND" | "TITLE_EXISTS" | "INVALID_FILE" | "UPLOAD_FAILED";
+      message: string;
+    };
+
+export async function uploadResumeToJobTitle(input: {
+  userId: string;
+  resumePublicId?: string;
+  title?: string;
+  file: File;
+  storageProvider?: StorageProvider;
+}): Promise<UploadResumeResult> {
+  let resume: Resume | null = null;
+  let createdGroup = false;
+
+  if (input.resumePublicId) {
+    resume = await getOwnedResume({
+      userId: input.userId,
+      publicId: input.resumePublicId,
+    });
+
+    if (!resume) {
+      return {
+        ok: false,
+        error: "RESUME_NOT_FOUND",
+        message: "That job title could not be found.",
+      };
+    }
+  } else {
+    const title = (input.title ?? "").trim();
+    const existing = await findActiveResumeByTitle({
+      userId: input.userId,
+      title,
+    });
+
+    if (existing) {
+      return {
+        ok: false,
+        error: "TITLE_EXISTS",
+        message: `"${existing.title}" already exists. Pick it from the job title list to add another resume.`,
+      };
+    }
+
+    resume = await createResume({ userId: input.userId, title });
+    createdGroup = true;
+  }
+
+  const result = await createOwnedResumeVersionFromUpload({
+    userId: input.userId,
+    resumePublicId: resume.publicId,
+    label: resumeVersionLabelFromFilename(input.file.name),
+    dedupeLabel: true,
+    file: input.file,
+    storageProvider: input.storageProvider,
+  });
+
+  if (!result.ok) {
+    if (createdGroup) {
+      await deleteResumeForUser({
+        userId: input.userId,
+        publicId: resume.publicId,
+      }).catch(() => undefined);
+    }
+
+    return result;
+  }
+
+  return { ok: true, resume, version: result.version, createdGroup };
 }
 
 export async function getOwnedResumeVersion(input: {

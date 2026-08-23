@@ -30,13 +30,9 @@ export type JobExtractionResult =
     }
   | { ok: false; message: string };
 
-const EXTRACTION_TIMEOUT_MS = 12_000;
+const EXTRACTION_BACKSTOP_MS = 13_000;
 
-function hasSomething(job: ExtractedJob) {
-  return Boolean(job.title || job.company || job.description);
-}
-
-async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+async function withBackstop<T>(work: Promise<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
 
   try {
@@ -44,7 +40,7 @@ async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
       work,
       new Promise<never>((_resolve, reject) => {
         timer = setTimeout(
-          () => reject(new Error("Job extraction timed out")),
+          () => reject(new Error("Job extraction exceeded its time backstop")),
           ms,
         );
       }),
@@ -52,6 +48,10 @@ async function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function hasSomething(job: ExtractedJob) {
+  return Boolean(job.title || job.company || job.description);
 }
 
 async function settleUsage(work: Promise<unknown>, stage: string) {
@@ -226,9 +226,9 @@ export async function extractJobPosting(input: {
 
   try {
     const provider = input.provider ?? getApplicationIntelligenceProvider();
-    const result = await withTimeout(
+    const result = await withBackstop(
       provider.extractJobPosting({ content: parsedInput.data.content }),
-      EXTRACTION_TIMEOUT_MS,
+      EXTRACTION_BACKSTOP_MS,
     );
 
     const assisted = sanitize(

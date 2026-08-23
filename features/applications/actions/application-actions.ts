@@ -78,7 +78,10 @@ export async function saveAndAnalyzeAction(
 
   revalidatePath("/dashboard/jobs");
   revalidatePath("/dashboard");
-  redirect(`/dashboard/jobs?open=${result.value.applicationPublicId}`);
+
+  const target = `/dashboard/jobs?open=${result.value.applicationPublicId}`;
+
+  redirect(result.value.analysed ? target : `${target}&analysis=failed`);
 }
 
 export async function changeApplicationStatusAction(formData: FormData) {

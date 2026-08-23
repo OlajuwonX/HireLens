@@ -5,6 +5,8 @@ import { requireDatabaseUser } from "@/features/auth/server/require-database-use
 import { SaveAndAnalyzeForm } from "@/features/applications/components/save-and-analyze-form";
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
 
+export const maxDuration = 60;
+
 export const metadata: Metadata = {
   title: "Applications",
 };

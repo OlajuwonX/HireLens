@@ -37,9 +37,8 @@ vi.mock("@/lib/email/brevo", () => ({
   sendEmail: (input: unknown) => sendEmail(input),
 }));
 
-const { completeEmailVerification, requestEmailVerification } = await import(
-  "@/features/auth/server/email-verification.service"
-);
+const { completeEmailVerification, requestEmailVerification } =
+  await import("@/features/auth/server/email-verification.service");
 
 const UNVERIFIED_USER = {
   id: "user-1",

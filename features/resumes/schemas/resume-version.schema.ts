@@ -3,10 +3,19 @@ import { MAX_RESUME_PDF_SIZE_BYTES } from "@/lib/storage";
 
 export const resumeVersionPublicIdSchema = z.string().uuid();
 
-export const createResumeVersionSchema = z.object({
-  resumePublicId: z.string().uuid(),
-  label: z.string().trim().min(1, "Version label is required").max(120),
-});
+export const uploadResumeSchema = z
+  .object({
+    resumePublicId: z.string().uuid().optional(),
+    title: z
+      .string()
+      .trim()
+      .min(1, "Job title is required")
+      .max(120, "Job title must be 120 characters or fewer")
+      .optional(),
+  })
+  .refine((value) => Boolean(value.resumePublicId) !== Boolean(value.title), {
+    message: "Enter a job title or pick an existing one",
+  });
 
 export const resumeUploadFileSchema = z
   .instanceof(File, { message: "Select a resume PDF to upload" })

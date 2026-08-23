@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   fileAssets,
@@ -8,13 +8,14 @@ import {
   resumes,
   type NewResume,
 } from "@/lib/db/schema";
+import type { ResumeLibraryItem } from "@/features/resumes/types";
 
 export async function createResume(input: NewResume) {
   const [resume] = await db.insert(resumes).values(input).returning();
   return resume;
 }
 
-export async function findOrCreateResumeGroupByTitle(input: {
+export async function findActiveResumeByTitle(input: {
   userId: string;
   title: string;
 }) {
@@ -24,12 +25,21 @@ export async function findOrCreateResumeGroupByTitle(input: {
     .where(
       and(
         eq(resumes.userId, input.userId),
-        eq(resumes.title, input.title),
+        sql`lower(${resumes.title}) = lower(${input.title})`,
         isNull(resumes.archivedAt),
       ),
     )
     .orderBy(desc(resumes.createdAt))
     .limit(1);
+
+  return existing ?? null;
+}
+
+export async function findOrCreateResumeGroupByTitle(input: {
+  userId: string;
+  title: string;
+}) {
+  const existing = await findActiveResumeByTitle(input);
 
   if (existing) {
     return existing;
@@ -76,11 +86,30 @@ export async function listStorageKeysForResume(input: {
     );
 }
 
-export async function listResumesForUser(userId: string) {
+export async function listActiveResumeTitles(userId: string) {
   return db
-    .select()
+    .select({ publicId: resumes.publicId, title: resumes.title })
     .from(resumes)
+    .where(and(eq(resumes.userId, userId), isNull(resumes.archivedAt)))
+    .orderBy(desc(resumes.createdAt));
+}
+
+export async function listResumesForUser(
+  userId: string,
+): Promise<ResumeLibraryItem[]> {
+  return db
+    .select({
+      publicId: resumes.publicId,
+      title: resumes.title,
+      status: resumes.status,
+      archivedAt: resumes.archivedAt,
+      createdAt: resumes.createdAt,
+      versionCount: count(resumeVersions.id),
+    })
+    .from(resumes)
+    .leftJoin(resumeVersions, eq(resumeVersions.resumeId, resumes.id))
     .where(eq(resumes.userId, userId))
+    .groupBy(resumes.id)
     .orderBy(desc(resumes.createdAt));
 }
 

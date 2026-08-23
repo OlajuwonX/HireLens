@@ -45,7 +45,10 @@ vi.mock("@/features/resumes/server/resume.repository", async () => {
 const { addImprovedResumeToLibrary } =
   await import("@/features/documents/server/document.service");
 
-function documentRow(resumeId: string | null) {
+function documentRow(
+  resumeId: string | null,
+  jobTitle: string | null = "Frontend Engineer",
+) {
   return {
     document: {
       id: "doc-internal-id",
@@ -53,7 +56,8 @@ function documentRow(resumeId: string | null) {
       fileAssetId: "asset-1",
     },
     resumeId,
-    jobTitle: "Frontend Engineer",
+    jobTitle,
+    jobCompany: "Acme",
   };
 }
 
@@ -68,8 +72,27 @@ beforeEach(() => {
 });
 
 describe("an improved resume can still be saved after its resume group is deleted", () => {
-  it("falls back to a dedicated group when the original is gone", async () => {
+  it("files the improved resume under its job title when the original is gone", async () => {
     findDocumentRowForUser.mockResolvedValue(documentRow(null));
+    findOrCreateResumeGroupByTitle.mockResolvedValue({ id: "fallback-group" });
+
+    const result = await addImprovedResumeToLibrary({
+      userId: "u1",
+      publicId: "doc-1",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(findOrCreateResumeGroupByTitle).toHaveBeenCalledWith({
+      userId: "u1",
+      title: "Frontend Engineer",
+    });
+    expect(copyImprovedResumeToVersion).toHaveBeenCalledWith(
+      expect.objectContaining({ resumeId: "fallback-group" }),
+    );
+  });
+
+  it("falls back to the dedicated group only when the job title is gone too", async () => {
+    findDocumentRowForUser.mockResolvedValue(documentRow(null, null));
     findOrCreateResumeGroupByTitle.mockResolvedValue({ id: "fallback-group" });
 
     const result = await addImprovedResumeToLibrary({
@@ -82,9 +105,6 @@ describe("an improved resume can still be saved after its resume group is delete
       userId: "u1",
       title: IMPROVED_RESUMES_GROUP_TITLE,
     });
-    expect(copyImprovedResumeToVersion).toHaveBeenCalledWith(
-      expect.objectContaining({ resumeId: "fallback-group" }),
-    );
   });
 
   it("still records the activity on the fallback path", async () => {

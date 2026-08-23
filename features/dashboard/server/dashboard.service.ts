@@ -16,6 +16,7 @@ import {
   getDailyAllowance,
   usageActionLabels,
 } from "@/lib/ai/usage";
+import { listActiveResumeTitles } from "@/features/resumes/server/resume.repository";
 
 function startOfUtcDay(date = new Date()) {
   return new Date(
@@ -60,6 +61,7 @@ export async function getDashboardSummary(userId: string) {
     recentDocuments,
     averageMatchRows,
     usageRows,
+    resumeTitles,
   ] = await Promise.all([
     countResumeGroups(userId),
     countResumeVersions(userId),
@@ -109,6 +111,7 @@ export async function getDashboardSummary(userId: string) {
           gte(aiUsageEvents.createdAt, startOfUtcDay()),
         ),
       ),
+    listActiveResumeTitles(userId),
   ]);
 
   const statusCounts = statusRows.reduce<Record<string, number>>((acc, row) => {
@@ -123,6 +126,7 @@ export async function getDashboardSummary(userId: string) {
   }));
 
   return {
+    resumeTitles,
     resumeGroupCount,
     resumeVersionCount,
     applicationCount,

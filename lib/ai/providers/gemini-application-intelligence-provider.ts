@@ -7,11 +7,28 @@ import {
   createApplicationIntelligencePrompt,
 } from "../prompts";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
+import { AiProviderError } from "../provider-errors";
 import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
 } from "../types";
+
+function statusOf(error: unknown) {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  const candidate = error as { status?: unknown; code?: unknown };
+
+  for (const value of [candidate.status, candidate.code]) {
+    if (typeof value === "number") {
+      return value;
+    }
+  }
+
+  return null;
+}
 
 function describeEmptyResponse(response: {
   candidates?: { finishReason?: unknown }[];
@@ -70,12 +87,42 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
     this.client = new GoogleGenAI({ apiKey: config.apiKey });
   }
 
+  private async send(
+    request: Parameters<GoogleGenAI["models"]["generateContent"]>[0],
+  ) {
+    try {
+      return await this.client.models.generateContent(request);
+    } catch (error) {
+      const status = statusOf(error);
+
+      throw new AiProviderError(
+        error instanceof Error ? error.message : "Gemini request failed",
+        {
+          provider: "gemini",
+          model: this.config.model,
+          status,
+          cause: error,
+          failureClass: status === null ? "TRANSIENT" : undefined,
+        },
+      );
+    }
+  }
+
+  private emptyResponse(response: Parameters<typeof describeEmptyResponse>[0]) {
+    return new AiProviderError(describeEmptyResponse(response), {
+      provider: "gemini",
+      model: this.config.model,
+      code: "EMPTY_RESPONSE",
+      failureClass: "TRANSIENT",
+    });
+  }
+
   async extractJobPosting(input: {
     content: string;
   }): Promise<AIProviderResult> {
     const startedAt = performance.now();
 
-    const response = await this.client.models.generateContent({
+    const response = await this.send({
       model: this.config.model,
       contents: [
         {
@@ -98,7 +145,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
     const text = response.text;
 
     if (!text) {
-      throw new Error(describeEmptyResponse(response));
+      throw this.emptyResponse(response);
     }
 
     return {
@@ -114,7 +161,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
   ): Promise<AIProviderResult> {
     const startedAt = performance.now();
 
-    const response = await this.client.models.generateContent({
+    const response = await this.send({
       model: this.config.model,
       contents: [
         {
@@ -123,7 +170,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
             {
               inlineData: {
                 mimeType: "application/pdf",
-                data: input.resume.pdfBase64,
+                data: Buffer.from(input.resume.pdfBytes).toString("base64"),
               },
             },
             { text: describeJob(input.job) },
@@ -147,7 +194,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
     const text = response.text;
 
     if (!text) {
-      throw new Error(describeEmptyResponse(response));
+      throw this.emptyResponse(response);
     }
 
     return {

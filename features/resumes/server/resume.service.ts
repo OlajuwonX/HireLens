@@ -4,25 +4,14 @@ import type { StorageProvider } from "@/lib/storage";
 import { getStorageProvider } from "@/lib/storage/provider";
 import {
   archiveResumeForUser,
-  createResume,
   deleteResumeForUser,
+  findActiveResumeByTitle,
   findResumeForUser,
   listResumesForUser,
   listStorageKeysForResume,
   renameResumeForUser,
   retryResumeProcessingForUser,
 } from "./resume.repository";
-
-export async function createResumeRecord(input: {
-  userId: string;
-  title: string;
-}) {
-  return createResume({
-    userId: input.userId,
-    title: input.title,
-    status: "UPLOADING",
-  });
-}
 
 export async function getOwnedResume(input: {
   userId: string;
@@ -40,7 +29,28 @@ export async function renameOwnedResume(input: {
   publicId: string;
   title: string;
 }) {
-  return renameResumeForUser(input);
+  const conflict = await findActiveResumeByTitle({
+    userId: input.userId,
+    title: input.title,
+  });
+
+  if (conflict && conflict.publicId !== input.publicId) {
+    return {
+      ok: false as const,
+      message: `"${conflict.title}" already exists. Pick a different job title.`,
+    };
+  }
+
+  const resume = await renameResumeForUser(input);
+
+  if (!resume) {
+    return {
+      ok: false as const,
+      message: "That job title could not be found.",
+    };
+  }
+
+  return { ok: true as const, resume };
 }
 
 export async function archiveOwnedResume(input: {

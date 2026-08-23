@@ -1,11 +1,71 @@
+import { AiProviderChainError, AiProviderError } from "./provider-errors";
+
+function describeCauseChain(cause: unknown, depth = 0): string[] {
+  if (!(cause instanceof Error) || depth >= 4) {
+    return [];
+  }
+
+  const parts = [`cause=${cause.name}:${cause.message}`];
+  const code = (cause as { code?: unknown }).code;
+  const errno = (cause as { errno?: unknown }).errno;
+
+  if (code !== undefined) {
+    parts.push(`causeCode=${String(code)}`);
+  }
+
+  if (errno !== undefined) {
+    parts.push(`causeErrno=${String(errno)}`);
+  }
+
+  return [...parts, ...describeCauseChain(cause.cause, depth + 1)];
+}
+
 export function describeAiFailure(error: unknown) {
   if (!(error instanceof Error)) {
     return "Unknown AI failure";
   }
 
+  const parts = [error.name];
   const detail = error.message?.trim();
 
-  return (detail ? `${error.name}: ${detail}` : error.name).slice(0, 1000);
+  if (detail) {
+    parts.push(detail);
+  }
+
+  if (error instanceof AiProviderError) {
+    parts.push(`provider=${error.provider}`);
+    parts.push(`model=${error.model}`);
+
+    if (error.status) {
+      parts.push(`status=${error.status}`);
+    }
+
+    if (error.code) {
+      parts.push(`code=${error.code}`);
+    }
+  }
+
+  if (error instanceof AiProviderChainError) {
+    parts.push(
+      `attempts=${error.attempts
+        .map((attempt) =>
+          [
+            attempt.provider,
+            attempt.model,
+            `#${attempt.attempt}`,
+            attempt.status ? `status=${attempt.status}` : null,
+            attempt.code ? `code=${attempt.code}` : null,
+          ]
+            .filter(Boolean)
+            .join(":"),
+        )
+        .join(",")}`,
+    );
+  }
+
+  parts.push(...describeCauseChain(error.cause));
+
+  return parts.join(" ").slice(0, 1000);
 }
 
 function statusCodeOf(error: unknown) {
@@ -25,7 +85,10 @@ function statusCodeOf(error: unknown) {
 }
 
 export type AiFailureKind =
-  "DAILY_QUOTA" | "RATE_LIMIT" | "OVERLOADED" | "UNKNOWN";
+  | "DAILY_QUOTA"
+  | "RATE_LIMIT"
+  | "OVERLOADED"
+  | "UNKNOWN";
 
 export function classifyAiFailure(error: unknown): AiFailureKind {
   const raw = error instanceof Error ? error.message : String(error ?? "");
