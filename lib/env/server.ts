@@ -85,6 +85,7 @@ const serverEnvSchema = z.object({
   OPENROUTER_API_KEY: optionalString,
   AI_PRIMARY_MODEL: optionalString,
   AI_FALLBACK_MODELS: optionalString,
+  AI_PROVIDER_ORDER: optionalStringWithDefault("gemini,openrouter"),
   AI_REQUEST_TIMEOUT_MS: optionalIntWithDefault(20_000),
   AI_TOTAL_BUDGET_MS: optionalIntWithDefault(35_000),
   AI_EXTRACTION_TIMEOUT_MS: optionalIntWithDefault(8_000),

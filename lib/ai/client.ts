@@ -39,44 +39,72 @@ function resolveOpenRouterModels(env: {
   return configured.length > 0 ? configured : DEFAULT_OPENROUTER_MODELS;
 }
 
-export function getApplicationIntelligenceProvider(): ApplicationIntelligenceProvider {
-  if (provider) {
-    return provider;
+function buildOpenRouterCandidates(
+  env: ReturnType<typeof getServerEnv>,
+): NamedProvider[] {
+  if (!env.OPENROUTER_API_KEY) {
+    return [];
   }
 
-  const env = getServerEnv();
-  const candidates: NamedProvider[] = [];
+  const apiKey = env.OPENROUTER_API_KEY;
 
-  if (env.OPENROUTER_API_KEY) {
-    const apiKey = env.OPENROUTER_API_KEY;
+  return resolveOpenRouterModels(env).map((model) => ({
+    providerName: "openrouter",
+    model,
+    provider: new OpenRouterApplicationIntelligenceProvider({
+      apiKey,
+      model,
+      timeoutMs: env.AI_REQUEST_TIMEOUT_MS,
+      maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
+      allowDataCollection: env.AI_ALLOW_DATA_COLLECTION,
+      siteUrl: env.SITE_URL,
+      appName: "HireLens",
+    }),
+  }));
+}
 
-    candidates.push(
-      ...resolveOpenRouterModels(env).map((model) => ({
-        providerName: "openrouter",
-        model,
-        provider: new OpenRouterApplicationIntelligenceProvider({
-          apiKey,
-          model,
-          timeoutMs: env.AI_REQUEST_TIMEOUT_MS,
-          maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
-          allowDataCollection: env.AI_ALLOW_DATA_COLLECTION,
-          siteUrl: env.SITE_URL,
-          appName: "HireLens",
-        }),
-      })),
-    );
+function buildGeminiCandidates(
+  env: ReturnType<typeof getServerEnv>,
+): NamedProvider[] {
+  if (!env.GEMINI_API_KEY) {
+    return [];
   }
 
-  if (env.GEMINI_API_KEY) {
-    candidates.push({
+  return [
+    {
       providerName: "gemini",
       model: env.GEMINI_MODEL,
       provider: new GeminiApplicationIntelligenceProvider({
         apiKey: env.GEMINI_API_KEY,
         model: env.GEMINI_MODEL,
       }),
-    });
+    },
+  ];
+}
+
+export function resolveProviderOrder(value: string | undefined) {
+  const order = (value ?? "")
+    .split(",")
+    .map((name) => name.trim().toLowerCase())
+    .filter((name) => name === "gemini" || name === "openrouter");
+
+  return order.length > 0 ? [...new Set(order)] : ["gemini", "openrouter"];
+}
+
+export function getApplicationIntelligenceProvider(): ApplicationIntelligenceProvider {
+  if (provider) {
+    return provider;
   }
+
+  const env = getServerEnv();
+  const byName: Record<string, NamedProvider[]> = {
+    openrouter: buildOpenRouterCandidates(env),
+    gemini: buildGeminiCandidates(env),
+  };
+
+  const candidates = resolveProviderOrder(env.AI_PROVIDER_ORDER).flatMap(
+    (name) => byName[name] ?? [],
+  );
 
   provider =
     candidates.length > 0
