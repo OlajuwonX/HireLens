@@ -256,6 +256,53 @@ describe("RetryingApplicationIntelligenceProvider", () => {
     expect(rescue).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps a usable window for the middle provider when the first one retries", async () => {
+    const rejectsSlowly = vi.fn().mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          setTimeout(
+            () =>
+              reject(
+                new AiProviderError("upstream unavailable", {
+                  provider: "openrouter",
+                  model: "a",
+                  status: 503,
+                }),
+              ),
+            60,
+          );
+        }),
+    );
+    const middle = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(success("middle")), 60);
+        }),
+    );
+    const last = vi.fn().mockResolvedValue(success("last"));
+
+    const retrying = new RetryingApplicationIntelligenceProvider({
+      providers: [
+        {
+          provider: provider(rejectsSlowly),
+          providerName: "openrouter",
+          model: "a",
+        },
+        { provider: provider(middle), providerName: "openrouter", model: "b" },
+        { provider: provider(last), providerName: "gemini", model: "last" },
+      ],
+      maxRetries: 2,
+      timeoutMs: 100,
+      totalBudgetMs: 300,
+      baseDelayMs: 1,
+    });
+
+    await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
+      model: "middle",
+    });
+    expect(last).not.toHaveBeenCalled();
+  });
+
   it("records budget exhaustion when the window closes on a provider", async () => {
     const stall = () =>
       vi.fn().mockImplementation(

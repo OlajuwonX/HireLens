@@ -119,7 +119,7 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     const deadline = Date.now() + budget.budgetMs;
     const reserveMs = Math.min(
       budget.timeoutMs,
-      Math.floor(budget.budgetMs / 3),
+      Math.floor(budget.budgetMs / Math.max(1, this.config.providers.length)),
     );
     const failures: AiAttemptFailure[] = [];
     const exhausted = new Set<string>();
@@ -132,8 +132,8 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
         continue;
       }
 
-      const isFinal = index === candidates.length - 1;
-      const candidateDeadline = isFinal ? deadline : deadline - reserveMs;
+      const candidateDeadline =
+        deadline - reserveMs * (candidates.length - 1 - index);
 
       for (let attempt = 1; attempt <= this.config.maxRetries + 1; attempt++) {
         const remaining = candidateDeadline - Date.now();
