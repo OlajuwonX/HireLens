@@ -1,26 +1,27 @@
-import Link from "next/link";
-import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
+import { Alert } from "@/components/ui/alert";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
+import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
 import { ScorePanel } from "@/features/analyses/components/score-panel";
-import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
-import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
-import {
-  documentTypeForView,
-  documentTypeLabels,
-} from "@/features/documents/constants";
 import {
   AI_VIEWS,
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
-import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
+import { getApplicationAnalysis } from "@/features/analyses/server/analysis.service";
 import {
   getApplicationTimeline,
   getOwnedApplication,
 } from "@/features/applications/server/application.service";
+import { ApplicationAiActions } from "@/features/documents/components/application-ai-actions";
+import {
+  documentTypeForView,
+  documentTypeLabels,
+} from "@/features/documents/constants";
+import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
 import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import Link from "next/link";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { ReanalyzeButton } from "./reanalyze-button";
@@ -39,10 +40,12 @@ export async function SavedJobDrawer({
   userId,
   publicId,
   closeHref,
+  analysisFailed = false,
 }: {
   userId: string;
   publicId: string;
   closeHref: string;
+  analysisFailed?: boolean;
 }) {
   const row = await getOwnedApplication({ userId, publicId });
 
@@ -193,9 +196,16 @@ export async function SavedJobDrawer({
     </div>
   ) : (
     <div className="space-y-5">
-      <p className="text-meta text-text-secondary">
-        No analysis is attached to this application yet.
-      </p>
+      {analysisFailed ? (
+        <Alert tone="error">
+          The job was saved, but the analysis could not be completed. Your daily
+          AI allowance was not used. Use Analyze above to try again.
+        </Alert>
+      ) : (
+        <p className="text-meta text-text-secondary">
+          No analysis is attached to this application yet.
+        </p>
+      )}
       <ApplicationAiActions
         applicationPublicId={row.application.publicId}
         result={null}

@@ -81,7 +81,11 @@ export async function saveAndAnalyze(input: {
   userId: string;
   values: SaveAndAnalyzeInput;
 }): Promise<
-  ApplicationResult<{ applicationPublicId: string; analysed: boolean }>
+  ApplicationResult<{
+    applicationPublicId: string;
+    analysed: boolean;
+    analysisMessage?: string;
+  }>
 > {
   const version = await getOwnedResumeVersion({
     userId: input.userId,
@@ -145,6 +149,7 @@ export async function saveAndAnalyze(input: {
     value: {
       applicationPublicId: application.publicId,
       analysed: analysis.ok,
+      analysisMessage: analysis.ok ? undefined : analysis.message,
     },
   };
 }

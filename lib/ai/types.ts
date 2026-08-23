@@ -1,4 +1,4 @@
-export type AIProviderName = "gemini" | "mock";
+export type AIProviderName = "gemini" | "openrouter" | "mock";
 
 export type AIProviderResult = {
   provider: AIProviderName;
@@ -8,7 +8,7 @@ export type AIProviderResult = {
 };
 
 export type ResumeDocumentInput = {
-  pdfBase64: string;
+  pdfBytes: Uint8Array;
   filename: string;
   text: string | null;
 };

@@ -68,6 +68,7 @@ async function countCompletedToday(input: {
       and(
         eq(aiUsageEvents.userId, input.userId),
         eq(aiUsageEvents.action, input.action),
+        eq(aiUsageEvents.status, "COMPLETED"),
         gte(aiUsageEvents.createdAt, startOfUtcDay()),
       ),
     );
@@ -79,7 +80,12 @@ async function countEveryUserCompletedToday() {
   const [row] = await db
     .select({ value: count() })
     .from(aiUsageEvents)
-    .where(gte(aiUsageEvents.createdAt, startOfUtcDay()));
+    .where(
+      and(
+        eq(aiUsageEvents.status, "COMPLETED"),
+        gte(aiUsageEvents.createdAt, startOfUtcDay()),
+      ),
+    );
 
   return row?.value ?? 0;
 }
