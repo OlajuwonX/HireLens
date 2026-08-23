@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { controlHeight, controlHeightClass, radius } from "@/lib/design/size";
+import { space } from "@/lib/design/spaces";
 import { dark, light, type Palette } from "@/lib/design/theme";
 import { typeScale } from "@/lib/design/typography";
-import { space } from "@/lib/design/spaces";
-import { controlHeight, controlHeightClass, radius } from "@/lib/design/size";
+import { describe, expect, it } from "vitest";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const REM_OR_CLAMP = /^(clamp\(|[\d.]+rem$|[\d.]+px$)/;

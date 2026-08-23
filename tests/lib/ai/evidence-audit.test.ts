@@ -27,7 +27,9 @@ describe("extractNumericEvidence", () => {
   });
 
   it("treats an added plus sign as the same evidence", () => {
-    expect(extractNumericEvidence("30%")).toEqual(extractNumericEvidence("30%+"));
+    expect(extractNumericEvidence("30%")).toEqual(
+      extractNumericEvidence("30%+"),
+    );
   });
 
   it("does not read a following word as a unit", () => {
@@ -219,7 +221,7 @@ describe("the guard stays out of the way when it cannot judge", () => {
     expect(decision.reason).toBe("NO_SOURCE_TEXT");
   });
 
-  it("accepts the new pass when the source states no numbers at all", () => {
+  it("still runs when the source states no numbers at all", () => {
     const decision = compareOptimizationPasses({
       sourceText: "Managed stakeholder relationships across the practice.",
       previousResumeText: "Managed stakeholders.",
@@ -227,6 +229,6 @@ describe("the guard stays out of the way when it cannot judge", () => {
     });
 
     expect(decision.keepPrevious).toBe(false);
-    expect(decision.reason).toBe("NO_SOURCE_TEXT");
+    expect(decision.reason).toBe("NOT_WORSE");
   });
 });

@@ -34,9 +34,11 @@ export type {
 } from "./types";
 export {
   auditResumeEvidence,
+  collectResumeEntities,
   compareOptimizationPasses,
   extractNumericEvidence,
   extractYearClaims,
+  normalizeEntity,
   type EvidenceAudit,
   type RegressionDecision,
   type RegressionReason,

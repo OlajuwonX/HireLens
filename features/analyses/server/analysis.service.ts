@@ -4,6 +4,7 @@ import {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   applicationIntelligenceSchema,
   AiProviderChainError,
+  collectResumeEntities,
   compareOptimizationPasses,
   describeAiFailure,
   hashAnalysisInput,
@@ -273,6 +274,10 @@ export async function analyzeApplication(input: {
         ? improvedResumeToText(previousResult.improvedResume)
         : null,
       nextResumeText: improvedResumeToText(result.improvedResume),
+      previousEntities: previousResult
+        ? collectResumeEntities(previousResult.improvedResume)
+        : [],
+      nextEntities: collectResumeEntities(result.improvedResume),
     });
 
     if (regression.keepPrevious && previousResult) {
@@ -283,6 +288,8 @@ export async function analyzeApplication(input: {
         reason: regression.reason,
         previousPreserved: regression.previous?.preserved.length ?? null,
         nextPreserved: regression.next?.preserved.length ?? null,
+        previousNamed: regression.previous?.preservedEntities.length ?? null,
+        nextNamed: regression.next?.preservedEntities.length ?? null,
       });
 
       result = { ...result, improvedResume: previousResult.improvedResume };

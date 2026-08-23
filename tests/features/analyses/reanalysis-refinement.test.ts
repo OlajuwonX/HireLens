@@ -38,9 +38,8 @@ vi.mock("@/features/files/server/file-asset.repository", () => ({
   findFileAssetById: (input: unknown) => findFileAssetById(input),
 }));
 
-const { analyzeApplication } = await import(
-  "@/features/analyses/server/analysis.service"
-);
+const { analyzeApplication } =
+  await import("@/features/analyses/server/analysis.service");
 
 const RESUME_TEXT = [
   "Ada Okonkwo — Frontend Engineer",
@@ -328,9 +327,7 @@ describe("the regression guard protects a re-analyzed resume", () => {
 
     const stored = markAnalysisSucceeded.mock.calls[0][0].resultJson;
 
-    expect(stored.improvedResume.experience[0].bullets).toEqual(
-      STRONG_BULLETS,
-    );
+    expect(stored.improvedResume.experience[0].bullets).toEqual(STRONG_BULLETS);
   });
 
   it("still stores the rest of the new analysis", async () => {
@@ -347,6 +344,25 @@ describe("the regression guard protects a re-analyzed resume", () => {
     const stored = markAnalysisSucceeded.mock.calls[0][0].resultJson;
 
     expect(stored.coverLetter).toBe("A sharper second-pass letter.");
+  });
+
+  it("keeps the previous resume when a pass drops a proven technology", async () => {
+    const withoutAzure = intelligence(STRONG_BULLETS);
+    withoutAzure.improvedResume.skills = [
+      { category: "Core", items: ["React"] },
+    ];
+
+    const { promise } = run({ regenerate: true, returns: withoutAzure });
+
+    await expect(promise).resolves.toMatchObject({ ok: true });
+
+    const stored = markAnalysisSucceeded.mock.calls[0][0].resultJson;
+
+    expect(stored.improvedResume.skills[0].items).toEqual([
+      "React",
+      "Azure",
+      "Express.js",
+    ]);
   });
 
   it("accepts a pass that keeps the evidence intact", async () => {

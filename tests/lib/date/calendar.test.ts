@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   addMonths,
   buildMonth,
@@ -9,6 +8,7 @@ import {
   isWithin,
   toIsoDate,
 } from "@/lib/date/calendar";
+import { describe, expect, it } from "vitest";
 
 describe("toIsoDate", () => {
   it("uses local parts, not UTC", () => {

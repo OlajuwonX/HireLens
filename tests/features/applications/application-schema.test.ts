@@ -1,15 +1,15 @@
-import { describe, expect, it } from "vitest";
+import {
+  APPLICATION_STATUSES,
+  APPLICATION_TABS,
+  applicationStatusLabels,
+} from "@/features/applications/constants";
 import {
   applicationFiltersSchema,
   changeStatusSchema,
   saveAndAnalyzeSchema,
   updateApplicationSchema,
 } from "@/features/applications/schemas/application.schema";
-import {
-  APPLICATION_STATUSES,
-  APPLICATION_TABS,
-  applicationStatusLabels,
-} from "@/features/applications/constants";
+import { describe, expect, it } from "vitest";
 
 const uuid = "8f1b1f4e-7c1a-4a5d-9a2e-2f9a5c1b3d77";
 

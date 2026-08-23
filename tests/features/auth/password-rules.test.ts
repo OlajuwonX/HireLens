@@ -1,5 +1,3 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import { passwordSchema } from "@/features/auth/schemas/credentials.schema";
 import {
   PASSWORD_MAX_LENGTH,
@@ -7,6 +5,8 @@ import {
   passwordProblemMessage,
   unmetPasswordRules,
 } from "@/features/auth/schemas/password-rules";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const VALID = "Str0ngPassword";

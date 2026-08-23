@@ -65,7 +65,8 @@ const legacyStoredAnalysis = {
 };
 
 describe("an analysis stored before this change stays readable", () => {
-  const parsed = storedApplicationIntelligenceSchema.parse(legacyStoredAnalysis);
+  const parsed =
+    storedApplicationIntelligenceSchema.parse(legacyStoredAnalysis);
 
   it("keeps the improved resume instead of falling back to an empty one", () => {
     expect(parsed.improvedResume.header.name).toBe("Ada Okonkwo");

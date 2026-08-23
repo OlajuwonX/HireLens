@@ -122,7 +122,9 @@ describe("the improved resume is driven by the evidence analysis", () => {
   });
 
   it("stays profession-agnostic", () => {
-    expect(IMPROVED_RESUME_PROMPT).toContain("Do not assume software engineering");
+    expect(IMPROVED_RESUME_PROMPT).toContain(
+      "Do not assume software engineering",
+    );
     expect(BASE_SYSTEM_PROMPT).toContain("Do not assume a technology career");
   });
 });

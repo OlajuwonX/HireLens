@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { StorageProvider } from "@/lib/storage";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const findActiveResumeByTitle = vi.fn();
 const createResume = vi.fn();

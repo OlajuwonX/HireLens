@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IMPROVED_RESUMES_GROUP_TITLE } from "@/features/resumes/constants";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const findDocumentRowForUser = vi.fn();
 const recordDocumentActivity = vi.fn();

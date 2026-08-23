@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
 import {
   pruneToSupportedKeywords,
   toGeminiResponseSchema,
 } from "@/lib/ai/gemini-json-schema";
 import { applicationIntelligenceSchema } from "@/lib/ai/schemas/application-intelligence.schema";
+import { describe, expect, it } from "vitest";
 
 function collectKeys(value: unknown, found = new Set<string>()) {
   if (Array.isArray(value)) {
