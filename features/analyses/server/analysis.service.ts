@@ -4,6 +4,7 @@ import {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   applicationIntelligenceSchema,
   AiProviderChainError,
+  compareOptimizationPasses,
   describeAiFailure,
   hashAnalysisInput,
   normalizeJsonModelOutput,
@@ -29,7 +30,12 @@ import {
   workArrangementLabels,
 } from "@/features/jobs/constants";
 import type { Job, ResumeVersion } from "@/lib/db/schema";
-import { mergeCorrections, readStoredIntelligence } from "./analysis.mapper";
+import {
+  improvedResumeToText,
+  mergeCorrections,
+  readStoredIntelligence,
+} from "./analysis.mapper";
+import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
 import {
   createPendingAnalysis,
   findAnalysisByInputHash,
@@ -53,6 +59,35 @@ async function settleUsage(work: Promise<unknown>, stage: string) {
       reason: describeAiFailure(error),
     });
   }
+}
+
+const PREVIOUS_PASS_GAP_LIMIT = 12;
+
+function describePreviousPass(previous: StoredApplicationIntelligence | null) {
+  if (!previous) {
+    return null;
+  }
+
+  const improvedResume = improvedResumeToText(previous.improvedResume).trim();
+
+  if (!improvedResume) {
+    return null;
+  }
+
+  return {
+    improvedResume,
+    professionalSummary: previous.professionalSummary,
+    unresolvedRequirements: previous.requirementMatches
+      .filter(
+        (match) => match.status === "MISSING" || match.status === "PARTIAL",
+      )
+      .map((match) => match.requirement)
+      .slice(0, PREVIOUS_PASS_GAP_LIMIT),
+    unresolvedKeywords: previous.keywordAnalysis.missing
+      .filter((item) => item.gapType === "WORDING_ONLY")
+      .map((item) => item.keyword)
+      .slice(0, PREVIOUS_PASS_GAP_LIMIT),
+  };
 }
 
 function describeJobForHash(job: Job) {
@@ -99,6 +134,20 @@ export async function analyzeApplication(input: {
       reused: true,
     };
   }
+
+  const previousApplicationAnalysis =
+    input.regenerate && input.applicationId
+      ? await findAnalysisForApplication({
+          userId: input.userId,
+          applicationId: input.applicationId,
+        })
+      : null;
+
+  const previousResult = input.regenerate
+    ? ((previousApplicationAnalysis
+        ? readStoredIntelligence(previousApplicationAnalysis)
+        : null) ?? (existing ? readStoredIntelligence(existing) : null))
+    : null;
 
   const fileAsset = await findFileAssetById({
     userId: input.userId,
@@ -210,12 +259,34 @@ export async function analyzeApplication(input: {
         evidence: correction.evidence,
         notes: correction.notes,
       })),
+      previousPass: describePreviousPass(previousResult),
     });
 
     result = normalizeJsonModelOutput(
       providerResult.rawResponse,
       applicationIntelligenceSchema,
     );
+
+    const regression = compareOptimizationPasses({
+      sourceText: resumeText,
+      previousResumeText: previousResult
+        ? improvedResumeToText(previousResult.improvedResume)
+        : null,
+      nextResumeText: improvedResumeToText(result.improvedResume),
+    });
+
+    if (regression.keepPrevious && previousResult) {
+      console.warn("Optimized resume rejected as a regression", {
+        stage: "REGRESSION_GUARD",
+        jobId: input.job.id,
+        resumeVersionId: input.version.id,
+        reason: regression.reason,
+        previousPreserved: regression.previous?.preserved.length ?? null,
+        nextPreserved: regression.next?.preserved.length ?? null,
+      });
+
+      result = { ...result, improvedResume: previousResult.improvedResume };
+    }
   } catch (error) {
     const failureReason = describeAiFailure(error);
 

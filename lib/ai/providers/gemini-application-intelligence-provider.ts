@@ -5,6 +5,7 @@ import {
   BASE_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
   createApplicationIntelligencePrompt,
+  formatPreviousOptimization,
 } from "../prompts";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import { AiProviderError } from "../provider-errors";
@@ -160,6 +161,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
     input: ApplicationIntelligenceInput,
   ): Promise<AIProviderResult> {
     const startedAt = performance.now();
+    const previousPass = formatPreviousOptimization(input.previousPass);
 
     const response = await this.send({
       model: this.config.model,
@@ -174,6 +176,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
               },
             },
             { text: describeJob(input.job) },
+            ...(previousPass ? [{ text: previousPass }] : []),
           ],
         },
       ],
@@ -181,7 +184,9 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
         systemInstruction: [
           BASE_SYSTEM_PROMPT,
           "",
-          createApplicationIntelligencePrompt(input.priorCorrections),
+          createApplicationIntelligencePrompt(input.priorCorrections, {
+            refinement: previousPass !== null,
+          }),
         ].join("\n"),
         responseMimeType: "application/json",
         responseJsonSchema: toGeminiResponseSchema(

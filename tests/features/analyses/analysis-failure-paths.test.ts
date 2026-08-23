@@ -61,6 +61,12 @@ const VALID_RESULT = {
     avoidForcing: [],
   },
   requirementMatches: [],
+  optimizationPlan: {
+    alignment: "MEDIUM",
+    intensity: "TARGETED",
+    rationale: "Some overlap with the posting.",
+    droppedEvidence: [],
+  },
   improvedResume: {
     header: {
       name: "Jane Doe",
@@ -75,6 +81,8 @@ const VALID_RESULT = {
     experience: [],
     projects: [],
     education: [],
+    certifications: [],
+    additionalSections: [],
   },
   bulletRewrites: [],
   professionalSummary: "Backend engineer.",

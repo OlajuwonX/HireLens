@@ -2,6 +2,7 @@ import {
   BASE_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
   createApplicationIntelligencePrompt,
+  formatPreviousOptimization,
 } from "../prompts";
 import { toStrictJsonSchema } from "../json-schema";
 import { AiProviderError, type AiFailureClass } from "../provider-errors";
@@ -268,15 +269,22 @@ export class OpenRouterApplicationIntelligenceProvider implements ApplicationInt
       });
     }
 
+    const previousPass = formatPreviousOptimization(input.previousPass);
+
     return this.complete({
       system: [
         BASE_SYSTEM_PROMPT,
         "",
-        createApplicationIntelligencePrompt(input.priorCorrections),
+        createApplicationIntelligencePrompt(input.priorCorrections, {
+          refinement: previousPass !== null,
+        }),
       ].join("\n"),
-      user: [describeResume(input.resume), "", describeJob(input.job)].join(
-        "\n",
-      ),
+      user: [
+        describeResume(input.resume),
+        "",
+        describeJob(input.job),
+        ...(previousPass ? ["", previousPass] : []),
+      ].join("\n"),
       schemaName: "application_intelligence",
       schema: ANALYSIS_SCHEMA,
     });

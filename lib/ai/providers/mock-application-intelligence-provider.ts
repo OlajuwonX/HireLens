@@ -101,6 +101,13 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
             recommendation: "Add the certification if you hold it.",
           },
         ],
+        optimizationPlan: {
+          alignment: "MEDIUM",
+          intensity: "TARGETED",
+          rationale:
+            "Mock plan generated without calling an external AI provider.",
+          droppedEvidence: [],
+        },
         improvedResume: {
           header: {
             name: "[verified full name]",
@@ -126,6 +133,8 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
           ],
           projects: [],
           education: [],
+          certifications: [],
+          additionalSections: [],
         },
         bulletRewrites: [
           {

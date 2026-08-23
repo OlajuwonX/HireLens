@@ -26,6 +26,13 @@ export type JobPostingInput = {
   requirements: string | null;
 };
 
+export type PreviousOptimizationInput = {
+  improvedResume: string;
+  professionalSummary: string;
+  unresolvedRequirements: string[];
+  unresolvedKeywords: string[];
+};
+
 export type ApplicationIntelligenceInput = {
   resume: ResumeDocumentInput;
   job: JobPostingInput;
@@ -35,6 +42,7 @@ export type ApplicationIntelligenceInput = {
     evidence: string | null;
     notes: string | null;
   }[];
+  previousPass?: PreviousOptimizationInput | null;
 };
 
 export interface ApplicationIntelligenceProvider {

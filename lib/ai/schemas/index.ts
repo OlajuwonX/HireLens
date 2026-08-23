@@ -17,6 +17,13 @@ export {
   type ImprovedResume,
 } from "./improved-resume.schema";
 export {
+  alignmentLevels,
+  emptyOptimizationPlan,
+  optimizationIntensities,
+  optimizationPlanSchema,
+  type OptimizationPlan,
+} from "./optimization-plan.schema";
+export {
   extractedJobSchema,
   JOB_CONTENT_MAX_LENGTH,
   JOB_CONTENT_MIN_LENGTH,

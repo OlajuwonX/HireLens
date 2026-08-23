@@ -223,6 +223,28 @@ export function improvedResumeToText(
     }
   }
 
+  if (resume.certifications.length > 0) {
+    lines.push("", "CERTIFICATIONS");
+
+    for (const entry of resume.certifications) {
+      lines.push(
+        `- ${[entry.name, entry.issuer, entry.date].filter(Boolean).join(" - ")}`,
+      );
+    }
+  }
+
+  for (const section of resume.additionalSections) {
+    if (section.items.length === 0) {
+      continue;
+    }
+
+    lines.push("", section.title.toUpperCase());
+
+    for (const item of section.items) {
+      lines.push(`- ${item}`);
+    }
+  }
+
   return lines.join("\n");
 }
 

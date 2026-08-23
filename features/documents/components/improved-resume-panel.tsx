@@ -139,6 +139,39 @@ export function ImprovedResumePanel({ resume }: { resume: ImprovedResume }) {
           </ul>
         </Section>
       ) : null}
+
+      {resume.certifications.length > 0 ? (
+        <Section title="Certifications">
+          <ul className="space-y-2">
+            {resume.certifications.map((entry, index) => (
+              <li key={`${index}-${entry.name}`}>
+                <p className="text-meta font-medium text-text-primary">
+                  {entry.name}
+                </p>
+                {entry.issuer || entry.date ? (
+                  <p className="text-label text-text-secondary">
+                    {[entry.issuer, entry.date].filter(Boolean).join(" - ")}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
+
+      {resume.additionalSections.map((section) =>
+        section.items.length > 0 ? (
+          <Section key={section.title} title={section.title}>
+            <ul className="space-y-1">
+              {section.items.map((item, index) => (
+                <li key={index} className="text-meta text-text-primary">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        ) : null,
+      )}
     </div>
   );
 }
