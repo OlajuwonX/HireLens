@@ -33,9 +33,8 @@ vi.mock("@/features/resumes/server/resume-version.repository", async () => {
   };
 });
 
-const { uploadResumeToJobTitle } = await import(
-  "@/features/resumes/server/resume-version.service"
-);
+const { uploadResumeToJobTitle } =
+  await import("@/features/resumes/server/resume-version.service");
 
 const uploadResume = vi.fn();
 const deleteFile = vi.fn();

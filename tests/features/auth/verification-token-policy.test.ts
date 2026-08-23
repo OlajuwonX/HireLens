@@ -68,14 +68,19 @@ describe("resendCooldownThreshold", () => {
     );
   });
 
-  it.each(TOKEN_PURPOSES)("lets a %s email through after the wait", (purpose) => {
-    const issuedEarlier = tokenExpiry(purpose, NOW);
-    const later = new Date(NOW.getTime() + RESEND_COOLDOWN_MINUTES * MINUTE + 1000);
+  it.each(TOKEN_PURPOSES)(
+    "lets a %s email through after the wait",
+    (purpose) => {
+      const issuedEarlier = tokenExpiry(purpose, NOW);
+      const later = new Date(
+        NOW.getTime() + RESEND_COOLDOWN_MINUTES * MINUTE + 1000,
+      );
 
-    expect(issuedEarlier.getTime()).toBeLessThan(
-      resendCooldownThreshold(purpose, later).getTime(),
-    );
-  });
+      expect(issuedEarlier.getTime()).toBeLessThan(
+        resendCooldownThreshold(purpose, later).getTime(),
+      );
+    },
+  );
 });
 
 describe("isTokenExpired", () => {

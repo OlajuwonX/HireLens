@@ -141,10 +141,7 @@ export type UploadResumeResult =
   | {
       ok: false;
       error:
-        | "RESUME_NOT_FOUND"
-        | "TITLE_EXISTS"
-        | "INVALID_FILE"
-        | "UPLOAD_FAILED";
+        "RESUME_NOT_FOUND" | "TITLE_EXISTS" | "INVALID_FILE" | "UPLOAD_FAILED";
       message: string;
     };
 

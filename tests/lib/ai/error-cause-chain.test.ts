@@ -5,7 +5,9 @@ import { AiProviderError } from "@/lib/ai/provider-errors";
 describe("describeAiFailure", () => {
   it("unwraps the nested cause undici hides fetch failures behind", () => {
     const socket = Object.assign(
-      new Error("Client network socket disconnected before secure TLS connection was established"),
+      new Error(
+        "Client network socket disconnected before secure TLS connection was established",
+      ),
       { code: "ECONNRESET" },
     );
     const fetchFailure = new TypeError("fetch failed", { cause: socket });

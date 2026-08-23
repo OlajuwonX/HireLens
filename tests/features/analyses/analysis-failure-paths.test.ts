@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PDFDocument, StandardFonts } from "pdf-lib";
-import { AiProviderChainError, AiProviderError } from "@/lib/ai/provider-errors";
+import {
+  AiProviderChainError,
+  AiProviderError,
+} from "@/lib/ai/provider-errors";
 import type { Job, ResumeVersion } from "@/lib/db/schema";
 
 const reserveUsage = vi.fn();
@@ -37,9 +40,8 @@ vi.mock("@/features/files/server/file-asset.repository", () => ({
   findFileAssetById: (input: unknown) => findFileAssetById(input),
 }));
 
-const { analyzeApplication } = await import(
-  "@/features/analyses/server/analysis.service"
-);
+const { analyzeApplication } =
+  await import("@/features/analyses/server/analysis.service");
 
 const VALID_RESULT = {
   scoring: {
@@ -275,14 +277,12 @@ describe("resume text", () => {
   it("is read out of the PDF when the column is empty", async () => {
     const document = await PDFDocument.create();
     const font = await document.embedFont(StandardFonts.Helvetica);
-    document
-      .addPage([612, 792])
-      .drawText("Jane Doe - Backend Engineer", {
-        x: 54,
-        y: 720,
-        size: 12,
-        font,
-      });
+    document.addPage([612, 792]).drawText("Jane Doe - Backend Engineer", {
+      x: 54,
+      y: 720,
+      size: 12,
+      font,
+    });
 
     const analyze = vi.fn().mockResolvedValue({
       provider: "openrouter",

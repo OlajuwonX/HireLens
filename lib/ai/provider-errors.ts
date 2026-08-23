@@ -1,8 +1,5 @@
 export type AiFailureClass =
-  | "RATE_LIMIT"
-  | "TRANSIENT"
-  | "INVALID_OUTPUT"
-  | "PERMANENT";
+  "RATE_LIMIT" | "TRANSIENT" | "INVALID_OUTPUT" | "PERMANENT";
 
 export type AiProviderErrorOptions = {
   provider: string;
@@ -130,7 +127,8 @@ export function toAttemptFailure(input: {
     status: null,
     code: null,
     failureClass: classifyProviderFailure(error),
-    message: error instanceof Error ? error.message : String(error ?? "unknown"),
+    message:
+      error instanceof Error ? error.message : String(error ?? "unknown"),
     cause: error instanceof Error ? error.cause : undefined,
   };
 }

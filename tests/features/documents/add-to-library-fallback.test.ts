@@ -42,9 +42,8 @@ vi.mock("@/features/resumes/server/resume.repository", async () => {
   };
 });
 
-const { addImprovedResumeToLibrary } = await import(
-  "@/features/documents/server/document.service"
-);
+const { addImprovedResumeToLibrary } =
+  await import("@/features/documents/server/document.service");
 
 function documentRow(
   resumeId: string | null,
