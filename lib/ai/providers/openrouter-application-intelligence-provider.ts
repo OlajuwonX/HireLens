@@ -155,6 +155,7 @@ export class OpenRouterApplicationIntelligenceProvider
     try {
       const response = await fetch(OPENROUTER_URL, {
         method: "POST",
+        cache: "no-store",
         signal: controller.signal,
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,

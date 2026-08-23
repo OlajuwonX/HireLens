@@ -1,5 +1,25 @@
 import { AiProviderChainError, AiProviderError } from "./provider-errors";
 
+function describeCauseChain(cause: unknown, depth = 0): string[] {
+  if (!(cause instanceof Error) || depth >= 4) {
+    return [];
+  }
+
+  const parts = [`cause=${cause.name}:${cause.message}`];
+  const code = (cause as { code?: unknown }).code;
+  const errno = (cause as { errno?: unknown }).errno;
+
+  if (code !== undefined) {
+    parts.push(`causeCode=${String(code)}`);
+  }
+
+  if (errno !== undefined) {
+    parts.push(`causeErrno=${String(errno)}`);
+  }
+
+  return [...parts, ...describeCauseChain(cause.cause, depth + 1)];
+}
+
 export function describeAiFailure(error: unknown) {
   if (!(error instanceof Error)) {
     return "Unknown AI failure";
@@ -43,15 +63,7 @@ export function describeAiFailure(error: unknown) {
     );
   }
 
-  const cause = error.cause;
-
-  if (cause instanceof Error) {
-    parts.push(`cause=${cause.name}:${cause.message}`);
-
-    if ("code" in cause) {
-      parts.push(`causeCode=${String((cause as { code?: unknown }).code)}`);
-    }
-  }
+  parts.push(...describeCauseChain(error.cause));
 
   return parts.join(" ").slice(0, 1000);
 }

@@ -86,7 +86,7 @@ const serverEnvSchema = z.object({
   AI_PRIMARY_MODEL: optionalString,
   AI_FALLBACK_MODELS: optionalString,
   AI_REQUEST_TIMEOUT_MS: optionalIntWithDefault(20_000),
-  AI_TOTAL_BUDGET_MS: optionalIntWithDefault(45_000),
+  AI_TOTAL_BUDGET_MS: optionalIntWithDefault(35_000),
   AI_EXTRACTION_TIMEOUT_MS: optionalIntWithDefault(8_000),
   AI_EXTRACTION_BUDGET_MS: optionalIntWithDefault(10_000),
   AI_MAX_OUTPUT_TOKENS: optionalIntWithDefault(16_000),

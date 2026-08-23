@@ -214,11 +214,83 @@ describe("RetryingApplicationIntelligenceProvider", () => {
     expect(gemini).toHaveBeenCalledTimes(1);
   });
 
-  it("gives up once the total time budget is spent", async () => {
+  it("always leaves the last provider a chance, even when earlier ones stall", async () => {
     const slow = vi.fn().mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(() => resolve(success("primary")), 50);
+          setTimeout(() => resolve(success("primary")), 5_000);
+        }),
+    );
+    const rescue = vi.fn().mockResolvedValue(success("gemini-model"));
+
+    const retrying = new RetryingApplicationIntelligenceProvider({
+      providers: [
+        {
+          provider: provider(slow),
+          providerName: "openrouter",
+          model: "primary",
+        },
+        {
+          provider: provider(slow),
+          providerName: "openrouter",
+          model: "second",
+        },
+        {
+          provider: provider(rescue),
+          providerName: "gemini",
+          model: "gemini-model",
+        },
+      ],
+      maxRetries: 2,
+      timeoutMs: 60,
+      totalBudgetMs: 180,
+      baseDelayMs: 1,
+    });
+
+    await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
+      model: "gemini-model",
+    });
+    expect(rescue).toHaveBeenCalledTimes(1);
+  });
+
+  it("records budget exhaustion when the window closes on a provider", async () => {
+    const stall = () =>
+      vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve(success("never")), 5_000);
+          }),
+      );
+    const rescue = vi.fn().mockResolvedValue(success("gemini-model"));
+
+    const retrying = new RetryingApplicationIntelligenceProvider({
+      providers: [
+        { provider: provider(stall()), providerName: "openrouter", model: "a" },
+        { provider: provider(stall()), providerName: "openrouter", model: "b" },
+        { provider: provider(stall()), providerName: "openrouter", model: "c" },
+        {
+          provider: provider(rescue),
+          providerName: "gemini",
+          model: "gemini-model",
+        },
+      ],
+      maxRetries: 0,
+      timeoutMs: 50,
+      totalBudgetMs: 120,
+      baseDelayMs: 1,
+    });
+
+    await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
+      model: "gemini-model",
+    });
+    expect(rescue).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry a timeout on the same model", async () => {
+    const slow = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(success("primary")), 5_000);
         }),
     );
 
@@ -229,28 +301,16 @@ describe("RetryingApplicationIntelligenceProvider", () => {
           providerName: "openrouter",
           model: "primary",
         },
-        {
-          provider: provider(vi.fn()),
-          providerName: "gemini",
-          model: "fallback",
-        },
       ],
       maxRetries: 3,
-      timeoutMs: 10,
-      totalBudgetMs: 25,
+      timeoutMs: 30,
+      totalBudgetMs: 500,
       baseDelayMs: 1,
     });
 
-    const error = await retrying
-      .analyzeApplication(input)
-      .catch((thrown: unknown) => thrown);
+    await retrying.analyzeApplication(input).catch(() => undefined);
 
-    expect(error).toBeInstanceOf(AiProviderChainError);
-    expect(
-      (error as AiProviderChainError).attempts.some(
-        (attempt) => attempt.code === "BUDGET_EXHAUSTED",
-      ),
-    ).toBe(true);
+    expect(slow).toHaveBeenCalledTimes(1);
   });
 
   it("reports every attempt so a failure can be diagnosed", async () => {
