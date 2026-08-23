@@ -15,6 +15,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
+export const maxDuration = 60;
+
 export const metadata: Metadata = {
   title: "Saved Jobs",
 };
@@ -56,6 +58,7 @@ export default async function SavedJobsPage({
   if (filters.sort !== "activity_desc") query.set("sort", filters.sort);
 
   const openId = typeof raw.open === "string" ? raw.open : null;
+  const analysisFailed = raw.analysis === "failed";
 
   const visible = rows.slice(0, APPLICATION_PAGE_SIZE);
   const nextOffset =
@@ -109,6 +112,7 @@ export default async function SavedJobsPage({
         <SavedJobDrawer
           userId={user.id}
           publicId={openId}
+          analysisFailed={analysisFailed}
           closeHref={`/dashboard/jobs${query.toString() ? `?${query}` : ""}`}
         />
       ) : null}

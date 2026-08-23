@@ -17,10 +17,10 @@ export const usageActionLabels: Record<AiUsageAction, string> = {
 };
 
 export const AI_USAGE_DEFAULTS = {
-  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 5,
+  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 4,
   AI_DAILY_REGENERATE_LIMIT: 1,
   AI_DAILY_JOB_EXTRACTION_LIMIT: 3,
-  AI_GLOBAL_DAILY_SAFETY_LIMIT: 250,
+  AI_GLOBAL_DAILY_SAFETY_LIMIT: 40,
 } as const;
 
 function readLimit(key: keyof typeof AI_USAGE_DEFAULTS) {

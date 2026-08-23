@@ -1,6 +1,9 @@
 import "server-only";
 
 import { getServerEnv } from "@/lib/env/server";
+import { normalizeJsonModelOutput } from "./normalize";
+import { applicationIntelligenceSchema } from "./schemas/application-intelligence.schema";
+import { extractedJobResponseSchema } from "./schemas/job-extraction.schema";
 import { GeminiApplicationIntelligenceProvider } from "./providers/gemini-application-intelligence-provider";
 import { MockApplicationIntelligenceProvider } from "./providers/mock-application-intelligence-provider";
 import { OpenRouterApplicationIntelligenceProvider } from "./providers/openrouter-application-intelligence-provider";
@@ -12,10 +15,9 @@ import type { ApplicationIntelligenceProvider } from "./types";
 
 let provider: ApplicationIntelligenceProvider | undefined;
 
-const DEFAULT_OPENROUTER_MODELS = [
-  "openai/gpt-oss-120b:free",
-  "qwen/qwen3-235b-a22b:free",
-  "nvidia/nemotron-nano-9b-v2:free",
+export const DEFAULT_OPENROUTER_MODELS = [
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "z-ai/glm-5.2:free",
 ];
 
 function splitModels(value: string | undefined) {
@@ -25,8 +27,16 @@ function splitModels(value: string | undefined) {
     .filter(Boolean);
 }
 
-function isModel(value: string | undefined): value is string {
-  return Boolean(value);
+function resolveOpenRouterModels(env: {
+  AI_PRIMARY_MODEL?: string;
+  AI_FALLBACK_MODELS?: string;
+}) {
+  const configured = [
+    ...splitModels(env.AI_PRIMARY_MODEL),
+    ...splitModels(env.AI_FALLBACK_MODELS),
+  ];
+
+  return configured.length > 0 ? configured : DEFAULT_OPENROUTER_MODELS;
 }
 
 export function getApplicationIntelligenceProvider(): ApplicationIntelligenceProvider {
@@ -38,20 +48,18 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
   const candidates: NamedProvider[] = [];
 
   if (env.OPENROUTER_API_KEY) {
-    const models = [
-      env.AI_PRIMARY_MODEL,
-      ...splitModels(env.AI_FALLBACK_MODELS),
-    ].filter(isModel);
-    const configuredModels = models.length > 0 ? models : DEFAULT_OPENROUTER_MODELS;
+    const apiKey = env.OPENROUTER_API_KEY;
 
     candidates.push(
-      ...configuredModels.map((model) => ({
+      ...resolveOpenRouterModels(env).map((model) => ({
         providerName: "openrouter",
         model,
         provider: new OpenRouterApplicationIntelligenceProvider({
-          apiKey: env.OPENROUTER_API_KEY!,
+          apiKey,
           model,
           timeoutMs: env.AI_REQUEST_TIMEOUT_MS,
+          maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
+          allowDataCollection: env.AI_ALLOW_DATA_COLLECTION,
           siteUrl: env.SITE_URL,
           appName: "HireLens",
         }),
@@ -76,6 +84,15 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           providers: candidates,
           maxRetries: env.AI_MAX_RETRIES,
           timeoutMs: env.AI_REQUEST_TIMEOUT_MS,
+          totalBudgetMs: env.AI_TOTAL_BUDGET_MS,
+          extractionTimeoutMs: env.AI_EXTRACTION_TIMEOUT_MS,
+          extractionBudgetMs: env.AI_EXTRACTION_BUDGET_MS,
+          validateAnalysis: (raw) => {
+            normalizeJsonModelOutput(raw, applicationIntelligenceSchema);
+          },
+          validateExtraction: (raw) => {
+            normalizeJsonModelOutput(raw, extractedJobResponseSchema);
+          },
         })
       : new MockApplicationIntelligenceProvider();
 

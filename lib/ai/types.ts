@@ -8,7 +8,7 @@ export type AIProviderResult = {
 };
 
 export type ResumeDocumentInput = {
-  pdfBase64: string;
+  pdfBytes: Uint8Array;
   filename: string;
   text: string | null;
 };

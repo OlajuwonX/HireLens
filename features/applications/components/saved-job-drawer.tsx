@@ -1,3 +1,4 @@
+import { Alert } from "@/components/ui/alert";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
 import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
 import { ScorePanel } from "@/features/analyses/components/score-panel";
@@ -39,10 +40,12 @@ export async function SavedJobDrawer({
   userId,
   publicId,
   closeHref,
+  analysisFailed = false,
 }: {
   userId: string;
   publicId: string;
   closeHref: string;
+  analysisFailed?: boolean;
 }) {
   const row = await getOwnedApplication({ userId, publicId });
 
@@ -193,9 +196,16 @@ export async function SavedJobDrawer({
     </div>
   ) : (
     <div className="space-y-5">
-      <p className="text-meta text-text-secondary">
-        No analysis is attached to this application yet.
-      </p>
+      {analysisFailed ? (
+        <Alert tone="error">
+          The job was saved, but the analysis could not be completed. Your daily
+          AI allowance was not used. Use Analyze above to try again.
+        </Alert>
+      ) : (
+        <p className="text-meta text-text-secondary">
+          No analysis is attached to this application yet.
+        </p>
+      )}
       <ApplicationAiActions
         applicationPublicId={row.application.publicId}
         result={null}

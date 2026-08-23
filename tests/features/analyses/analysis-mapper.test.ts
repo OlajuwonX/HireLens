@@ -17,7 +17,7 @@ import { describe, expect, it } from "vitest";
 async function mockResult() {
   const provider = new MockApplicationIntelligenceProvider();
   const output = await provider.analyzeApplication({
-    resume: { pdfBase64: "", filename: "resume.pdf", text: null },
+    resume: { pdfBytes: new Uint8Array(), filename: "resume.pdf", text: null },
     job: {
       title: "Site Manager",
       company: "Turner",
