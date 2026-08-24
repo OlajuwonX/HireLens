@@ -81,7 +81,17 @@ export async function saveAndAnalyzeAction(
 
   const target = `/dashboard/jobs?open=${result.value.applicationPublicId}`;
 
-  redirect(result.value.analysed ? target : `${target}&analysis=failed`);
+  if (result.value.analysed) {
+    redirect(target);
+  }
+
+  const reason = result.value.analysisLimitReason;
+
+  redirect(
+    reason
+      ? `${target}&analysis=failed&reason=${reason}`
+      : `${target}&analysis=failed`,
+  );
 }
 
 export async function changeApplicationStatusAction(formData: FormData) {

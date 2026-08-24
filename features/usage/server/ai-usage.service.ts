@@ -4,6 +4,10 @@ import { and, count, eq, gt, gte, isNull, lt } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { aiUsageEvents, aiUsageReservations } from "@/lib/db/schema";
 import {
+  usageLimitMessage,
+  type UsageDenialReason,
+} from "@/features/usage/limit-notice";
+import {
   AI_BURST_LIMIT,
   AI_BURST_WINDOW_SECONDS,
   AI_RESERVATION_TTL_SECONDS,
@@ -12,8 +16,7 @@ import {
   type AiUsageAction,
 } from "@/lib/ai/usage";
 
-export type UsageDenialReason =
-  "BURST_LIMIT" | "DAILY_LIMIT" | "GLOBAL_LIMIT" | "ACTIVE_REQUEST";
+export type { UsageDenialReason };
 
 export type UsageAllowanceResult =
   | { ok: true; remaining: number; resetAt: Date }
@@ -147,7 +150,7 @@ export async function checkAllowance(input: {
     return {
       ok: false,
       reason: "ACTIVE_REQUEST",
-      message: "Another AI request is already running. Try again shortly.",
+      message: usageLimitMessage("ACTIVE_REQUEST"),
       resetAt: secondsFromNow(AI_RESERVATION_TTL_SECONDS),
     };
   }
@@ -156,8 +159,7 @@ export async function checkAllowance(input: {
     return {
       ok: false,
       reason: "BURST_LIMIT",
-      message:
-        "You have reached the short-term AI request limit. Try again in about a minute.",
+      message: usageLimitMessage("BURST_LIMIT"),
       resetAt: secondsFromNow(AI_BURST_WINDOW_SECONDS),
     };
   }
@@ -168,8 +170,7 @@ export async function checkAllowance(input: {
     return {
       ok: false,
       reason: "GLOBAL_LIMIT",
-      message:
-        "HireLens has used its shared daily AI budget. Try again tomorrow.",
+      message: usageLimitMessage("GLOBAL_LIMIT"),
       resetAt: nextUtcDay(),
     };
   }
@@ -181,7 +182,7 @@ export async function checkAllowance(input: {
     return {
       ok: false,
       reason: "DAILY_LIMIT",
-      message: "You have reached today's AI allowance for this action.",
+      message: usageLimitMessage("DAILY_LIMIT"),
       resetAt: nextUtcDay(),
     };
   }
@@ -219,7 +220,7 @@ export async function reserveUsage(input: {
       return {
         ok: false,
         reason: "ACTIVE_REQUEST",
-        message: "Another AI request is already running. Try again shortly.",
+        message: usageLimitMessage("ACTIVE_REQUEST"),
         resetAt: secondsFromNow(AI_RESERVATION_TTL_SECONDS),
       };
     }

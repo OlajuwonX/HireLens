@@ -1,8 +1,9 @@
 import "server-only";
 
+import { attachAnalysisApplication } from "@/features/analyses/server/analysis.repository";
 import { analyzeApplication } from "@/features/analyses/server/analysis.service";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
-import { attachAnalysisApplication } from "@/features/analyses/server/analysis.repository";
+import type { UsageDenialReason } from "@/features/usage/limit-notice";
 import { applicationStatusLabels } from "../constants";
 import type {
   ApplicationFilters,
@@ -23,7 +24,12 @@ import {
 
 export type ApplicationResult<T> =
   | { ok: true; value: T }
-  | { ok: false; error: "NOT_FOUND" | "ANALYSIS_FAILED"; message: string };
+  | {
+      ok: false;
+      error: "NOT_FOUND" | "ANALYSIS_FAILED" | "LIMIT_REACHED";
+      message: string;
+      limitReason?: UsageDenialReason;
+    };
 
 async function resolveVersionId(input: {
   userId: string;
@@ -85,6 +91,7 @@ export async function saveAndAnalyze(input: {
     applicationPublicId: string;
     analysed: boolean;
     analysisMessage?: string;
+    analysisLimitReason?: UsageDenialReason;
   }>
 > {
   const version = await getOwnedResumeVersion({
@@ -150,6 +157,10 @@ export async function saveAndAnalyze(input: {
       applicationPublicId: application.publicId,
       analysed: analysis.ok,
       analysisMessage: analysis.ok ? undefined : analysis.message,
+      analysisLimitReason:
+        !analysis.ok && analysis.error === "LIMIT_REACHED"
+          ? analysis.limitReason
+          : undefined,
     },
   };
 }
@@ -240,11 +251,18 @@ export async function analyzeOwnedApplication(input: {
   });
 
   if (!analysis.ok) {
-    return {
-      ok: false,
-      error: "ANALYSIS_FAILED",
-      message: analysis.message,
-    };
+    return analysis.error === "LIMIT_REACHED"
+      ? {
+          ok: false,
+          error: "LIMIT_REACHED",
+          message: analysis.message,
+          limitReason: analysis.limitReason,
+        }
+      : {
+          ok: false,
+          error: "ANALYSIS_FAILED",
+          message: analysis.message,
+        };
   }
 
   await attachAnalysisToApplication({

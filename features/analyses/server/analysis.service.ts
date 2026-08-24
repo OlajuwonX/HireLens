@@ -26,6 +26,7 @@ import {
   failUsage,
   reserveUsage,
 } from "@/features/usage/server/ai-usage.service";
+import type { UsageDenialReason } from "@/features/usage/limit-notice";
 import {
   employmentTypeLabels,
   workArrangementLabels,
@@ -49,7 +50,13 @@ import {
 
 export type AnalysisOutcome =
   | { ok: true; analysisId: string; analysisPublicId: string; reused: boolean }
-  | { ok: false; error: "FILE_MISSING" | "FAILED"; message: string };
+  | { ok: false; error: "FILE_MISSING" | "FAILED"; message: string }
+  | {
+      ok: false;
+      error: "LIMIT_REACHED";
+      limitReason: UsageDenialReason;
+      message: string;
+    };
 
 async function settleUsage(work: Promise<unknown>, stage: string) {
   try {
@@ -224,7 +231,12 @@ export async function analyzeApplication(input: {
       failureReason: reservation.reason,
     });
 
-    return { ok: false, error: "FAILED", message: reservation.message };
+    return {
+      ok: false,
+      error: "LIMIT_REACHED",
+      limitReason: reservation.reason,
+      message: reservation.message,
+    };
   }
 
   const resumeText =
