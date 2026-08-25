@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { AccessibleIconButton } from "./accessible-icon-button";
 
 export const Dialog = DialogPrimitive.Root;

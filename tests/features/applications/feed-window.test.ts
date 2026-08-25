@@ -23,11 +23,6 @@ describe("shiftOffset", () => {
   });
 });
 
-/**
- * Simulates the real failure: a server list that shrinks underneath an
- * offset-paged feed. `server` is the source of truth; `loaded` is what the
- * user has accumulated on screen.
- */
 function simulate({
   total,
   compensate,

@@ -1,8 +1,5 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { ClipboardPaste, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,16 +11,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { notify } from "@/components/ui/toast";
+import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
+import { ClipboardPaste } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { extractJobPostingAction } from "../actions/job-extraction-actions";
 import { initialJobExtractionState } from "../actions/job-extraction-state";
-import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
 
 function ExtractButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
 
   return (
     <Button type="submit" disabled={pending || disabled}>
-      <Sparkles className="size-4" aria-hidden />
       {pending ? "Extracting job details..." : "Extract job details"}
     </Button>
   );

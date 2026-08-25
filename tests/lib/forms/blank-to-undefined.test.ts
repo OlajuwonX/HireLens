@@ -1,8 +1,8 @@
+import { evidenceCorrectionSchema } from "@/features/analyses/schemas/analysis.schema";
+import { generateDocumentSchema } from "@/features/documents/schemas/document.schema";
+import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
-import { generateDocumentSchema } from "@/features/documents/schemas/document.schema";
-import { evidenceCorrectionSchema } from "@/features/analyses/schemas/analysis.schema";
 
 describe("blankToUndefined", () => {
   it("maps null to undefined, which is what an absent FormData field is", () => {

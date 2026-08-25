@@ -21,6 +21,10 @@ import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import {
+  usageLimitMessage,
+  type UsageDenialReason,
+} from "@/features/usage/limit-notice";
 import Link from "next/link";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
@@ -41,11 +45,13 @@ export async function SavedJobDrawer({
   publicId,
   closeHref,
   analysisFailed = false,
+  analysisLimitReason = null,
 }: {
   userId: string;
   publicId: string;
   closeHref: string;
   analysisFailed?: boolean;
+  analysisLimitReason?: UsageDenialReason | null;
 }) {
   const row = await getOwnedApplication({ userId, publicId });
 
@@ -198,8 +204,9 @@ export async function SavedJobDrawer({
     <div className="space-y-5">
       {analysisFailed ? (
         <Alert tone="error">
-          The job was saved, but the analysis could not be completed. Your daily
-          AI allowance was not used. Use Analyze above to try again.
+          {analysisLimitReason
+            ? `The job was saved, but the analysis did not run. ${usageLimitMessage(analysisLimitReason)}`
+            : "The job was saved, but the analysis could not be completed. Your daily AI allowance was not used. Use Analyze above to try again."}
         </Alert>
       ) : (
         <p className="text-meta text-text-secondary">

@@ -1,5 +1,6 @@
 import { normalizePastedText } from "@/lib/ai/normalize-pasted-text";
 import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
+import { extractHtmlHeadings } from "./clipboard-html";
 
 const NAV_LINES = new Set(
   [
@@ -32,6 +33,7 @@ const NAV_LINES = new Set(
     "people you may know",
     "promoted",
     "actively hiring",
+    "represents the skills you have",
   ].map((line) => line.toLowerCase()),
 );
 
@@ -44,7 +46,14 @@ const NOISE_PATTERNS = [
   /^\d+ of \d+$/i,
   /^cookie/i,
   /^we use cookies/i,
+  /^\d{1,3}%/,
+  /\d{1,3}%$/,
+  /^find out how your skills align/i,
+  /^https?:\/\/\S+$/i,
 ];
+
+const POSTED_AGO =
+  /^(posted\s+)?\d+\s*(m|h|d|w|mo|minute|hour|day|week|month|year)s?\s+ago$/i;
 
 const SOURCE_HOSTS: [RegExp, string][] = [
   [/linkedin\./i, "LinkedIn"],
@@ -57,6 +66,14 @@ const SOURCE_HOSTS: [RegExp, string][] = [
   [/ashbyhq\./i, "Ashby"],
   [/smartrecruiters\./i, "SmartRecruiters"],
   [/workday(jobs)?\./i, "Workday"],
+  [/pinpointhq\./i, "Pinpoint"],
+  [/teamtailor\./i, "Teamtailor"],
+  [/bamboohr\./i, "BambooHR"],
+  [/recruitee\./i, "Recruitee"],
+  [/personio\./i, "Personio"],
+  [/jobvite\./i, "Jobvite"],
+  [/icims\./i, "iCIMS"],
+  [/jobright\./i, "JobRight"],
 ];
 
 const SOURCE_MARKERS: [RegExp, string][] = [
@@ -66,6 +83,7 @@ const SOURCE_MARKERS: [RegExp, string][] = [
   [/\bglassdoor\b/i, "Glassdoor"],
   [/\bgreenhouse\b/i, "Greenhouse"],
   [/\blever\b/i, "Lever"],
+  [/\bjobright\b/i, "JobRight"],
 ];
 
 const EMPLOYMENT_PATTERNS: [RegExp, ExtractedJob["employmentType"]][] = [
@@ -83,14 +101,22 @@ const ARRANGEMENT_PATTERNS: [RegExp, ExtractedJob["workArrangement"]][] = [
   [/\bon[\s-]?site\b|\bonsite\b|\bin[\s-]?office\b/i, "ON_SITE"],
 ];
 
+const SENIORITY_LINE =
+  /^(entry|junior|mid|senior|staff|principal|lead|associate|executive|director|graduate|intern)([\s-]?level)?$/i;
+
+const EXPERIENCE_LINE = /^\d+\+?\s*(years?|yrs?)\b/i;
+
 const DESCRIPTION_MARKERS =
-  /^(about the job|job description|about the role|the role|role overview|overview|about this role|position summary|job summary|what you.?ll do)\s*:?\s*$/i;
+  /^(about the job|job description|about the role|the role|role overview|overview|about this role|position summary|job summary)\s*:?\s*$/i;
 
 const REQUIREMENT_MARKERS =
-  /^(requirements?|qualifications?|what you.?ll need|what we.?re looking for|who you are|minimum qualifications?|basic qualifications?|skills? (and|&) experience|your (profile|background))\s*:?\s*$/i;
+  /^(requirements?|qualifications?|required|preferred|what you.?ll need|what we.?re looking for|who you are|minimum qualifications?|basic qualifications?|preferred qualifications?|nice to have|bonus points|skills? (and|&) experience|your (profile|background))\s*:?\s*$/i;
+
+const RESPONSIBILITY_MARKERS =
+  /^(responsibilities|key responsibilities|what you.?ll do|duties|the job|your role)\s*:?\s*$/i;
 
 const NEXT_SECTION_MARKERS =
-  /^(benefits?|perks?|what we offer|compensation|about (us|the company)|how to apply|equal opportunity|nice to have|bonus points|preferred qualifications?)\s*:?\s*$/i;
+  /^(benefits?|perks?|what we offer|compensation|about (us|the company)|how to apply|equal opportunity|our values|why join)\s*:?\s*$/i;
 
 const CURRENCY_CODES = /\b(USD|GBP|EUR|NGN|CAD|AUD|INR|ZAR|KES|GHS|JPY)\b/i;
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -102,9 +128,17 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   "¥": "JPY",
 };
 
+const AMOUNT = String.raw`[\d][\d,. ]*k?`;
+const UNIT = String.raw`(?:\s*(?:\/|per\s+|a\s+)\s*(?:yr|year|annum|hr|hour|mo|month|wk|week))?`;
+const SYMBOL = String.raw`[$£€₦₹¥]`;
+const CODE = String.raw`\b(?:USD|GBP|EUR|NGN|CAD|AUD|INR|ZAR|KES|GHS|JPY)\b`;
+
+export type JobLayout = "TITLE_FIRST" | "COMPANY_FIRST";
+
 export type ParsedJob = {
   job: Partial<ExtractedJob>;
   missing: ("title" | "company" | "description")[];
+  layout: JobLayout;
 };
 
 function isNoise(line: string) {
@@ -182,6 +216,11 @@ export function detectWorkArrangement(text: string) {
 
 function toAmount(raw: string) {
   const cleaned = raw.replace(/[, ]/g, "").toLowerCase();
+
+  if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    return Number.parseInt(cleaned.replace(/\./g, ""), 10);
+  }
+
   const multiplier = cleaned.endsWith("k") ? 1000 : 1;
   const value = Number.parseFloat(cleaned.replace(/k$/, ""));
 
@@ -190,7 +229,10 @@ function toAmount(raw: string) {
 
 export function detectSalary(text: string) {
   const range = text.match(
-    /([$£€₦₹¥]|\b(?:USD|GBP|EUR|NGN|CAD|AUD|INR|ZAR|KES|GHS|JPY)\b)?\s*([\d][\d,. ]*k?)\s*(?:-|–|—|to)\s*([$£€₦₹¥])?\s*([\d][\d,. ]*k?)/i,
+    new RegExp(
+      `(${SYMBOL}|${CODE})?\\s*(${AMOUNT})${UNIT}\\s*(?:-|–|—|to)\\s*(${SYMBOL})?\\s*(${AMOUNT})${UNIT}`,
+      "i",
+    ),
   );
 
   const symbolFor = (value: string | undefined) => {
@@ -218,7 +260,7 @@ export function detectSalary(text: string) {
   }
 
   const single = text.match(
-    /([$£€₦₹¥])\s*([\d][\d,. ]*k?)|\b(USD|GBP|EUR|NGN|CAD|AUD|INR|ZAR|KES|GHS|JPY)\s*([\d][\d,. ]*k?)/i,
+    new RegExp(`(${SYMBOL})\\s*(${AMOUNT})|(${CODE})\\s*(${AMOUNT})`, "i"),
   );
 
   if (single) {
@@ -240,12 +282,17 @@ function splitMetaLine(line: string) {
     .filter(Boolean);
 }
 
-function looksLikeLocation(value: string) {
-  if (/\d{3,}/.test(value)) {
-    return false;
-  }
+function isMetadataLine(value: string) {
+  return Boolean(
+    detectEmploymentType(value) ||
+    detectWorkArrangement(value) ||
+    SENIORITY_LINE.test(value) ||
+    EXPERIENCE_LINE.test(value),
+  );
+}
 
-  if (detectEmploymentType(value) || detectWorkArrangement(value)) {
+function looksLikeLocation(value: string) {
+  if (/\d{3,}/.test(value) || isMetadataLine(value)) {
     return false;
   }
 
@@ -255,6 +302,7 @@ function looksLikeLocation(value: string) {
 function isSectionHeading(line: string) {
   return (
     REQUIREMENT_MARKERS.test(line) ||
+    RESPONSIBILITY_MARKERS.test(line) ||
     DESCRIPTION_MARKERS.test(line) ||
     NEXT_SECTION_MARKERS.test(line)
   );
@@ -270,35 +318,170 @@ function isCompanyCandidate(line: string) {
   }
 
   return (
-    !detectEmploymentType(line) &&
-    !detectWorkArrangement(line) &&
-    !/^https?:/i.test(line) &&
-    !/^[-*•]/.test(line)
+    !isMetadataLine(line) && !/^https?:/i.test(line) && !/^[-*•]/.test(line)
   );
 }
 
-function sectionFrom(lines: string[], marker: RegExp) {
-  const start = lines.findIndex((line) => marker.test(line));
+function detectLayout(header: string[]) {
+  const parts = splitMetaLine(header[0] ?? "");
 
-  if (start === -1) {
+  if (
+    parts.length > 1 &&
+    parts.slice(1).some((part) => POSTED_AGO.test(part))
+  ) {
+    return "COMPANY_FIRST" as const;
+  }
+
+  return "TITLE_FIRST" as const;
+}
+
+function titleFromHeadings(html: string | null | undefined, header: string[]) {
+  if (!html) {
     return null;
   }
 
-  const body: string[] = [];
+  const headings = extractHtmlHeadings(html).filter(
+    (heading) => !isSectionHeading(heading.text) && !isNoise(heading.text),
+  );
 
-  for (let index = start + 1; index < lines.length; index += 1) {
-    const line = lines[index];
-
-    if (NEXT_SECTION_MARKERS.test(line) || DESCRIPTION_MARKERS.test(line)) {
-      break;
-    }
-
-    body.push(line);
+  if (headings.length === 0) {
+    return null;
   }
 
-  const text = body.join("\n").trim();
+  const best = [...headings].sort((a, b) => a.level - b.level)[0];
+  const normalizedHeader = header.map((line) => line.toLowerCase());
 
-  return text || null;
+  return normalizedHeader.includes(best.text.toLowerCase()) ? best.text : null;
+}
+
+const CHIP_MAX_WORDS = 4;
+const CHIP_SECTION_RATIO = 0.6;
+
+function isListItem(line: string) {
+  return /^[-*•]|^\d+[.)]\s/.test(line);
+}
+
+export function isChipLine(line: string) {
+  return (
+    !/[.!?]/.test(line) &&
+    !isListItem(line) &&
+    line.split(/\s+/).length <= CHIP_MAX_WORDS
+  );
+}
+
+export function isChipSection(lines: string[]) {
+  if (lines.length < 2) {
+    return false;
+  }
+
+  return lines.filter(isChipLine).length / lines.length >= CHIP_SECTION_RATIO;
+}
+
+function stripBullet(line: string) {
+  return line.replace(/^[-*•]\s*/, "").replace(/^\d+[.)]\s*/, "");
+}
+
+type Section = { heading: string | null; lines: string[] };
+
+function collectSections(lines: string[]) {
+  const description: Section = { heading: null, lines: [] };
+  const requirements: Section[] = [];
+
+  let target: Section | null = description;
+  let descriptionMarked = false;
+
+  for (const line of lines) {
+    if (DESCRIPTION_MARKERS.test(line)) {
+      target = description;
+      descriptionMarked = true;
+      continue;
+    }
+
+    if (REQUIREMENT_MARKERS.test(line) || RESPONSIBILITY_MARKERS.test(line)) {
+      const section: Section = {
+        heading: line.replace(/\s*:\s*$/, ""),
+        lines: [],
+      };
+
+      requirements.push(section);
+      target = section;
+      continue;
+    }
+
+    if (NEXT_SECTION_MARKERS.test(line)) {
+      target = null;
+      continue;
+    }
+
+    target?.lines.push(line);
+  }
+
+  return { description, requirements, descriptionMarked };
+}
+
+function formatSectionBody(lines: string[]) {
+  if (lines.length === 0) {
+    return "";
+  }
+
+  if (isChipSection(lines)) {
+    return `${lines.map(stripBullet).join(", ")}.`;
+  }
+
+  return lines
+    .map((line, index) => `${index + 1}. ${stripBullet(line)}`)
+    .join("\n");
+}
+
+function formatRequirements(sections: Section[]) {
+  const blocks = sections
+    .map((section) => {
+      const body = formatSectionBody(section.lines);
+
+      if (!section.heading) {
+        return body;
+      }
+
+      return body ? `${section.heading}\n\n${body}` : null;
+    })
+    .filter((block): block is string => Boolean(block));
+
+  return blocks.join("\n\n") || null;
+}
+
+function formatDescription(input: { headline: string[]; lines: string[] }) {
+  const blocks: string[] = [];
+  const headline = input.headline.filter(Boolean).join(" · ");
+
+  if (headline) {
+    blocks.push(headline);
+  }
+
+  let run: string[] = [];
+
+  const flush = () => {
+    if (run.length === 0) {
+      return;
+    }
+
+    blocks.push(isChipSection(run) ? `${run.join(", ")}.` : run.join("\n"));
+    run = [];
+  };
+
+  for (const line of input.lines) {
+    if (
+      run.length > 0 &&
+      isChipLine(line) !== isChipLine(run[run.length - 1])
+    ) {
+      flush();
+    }
+
+    run.push(line);
+  }
+
+  flush();
+
+  return blocks.join("\n\n").trim() || null;
 }
 
 export function parseJobPosting(input: {
@@ -314,49 +497,108 @@ export function parseJobPosting(input: {
   const salary = detectSalary(joined);
 
   const firstSection = lines.findIndex((line) => isSectionHeading(line));
-  const headerEnd = firstSection === -1 ? 6 : Math.min(firstSection, 6);
+  const headerEnd = firstSection === -1 ? 8 : Math.min(firstSection, 8);
   const header = lines.slice(0, Math.max(headerEnd, 1));
-  const title = header[0] && header[0].length <= 120 ? header[0] : null;
+  const layout = detectLayout(header);
 
+  let title: string | null = null;
   let company: string | null = null;
   let location: string | null = null;
+  let consumed = 0;
 
-  for (const line of header.slice(1)) {
-    const parts = splitMetaLine(line);
+  const headingTitle = titleFromHeadings(input.html, header);
 
-    if (parts.length > 1) {
-      const [first, ...rest] = parts;
+  if (layout === "COMPANY_FIRST") {
+    const [first] = splitMetaLine(header[0]);
 
-      company = company ?? (first.length <= 120 ? first : null);
-      location = location ?? rest.find(looksLikeLocation) ?? null;
-      break;
+    company = first && first.length <= 120 ? first : null;
+
+    const titleIndex = header.findIndex(
+      (line, index) =>
+        index > 0 &&
+        !isMetadataLine(line) &&
+        line.length <= 120 &&
+        (!headingTitle || line === headingTitle),
+    );
+
+    if (titleIndex !== -1) {
+      title = header[titleIndex];
+      consumed = titleIndex;
+    }
+  } else {
+    title =
+      headingTitle ?? (header[0] && header[0].length <= 120 ? header[0] : null);
+
+    const rest = header.filter((line) => line !== title);
+
+    for (const line of rest) {
+      const parts = splitMetaLine(line);
+
+      if (parts.length > 1) {
+        const [head, ...tail] = parts;
+
+        company = company ?? (head.length <= 120 ? head : null);
+        location = location ?? tail.find(looksLikeLocation) ?? null;
+        break;
+      }
+    }
+
+    if (!company) {
+      company = rest.find(isCompanyCandidate) ?? null;
     }
   }
 
-  if (!company) {
-    const candidate = header.slice(1).find((line) => isCompanyCandidate(line));
-
-    company = candidate ?? null;
+  if (!location) {
+    location =
+      header
+        .slice(consumed + 1)
+        .find(
+          (line) =>
+            line !== title && line !== company && looksLikeLocation(line),
+        ) ?? null;
   }
 
-  const requirements = sectionFrom(lines, REQUIREMENT_MARKERS);
-  const describedBody = sectionFrom(lines, DESCRIPTION_MARKERS);
-  const description =
-    describedBody ?? (lines.length > 4 ? lines.slice(1).join("\n") : null);
+  const sections = collectSections(lines);
+  const headerText = header.join(" ") || normalized;
+
+  const headline = [
+    title,
+    header.find((line) => SENIORITY_LINE.test(line)) ?? "",
+    header.find((line) => EXPERIENCE_LINE.test(line)) ?? "",
+  ].filter((value): value is string => Boolean(value));
+
+  const body = sections.description.lines.filter(
+    (line) =>
+      line !== title &&
+      line !== company &&
+      line !== location &&
+      !isMetadataLine(line) &&
+      !splitMetaLine(line).some((part) => POSTED_AGO.test(part)),
+  );
+
+  const identified =
+    sections.descriptionMarked ||
+    Boolean(title) ||
+    Boolean(company) ||
+    sections.requirements.length > 0;
+
+  const description = identified
+    ? formatDescription({ headline, lines: body })
+    : null;
 
   const job: Partial<ExtractedJob> = {
     title,
     company,
     location,
-    workArrangement: detectWorkArrangement(header.join(" ") || normalized),
-    employmentType: detectEmploymentType(header.join(" ") || normalized),
+    workArrangement: detectWorkArrangement(headerText),
+    employmentType: detectEmploymentType(headerText),
     salaryMin: salary.salaryMin,
     salaryMax: salary.salaryMax,
     currency: salary.currency,
     source,
     sourceUrl,
     description,
-    requirements,
+    requirements: formatRequirements(sections.requirements),
   };
 
   const missing: ParsedJob["missing"] = [];
@@ -373,5 +615,5 @@ export function parseJobPosting(input: {
     missing.push("description");
   }
 
-  return { job, missing };
+  return { job, missing, layout };
 }

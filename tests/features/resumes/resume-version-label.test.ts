@@ -1,13 +1,13 @@
-import { describe, expect, it } from "vitest";
+import {
+  improvedResumeVersionLabel,
+  legacyImprovedResumeVersionLabel,
+} from "@/features/documents/improved-resume-format";
 import {
   MAX_VERSION_LABEL_LENGTH,
   resumeVersionLabelFromFilename,
   withVersionSuffix,
 } from "@/features/resumes/version-label";
-import {
-  improvedResumeVersionLabel,
-  legacyImprovedResumeVersionLabel,
-} from "@/features/documents/improved-resume-format";
+import { describe, expect, it } from "vitest";
 
 describe("a resume version is named after the file the user uploaded", () => {
   it("drops the pdf extension", () => {

@@ -1,9 +1,9 @@
 import { BackButton } from "@/components/layout/back-button";
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/page-header";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { SaveAndAnalyzeForm } from "@/features/applications/components/save-and-analyze-form";
+import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
+import type { Metadata } from "next";
 
 export const maxDuration = 60;
 

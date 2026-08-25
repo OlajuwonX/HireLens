@@ -35,6 +35,17 @@ export const improvedResumeEducationSchema = z.object({
   date: z.string().nullable(),
 });
 
+export const improvedResumeCertificationSchema = z.object({
+  name: z.string().min(1),
+  issuer: z.string().nullable(),
+  date: z.string().nullable(),
+});
+
+export const improvedResumeAdditionalSectionSchema = z.object({
+  title: z.string().min(1),
+  items: z.array(z.string().min(1)),
+});
+
 export const improvedResumeSchema = z.object({
   header: improvedResumeHeaderSchema,
   professionalSummary: z.string().min(1),
@@ -42,6 +53,10 @@ export const improvedResumeSchema = z.object({
   experience: z.array(improvedResumeExperienceSchema),
   projects: z.array(improvedResumeProjectSchema),
   education: z.array(improvedResumeEducationSchema),
+  certifications: z.array(improvedResumeCertificationSchema).default([]),
+  additionalSections: z
+    .array(improvedResumeAdditionalSectionSchema)
+    .default([]),
 });
 
 export type ImprovedResume = z.infer<typeof improvedResumeSchema>;

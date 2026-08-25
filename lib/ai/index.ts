@@ -29,5 +29,17 @@ export type {
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
   JobPostingInput,
+  PreviousOptimizationInput,
   ResumeDocumentInput,
 } from "./types";
+export {
+  auditResumeEvidence,
+  collectResumeEntities,
+  compareOptimizationPasses,
+  extractNumericEvidence,
+  extractYearClaims,
+  normalizeEntity,
+  type EvidenceAudit,
+  type RegressionDecision,
+  type RegressionReason,
+} from "./evidence-audit";

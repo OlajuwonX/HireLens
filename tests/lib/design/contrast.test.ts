@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { dark, light, type Palette } from "@/lib/design/theme";
+import { describe, expect, it } from "vitest";
 
 const AA = 4.5;
 
