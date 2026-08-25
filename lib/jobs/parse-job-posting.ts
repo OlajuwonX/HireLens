@@ -285,9 +285,9 @@ function splitMetaLine(line: string) {
 function isMetadataLine(value: string) {
   return Boolean(
     detectEmploymentType(value) ||
-      detectWorkArrangement(value) ||
-      SENIORITY_LINE.test(value) ||
-      EXPERIENCE_LINE.test(value),
+    detectWorkArrangement(value) ||
+    SENIORITY_LINE.test(value) ||
+    EXPERIENCE_LINE.test(value),
   );
 }
 
@@ -318,16 +318,17 @@ function isCompanyCandidate(line: string) {
   }
 
   return (
-    !isMetadataLine(line) &&
-    !/^https?:/i.test(line) &&
-    !/^[-*•]/.test(line)
+    !isMetadataLine(line) && !/^https?:/i.test(line) && !/^[-*•]/.test(line)
   );
 }
 
 function detectLayout(header: string[]) {
   const parts = splitMetaLine(header[0] ?? "");
 
-  if (parts.length > 1 && parts.slice(1).some((part) => POSTED_AGO.test(part))) {
+  if (
+    parts.length > 1 &&
+    parts.slice(1).some((part) => POSTED_AGO.test(part))
+  ) {
     return "COMPANY_FIRST" as const;
   }
 
@@ -397,7 +398,10 @@ function collectSections(lines: string[]) {
     }
 
     if (REQUIREMENT_MARKERS.test(line) || RESPONSIBILITY_MARKERS.test(line)) {
-      const section: Section = { heading: line.replace(/\s*:\s*$/, ""), lines: [] };
+      const section: Section = {
+        heading: line.replace(/\s*:\s*$/, ""),
+        lines: [],
+      };
 
       requirements.push(section);
       target = section;
@@ -460,14 +464,15 @@ function formatDescription(input: { headline: string[]; lines: string[] }) {
       return;
     }
 
-    blocks.push(
-      isChipSection(run) ? `${run.join(", ")}.` : run.join("\n"),
-    );
+    blocks.push(isChipSection(run) ? `${run.join(", ")}.` : run.join("\n"));
     run = [];
   };
 
   for (const line of input.lines) {
-    if (run.length > 0 && isChipLine(line) !== isChipLine(run[run.length - 1])) {
+    if (
+      run.length > 0 &&
+      isChipLine(line) !== isChipLine(run[run.length - 1])
+    ) {
       flush();
     }
 
@@ -547,8 +552,10 @@ export function parseJobPosting(input: {
     location =
       header
         .slice(consumed + 1)
-        .find((line) => line !== title && line !== company && looksLikeLocation(line)) ??
-      null;
+        .find(
+          (line) =>
+            line !== title && line !== company && looksLikeLocation(line),
+        ) ?? null;
   }
 
   const sections = collectSections(lines);
