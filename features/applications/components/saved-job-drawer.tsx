@@ -18,13 +18,13 @@ import {
 } from "@/features/documents/constants";
 import { listDocumentsForApplication } from "@/features/documents/server/document.repository";
 import {
-  usageLimitMessage,
-  type UsageDenialReason,
-} from "@/features/usage/limit-notice";
-import {
   employmentTypeLabels,
   workArrangementLabels,
 } from "@/features/jobs/constants";
+import {
+  usageLimitMessage,
+  type UsageDenialReason,
+} from "@/features/usage/limit-notice";
 import Link from "next/link";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
