@@ -37,9 +37,8 @@ vi.mock("@/features/files/server/file-asset.repository", () => ({
   findFileAssetById: (input: unknown) => findFileAssetById(input),
 }));
 
-const { analyzeApplication } = await import(
-  "@/features/analyses/server/analysis.service"
-);
+const { analyzeApplication } =
+  await import("@/features/analyses/server/analysis.service");
 
 const job = {
   id: "job-1",

@@ -30,6 +30,27 @@ function decodeEntities(value: string) {
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
 }
 
+const HEADING_BLOCK = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
+
+export type HtmlHeading = { level: number; text: string };
+
+export function extractHtmlHeadings(html: string): HtmlHeading[] {
+  const withoutScripts = html.replace(SCRIPTS, "");
+  const headings: HtmlHeading[] = [];
+
+  for (const match of withoutScripts.matchAll(HEADING_BLOCK)) {
+    const text = decodeEntities(match[2].replace(TAGS, ""))
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (text && text.length <= 200) {
+      headings.push({ level: Number(match[1]), text });
+    }
+  }
+
+  return headings;
+}
+
 export function clipboardHtmlToText(html: string) {
   return decodeEntities(
     html
