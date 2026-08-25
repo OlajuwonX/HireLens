@@ -289,5 +289,33 @@ export async function renderImprovedResumePdf(
     });
   }
 
+  if (resume.certifications.length > 0) {
+    canvas.sectionHeading("Certifications");
+
+    resume.certifications.forEach((entry, index) => {
+      if (index > 0) {
+        canvas.space(4);
+      }
+
+      canvas.splitRow(entry.name, entry.date ?? "", 10.5, true);
+
+      if (entry.issuer) {
+        canvas.text(entry.issuer, { size: 9.5, color: muted });
+      }
+    });
+  }
+
+  for (const section of resume.additionalSections) {
+    if (section.items.length === 0) {
+      continue;
+    }
+
+    canvas.sectionHeading(section.title);
+
+    for (const item of section.items) {
+      canvas.bullet(item, 10);
+    }
+  }
+
   return doc.save();
 }

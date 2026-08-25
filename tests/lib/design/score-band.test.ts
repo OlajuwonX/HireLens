@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { scoreBandFor } from "@/lib/design/score-band";
+import { describe, expect, it } from "vitest";
 
 describe("scoreBandFor", () => {
   it.each([

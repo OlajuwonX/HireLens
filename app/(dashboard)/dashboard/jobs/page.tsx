@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AnalysisNoticeToast } from "@/features/applications/components/analysis-notice-toast";
 import { ApplicationFilters } from "@/features/applications/components/application-filters";
 import { SavedJobDrawer } from "@/features/applications/components/saved-job-drawer";
 import { SavedJobFeed } from "@/features/applications/components/saved-job-feed";
@@ -11,6 +12,7 @@ import {
   getStatusCounts,
 } from "@/features/applications/server/application.service";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { readUsageDenialReason } from "@/features/usage/limit-notice";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -59,6 +61,9 @@ export default async function SavedJobsPage({
 
   const openId = typeof raw.open === "string" ? raw.open : null;
   const analysisFailed = raw.analysis === "failed";
+  const analysisLimitReason = analysisFailed
+    ? readUsageDenialReason(raw.reason)
+    : null;
 
   const visible = rows.slice(0, APPLICATION_PAGE_SIZE);
   const nextOffset =
@@ -108,11 +113,16 @@ export default async function SavedJobsPage({
         />
       )}
 
+      {analysisFailed ? (
+        <AnalysisNoticeToast limitReason={analysisLimitReason} />
+      ) : null}
+
       {openId ? (
         <SavedJobDrawer
           userId={user.id}
           publicId={openId}
           analysisFailed={analysisFailed}
+          analysisLimitReason={analysisLimitReason}
           closeHref={`/dashboard/jobs${query.toString() ? `?${query}` : ""}`}
         />
       ) : null}

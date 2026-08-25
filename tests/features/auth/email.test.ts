@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { normalizeEmail } from "@/features/auth/server/email";
+import { describe, expect, it } from "vitest";
 
 describe("normalizeEmail", () => {
   it("lowercases so a Google profile links to a credentials account", () => {

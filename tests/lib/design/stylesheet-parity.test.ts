@@ -1,6 +1,6 @@
+import { dark, light, type Palette } from "@/lib/design/theme";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { dark, light, type Palette } from "@/lib/design/theme";
 
 const css = readFileSync("app/app.css", "utf8");
 

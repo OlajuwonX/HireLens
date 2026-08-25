@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PDFDocument, StandardFonts } from "pdf-lib";
 import {
   AiProviderChainError,
   AiProviderError,
 } from "@/lib/ai/provider-errors";
 import type { Job, ResumeVersion } from "@/lib/db/schema";
+import { PDFDocument, StandardFonts } from "pdf-lib";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const reserveUsage = vi.fn();
 const completeUsage = vi.fn();
@@ -61,6 +61,12 @@ const VALID_RESULT = {
     avoidForcing: [],
   },
   requirementMatches: [],
+  optimizationPlan: {
+    alignment: "MEDIUM",
+    intensity: "TARGETED",
+    rationale: "Some overlap with the posting.",
+    droppedEvidence: [],
+  },
   improvedResume: {
     header: {
       name: "Jane Doe",
@@ -75,6 +81,8 @@ const VALID_RESULT = {
     experience: [],
     projects: [],
     education: [],
+    certifications: [],
+    additionalSections: [],
   },
   bulletRewrites: [],
   professionalSummary: "Backend engineer.",

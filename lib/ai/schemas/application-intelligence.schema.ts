@@ -3,21 +3,26 @@ import { applicationEmailSchema } from "./application-email.schema";
 import { bulletRewriteSchema } from "./bullet-rewrites.schema";
 import { improvedResumeSchema } from "./improved-resume.schema";
 import { keywordAnalysisSchema } from "./keywords.schema";
+import {
+  emptyOptimizationPlan,
+  optimizationPlanSchema,
+} from "./optimization-plan.schema";
 import { recommendationSchema } from "./recommendations.schema";
 import { requirementMatchSchema } from "./requirements.schema";
 import { scoringSchema } from "./scoring.schema";
 
 export const applicationIntelligenceSchema = z.object({
-  scoring: scoringSchema,
-  recommendations: z.array(recommendationSchema),
-  keywordAnalysis: keywordAnalysisSchema,
   requirementMatches: z.array(requirementMatchSchema),
+  keywordAnalysis: keywordAnalysisSchema,
+  optimizationPlan: optimizationPlanSchema,
   improvedResume: improvedResumeSchema,
   bulletRewrites: z.array(bulletRewriteSchema),
   professionalSummary: z.string().min(1),
   coverLetter: z.string().min(1),
   applicationEmail: applicationEmailSchema,
   followUpMessage: z.string().min(1),
+  recommendations: z.array(recommendationSchema),
+  scoring: scoringSchema,
 });
 
 export type ApplicationIntelligence = z.infer<
@@ -45,6 +50,8 @@ const emptyImprovedResume = {
   experience: [],
   projects: [],
   education: [],
+  certifications: [],
+  additionalSections: [],
 };
 
 export const storedApplicationIntelligenceSchema = z.object({
@@ -52,6 +59,7 @@ export const storedApplicationIntelligenceSchema = z.object({
   recommendations: z.array(recommendationSchema).catch([]),
   keywordAnalysis: keywordAnalysisSchema.catch(emptyKeywordAnalysis),
   requirementMatches: z.array(requirementMatchSchema).catch([]),
+  optimizationPlan: optimizationPlanSchema.catch(emptyOptimizationPlan),
   improvedResume: improvedResumeSchema.catch(emptyImprovedResume),
   bulletRewrites: z.array(bulletRewriteSchema).catch([]),
   professionalSummary: z.string().catch(""),

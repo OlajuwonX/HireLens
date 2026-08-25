@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
 import {
   createJobSchema,
   jobFiltersSchema,
 } from "@/features/jobs/schemas/job.schema";
+import { describe, expect, it } from "vitest";
 
 const valid = {
   title: "Quantity Surveyor",

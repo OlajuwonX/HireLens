@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AI_BURST_LIMIT,
   AI_USAGE_ACTIONS,
@@ -6,6 +5,7 @@ import {
   getGlobalDailySafetyLimit,
   usageActionLabels,
 } from "@/lib/ai/usage";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const original = { ...process.env };
 

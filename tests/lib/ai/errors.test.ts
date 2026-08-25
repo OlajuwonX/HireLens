@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
 import {
   aiFailureMessage,
   classifyAiFailure,
   describeAiFailure,
 } from "@/lib/ai/errors";
+import { describe, expect, it } from "vitest";
 
 const dailyQuotaError = Object.assign(
   new Error(

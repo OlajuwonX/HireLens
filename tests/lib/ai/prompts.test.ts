@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
   BASE_SYSTEM_PROMPT,
   createApplicationIntelligencePrompt,
   formatEvidenceCorrections,
   type EvidenceCorrection,
 } from "@/lib/ai/prompts";
+import { describe, expect, it } from "vitest";
 
 const correction: EvidenceCorrection = {
   requirement: "Five years of site management",
