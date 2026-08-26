@@ -9,18 +9,32 @@ import {
 const measure = (text: string) => text.length;
 
 describe("sanitizePdfText", () => {
-  it("folds smart punctuation into WinAnsi-safe characters", () => {
+  it("keeps smart punctuation the embedded fonts can render", () => {
     expect(sanitizePdfText("It’s a “quote” — really…")).toBe(
-      `It's a "quote" - really...`,
+      "It’s a “quote” — really…",
     );
   });
 
-  it("drops characters the standard fonts cannot encode", () => {
-    expect(sanitizePdfText("Résumé 🚀 ok")).toBe("Rsum  ok");
+  it("preserves accented and extended Latin names", () => {
+    expect(sanitizePdfText("José Müller Łukasz Đorđe")).toBe(
+      "José Müller Łukasz Đorđe",
+    );
   });
 
-  it("normalises bullets and non-breaking spaces", () => {
-    expect(sanitizePdfText("• one two")).toBe("- one two");
+  it("preserves Vietnamese diacritics", () => {
+    expect(sanitizePdfText("Nguyễn Thị")).toBe("Nguyễn Thị");
+  });
+
+  it("drops characters no Latin font can render", () => {
+    expect(sanitizePdfText("Résumé 🚀 ok")).toBe("Résumé ok");
+  });
+
+  it("normalises middots to bullets and collapses runs of spaces", () => {
+    expect(sanitizePdfText("· one  two")).toBe("• one two");
+  });
+
+  it("normalises non-breaking spaces", () => {
+    expect(sanitizePdfText("a b")).toBe("a b");
   });
 
   it("normalises CRLF to LF", () => {
@@ -76,6 +90,16 @@ describe("wrapText", () => {
 
     expect(joined.split(/\s+/)).toEqual(source.split(" "));
   });
+
+  it("still wraps when the caller passes a width of zero or less", () => {
+    const lines = wrapText("alpha beta gamma delta", measure, 0);
+
+    expect(lines.length).toBeGreaterThan(1);
+
+    for (const line of lines) {
+      expect(line.length).toBeLessThanOrEqual(8);
+    }
+  });
 });
 
 describe("joinNonEmpty", () => {
@@ -86,11 +110,11 @@ describe("joinNonEmpty", () => {
 
 describe("formatDateRange", () => {
   it("joins a closed range", () => {
-    expect(formatDateRange("2019", "2024")).toBe("2019 - 2024");
+    expect(formatDateRange("2019", "2024")).toBe("2019 – 2024");
   });
 
   it("treats a missing end date as present", () => {
-    expect(formatDateRange("2019", null)).toBe("2019 - Present");
+    expect(formatDateRange("2019", null)).toBe("2019 – Present");
   });
 
   it("returns the end alone when there is no start", () => {

@@ -11,6 +11,8 @@ import {
 } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
 import type { DOCUMENT_TYPES } from "../constants";
+import type { ResumeDesignSelection } from "@/lib/resume-design";
+import { ResumeDesignControls } from "./resume-design-controls";
 
 function CopyButton({ content, label }: { content: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -43,6 +45,7 @@ export function DocumentActions({
   content,
   hasFile,
   inLibrary,
+  resumeDesign,
 }: {
   publicId: string;
   type: (typeof DOCUMENT_TYPES)[number];
@@ -50,6 +53,7 @@ export function DocumentActions({
   content: string;
   hasFile: boolean;
   inLibrary: boolean;
+  resumeDesign?: ResumeDesignSelection | null;
 }) {
   const [libraryState, addToLibrary] = useActionState(
     addImprovedResumeToLibraryAction,
@@ -77,7 +81,12 @@ export function DocumentActions({
     <div className="flex flex-wrap gap-2">
       <CopyButton content={content} label={label} />
 
-      {hasFile ? (
+      {resumeDesign ? (
+        <ResumeDesignControls
+          publicId={publicId}
+          savedSelection={resumeDesign}
+        />
+      ) : hasFile ? (
         <Button asChild variant="outline">
           <a href={`/dashboard/documents/${publicId}/download`} download>
             <Download className="size-4" aria-hidden />

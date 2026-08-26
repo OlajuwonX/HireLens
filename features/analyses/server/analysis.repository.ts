@@ -63,6 +63,46 @@ export async function findAnalysisForApplication(input: {
   return analysis ?? null;
 }
 
+export async function findAnalysisForDocumentSource(input: {
+  userId: string;
+  applicationId: string | null;
+  resumeVersionId: string | null;
+  jobId: string | null;
+}) {
+  if (input.applicationId) {
+    const byApplication = await findAnalysisForApplication({
+      userId: input.userId,
+      applicationId: input.applicationId,
+    });
+
+    if (byApplication) {
+      return byApplication;
+    }
+  }
+
+  if (!input.resumeVersionId) {
+    return null;
+  }
+
+  const conditions = [
+    eq(applicationAnalyses.userId, input.userId),
+    eq(applicationAnalyses.resumeVersionId, input.resumeVersionId),
+  ];
+
+  if (input.jobId) {
+    conditions.push(eq(applicationAnalyses.jobId, input.jobId));
+  }
+
+  const [analysis] = await db
+    .select()
+    .from(applicationAnalyses)
+    .where(and(...conditions))
+    .orderBy(desc(applicationAnalyses.createdAt))
+    .limit(1);
+
+  return analysis ?? null;
+}
+
 export async function createPendingAnalysis(input: NewApplicationAnalysis) {
   const [analysis] = await db
     .insert(applicationAnalyses)

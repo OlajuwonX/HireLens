@@ -14,6 +14,10 @@ import {
   getDocumentActivity,
   getOwnedDocument,
 } from "@/features/documents/server/document.service";
+import {
+  documentDesignSelection,
+  documentSupportsResumeDesign,
+} from "@/features/documents/server/resume-design.service";
 import { DocumentActivityLog } from "@/features/documents/components/document-activity";
 import { BackButton } from "@/components/layout/back-button";
 
@@ -34,9 +38,10 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     notFound();
   }
 
-  const [inLibrary, activities] = await Promise.all([
+  const [inLibrary, activities, supportsDesign] = await Promise.all([
     documentIsInResumeLibrary({ userId: user.id, row }),
     getDocumentActivity({ userId: user.id, documentId: row.document.id }),
+    documentSupportsResumeDesign({ userId: user.id, publicId: documentId }),
   ]);
 
   const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
@@ -61,6 +66,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
         content={document.editedContent}
         hasFile={Boolean(document.fileAssetId)}
         inLibrary={inLibrary}
+        resumeDesign={supportsDesign ? documentDesignSelection(row) : null}
       />
 
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
