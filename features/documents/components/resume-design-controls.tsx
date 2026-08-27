@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { Download, Eye, LayoutTemplate, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,19 +7,22 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Popover, PopoverGroup, PopoverOption } from "@/components/ui/popover";
+import { Popover, PopoverChip, PopoverGroup } from "@/components/ui/popover";
 import { notify } from "@/components/ui/toast";
 import {
   RESUME_SPACING,
   RESUME_TEMPLATES,
   RESUME_TYPOGRAPHY,
   resumeSpacingLabels,
-  resumeTemplateHints,
   resumeTemplateLabels,
   resumeTypographyLabels,
   type ResumeDesignSelection,
 } from "@/lib/resume-design";
+import { Download, Eye, FileText, LayoutTemplate, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { saveResumeDesignAction } from "../actions/resume-design-actions";
+
+const PREVIEW_TIMEOUT_MS = 20_000;
 
 function sameSelection(a: ResumeDesignSelection, b: ResumeDesignSelection) {
   return (
@@ -37,6 +38,57 @@ function toQuery(selection: ResumeDesignSelection) {
     typography: selection.typography,
     spacing: selection.spacing,
   });
+}
+
+function DownloadLinks({
+  publicId,
+  selection,
+  onDownload,
+  close,
+}: {
+  publicId: string;
+  selection: ResumeDesignSelection;
+  onDownload: () => void;
+  close?: () => void;
+}) {
+  const query = toQuery(selection);
+
+  function handleDownload() {
+    onDownload();
+
+    if (close) {
+      setTimeout(close, 0);
+    }
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {(
+        [
+          { format: "pdf", label: "PDF", icon: FileText },
+          { format: "docx", label: "Word (.docx)", icon: FileText },
+        ] as const
+      ).map((option) => (
+        <Button
+          key={option.format}
+          asChild
+          variant="outline"
+          block
+          align="start"
+          size="compact"
+          onClick={handleDownload}
+        >
+          <a
+            href={`/dashboard/documents/${publicId}/download?format=${option.format}&${query}`}
+            download
+          >
+            <option.icon className="size-3.5" aria-hidden />
+            {option.label}
+          </a>
+        </Button>
+      ))}
+    </div>
+  );
 }
 
 export function ResumeDesignControls({
@@ -86,45 +138,63 @@ export function ResumeDesignControls({
   );
 
   const loadPreview = useCallback(
-    (next: ResumeDesignSelection) => {
+    async (next: ResumeDesignSelection) => {
       abortRef.current?.abort();
 
       const controller = new AbortController();
+      let timedOut = false;
+      const timer = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, PREVIEW_TIMEOUT_MS);
 
       abortRef.current = controller;
       setLoading(true);
       setError("");
 
-      fetch(`/dashboard/documents/${publicId}/preview?${toQuery(next)}`, {
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            throw new Error("This document cannot be previewed.");
-          }
+      try {
+        const response = await fetch(
+          `/dashboard/documents/${publicId}/preview?${toQuery(next)}`,
+          {
+            signal: controller.signal,
+            headers: { Accept: "application/json" },
+          },
+        );
 
-          return response.json() as Promise<{
-            svg: string;
-            pageCount: number;
-          }>;
-        })
-        .then((data) => {
-          setSvg(data.svg);
-          setPageCount(data.pageCount);
-          setLoading(false);
-        })
-        .catch((cause: unknown) => {
-          if (controller.signal.aborted) {
-            return;
-          }
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404
+              ? "This resume has no stored analysis to preview from. You can still download it."
+              : "The preview could not be built.",
+          );
+        }
 
-          setError(
-            cause instanceof Error
+        const data = (await response.json()) as {
+          svg: string;
+          pageCount: number;
+        };
+
+        setSvg(data.svg);
+        setPageCount(data.pageCount);
+        setError("");
+        setLoading(false);
+      } catch (cause) {
+        if (controller.signal.aborted && !timedOut) {
+          return;
+        }
+
+        setSvg("");
+        setError(
+          timedOut
+            ? "The preview timed out. You can still download the resume."
+            : cause instanceof Error
               ? cause.message
               : "The preview could not be loaded.",
-          );
-          setLoading(false);
-        });
+        );
+        setLoading(false);
+      } finally {
+        clearTimeout(timer);
+      }
     },
     [publicId],
   );
@@ -136,7 +206,7 @@ export function ResumeDesignControls({
       return;
     }
 
-    const timer = setTimeout(() => loadPreview(selection), 200);
+    const timer = setTimeout(() => void loadPreview(selection), 150);
 
     return () => clearTimeout(timer);
   }, [previewOpen, selection, loadPreview]);
@@ -160,72 +230,83 @@ export function ResumeDesignControls({
           </Button>
         )}
       >
-        <div className="space-y-4">
-          <p className="text-label font-medium text-text-primary">
-            Customize resume
-          </p>
-
+        <div className="space-y-3">
           <PopoverGroup label="Template">
-            <div className="grid grid-cols-2 gap-2">
-              {RESUME_TEMPLATES.map((template) => (
-                <PopoverOption
-                  key={template}
-                  name="resume-template"
-                  checked={selection.template === template}
-                  label={resumeTemplateLabels[template]}
-                  hint={resumeTemplateHints[template]}
-                  onSelect={() =>
-                    setSelection((current) => ({ ...current, template }))
-                  }
-                />
-              ))}
-            </div>
+            {RESUME_TEMPLATES.map((template) => (
+              <PopoverChip
+                key={template}
+                name="resume-template"
+                checked={selection.template === template}
+                label={resumeTemplateLabels[template]}
+                onSelect={() =>
+                  setSelection((current) => ({ ...current, template }))
+                }
+              />
+            ))}
           </PopoverGroup>
 
-          <PopoverGroup label="Typography">
-            <div className="space-y-2">
-              {RESUME_TYPOGRAPHY.map((typography) => (
-                <PopoverOption
-                  key={typography}
-                  name="resume-typography"
-                  checked={selection.typography === typography}
-                  label={resumeTypographyLabels[typography]}
-                  onSelect={() =>
-                    setSelection((current) => ({ ...current, typography }))
-                  }
-                />
-              ))}
-            </div>
+          <PopoverGroup label="Typeface">
+            {RESUME_TYPOGRAPHY.map((typography) => (
+              <PopoverChip
+                key={typography}
+                name="resume-typography"
+                checked={selection.typography === typography}
+                label={resumeTypographyLabels[typography]}
+                onSelect={() =>
+                  setSelection((current) => ({ ...current, typography }))
+                }
+              />
+            ))}
           </PopoverGroup>
 
           <PopoverGroup label="Spacing">
-            <div className="grid grid-cols-2 gap-2">
-              {RESUME_SPACING.map((spacing) => (
-                <PopoverOption
-                  key={spacing}
-                  name="resume-spacing"
-                  checked={selection.spacing === spacing}
-                  label={resumeSpacingLabels[spacing]}
-                  onSelect={() =>
-                    setSelection((current) => ({ ...current, spacing }))
-                  }
-                />
-              ))}
-            </div>
+            {RESUME_SPACING.map((spacing) => (
+              <PopoverChip
+                key={spacing}
+                name="resume-spacing"
+                checked={selection.spacing === spacing}
+                label={resumeSpacingLabels[spacing]}
+                onSelect={() =>
+                  setSelection((current) => ({ ...current, spacing }))
+                }
+              />
+            ))}
           </PopoverGroup>
 
-          <Button type="button" block onClick={openPreview}>
-            <Eye className="size-4" aria-hidden />
-            Preview
-          </Button>
+          <div className="space-y-1.5 border-t border-border pt-3">
+            <Button type="button" block size="compact" onClick={openPreview}>
+              <Eye className="size-3.5" aria-hidden />
+              Preview
+            </Button>
+
+            <DownloadLinks
+              publicId={publicId}
+              selection={selection}
+              onDownload={() => persist(selection)}
+            />
+          </div>
         </div>
       </Popover>
 
-      <ResumeDownloadPopover
-        publicId={publicId}
-        selection={selection}
-        onDownload={() => persist(selection)}
-      />
+      <Popover
+        title="Download resume"
+        panelClassName="sm:w-52"
+        trigger={(props) => (
+          <Button type="button" variant="outline" {...props}>
+            <Download className="size-4" aria-hidden />
+            Download
+          </Button>
+        )}
+      >
+        {(close) => (
+          <DownloadLinks
+            publicId={publicId}
+            selection={selection}
+            onDownload={() => persist(selection)}
+            close={close}
+          />
+        )}
+      </Popover>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-3xl">
@@ -233,113 +314,69 @@ export function ResumeDesignControls({
             Resume preview
           </DialogTitle>
           <DialogDescription className="mt-1 text-meta text-text-secondary">
-            This is what your resume will look like.
-            {pageCount > 1 ? " Showing page 1." : null}
-          </DialogDescription>
-
-          <p className="mt-3 font-mono text-system uppercase text-text-muted">
             {resumeTemplateLabels[selection.template]} ·{" "}
             {resumeTypographyLabels[selection.typography]} ·{" "}
             {resumeSpacingLabels[selection.spacing]} spacing
-          </p>
+            {pageCount > 1 ? " · page 1 of " + pageCount : null}
+          </DialogDescription>
 
-          <div className="hl-scroll mt-3 max-h-[65vh] overflow-auto rounded-card border border-border bg-white">
-            {loading ? (
-              <div className="flex h-64 items-center justify-center gap-2 text-meta text-text-secondary">
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-                Building preview
+          <div className="hl-scroll mt-3 max-h-[62vh] overflow-auto rounded-card border border-border bg-white">
+            {svg ? (
+              <div dangerouslySetInnerHTML={{ __html: svg }} />
+            ) : (
+              <div className="flex h-64 items-center justify-center gap-2 px-6 text-center text-meta text-text-secondary">
+                {loading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    Building preview
+                  </>
+                ) : (
+                  error
+                )}
               </div>
-            ) : null}
-
-            {!loading && error ? (
-              <div className="flex h-64 items-center justify-center px-6 text-center text-meta text-text-secondary">
-                {error}
-              </div>
-            ) : null}
-
-            {!loading && !error && svg ? (
-              <div
-                className="min-w-[20rem]"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
-            ) : null}
+            )}
           </div>
 
-          <div className="mt-4 flex flex-wrap justify-end gap-2">
-            <ResumeDownloadPopover
-              publicId={publicId}
-              selection={selection}
+          <p
+            className="mt-2 min-h-4 text-label text-text-muted"
+            aria-live="polite"
+          >
+            {loading && svg ? "Updating preview" : null}
+            {!loading && error && svg ? error : null}
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPreviewOpen(false)}
+            >
+              Close
+            </Button>
+
+            <Popover
+              title="Download resume"
               align="end"
-              onDownload={() => persist(selection)}
-            />
+              panelClassName="sm:w-52"
+              trigger={(props) => (
+                <Button type="button" {...props}>
+                  <Download className="size-4" aria-hidden />
+                  Download
+                </Button>
+              )}
+            >
+              {(close) => (
+                <DownloadLinks
+                  publicId={publicId}
+                  selection={selection}
+                  onDownload={() => persist(selection)}
+                  close={close}
+                />
+              )}
+            </Popover>
           </div>
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-function ResumeDownloadPopover({
-  publicId,
-  selection,
-  align = "start",
-  onDownload,
-}: {
-  publicId: string;
-  selection: ResumeDesignSelection;
-  align?: "start" | "end";
-  onDownload: () => void;
-}) {
-  const query = toQuery(selection);
-
-  return (
-    <Popover
-      title="Download resume"
-      align={align}
-      trigger={(props) => (
-        <Button type="button" variant="outline" {...props}>
-          <Download className="size-4" aria-hidden />
-          Download
-        </Button>
-      )}
-    >
-      {(close) => (
-        <div className="space-y-3">
-          <p className="text-label font-medium text-text-primary">
-            Download resume
-          </p>
-
-          <div className="space-y-2">
-            {(
-              [
-                { format: "pdf", label: "PDF", hint: "Best for applying" },
-                { format: "docx", label: "Word / DOCX", hint: "Editable" },
-              ] as const
-            ).map((option) => (
-              <Button
-                key={option.format}
-                asChild
-                variant="outline"
-                block
-                align="start"
-                onClick={() => {
-                  onDownload();
-                  close();
-                }}
-              >
-                <a
-                  href={`/dashboard/documents/${publicId}/download?format=${option.format}&${query}`}
-                >
-                  <span className="flex-1 text-left">{option.label}</span>
-                  <span className="text-label font-normal text-text-muted">
-                    {option.hint}
-                  </span>
-                </a>
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-    </Popover>
   );
 }

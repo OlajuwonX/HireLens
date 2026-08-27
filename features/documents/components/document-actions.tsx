@@ -1,17 +1,17 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { Check, Copy, Download, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import { notify } from "@/components/ui/toast";
+import type { ResumeDesignSelection } from "@/lib/resume-design";
+import { Check, Copy, Download, Library } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import {
   addImprovedResumeToLibraryAction,
   deleteDocumentAction,
 } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
 import type { DOCUMENT_TYPES } from "../constants";
-import type { ResumeDesignSelection } from "@/lib/resume-design";
 import { ResumeDesignControls } from "./resume-design-controls";
 
 function CopyButton({ content, label }: { content: string; label: string }) {

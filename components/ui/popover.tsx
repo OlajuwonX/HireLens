@@ -122,9 +122,9 @@ export function Popover({
           role="dialog"
           aria-label={title}
           className={cn(
-            "hl-scroll z-50 max-h-[min(28rem,calc(100vh-6rem))] overflow-y-auto rounded-card border border-border bg-surface p-4 shadow-lg",
+            "hl-scroll z-50 max-h-[min(26rem,calc(100vh-6rem))] overflow-y-auto rounded-card border border-border bg-surface p-3 shadow-lg",
             "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:w-auto",
-            "sm:absolute sm:mt-2 sm:w-80",
+            "sm:absolute sm:mt-2 sm:w-64",
             align === "end" ? "sm:right-0" : "sm:left-0",
             panelClassName,
           )}
@@ -144,35 +144,34 @@ export function PopoverGroup({
   children: ReactNode;
 }) {
   return (
-    <fieldset className="space-y-2">
-      <legend className="font-mono text-system font-medium uppercase text-text-muted">
+    <fieldset className="space-y-1.5">
+      <legend className="mb-1.5 font-mono text-system font-medium uppercase text-text-muted">
         {label}
       </legend>
-      {children}
+      <div className="flex flex-wrap gap-1.5">{children}</div>
     </fieldset>
   );
 }
 
-export function PopoverOption({
+export function PopoverChip({
   checked,
   label,
-  hint,
   name,
   onSelect,
 }: {
   checked: boolean;
   label: string;
-  hint?: string;
   name: string;
   onSelect: () => void;
 }) {
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-start gap-2 rounded-control border px-2.5 py-2 transition-colors",
+        "cursor-pointer select-none rounded-control border px-2 py-1 text-label transition-colors",
+        "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-accent-hover",
         checked
-          ? "border-accent-hover bg-surface-secondary"
-          : "border-border hover:border-border-strong",
+          ? "border-transparent bg-accent font-medium text-accent-text"
+          : "border-border text-text-secondary hover:border-border-strong hover:text-text-primary",
       )}
     >
       <input
@@ -180,18 +179,9 @@ export function PopoverOption({
         name={name}
         checked={checked}
         onChange={onSelect}
-        className="mt-0.5 size-3.5 shrink-0 accent-[var(--color-accent-hover)]"
+        className="sr-only"
       />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-label font-medium text-text-primary">
-          {label}
-        </span>
-        {hint ? (
-          <span className="block truncate text-label text-text-muted">
-            {hint}
-          </span>
-        ) : null}
-      </span>
+      {label}
     </label>
   );
 }

@@ -14,6 +14,13 @@ import type { ResumeMetrics } from "./types";
 
 const RESUME_FONT_ROLES: ResumeFontRole[] = ["regular", "bold", "italic"];
 
+export const RESUME_FONT_FEATURES = {
+  liga: false,
+  clig: false,
+  dlig: false,
+  rlig: false,
+} as const;
+
 const standardFallback: Record<ResumeFontRole, StandardFonts> = {
   regular: StandardFonts.Helvetica,
   bold: StandardFonts.HelveticaBold,
@@ -66,23 +73,39 @@ function parseFont(filename: string, bytes: Uint8Array | null): ParsedFont | nul
 
   try {
     const font = fontkit.create(bytes);
-    const widths = new Map<string, number>();
+    const glyphWidths = new Map<number, number>();
+    const fallbackWidth = font.unitsPerEm * 0.5;
+
+    const widthOfCodePoint = (codePoint: number) => {
+      const cached = glyphWidths.get(codePoint);
+
+      if (cached !== undefined) {
+        return cached;
+      }
+
+      let width = fallbackWidth;
+
+      try {
+        width = font.glyphForCodePoint(codePoint).advanceWidth;
+      } catch {
+        width = fallbackWidth;
+      }
+
+      glyphWidths.set(codePoint, width);
+
+      return width;
+    };
+
     const parsed: ParsedFont = {
       unitsPerEm: font.unitsPerEm,
       measure: (text) => {
-        const cached = widths.get(text);
+        let total = 0;
 
-        if (cached !== undefined) {
-          return cached;
+        for (const character of text) {
+          total += widthOfCodePoint(character.codePointAt(0) ?? 32);
         }
 
-        const width = font.layout(text).advanceWidth / font.unitsPerEm;
-
-        if (widths.size < 20_000) {
-          widths.set(text, width);
-        }
-
-        return width;
+        return total / font.unitsPerEm;
       },
     };
 
@@ -170,7 +193,10 @@ export async function embedResumeFonts(
       registered = true;
     }
 
-    embedded[role] = await doc.embedFont(bytes, { subset: true });
+    embedded[role] = await doc.embedFont(bytes, {
+      subset: true,
+      features: RESUME_FONT_FEATURES,
+    });
   }
 
   if (!embedded.regular) {
