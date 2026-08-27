@@ -4,7 +4,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["unpdf"],
   outputFileTracingIncludes: {
-    "/dashboard/**": ["./public/fonts/**"],
+    "/dashboard/documents/**": ["./public/fonts/**"],
+  },
+  outputFileTracingExcludes: {
+    "**": [
+      "./.pnpm-store/**",
+      "./.git/**",
+      "./.next/cache/**",
+      "./tests/**",
+      "./.claude/**",
+    ],
   },
   eslint: {
     ignoreDuringBuilds: false,
@@ -16,8 +25,8 @@ const nextConfig: NextConfig = {
 
 const canUploadSourcemaps = Boolean(
   process.env.SENTRY_AUTH_TOKEN &&
-  process.env.SENTRY_ORG &&
-  process.env.SENTRY_PROJECT,
+    process.env.SENTRY_ORG &&
+    process.env.SENTRY_PROJECT,
 );
 
 export default withSentryConfig(nextConfig, {
