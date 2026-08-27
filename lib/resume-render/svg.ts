@@ -35,7 +35,8 @@ function fontFaceRules(typography: ResumeTypography) {
 
   return roles
     .map(
-      (role) => `@font-face{font-family:'${family.cssFamily}';src:url('/fonts/${family.files[role]}') format('truetype');font-weight:${roleWeight[role]};font-style:${roleStyle[role]};font-display:swap;}`,
+      (role) =>
+        `@font-face{font-family:'${family.cssFamily}';src:url('/fonts/${family.files[role]}') format('truetype');font-weight:${roleWeight[role]};font-style:${roleStyle[role]};font-display:swap;}`,
     )
     .join("");
 }
