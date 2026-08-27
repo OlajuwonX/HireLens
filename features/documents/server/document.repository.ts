@@ -196,6 +196,32 @@ export async function updateGeneratedDocumentForUser(input: {
   return document ?? null;
 }
 
+export async function updateGeneratedDocumentDesign(input: {
+  userId: string;
+  publicId: string;
+  resumeTemplate: string;
+  resumeTypography: string;
+  resumeSpacing: string;
+}) {
+  const [document] = await db
+    .update(generatedDocuments)
+    .set({
+      resumeTemplate: input.resumeTemplate,
+      resumeTypography: input.resumeTypography,
+      resumeSpacing: input.resumeSpacing,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(generatedDocuments.userId, input.userId),
+        eq(generatedDocuments.publicId, input.publicId),
+      ),
+    )
+    .returning();
+
+  return document ?? null;
+}
+
 export async function deleteGeneratedDocumentForUser(input: {
   userId: string;
   publicId: string;

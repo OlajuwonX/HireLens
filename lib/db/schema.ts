@@ -470,6 +470,9 @@ export const generatedDocuments = pgTable(
     promptVersion: text("prompt_version").notNull(),
     originalContent: text("original_content").notNull(),
     editedContent: text("edited_content").notNull(),
+    resumeTemplate: text("resume_template").notNull().default("CLASSIC"),
+    resumeTypography: text("resume_typography").notNull().default("INTER"),
+    resumeSpacing: text("resume_spacing").notNull().default("STANDARD"),
     ...timestamps,
   },
   (table) => [
