@@ -17,13 +17,22 @@ import { IMPROVED_RESUMES_GROUP_TITLE } from "@/features/resumes/constants";
 import type { UpdateDocumentInput } from "../schemas/document.schema";
 import type { DocumentFilters } from "./document.repository";
 import { documentTypeForView } from "../constants";
-import { legacyImprovedResumeVersionLabel } from "../improved-resume-format";
+import {
+  improvedResumeFilename,
+  legacyImprovedResumeVersionLabel,
+} from "../improved-resume-format";
 import {
   buildImprovedResumePdf,
   copyImprovedResumeToVersion,
+  createResumeVersionFromBytes,
   improvedResumeVersionLabel,
   removeImprovedResumeFile,
 } from "./improved-resume.service";
+import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
+import {
+  documentDesignSelection,
+  readEditedResume,
+} from "./resume-design.service";
 import {
   createGeneratedDocument,
   deleteGeneratedDocumentForUser,
@@ -223,12 +232,28 @@ export async function addImprovedResumeToLibrary(input: {
         })
       ).id;
 
-    const version = await copyImprovedResumeToVersion({
-      userId: input.userId,
-      fileAssetId: row.document.fileAssetId,
-      resumeId,
-      label: improvedResumeVersionLabel(row.jobTitle, row.jobCompany),
-    });
+    const label = improvedResumeVersionLabel(row.jobTitle, row.jobCompany);
+    const edited = readEditedResume(row.document.editedResumeJson);
+    const version = edited
+      ? await createResumeVersionFromBytes({
+          userId: input.userId,
+          bytes: await renderImprovedResumePdf(
+            edited,
+            documentDesignSelection(row),
+          ),
+          filename: improvedResumeFilename(
+            edited.header.name,
+            row.jobTitle ?? edited.header.headline,
+          ),
+          resumeId,
+          label,
+        })
+      : await copyImprovedResumeToVersion({
+          userId: input.userId,
+          fileAssetId: row.document.fileAssetId,
+          resumeId,
+          label,
+        });
 
     await recordDocumentActivity({
       userId: input.userId,
