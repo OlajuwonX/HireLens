@@ -63,9 +63,7 @@ function resumeWith(overrides: Record<string, unknown> = {}) {
       },
     ],
     certifications: [{ name: "SMSTS", issuer: "CITB", date: "2021" }],
-    additionalSections: [
-      { title: "Languages", items: ["English", "Igbo"] },
-    ],
+    additionalSections: [{ title: "Languages", items: ["English", "Igbo"] }],
     ...overrides,
   });
 }
@@ -77,7 +75,10 @@ const everyCombination: ResumeDesignSelection[] = RESUME_TEMPLATES.flatMap(
     ),
 );
 
-function overflowsMargins(layout: ResumeLayout, selection: ResumeDesignSelection) {
+function overflowsMargins(
+  layout: ResumeLayout,
+  selection: ResumeDesignSelection,
+) {
   const design = resolveResumeDesign(selection);
   const right = RESUME_PAGE_WIDTH - design.margin.right;
   const bottom = RESUME_PAGE_HEIGHT - design.margin.bottom;
@@ -257,10 +258,7 @@ describe("resume content edge cases", () => {
         additionalSections: [],
       },
     ],
-    [
-      "no experience at all",
-      { experience: [], projects: [], skills: [] },
-    ],
+    ["no experience at all", { experience: [], projects: [], skills: [] }],
   ];
 
   it.each(cases)("stays inside the page with %s", async (_label, overrides) => {
@@ -279,15 +277,19 @@ describe("resume content edge cases", () => {
     }
   });
 
-  it.each(cases)("renders a loadable PDF with %s", async (_label, overrides) => {
-    const bytes = await renderImprovedResumePdf(resumeWith(overrides), {
-      template: "MODERN",
-      typography: "SOURCE_SERIF_4",
-      spacing: "STANDARD",
-    });
+  it.each(cases)(
+    "renders a loadable PDF with %s",
+    async (_label, overrides) => {
+      const bytes = await renderImprovedResumePdf(resumeWith(overrides), {
+        template: "MODERN",
+        typography: "SOURCE_SERIF_4",
+        spacing: "STANDARD",
+      });
 
-    await expect(PDFDocument.load(bytes)).resolves.toBeDefined();
-  }, 30_000);
+      await expect(PDFDocument.load(bytes)).resolves.toBeDefined();
+    },
+    30_000,
+  );
 });
 
 describe("ATS behaviour", () => {

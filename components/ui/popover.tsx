@@ -66,8 +66,9 @@ export function Popover({
     }
 
     triggerRef.current =
-      rootRef.current?.querySelector<HTMLElement>(`#${CSS.escape(triggerId)}`) ??
-      null;
+      rootRef.current?.querySelector<HTMLElement>(
+        `#${CSS.escape(triggerId)}`,
+      ) ?? null;
 
     const focusable = panelRef.current?.querySelector<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',

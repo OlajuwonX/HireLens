@@ -88,7 +88,10 @@ describe("resolveResumeDesign", () => {
         spacing: "STANDARD",
       });
 
-      expect(resolved.leading).toBeCloseTo(resumeTemplates[template].leading, 5);
+      expect(resolved.leading).toBeCloseTo(
+        resumeTemplates[template].leading,
+        5,
+      );
       expect(resolved.margin.top).toBeCloseTo(
         resumeTemplates[template].margin.top,
         5,

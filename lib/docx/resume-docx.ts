@@ -42,7 +42,9 @@ function hex(value: string) {
 }
 
 function isLink(value: string) {
-  return /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}\//i.test(value);
+  return (
+    /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}\//i.test(value)
+  );
 }
 
 function linkHref(value: string) {
@@ -156,7 +158,9 @@ function sectionHeading(design: ResolvedResumeDesign, label: string) {
         color: design.accent ?? "#5B625E",
         allCaps: design.sectionLabelCase === "upper",
         characterSpacing: design.sectionLabelTracking
-          ? Math.round(design.sectionLabelTracking * design.scale.sectionLabel * 20)
+          ? Math.round(
+              design.sectionLabelTracking * design.scale.sectionLabel * 20,
+            )
           : undefined,
       }),
     ],

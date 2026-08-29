@@ -427,7 +427,14 @@ class ResumeLayoutBuilder {
     let cursor = x;
 
     for (const character of text) {
-      this.pushRun({ text: character, x: cursor, y: baseline, size, role, color });
+      this.pushRun({
+        text: character,
+        x: cursor,
+        y: baseline,
+        size,
+        role,
+        color,
+      });
       cursor += this.measure(character, size, role) + tracking * size;
     }
   }
@@ -704,7 +711,10 @@ export function buildResumeLayout(
       continue;
     }
 
-    builder.sectionHeading(section.title, builder.lineHeight(design.scale.body));
+    builder.sectionHeading(
+      section.title,
+      builder.lineHeight(design.scale.body),
+    );
 
     for (const item of section.items) {
       builder.bullet(item);

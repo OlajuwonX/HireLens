@@ -60,7 +60,10 @@ function loadFontFile(filename: string) {
   return pending;
 }
 
-function parseFont(filename: string, bytes: Uint8Array | null): ParsedFont | null {
+function parseFont(
+  filename: string,
+  bytes: Uint8Array | null,
+): ParsedFont | null {
   if (!bytes) {
     return null;
   }
