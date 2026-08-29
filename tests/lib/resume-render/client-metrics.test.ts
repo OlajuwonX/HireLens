@@ -10,7 +10,6 @@ import {
   resolveResumeDesign,
   resumeFontFamilies,
   type ResumeFontRole,
-  type ResumeMetricsShape,
 } from "@/lib/resume-design";
 import type { ResumeMetrics } from "@/lib/resume-render/types";
 
@@ -33,7 +32,7 @@ async function clientMetricsFromDisk(slug: string): Promise<ResumeMetrics> {
   ) as {
     roles: Record<
       ResumeFontRole,
-      { widths: Record<string, number>; fallback: number }
+      { unitsPerEm: number; fallback: number; widths: Record<string, number> }
     >;
   };
 
@@ -52,7 +51,7 @@ async function clientMetricsFromDisk(slug: string): Promise<ResumeMetrics> {
         total += table.widths[key] ?? table.fallback;
       }
 
-      return total * size;
+      return (total / table.unitsPerEm) * size;
     },
   };
 }

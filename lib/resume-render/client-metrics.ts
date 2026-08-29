@@ -5,7 +5,11 @@ import {
 } from "@/lib/resume-design";
 import type { ResumeMetrics } from "./types";
 
-type RoleWidths = { widths: Record<string, number>; fallback: number };
+type RoleWidths = {
+  unitsPerEm: number;
+  fallback: number;
+  widths: Record<string, number>;
+};
 
 type MetricsFile = {
   typography: ResumeTypography;
@@ -40,13 +44,12 @@ function toMetrics(file: MetricsFile): ResumeMetrics {
       let total = 0;
 
       for (const character of text) {
-        const codePoint = character.codePointAt(0);
-        const key = codePoint === undefined ? "" : codePoint.toString(36);
+        const key = (character.codePointAt(0) ?? 32).toString(36);
 
         total += table.widths[key] ?? table.fallback;
       }
 
-      return total * size;
+      return (total / table.unitsPerEm) * size;
     },
   };
 }

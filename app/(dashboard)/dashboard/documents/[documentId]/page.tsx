@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { DocumentActions } from "@/features/documents/components/document-actions";
 import { DocumentEditForm } from "@/features/documents/components/document-edit-form";
+import { ResumeEditor } from "@/features/documents/components/resume-editor";
 import {
   documentTypeLabels,
   type DOCUMENT_TYPES,
@@ -14,10 +15,7 @@ import {
   getDocumentActivity,
   getOwnedDocument,
 } from "@/features/documents/server/document.service";
-import {
-  documentDesignSelection,
-  documentSupportsResumeDesign,
-} from "@/features/documents/server/resume-design.service";
+import { findResumeDesignSource } from "@/features/documents/server/resume-design.service";
 import { DocumentActivityLog } from "@/features/documents/components/document-activity";
 import { BackButton } from "@/components/layout/back-button";
 
@@ -38,13 +36,44 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     notFound();
   }
 
-  const [inLibrary, activities, supportsDesign] = await Promise.all([
+  const [inLibrary, activities, designSource] = await Promise.all([
     documentIsInResumeLibrary({ userId: user.id, row }),
     getDocumentActivity({ userId: user.id, documentId: row.document.id }),
-    documentSupportsResumeDesign({ userId: user.id, publicId: documentId }),
+    findResumeDesignSource({ userId: user.id, publicId: documentId }),
   ]);
 
   const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
+
+  const sourceCard = (
+    <Card className="flex flex-col overflow-hidden">
+      <CardHeader className="shrink-0">
+        <CardTitle>Source</CardTitle>
+      </CardHeader>
+      <CardContent className="hl-scroll min-h-0 flex-1 space-y-3 overflow-y-auto text-meta text-text-secondary">
+        <p>
+          <span className="font-medium text-text-primary">Job: </span>
+          {jobTitle && jobCompany ? `${jobTitle} at ${jobCompany}` : "None"}
+        </p>
+        <p>
+          <span className="font-medium text-text-primary">Resume: </span>
+          {versionLabel
+            ? `${resumeTitle ? `${resumeTitle} - ` : ""}${versionLabel}`
+            : "None"}
+        </p>
+        <p>
+          <span className="font-medium text-text-primary">Created: </span>
+          {document.createdAt.toLocaleDateString()}
+        </p>
+
+        <div className="space-y-2 border-t border-border pt-3">
+          <p className="font-mono text-system uppercase text-text-muted">
+            Activity
+          </p>
+          <DocumentActivityLog activities={activities} />
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -66,48 +95,40 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
         content={document.editedContent}
         hasFile={Boolean(document.fileAssetId)}
         inLibrary={inLibrary}
-        resumeDesign={supportsDesign ? documentDesignSelection(row) : null}
+        resumeDesign={designSource ? designSource.selection : null}
       />
 
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
-        <Card className="min-w-0">
-          <CardContent className="p-4 sm:p-5">
-            <DocumentEditForm
-              publicId={document.publicId}
-              content={document.editedContent}
-            />
-          </CardContent>
-        </Card>
+      {designSource ? (
+        <div className="space-y-6">
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <ResumeEditor
+                publicId={document.publicId}
+                initialResume={designSource.resume}
+                initialVersion={designSource.editVersion}
+                selection={designSource.selection}
+              />
+            </CardContent>
+          </Card>
 
-        <Card className="flex max-h-[calc(100vh-8rem)] flex-col overflow-hidden lg:sticky lg:top-0">
-          <CardHeader className="shrink-0">
-            <CardTitle>Source</CardTitle>
-          </CardHeader>
-          <CardContent className="hl-scroll min-h-0 flex-1 space-y-3 overflow-y-auto text-meta text-text-secondary">
-            <p>
-              <span className="font-medium text-text-primary">Job: </span>
-              {jobTitle && jobCompany ? `${jobTitle} at ${jobCompany}` : "None"}
-            </p>
-            <p>
-              <span className="font-medium text-text-primary">Resume: </span>
-              {versionLabel
-                ? `${resumeTitle ? `${resumeTitle} - ` : ""}${versionLabel}`
-                : "None"}
-            </p>
-            <p>
-              <span className="font-medium text-text-primary">Created: </span>
-              {document.createdAt.toLocaleDateString()}
-            </p>
+          <div className="lg:max-w-md">{sourceCard}</div>
+        </div>
+      ) : (
+        <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
+          <Card className="min-w-0">
+            <CardContent className="p-4 sm:p-5">
+              <DocumentEditForm
+                publicId={document.publicId}
+                content={document.editedContent}
+              />
+            </CardContent>
+          </Card>
 
-            <div className="space-y-2 border-t border-border pt-3">
-              <p className="font-mono text-system uppercase text-text-muted">
-                Activity
-              </p>
-              <DocumentActivityLog activities={activities} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="lg:sticky lg:top-0 lg:max-h-[calc(100vh-8rem)]">
+            {sourceCard}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -52,17 +52,19 @@ async function widthsFor(filename) {
   for (const [lo, hi] of RANGES) {
     for (let codePoint = lo; codePoint <= hi; codePoint += 1) {
       try {
-        const advance =
-          font.glyphForCodePoint(codePoint).advanceWidth / font.unitsPerEm;
-
-        widths[codePoint.toString(36)] = Math.round(advance * 100000) / 100000;
+        widths[codePoint.toString(36)] =
+          font.glyphForCodePoint(codePoint).advanceWidth;
       } catch {
         continue;
       }
     }
   }
 
-  return { widths, fallback: 0.5 };
+  return {
+    unitsPerEm: font.unitsPerEm,
+    fallback: Math.round(font.unitsPerEm * 0.5),
+    widths,
+  };
 }
 
 let written = 0;
