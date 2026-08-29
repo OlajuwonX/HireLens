@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
 
 const canUploadSourcemaps = Boolean(
   process.env.SENTRY_AUTH_TOKEN &&
-  process.env.SENTRY_ORG &&
-  process.env.SENTRY_PROJECT,
+    process.env.SENTRY_ORG &&
+    process.env.SENTRY_PROJECT,
 );
 
 export default withSentryConfig(nextConfig, {
