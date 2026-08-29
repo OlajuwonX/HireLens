@@ -111,6 +111,41 @@ export async function removeImprovedResumeFile(input: {
   });
 }
 
+export async function createResumeVersionFromBytes(input: {
+  userId: string;
+  bytes: Uint8Array;
+  filename: string;
+  resumeId: string;
+  label: string;
+  storageProvider?: StorageProvider;
+}) {
+  const storage = input.storageProvider ?? getStorageProvider();
+  const { stored } = await storeImprovedResumePdf({
+    userId: input.userId,
+    bytes: input.bytes,
+    filename: input.filename,
+    storageProvider: storage,
+  });
+
+  try {
+    return await createResumeVersionWithFileAsset({
+      userId: input.userId,
+      resumeId: input.resumeId,
+      label: input.label,
+      fileAsset: {
+        storageProvider: stored.provider,
+        storageKey: stored.storageKey,
+        originalFilename: stored.originalFilename,
+        mimeType: stored.mimeType,
+        sizeBytes: stored.sizeBytes,
+      },
+    });
+  } catch (error) {
+    await storage.deleteFile(stored.storageKey).catch(() => undefined);
+    throw error;
+  }
+}
+
 export async function copyImprovedResumeToVersion(input: {
   userId: string;
   fileAssetId: string;

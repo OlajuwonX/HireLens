@@ -222,6 +222,68 @@ export async function updateGeneratedDocumentDesign(input: {
   return document ?? null;
 }
 
+export async function updateGeneratedDocumentResume(input: {
+  userId: string;
+  publicId: string;
+  resume: unknown;
+  editedContent: string;
+  expectedVersion: number;
+}) {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({
+        id: generatedDocuments.id,
+        editVersion: generatedDocuments.editVersion,
+      })
+      .from(generatedDocuments)
+      .where(
+        and(
+          eq(generatedDocuments.userId, input.userId),
+          eq(generatedDocuments.publicId, input.publicId),
+        ),
+      )
+      .limit(1);
+
+    if (!current) {
+      return { status: "missing" as const };
+    }
+
+    if (current.editVersion !== input.expectedVersion) {
+      return { status: "conflict" as const, version: current.editVersion };
+    }
+
+    const [document] = await tx
+      .update(generatedDocuments)
+      .set({
+        editedResumeJson: input.resume,
+        editedContent: input.editedContent,
+        editedAt: new Date(),
+        editVersion: current.editVersion + 1,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(generatedDocuments.userId, input.userId),
+          eq(generatedDocuments.publicId, input.publicId),
+          eq(generatedDocuments.editVersion, input.expectedVersion),
+        ),
+      )
+      .returning();
+
+    if (!document) {
+      return { status: "conflict" as const, version: current.editVersion };
+    }
+
+    await tx.insert(documentActivities).values({
+      userId: input.userId,
+      documentId: current.id,
+      kind: "EDITED",
+    });
+
+    return { status: "saved" as const, version: document.editVersion };
+  });
+}
+
 export async function deleteGeneratedDocumentForUser(input: {
   userId: string;
   publicId: string;

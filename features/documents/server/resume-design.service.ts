@@ -11,10 +11,16 @@ import {
   renderImprovedResumePdf,
 } from "@/lib/pdf/resume-document";
 import { findAnalysisForDocumentSource } from "@/features/analyses/server/analysis.repository";
-import { readStoredIntelligence } from "@/features/analyses/server/analysis.mapper";
+import {
+  improvedResumeToText,
+  readStoredIntelligence,
+} from "@/features/analyses/server/analysis.mapper";
+import { improvedResumeSchema } from "@/lib/ai/schemas/improved-resume.schema";
+import { parseEditableResume } from "../schemas/editable-resume.schema";
 import {
   findDocumentRowForUser,
   updateGeneratedDocumentDesign,
+  updateGeneratedDocumentResume,
   type DocumentRow,
 } from "./document.repository";
 import { improvedResumeFilename } from "../improved-resume-format";
@@ -23,7 +29,19 @@ export type ResumeDesignSource = {
   row: DocumentRow;
   resume: ImprovedResume;
   selection: ResumeDesignSelection;
+  edited: boolean;
+  editVersion: number;
 };
+
+export function readEditedResume(value: unknown): ImprovedResume | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = improvedResumeSchema.safeParse(value);
+
+  return parsed.success ? parsed.data : null;
+}
 
 export function documentDesignSelection(row: DocumentRow) {
   return readResumeDesignSelection({
@@ -41,6 +59,14 @@ export async function findResumeDesignSource(input: {
 
   if (!row || row.document.type !== "IMPROVED_RESUME") {
     return null;
+  }
+
+  const selection = documentDesignSelection(row);
+  const editVersion = row.document.editVersion;
+  const edited = readEditedResume(row.document.editedResumeJson);
+
+  if (edited) {
+    return { row, resume: edited, selection, edited: true, editVersion };
   }
 
   const analysis = await findAnalysisForDocumentSource({
@@ -63,7 +89,9 @@ export async function findResumeDesignSource(input: {
   return {
     row,
     resume: result.improvedResume,
-    selection: documentDesignSelection(row),
+    selection,
+    edited: false,
+    editVersion,
   };
 }
 
@@ -88,6 +116,52 @@ export async function saveResumeDesignSelection(input: {
   });
 
   return document ? { ok: true as const } : { ok: false as const };
+}
+
+export async function saveEditedResume(input: {
+  userId: string;
+  publicId: string;
+  resume: unknown;
+  expectedVersion: number;
+}) {
+  const parsed = parseEditableResume(input.resume);
+
+  if (!parsed.ok) {
+    return {
+      ok: false as const,
+      reason: "INVALID" as const,
+      message: parsed.error
+        ? (parsed.error.issues[0]?.message ?? "Check the resume and try again.")
+        : "That resume is too large to save.",
+    };
+  }
+
+  const result = await updateGeneratedDocumentResume({
+    userId: input.userId,
+    publicId: input.publicId,
+    resume: parsed.resume,
+    editedContent: improvedResumeToText(parsed.resume),
+    expectedVersion: input.expectedVersion,
+  });
+
+  if (result.status === "missing") {
+    return {
+      ok: false as const,
+      reason: "MISSING" as const,
+      message: "That document could not be found.",
+    };
+  }
+
+  if (result.status === "conflict") {
+    return {
+      ok: false as const,
+      reason: "CONFLICT" as const,
+      version: result.version,
+      message: "This resume changed in another tab. Reload to keep editing.",
+    };
+  }
+
+  return { ok: true as const, version: result.version };
 }
 
 export async function renderResumeDesignPreview(input: {

@@ -473,6 +473,9 @@ export const generatedDocuments = pgTable(
     resumeTemplate: text("resume_template").notNull().default("CLASSIC"),
     resumeTypography: text("resume_typography").notNull().default("INTER"),
     resumeSpacing: text("resume_spacing").notNull().default("STANDARD"),
+    editedResumeJson: jsonb("edited_resume_json"),
+    editedAt: timestamp("edited_at", { withTimezone: true }),
+    editVersion: integer("edit_version").notNull().default(0),
     ...timestamps,
   },
   (table) => [
