@@ -176,7 +176,9 @@ export function SaveAndAnalyzeForm({
           Copied a posting already? Paste it once and HireLens fills the form.
         </p>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <JobPasteDialog onExtracted={applyExtraction} />
+          <span data-onboarding="paste-job" className="inline-flex">
+            <JobPasteDialog onExtracted={applyExtraction} />
+          </span>
           {imported ? (
             <Button type="button" variant="ghost" onClick={clearImport}>
               Clear imported details
@@ -351,7 +353,9 @@ export function SaveAndAnalyzeForm({
       </section>
 
       <div className="flex justify-end border-t border-border pt-5">
-        <SubmitButton />
+        <span data-onboarding="save-analyze" className="inline-flex">
+          <SubmitButton />
+        </span>
       </div>
     </form>
   );

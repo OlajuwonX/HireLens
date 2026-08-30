@@ -78,6 +78,7 @@ export function ApplicationDrawer({
                 key={name}
                 type="button"
                 role="tab"
+                data-onboarding={name === "Analysis" ? "analysis-tab" : undefined}
                 aria-selected={tab === name}
                 onClick={() => setTab(name)}
                 className={cn(

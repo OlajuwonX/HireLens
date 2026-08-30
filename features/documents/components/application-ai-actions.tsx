@@ -90,7 +90,7 @@ export function ApplicationAiActions({
         </p>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div data-onboarding="ai-results" className="grid gap-2 sm:grid-cols-2">
         {AI_VIEWS.map((view) => (
           <AiResultCard
             key={view}

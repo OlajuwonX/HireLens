@@ -1,13 +1,13 @@
-import Link from "next/link";
 import { MetricCard } from "@/components/data-display/metric-card";
 import { PageTitle } from "@/components/layout/page-title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { AddResumeDialog } from "@/features/resumes/components/add-resume-dialog";
 import { getDashboardSummary } from "@/features/dashboard/server/dashboard.service";
 import { documentTypeLabels } from "@/features/documents/constants";
+import { AddResumeDialog } from "@/features/resumes/components/add-resume-dialog";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Overview",
@@ -40,15 +40,19 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <AddResumeDialog
-            options={summary.resumeTitles}
-            label="Add Resume"
-            variant="outline"
-            redirectTo="/dashboard/resumes"
-          />
-          <Button asChild>
-            <Link href="/dashboard/applications">Create Application</Link>
-          </Button>
+          <span data-onboarding="add-resume" className="inline-flex">
+            <AddResumeDialog
+              options={summary.resumeTitles}
+              label="Add Resume"
+              variant="outline"
+              redirectTo="/dashboard/resumes"
+            />
+          </span>
+          <span data-onboarding="create-application" className="inline-flex">
+            <Button asChild>
+              <Link href="/dashboard/applications">Create Application</Link>
+            </Button>
+          </span>
         </div>
       </div>
 
