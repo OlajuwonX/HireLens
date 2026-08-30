@@ -78,7 +78,7 @@ export default async function DashboardPage() {
           hint={
             summary.averageMatchScore === null
               ? "Run an analysis"
-              : "Latest analyses"
+              : "Latest analysis"
           }
         />
       </div>

@@ -18,7 +18,7 @@ const guides = [
     action: "Go to Resumes",
   },
   {
-    title: "Save and analyse a job",
+    title: "Save and analyze a job",
     body: "Paste the posting into the application form and choose a resume. One analysis produces your match scores, requirement coverage and every AI document for that job.",
     href: "/dashboard/applications",
     action: "Create an application",

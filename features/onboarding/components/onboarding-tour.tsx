@@ -20,7 +20,6 @@ const ACTIVE_KEY = "hirelens-onboarding-active";
 const GREETED_KEY = "hirelens-onboarding-greeted";
 const FIRST_STEP_DELAY_MS = 2000;
 const BUBBLE_WIDTH = 320;
-const BUBBLE_ESTIMATE = 190;
 const GAP = 12;
 const FLOATING_QUERY = "(min-width: 640px)";
 const OPEN_MODAL_SELECTOR =
@@ -72,12 +71,62 @@ function sameRect(a: AnchorRect | null, b: AnchorRect) {
   );
 }
 
-function bubblePosition(rect: AnchorRect) {
+function scrollableAncestor(element: HTMLElement) {
+  let node = element.parentElement;
+
+  while (node) {
+    const overflowY = window.getComputedStyle(node).overflowY;
+
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      return node;
+    }
+
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
+function revealAnchor(anchor: HTMLElement, bias: number) {
+  const container = scrollableAncestor(anchor);
+
+  if (!container) {
+    return false;
+  }
+
+  const containerBox = container.getBoundingClientRect();
+  const anchorBox = anchor.getBoundingClientRect();
+  const offset = anchorBox.top - containerBox.top;
+  const room = container.clientHeight - anchorBox.height;
+  const target = container.scrollTop + offset - room * bias;
+  const next = Math.max(
+    0,
+    Math.min(target, container.scrollHeight - container.clientHeight),
+  );
+
+  if (Math.abs(next - container.scrollTop) < 1) {
+    return false;
+  }
+
+  container.scrollTop = next;
+  return true;
+}
+
+function bubblePosition(rect: AnchorRect, height: number) {
+  const viewport = window.innerHeight;
   const below = rect.top + rect.height + GAP;
-  const fitsBelow = below + BUBBLE_ESTIMATE <= window.innerHeight - GAP;
+  const above = rect.top - GAP - height;
+  const highest = GAP;
+  const lowest = Math.max(GAP, viewport - height - GAP);
+
+  const top =
+    below <= lowest ? below : above >= highest ? above : Math.max(highest, lowest);
 
   return {
-    top: fitsBelow ? below : Math.max(GAP, rect.top - GAP - BUBBLE_ESTIMATE),
+    top,
     left: Math.min(
       Math.max(GAP, rect.left + rect.width / 2 - BUBBLE_WIDTH / 2),
       Math.max(GAP, window.innerWidth - BUBBLE_WIDTH - GAP),
@@ -94,7 +143,9 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
   const [cursor, setCursor] = useState(0);
   const [hiddenFor, setHiddenFor] = useState<string | null>(null);
   const [rect, setRect] = useState<AnchorRect | null>(null);
+  const [bubbleHeight, setBubbleHeight] = useState(0);
   const [, startTransition] = useTransition();
+  const bubbleRef = useRef<HTMLDivElement>(null);
   const finishedRef = useRef(false);
   const scrolledRef = useRef<string | null>(null);
   const titleId = useId();
@@ -188,6 +239,10 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
   const measuring = running && ready && step !== null;
 
   useEffect(() => {
+    setBubbleHeight(0);
+  }, [step?.id, floating]);
+
+  useEffect(() => {
     if (!measuring || !step) {
       setRect((current) => (current === null ? current : null));
       return;
@@ -236,9 +291,11 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
         (box.top < GAP || box.bottom > window.innerHeight - GAP)
       ) {
         scrolledRef.current = step!.id;
-        anchor.scrollIntoView({ block: "center" });
-        schedule();
-        return;
+
+        if (revealAnchor(anchor, floating ? 0.5 : 0.3)) {
+          schedule();
+          return;
+        }
       }
 
       scrolledRef.current = step!.id;
@@ -270,7 +327,7 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
     };
-  }, [measuring, step]);
+  }, [measuring, step, floating]);
 
   const visible =
     mounted &&
@@ -278,6 +335,27 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
     step !== null &&
     rect !== null &&
     hiddenFor !== step.id;
+
+  useEffect(() => {
+    const node = bubbleRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    const sync = () => {
+      const next = Math.round(node.getBoundingClientRect().height);
+
+      setBubbleHeight((current) => (current === next ? current : next));
+    };
+
+    sync();
+
+    const observer = new ResizeObserver(sync);
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [visible, step, floating]);
 
   useEffect(() => {
     if (!visible || !step) {
@@ -301,12 +379,12 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
     return null;
   }
 
-  const position = bubblePosition(rect);
+  const position = floating ? bubblePosition(rect, bubbleHeight) : null;
   const isLast = cursor >= candidates.length - 1;
   const number = ONBOARDING_STEPS.findIndex((item) => item.id === step.id) + 1;
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-[60]">
+    <div className="pointer-events-none fixed inset-0 z-[60] overflow-hidden">
       <div
         aria-hidden="true"
         style={{
@@ -319,15 +397,21 @@ export function OnboardingTour({ progress }: { progress: OnboardingProgress }) {
       />
 
       <div
+        ref={bubbleRef}
         role="dialog"
         aria-labelledby={titleId}
         aria-describedby={bodyId}
-        style={floating ? position : undefined}
+        style={
+          position
+            ? { ...position, visibility: bubbleHeight ? undefined : "hidden" }
+            : undefined
+        }
         className={cn(
           "pointer-events-auto space-y-3 rounded-card border border-border bg-surface p-4 shadow-xl",
+          "hl-scroll overflow-y-auto",
           floating
-            ? "absolute w-80"
-            : "hl-scroll fixed inset-x-3 bottom-3 max-h-[70vh] overflow-y-auto",
+            ? "absolute max-h-[calc(100dvh-1.5rem)] w-80"
+            : "fixed inset-x-3 bottom-3 max-h-[60dvh]",
         )}
       >
         <p className="font-mono text-system uppercase text-text-muted">

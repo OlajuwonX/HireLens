@@ -93,7 +93,7 @@ export default async function SavedJobsPage({
           description={
             filters.q
               ? "Try a different search or another status tab."
-              : "Create an application to save the job and analyse your resume against it."
+              : "Create an application to save the job and analyze your resume against it."
           }
           action={
             filters.q ? null : (

@@ -9,7 +9,7 @@ export default function Loading() {
 
       <PageHeader
         title="Applications"
-        description="Enter the job you are preparing for. HireLens saves it and analyses your resume against it in one step."
+        description="Enter the job you are preparing for. HireLens saves it and analyzes your resume against it in one step."
       />
 
       <div aria-hidden className="mx-auto w-full max-w-reading space-y-8">

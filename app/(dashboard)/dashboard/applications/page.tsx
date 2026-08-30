@@ -21,7 +21,7 @@ export default async function ApplicationsPage() {
 
       <PageHeader
         title="Applications"
-        description="Enter the job you are preparing for. HireLens saves it and analyses your resume against it in one step."
+        description="Enter the job you are preparing for. HireLens saves it and analyzes your resume against it in one step."
       />
       <SaveAndAnalyzeForm versions={versions} />
     </div>

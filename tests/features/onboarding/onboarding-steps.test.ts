@@ -103,3 +103,25 @@ describe("the tour never runs for an account that already has data", () => {
     expect(tour).toContain("modal && !modal.contains(anchor)");
   });
 });
+
+describe("the tour never scrolls a container the user cannot scroll back", () => {
+  const tour = readFileSync(
+    "features/onboarding/components/onboarding-tour.tsx",
+    "utf8",
+  );
+
+  it("does not call scrollIntoView, which walks into overflow-hidden ancestors", () => {
+    expect(tour).not.toContain("scrollIntoView");
+  });
+
+  it("only scrolls an ancestor that is genuinely scrollable", () => {
+    expect(tour).toContain('overflowY === "auto" || overflowY === "scroll"');
+    expect(tour).toContain("node.scrollHeight > node.clientHeight");
+  });
+
+  it("measures the bubble from a ref instead of guessing its height", () => {
+    expect(tour).toContain("bubbleRef");
+    expect(tour).toContain("node.getBoundingClientRect().height");
+    expect(tour).not.toContain("BUBBLE_ESTIMATE");
+  });
+});

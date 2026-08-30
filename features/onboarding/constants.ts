@@ -27,7 +27,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     route: "/dashboard",
     anchors: ["create-application"],
     title: "Now add the job",
-    body: "Your resume is in. Open the application page to save the job you are targeting and analyse your resume against it.",
+    body: "Your resume is in. Open the application page to save the job you are targeting and analyze your resume against it.",
     isDone: (progress) => progress.hasApplication,
   },
   {
@@ -42,7 +42,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: "REVIEW_AND_SAVE",
     route: "/dashboard/applications",
     anchors: ["save-analyze"],
-    title: "Check it, then analyse",
+    title: "Check it, then analyze",
     body: "Correct anything the extraction got wrong, and paste the job's own link into Job posting URL. When it reads right, press Save & Analyze.",
     isDone: (progress) => progress.hasApplication,
   },
