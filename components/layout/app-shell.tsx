@@ -19,9 +19,11 @@ function titleFromPathname(pathname: string) {
 
 export function AppShell({
   sidebarFooter,
+  headerSlot,
   children,
 }: {
   sidebarFooter?: React.ReactNode;
+  headerSlot?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -64,6 +66,8 @@ export function AppShell({
               <h1 className="min-w-0 flex-1 truncate text-section-title font-semibold text-text-primary">
                 {title}
               </h1>
+
+              {headerSlot}
             </div>
           </header>
 

@@ -121,6 +121,13 @@ export const bugStatus = pgEnum("bug_status", [
   "RESOLVED",
 ]);
 
+export const notificationKind = pgEnum("notification_kind", [
+  "APPLICATION_UPDATE",
+  "FOLLOW_UP_DUE",
+  "DEADLINE_NEAR",
+  "SYSTEM",
+]);
+
 export const usageStatus = pgEnum("usage_status", [
   "RESERVED",
   "COMPLETED",
@@ -603,6 +610,31 @@ export const userPreferences = pgTable(
   (table) => [uniqueIndex("user_preferences_user_idx").on(table.userId)],
 );
 
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    kind: notificationKind("kind").notNull(),
+    title: text("title").notNull(),
+    body: text("body"),
+    applicationId: uuid("application_id").references(() => applications.id, {
+      onDelete: "cascade",
+    }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("notifications_public_id_idx").on(table.publicId),
+    index("notifications_user_unread_idx").on(
+      table.userId,
+      table.readAt,
+      table.createdAt.desc(),
+    ),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -687,6 +719,9 @@ export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
 export type BugReport = typeof bugReports.$inferSelect;
 export type NewBugReport = typeof bugReports.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+export type NotificationKind = (typeof notificationKind.enumValues)[number];
 export type BugCategory = (typeof bugCategory.enumValues)[number];
 export type BugStatus = (typeof bugStatus.enumValues)[number];
 export type UserRole = (typeof userRole.enumValues)[number];
