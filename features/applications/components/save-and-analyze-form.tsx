@@ -187,13 +187,6 @@ export function SaveAndAnalyzeForm({
         </div>
       </div>
 
-      {imported ? (
-        <Alert tone="info">
-          Job details extracted. Review every field before saving. Anything we
-          could not detect has been left blank.
-        </Alert>
-      ) : null}
-
       <section className="space-y-4">
         <h2 className="text-section-title font-semibold text-text-primary">
           Resume
