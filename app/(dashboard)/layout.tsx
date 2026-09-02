@@ -4,6 +4,8 @@ import { ProfileMenu } from "@/components/layout/profile-menu";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { requireCurrentUser } from "@/features/auth/server/require-user";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
+import { getUnreadNotificationCount } from "@/features/notifications/server/notification.service";
 import { OnboardingTour } from "@/features/onboarding/components/onboarding-tour";
 import { getOnboardingProgress } from "@/features/onboarding/server/onboarding.service";
 
@@ -14,10 +16,14 @@ export default async function DashboardLayout({
 }) {
   const { user, account } = await requireCurrentUser();
   const databaseUser = await requireDatabaseUser();
-  const onboarding = await getOnboardingProgress(databaseUser.id);
+  const [onboarding, unreadCount] = await Promise.all([
+    getOnboardingProgress(databaseUser.id),
+    getUnreadNotificationCount(databaseUser.id),
+  ]);
 
   return (
     <AppShell
+      headerSlot={<NotificationBell unreadCount={unreadCount} />}
       sidebarFooter={
         <ProfileMenu
           name={user.name}
