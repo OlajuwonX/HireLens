@@ -69,14 +69,20 @@ describe("the session carries only non-sensitive claims", () => {
   });
 });
 
-describe("requireDatabaseUser prefers the token over a query", () => {
+describe("requireDatabaseUser verifies the account, not just the token", () => {
   const source = readFileSync(
     "features/auth/server/require-database-user.ts",
     "utf8",
   );
 
-  it("returns early when the token carries the id", () => {
-    expect(source).toContain("if (session.dbUserId)");
+  it("reads the account state instead of returning straight from the token", () => {
+    expect(source).toContain("getAccountRecord");
+    expect(source).not.toContain("if (session.dbUserId) {\n    return");
+  });
+
+  it("routes on the resolved account state", () => {
+    expect(source).toContain("resolveAccountState");
+    expect(source).toContain("blockedAccountRoute");
   });
 
   it("keeps a fallback for tokens issued before the claim existed", () => {
@@ -85,5 +91,9 @@ describe("requireDatabaseUser prefers the token over a query", () => {
 
   it("redirects rather than inventing a user when the session is absent", () => {
     expect(source).toContain('redirect("/sign-in")');
+  });
+
+  it("refuses a token whose account row no longer exists", () => {
+    expect(source).toContain("if (!record)");
   });
 });

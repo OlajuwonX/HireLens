@@ -2,7 +2,11 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { findUserById } from "./user.repository";
+import {
+  blockedAccountRoute,
+  resolveAccountState,
+} from "@/features/auth/account-state";
+import { getAccountRecord } from "./current-account";
 import { requireCurrentUser } from "./require-user";
 import { findOrCreateUserFromPublicProfile } from "./user.service";
 
@@ -19,23 +23,32 @@ export async function requireDatabaseUser(): Promise<SessionUser> {
     redirect("/sign-in");
   }
 
-  if (session.dbUserId) {
-    return {
-      id: session.dbUserId,
-      name: session.user.name ?? null,
-      email: session.user.email,
-    };
+  const userId =
+    session.dbUserId ??
+    (
+      await findOrCreateUserFromPublicProfile(
+        (await requireCurrentUser()).user,
+      )
+    ).id;
+
+  const record = await getAccountRecord(userId);
+
+  if (!record) {
+    redirect("/sign-in");
   }
 
-  const currentUser = await requireCurrentUser();
-  const record = await findOrCreateUserFromPublicProfile(currentUser.user);
+  const blocked = blockedAccountRoute(resolveAccountState(record));
+
+  if (blocked) {
+    redirect(blocked);
+  }
 
   return { id: record.id, name: record.name, email: record.email };
 }
 
 export async function requireVerifiedDatabaseUser() {
   const user = await requireDatabaseUser();
-  const record = await findUserById(user.id);
+  const record = await getAccountRecord(user.id);
 
   if (!record || record.deletedAt) {
     redirect("/sign-in");
