@@ -149,12 +149,17 @@ export const users = pgTable(
       .notNull()
       .default(false),
     role: userRole("role").notNull().default("USER"),
+    disabledAt: timestamp("disabled_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    purgeAfter: timestamp("purge_after", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("users_email_idx").on(table.email),
     uniqueIndex("users_public_id_idx").on(table.publicId),
+    index("users_purge_after_idx")
+      .on(table.purgeAfter)
+      .where(sql`${table.purgeAfter} is not null`),
   ],
 );
 
