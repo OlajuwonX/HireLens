@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteAccountCard } from "@/features/account/components/delete-account-card";
+import { DisableAccountCard } from "@/features/account/components/disable-account-card";
 import { PasswordDialog } from "@/features/auth/components/password-dialog";
 import { VerifyEmailButton } from "@/features/auth/components/verify-email-button";
 import { requireVerifiedDatabaseUser } from "@/features/auth/server/require-database-user";
@@ -71,6 +73,10 @@ export default async function AccountSettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <DisableAccountCard />
+
+      <DeleteAccountCard />
     </div>
   );
 }

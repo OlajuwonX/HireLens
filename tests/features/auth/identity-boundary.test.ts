@@ -77,7 +77,15 @@ describe("requireDatabaseUser verifies the account, not just the token", () => {
 
   it("reads the account state instead of returning straight from the token", () => {
     expect(source).toContain("getAccountRecord");
-    expect(source).not.toContain("if (session.dbUserId) {\n    return");
+  });
+
+  it("builds the caller identity from the database row, not the token", () => {
+    expect(source).toContain("email: record.email");
+    expect(source).not.toContain("email: session.user.email");
+  });
+
+  it("separates identity resolution from the access decision", () => {
+    expect(source).toContain("requireSessionUserId");
   });
 
   it("routes on the resolved account state", () => {

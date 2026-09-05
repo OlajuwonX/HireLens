@@ -78,6 +78,14 @@ export async function registerCredentialsUser(
   const email = normalizeEmail(input.email);
   const existing = await findUserByEmail(email);
 
+  if (existing?.deletedAt) {
+    return {
+      ok: false,
+      message:
+        "That account is scheduled for deletion. Sign in to restore it, or try again once the deletion is complete.",
+    };
+  }
+
   if (existing) {
     return {
       ok: false,

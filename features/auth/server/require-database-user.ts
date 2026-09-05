@@ -16,21 +16,26 @@ export type SessionUser = {
   email: string;
 };
 
-export async function requireDatabaseUser(): Promise<SessionUser> {
+export async function requireSessionUserId(): Promise<string> {
   const session = await auth();
 
   if (!session?.user?.email) {
     redirect("/sign-in");
   }
 
-  const userId =
-    session.dbUserId ??
-    (
-      await findOrCreateUserFromPublicProfile(
-        (await requireCurrentUser()).user,
-      )
-    ).id;
+  if (session.dbUserId) {
+    return session.dbUserId;
+  }
 
+  const record = await findOrCreateUserFromPublicProfile(
+    (await requireCurrentUser()).user,
+  );
+
+  return record.id;
+}
+
+export async function requireDatabaseUser(): Promise<SessionUser> {
+  const userId = await requireSessionUserId();
   const record = await getAccountRecord(userId);
 
   if (!record) {
