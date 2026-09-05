@@ -22,9 +22,8 @@ export default function PrivacyPage() {
           never used to train anyone else&rsquo;s model.
         </p>
         <p>
-          You can ask for your account and everything in it to be deleted at any
-          time, for any reason or none. We do not keep your data against your
-          wishes.
+          You can delete your account yourself at any time, for any reason or
+          none, from Settings. We do not keep your data against your wishes.
         </p>
         <p>
           HireLens is operated from Nigeria and is written to meet the Nigeria
@@ -235,7 +234,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>When you close your account</strong> &mdash; everything tied
-            to it is deleted, including the files held in storage.
+            to it is held for 30 days so you can change your mind, then
+            permanently deleted, including the files held in storage.
           </li>
           <li>
             <strong>Backups</strong> &mdash; our database provider keeps
@@ -324,19 +324,27 @@ export default function PrivacyPage() {
           your wishes and we will not make you argue for it.
         </p>
         <p>
-          Ask through{" "}
-          <Link href="/dashboard/help" className={linkClass}>
-            Help
-          </Link>{" "}
-          and we will close the account and delete your resumes, files, jobs,
-          applications, analyses, documents and notifications. Closure stops
-          access straight away, and deletion is completed within 30 days, after
-          which it cannot be undone.
+          Open <strong>Settings &rarr; Account</strong> and choose{" "}
+          <strong>Delete my account</strong>. Access stops immediately. Your
+          resumes, uploaded files, saved jobs, applications, analyses, documents
+          and notifications are then held for 30 days and permanently deleted on
+          the date shown to you, along with the files in our storage provider.
+          After that date nothing can be recovered.
+        </p>
+        <p>
+          You can change your mind at any point during those 30 days by signing
+          in and choosing Restore. We email you when deletion is scheduled, once
+          more shortly before the deadline, and again if the account is
+          restored.
+        </p>
+        <p>
+          If you only want a break, <strong>Pause your account</strong> in the
+          same place stops access without deleting anything and starts no timer.
         </p>
         <p>
           Deleting your account does not require you to give a reason, and you
-          are free to create a new account later with the same email address
-          once the deletion is complete.
+          are free to create a new account with the same email address once the
+          deletion is complete.
         </p>
       </LegalSection>
 
