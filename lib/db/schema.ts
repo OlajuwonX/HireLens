@@ -152,6 +152,7 @@ export const users = pgTable(
     disabledAt: timestamp("disabled_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     purgeAfter: timestamp("purge_after", { withTimezone: true }),
+    purgeWarnedAt: timestamp("purge_warned_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [

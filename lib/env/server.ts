@@ -103,6 +103,9 @@ const serverEnvSchema = z.object({
   BREVO_SENDER_EMAIL: optionalString,
   BREVO_SENDER_NAME: optionalStringWithDefault("HireLens"),
 
+  CRON_SECRET: optionalString,
+  PURGE_DRY_RUN: optionalBooleanWithDefault(true),
+
   SITE_URL: optionalString,
   VERCEL_PROJECT_PRODUCTION_URL: optionalString,
   VERCEL_URL: optionalString,
