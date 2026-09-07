@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { findUserById } from "@/features/auth/server/user.repository";
+import { getAccountRecord } from "@/features/auth/server/current-account";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { OPS_CONSOLE_PATH } from "../constants";
 
@@ -14,7 +14,7 @@ export type AdminUser = {
 
 export async function requireAdminUser(): Promise<AdminUser> {
   const user = await requireDatabaseUser();
-  const record = await findUserById(user.id);
+  const record = await getAccountRecord(user.id);
 
   if (!record || record.deletedAt || record.role !== "ADMIN") {
     notFound();

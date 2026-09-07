@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isActiveAccount } from "@/features/auth/account-state";
 import { shouldClearUntrustedPassword } from "@/features/auth/policies/account-linking";
 import type { SignUpInput } from "@/features/auth/schemas/credentials.schema";
 import type { PublicUser } from "@/features/auth/types/public-user";
@@ -49,6 +50,10 @@ export async function recordSignIn(input: {
 
   const user = await findOrCreateUserFromPublicProfile(input.profile);
 
+  if (!isActiveAccount(user)) {
+    return user;
+  }
+
   await upsertOAuthAccount({
     userId: user.id,
     provider: input.provider,
@@ -72,6 +77,14 @@ export async function registerCredentialsUser(
 ): Promise<RegisterResult> {
   const email = normalizeEmail(input.email);
   const existing = await findUserByEmail(email);
+
+  if (existing?.deletedAt) {
+    return {
+      ok: false,
+      message:
+        "That account is scheduled for deletion. Sign in to restore it, or try again once the deletion is complete.",
+    };
+  }
 
   if (existing) {
     return {
@@ -129,7 +142,7 @@ export async function verifyCredentials(input: {
 }) {
   const user = await findUserByEmail(normalizeEmail(input.email));
 
-  if (!user?.passwordHash || user.deletedAt) {
+  if (!user?.passwordHash) {
     return null;
   }
 
@@ -137,6 +150,10 @@ export async function verifyCredentials(input: {
 
   if (!valid) {
     return null;
+  }
+
+  if (!isActiveAccount(user)) {
+    return user;
   }
 
   return (await touchUserLogin({ userId: user.id })) ?? user;
