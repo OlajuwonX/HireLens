@@ -31,6 +31,7 @@ import { notify } from "@/components/ui/toast";
 import type { AiView } from "@/features/analyses/server/analysis.mapper";
 import { saveAnalysisViewAction } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
+import { CoverLetterDownload } from "./cover-letter-download";
 import { SaveDocumentButton } from "./save-document-button";
 
 const CLOSE_AFTER_SAVE_MS = 200;
@@ -196,6 +197,9 @@ export function AiDocumentModal({
                 Download PDF
               </a>
             </Button>
+          ) : null}
+          {view === "COVER_LETTER" && savedDocumentId ? (
+            <CoverLetterDownload publicId={savedDocumentId} size="compact" />
           ) : null}
           <SaveDocumentButton
             applicationPublicId={applicationPublicId}
