@@ -12,6 +12,7 @@ import {
 } from "../actions/document-actions";
 import { initialDocumentFormState } from "../actions/document-form-state";
 import type { DOCUMENT_TYPES } from "../constants";
+import { CoverLetterDownload } from "./cover-letter-download";
 import { ResumeDesignControls } from "./resume-design-controls";
 
 function CopyButton({ content, label }: { content: string; label: string }) {
@@ -80,6 +81,10 @@ export function DocumentActions({
   return (
     <div className="flex flex-wrap gap-2">
       <CopyButton content={content} label={label} />
+
+      {type === "COVER_LETTER" ? (
+        <CoverLetterDownload publicId={publicId} />
+      ) : null}
 
       {resumeDesign ? (
         <ResumeDesignControls
