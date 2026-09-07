@@ -25,7 +25,7 @@ export const AUTHOR = {
   name: "Phantom Dev",
   url: "https://Phantomx3.vercel.app",
   github: "https://github.com/OlajuwonX",
-  linkedin: "https://www.linkedin.com/in/o-olasimbo-b986b7230/",
+  linkedin: "https://www.linkedin.com/in/olajuwonx/",
   x: "https://x.com/PhantomXDev?s=20",
 } as const;
 
