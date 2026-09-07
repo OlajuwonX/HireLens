@@ -7,6 +7,8 @@ export const INTERVIEW_POOL_SIZE = 30;
 
 export const INTERVIEW_OPTION_COUNT = 4;
 
+export const INTERVIEW_MIN_JOB_DESCRIPTION_LENGTH = 40;
+
 export const INTERVIEW_CYCLE_DAYS = 7;
 
 export const INTERVIEW_DAILY_QUESTIONS_PER_DAY = 2;
