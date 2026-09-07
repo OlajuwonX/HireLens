@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { findDocumentRowForUser } from "@/features/documents/server/document.repository";
+import { renderCoverLetterDownload } from "@/features/documents/server/cover-letter.service";
 import { readImprovedResumeBytes } from "@/features/documents/server/improved-resume.service";
 import {
   documentDesignSelection,
@@ -54,6 +55,24 @@ export async function GET(
         },
       });
     }
+  }
+
+  if (row.document.type === "COVER_LETTER") {
+    const rendered = await renderCoverLetterDownload({
+      text: row.document.editedContent,
+      role: row.jobTitle,
+      company: row.jobCompany,
+      format,
+    });
+
+    return new NextResponse(new Uint8Array(rendered.bytes), {
+      headers: {
+        "Content-Type": rendered.contentType,
+        "Content-Length": String(rendered.bytes.byteLength),
+        "Content-Disposition": attachment(rendered.filename),
+        "Cache-Control": "private, no-store",
+      },
+    });
   }
 
   if (format === "DOCX" || !row.document.fileAssetId) {
