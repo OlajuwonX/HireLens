@@ -3,11 +3,30 @@ import type {
   InterviewQuestionBucket,
 } from "@/lib/db/schema";
 
+export const INTERVIEW_POOL_PROMPT_VERSION = "interview-pool-v1";
+
 export const INTERVIEW_POOL_SIZE = 30;
 
 export const INTERVIEW_OPTION_COUNT = 4;
 
 export const INTERVIEW_MIN_JOB_DESCRIPTION_LENGTH = 40;
+
+export const INTERVIEW_CORE_SKILL_COUNT = 8;
+
+export const INTERVIEW_SECONDARY_SKILL_COUNT = 8;
+
+export const INTERVIEW_RESPONSIBILITY_COUNT = 8;
+
+export const INTERVIEW_TARGET_REQUIREMENT_COUNT = 10;
+
+export const INTERVIEW_SENIORITY_BANDS = [
+  "entry",
+  "mid",
+  "senior",
+  "principal",
+] as const;
+
+export type InterviewSeniorityBand = (typeof INTERVIEW_SENIORITY_BANDS)[number];
 
 export const INTERVIEW_CYCLE_DAYS = 7;
 
