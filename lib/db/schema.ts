@@ -103,6 +103,7 @@ export const usageAction = pgEnum("usage_action", [
   "KEYWORD_ANALYSIS",
   "BULLET_REWRITE",
   "FOLLOW_UP_MESSAGE",
+  "INTERVIEW_POOL_GENERATION",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
