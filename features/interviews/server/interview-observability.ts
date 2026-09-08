@@ -7,7 +7,8 @@ export type InterviewEvent =
   | "generation_failure"
   | "questions_reused"
   | "provider_used"
-  | "quota_refusal";
+  | "quota_refusal"
+  | "cycle_started";
 
 export type InterviewEventFields = Record<
   string,
