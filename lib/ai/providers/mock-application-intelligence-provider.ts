@@ -2,9 +2,52 @@ import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
 } from "../types";
 
+const MOCK_INTERVIEW_PLAN = [
+  ["easy", 6],
+  ["challenging", 8],
+  ["hard", 10],
+  ["very_hard", 6],
+] as const;
+
 export class MockApplicationIntelligenceProvider implements ApplicationIntelligenceProvider {
+  async generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+    const focus = input.coreSkills[0] ?? input.roleFamily;
+    const questions: unknown[] = [];
+    let index = 1;
+
+    for (const [difficulty, count] of MOCK_INTERVIEW_PLAN) {
+      for (let i = 0; i < count; i++) {
+        questions.push({
+          question: `Mock ${difficulty} question ${index} on ${input.roleFamily} at ${input.seniorityBand} level, focused on ${focus}. Configure an AI provider for real questions.`,
+          options: [
+            `Option A for question ${index}`,
+            `Option B for question ${index}`,
+            `Option C for question ${index}`,
+            `Option D for question ${index}`,
+          ],
+          correctOption: index % 4,
+          explanation: `Mock explanation ${index}: option ${index % 4} is correct here. Set GEMINI_API_KEY or OPENROUTER_API_KEY for real content.`,
+          difficulty,
+          topic: input.topics[index % Math.max(1, input.topics.length)] ?? focus,
+        });
+        index++;
+      }
+    }
+
+    return {
+      provider: "mock",
+      model: "mock-interview-pool",
+      durationMs: Math.round(performance.now() - startedAt),
+      rawResponse: JSON.stringify({ questions }),
+    };
+  }
+
   async extractJobPosting(input: {
     content: string;
   }): Promise<AIProviderResult> {

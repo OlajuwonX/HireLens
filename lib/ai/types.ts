@@ -45,9 +45,22 @@ export type ApplicationIntelligenceInput = {
   previousPass?: PreviousOptimizationInput | null;
 };
 
+export type InterviewPoolInput = {
+  roleFamily: string;
+  seniorityBand: string;
+  coreSkills: string[];
+  secondarySkills: string[];
+  topics: string[];
+  responsibilities: string[];
+  targetRequirements: string[];
+};
+
 export interface ApplicationIntelligenceProvider {
   analyzeApplication(
     input: ApplicationIntelligenceInput,
   ): Promise<AIProviderResult>;
   extractJobPosting(input: { content: string }): Promise<AIProviderResult>;
+  generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult>;
 }

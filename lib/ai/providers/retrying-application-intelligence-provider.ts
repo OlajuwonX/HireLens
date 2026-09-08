@@ -9,6 +9,7 @@ import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
 } from "../types";
 
 export type NamedProvider = {
@@ -27,8 +28,11 @@ export type RetryingProviderConfig = {
   extractionTimeoutMs?: number;
   extractionBudgetMs?: number;
   baseDelayMs?: number;
+  interviewTimeoutMs?: number;
+  interviewBudgetMs?: number;
   validateAnalysis?: ResponseValidator;
   validateExtraction?: ResponseValidator;
+  validateInterviewPool?: ResponseValidator;
 };
 
 function delay(ms: number) {
@@ -103,6 +107,19 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
       (provider) => provider.analyzeApplication(input),
       this.config.validateAnalysis,
       { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
+    );
+  }
+
+  async generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.generateInterviewPool(input),
+      this.config.validateInterviewPool,
+      {
+        timeoutMs: this.config.interviewTimeoutMs ?? this.config.timeoutMs,
+        budgetMs: this.config.interviewBudgetMs ?? this.totalBudgetMs,
+      },
     );
   }
 

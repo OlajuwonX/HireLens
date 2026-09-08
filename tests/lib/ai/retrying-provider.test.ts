@@ -12,6 +12,7 @@ function provider(
   return {
     analyzeApplication,
     extractJobPosting: vi.fn(),
+    generateInterviewPool: vi.fn(),
   };
 }
 

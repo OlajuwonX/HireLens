@@ -3,6 +3,10 @@ import "server-only";
 import { getServerEnv } from "@/lib/env/server";
 import { normalizeJsonModelOutput } from "./normalize";
 import { applicationIntelligenceSchema } from "./schemas/application-intelligence.schema";
+import {
+  assertValidInterviewPool,
+  generatedInterviewPoolSchema,
+} from "./schemas/interview-pool.schema";
 import { extractedJobResponseSchema } from "./schemas/job-extraction.schema";
 import { GeminiApplicationIntelligenceProvider } from "./providers/gemini-application-intelligence-provider";
 import { MockApplicationIntelligenceProvider } from "./providers/mock-application-intelligence-provider";
@@ -120,6 +124,11 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           },
           validateExtraction: (raw) => {
             normalizeJsonModelOutput(raw, extractedJobResponseSchema);
+          },
+          validateInterviewPool: (raw) => {
+            assertValidInterviewPool(
+              normalizeJsonModelOutput(raw, generatedInterviewPoolSchema),
+            );
           },
         })
       : new MockApplicationIntelligenceProvider();

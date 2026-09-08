@@ -31,6 +31,17 @@ export {
   type ExtractedJob,
   type JobExtractionInput,
 } from "./job-extraction.schema";
+export {
+  assertValidInterviewPool,
+  generatedDifficultyValues,
+  generatedInterviewPoolSchema,
+  generatedInterviewQuestionSchema,
+  INTERVIEW_POOL_QUESTION_COUNT,
+  REQUIRED_DIFFICULTY_DISTRIBUTION,
+  type GeneratedDifficulty,
+  type GeneratedInterviewPool,
+  type GeneratedInterviewQuestion,
+} from "./interview-pool.schema";
 export { keywordAnalysisSchema, type KeywordAnalysis } from "./keywords.schema";
 export {
   recommendationPriorities,
