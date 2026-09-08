@@ -26,6 +26,9 @@ vi.mock("@/features/interviews/server/interview-observability", () => ({
   recordInterviewEvent: (event: string, fields: unknown) =>
     recordInterviewEvent(event, fields),
 }));
+vi.mock("@/features/interviews/server/interview-readiness.service", () => ({
+  closeStaleCyclesForUser: vi.fn().mockResolvedValue(0),
+}));
 
 const { getOrCreateInterviewCycle, getInterviewCycleView } = await import(
   "@/features/interviews/server/interview-cycle.service"

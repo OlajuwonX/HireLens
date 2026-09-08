@@ -16,6 +16,7 @@ import {
   type CycleQuestionRow,
 } from "./interview-cycle.repository";
 import { recordInterviewEvent } from "./interview-observability";
+import { closeStaleCyclesForUser } from "./interview-readiness.service";
 
 type PoolNotReady = Exclude<EnsureInterviewPoolResult, { status: "ready" }>;
 
@@ -29,6 +30,8 @@ export async function getOrCreateInterviewCycle(input: {
 }): Promise<InterviewCycleResult> {
   const now = input.now ?? new Date();
   const weekStart = getWeekStart(now);
+
+  await closeStaleCyclesForUser({ userId: input.userId, now });
 
   const existing = await findCycleForWeek({ userId: input.userId, weekStart });
 
