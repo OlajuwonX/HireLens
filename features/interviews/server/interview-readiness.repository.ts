@@ -60,7 +60,12 @@ export async function closeCycle(input: {
       readinessScore: input.readinessScore,
       updatedAt: new Date(),
     })
-    .where(eq(userInterviewCycles.id, input.cycleId));
+    .where(
+      and(
+        eq(userInterviewCycles.id, input.cycleId),
+        isNull(userInterviewCycles.closedAt),
+      ),
+    );
 }
 
 export async function listClosedCycles(userId: string) {

@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { submitInterviewAnswer } from "../server/interview-answer.service";
 import { getOrCreateInterviewCycle } from "../server/interview-cycle.service";
 import type {
@@ -13,7 +13,12 @@ import type {
 
 const submitAnswerSchema = z.object({
   questionPublicId: z.string().uuid(),
-  selectedOption: z.coerce.number().int().min(0).max(9),
+  selectedOption: z
+    .string()
+    .trim()
+    .regex(/^\d+$/)
+    .transform(Number)
+    .pipe(z.number().int().min(0).max(9)),
 });
 
 const errorMessages: Record<string, string> = {
@@ -38,10 +43,7 @@ export async function submitInterviewAnswerAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: firstIssueMessage(
-        parsed.error,
-        "Could not submit that answer.",
-      ),
+      message: firstIssueMessage(parsed.error, "Could not submit that answer."),
     };
   }
 
@@ -72,8 +74,7 @@ export async function submitInterviewAnswerAction(
 }
 
 const startErrorMessages: Record<string, string> = {
-  ineligible:
-    "Add a resume and a saved job before starting an interview week.",
+  ineligible: "Add a resume and a saved job before starting an interview week.",
   no_source:
     "We could not read a role to build questions from. Analyze an application first.",
   quota_blocked:
