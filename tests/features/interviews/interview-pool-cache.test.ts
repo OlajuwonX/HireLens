@@ -113,6 +113,26 @@ describe("resolveInterviewPool", () => {
     }
   });
 
+  it("rotates a returning user onto the next unused pool version", async () => {
+    listReadyPoolsByFingerprint.mockResolvedValue([
+      pool({ id: "v1", poolVersion: 1 }),
+      pool({ id: "v2", poolVersion: 2 }),
+    ]);
+    listUserPoolIdsAmong.mockResolvedValue(new Set(["v1"]));
+
+    const result = await resolveInterviewPool({
+      userId: "u1",
+      fingerprint: "fp-1",
+      profile,
+    });
+
+    expect(result).toMatchObject({ status: "reuse", recycled: false });
+    if (result.status === "reuse") {
+      expect(result.pool.id).toBe("v2");
+    }
+    expect(claimPendingPool).not.toHaveBeenCalled();
+  });
+
   it("claims a generation slot on a cache miss", async () => {
     listReadyPoolsByFingerprint.mockResolvedValue([]);
     claimPendingPool.mockResolvedValue({
