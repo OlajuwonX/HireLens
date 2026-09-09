@@ -28,10 +28,12 @@ export type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
   JobPostingInput,
   PreviousOptimizationInput,
   ResumeDocumentInput,
 } from "./types";
+export { generateInterviewPoolCompletion } from "./interview-pool";
 export {
   auditResumeEvidence,
   collectResumeEntities,

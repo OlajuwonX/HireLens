@@ -153,6 +153,16 @@ export default function PrivacyPage() {
           effect is made about you automatically, and nothing HireLens produces
           is shared with an employer unless you send it yourself.
         </p>
+        <p>
+          Interview practice works from a generalised, non-identifying profile of
+          the role you are targeting &mdash; a role family, a seniority band and
+          broad skill areas derived from your analysis, never your resume text or
+          your name. Only that profile is sent to the AI to produce a set of
+          practice questions. Those question sets describe a type of role, not
+          you, and may be reused for other people preparing for similar roles.
+          Your answers, scores and progress stay on your account and are never
+          shared or reused.
+        </p>
       </LegalSection>
 
       <LegalSection heading="Who else processes your data">

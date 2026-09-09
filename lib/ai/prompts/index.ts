@@ -16,6 +16,11 @@ export {
   JOB_EXTRACTION_PROMPT,
   JOB_EXTRACTION_PROMPT_VERSION,
 } from "./job-extraction.prompt";
+export {
+  INTERVIEW_POOL_SYSTEM_PROMPT,
+  createInterviewPoolPrompt,
+  type InterviewProfileForPrompt,
+} from "./interview-pool.prompt";
 export { KEYWORD_ANALYSIS_PROMPT } from "./keyword-analysis.prompt";
 export { OPTIMIZATION_PLAN_PROMPT } from "./optimization-plan.prompt";
 export { PROFESSIONAL_SUMMARY_PROMPT } from "./professional-summary.prompt";

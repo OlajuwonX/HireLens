@@ -3,16 +3,20 @@ import { toGeminiResponseSchema } from "../gemini-json-schema";
 import { applicationIntelligenceSchema } from "../schemas/application-intelligence.schema";
 import {
   BASE_SYSTEM_PROMPT,
+  INTERVIEW_POOL_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
   createApplicationIntelligencePrompt,
+  createInterviewPoolPrompt,
   formatPreviousOptimization,
 } from "../prompts";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
+import { generatedInterviewPoolSchema } from "../schemas/interview-pool.schema";
 import { AiProviderError } from "../provider-errors";
 import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
 } from "../types";
 
 function statusOf(error: unknown) {
@@ -191,6 +195,40 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
         responseMimeType: "application/json",
         responseJsonSchema: toGeminiResponseSchema(
           applicationIntelligenceSchema,
+        ),
+      },
+    });
+
+    const durationMs = Math.round(performance.now() - startedAt);
+    const text = response.text;
+
+    if (!text) {
+      throw this.emptyResponse(response);
+    }
+
+    return {
+      provider: "gemini",
+      model: this.config.model,
+      rawResponse: text,
+      durationMs,
+    };
+  }
+
+  async generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+
+    const response = await this.send({
+      model: this.config.model,
+      contents: [
+        { role: "user", parts: [{ text: createInterviewPoolPrompt(input) }] },
+      ],
+      config: {
+        systemInstruction: INTERVIEW_POOL_SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiResponseSchema(
+          generatedInterviewPoolSchema,
         ),
       },
     });

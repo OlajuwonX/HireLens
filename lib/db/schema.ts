@@ -103,6 +103,7 @@ export const usageAction = pgEnum("usage_action", [
   "KEYWORD_ANALYSIS",
   "BULLET_REWRITE",
   "FOLLOW_UP_MESSAGE",
+  "INTERVIEW_POOL_GENERATION",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -641,12 +642,189 @@ export const notifications = pgTable(
   ],
 );
 
+export const interviewDifficulty = pgEnum("interview_difficulty", [
+  "EASY",
+  "CHALLENGING",
+  "HARD",
+  "VERY_HARD",
+]);
+
+export const interviewQuestionBucket = pgEnum("interview_question_bucket", [
+  "DAILY",
+  "PRACTICE",
+]);
+
+export const interviewPoolStatus = pgEnum("interview_pool_status", [
+  "PENDING",
+  "READY",
+  "FAILED",
+]);
+
+export const interviewQuestionPools = pgTable(
+  "interview_question_pools",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    fingerprint: text("fingerprint").notNull(),
+    roleFamily: text("role_family").notNull(),
+    seniorityBand: text("seniority_band").notNull(),
+    coreSkills: jsonb("core_skills")
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    promptVersion: text("prompt_version").notNull(),
+    poolVersion: integer("pool_version").notNull().default(1),
+    status: interviewPoolStatus("status").notNull().default("PENDING"),
+    provider: text("provider"),
+    model: text("model"),
+    questionCount: integer("question_count").notNull().default(0),
+    generationDurationMs: integer("generation_duration_ms"),
+    failureReason: text("failure_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("interview_question_pools_public_id_idx").on(table.publicId),
+    uniqueIndex("interview_question_pools_pending_fingerprint_idx")
+      .on(table.fingerprint)
+      .where(sql`${table.status} = 'PENDING'`),
+    index("interview_question_pools_fingerprint_status_idx").on(
+      table.fingerprint,
+      table.status,
+    ),
+    index("interview_question_pools_role_status_idx").on(
+      table.roleFamily,
+      table.seniorityBand,
+      table.status,
+    ),
+  ],
+);
+
+export const interviewQuestions = pgTable(
+  "interview_questions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    poolId: uuid("pool_id")
+      .notNull()
+      .references(() => interviewQuestionPools.id, { onDelete: "cascade" }),
+    orderIndex: integer("order_index").notNull(),
+    question: text("question").notNull(),
+    options: jsonb("options").notNull(),
+    correctOption: integer("correct_option").notNull(),
+    explanation: text("explanation").notNull(),
+    difficulty: interviewDifficulty("difficulty").notNull(),
+    topic: text("topic").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("interview_questions_public_id_idx").on(table.publicId),
+    uniqueIndex("interview_questions_pool_order_idx").on(
+      table.poolId,
+      table.orderIndex,
+    ),
+    index("interview_questions_pool_difficulty_idx").on(
+      table.poolId,
+      table.difficulty,
+    ),
+  ],
+);
+
+export const userInterviewCycles = pgTable(
+  "user_interview_cycles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    poolId: uuid("pool_id")
+      .notNull()
+      .references(() => interviewQuestionPools.id, { onDelete: "restrict" }),
+    weekStart: timestamp("week_start", { withTimezone: true }).notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    readinessScore: integer("readiness_score"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("user_interview_cycles_public_id_idx").on(table.publicId),
+    uniqueIndex("user_interview_cycles_user_week_idx").on(
+      table.userId,
+      table.weekStart,
+    ),
+    index("user_interview_cycles_user_closed_idx").on(
+      table.userId,
+      table.closedAt,
+    ),
+  ],
+);
+
+export const userInterviewQuestions = pgTable(
+  "user_interview_questions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => userInterviewCycles.id, { onDelete: "cascade" }),
+    questionId: uuid("question_id")
+      .notNull()
+      .references(() => interviewQuestions.id, { onDelete: "restrict" }),
+    bucket: interviewQuestionBucket("bucket").notNull(),
+    dayIndex: integer("day_index"),
+    assignedOrder: integer("assigned_order").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("user_interview_questions_cycle_question_idx").on(
+      table.cycleId,
+      table.questionId,
+    ),
+    index("user_interview_questions_cycle_bucket_idx").on(
+      table.cycleId,
+      table.bucket,
+      table.dayIndex,
+    ),
+    index("user_interview_questions_user_idx").on(table.userId),
+  ],
+);
+
+export const interviewAttempts = pgTable(
+  "interview_attempts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => userInterviewCycles.id, { onDelete: "cascade" }),
+    questionId: uuid("question_id")
+      .notNull()
+      .references(() => interviewQuestions.id, { onDelete: "restrict" }),
+    selectedOption: integer("selected_option").notNull(),
+    isCorrect: boolean("is_correct").notNull(),
+    difficulty: interviewDifficulty("difficulty").notNull(),
+    answeredAt: timestamp("answered_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("interview_attempts_public_id_idx").on(table.publicId),
+    uniqueIndex("interview_attempts_cycle_question_idx").on(
+      table.cycleId,
+      table.questionId,
+    ),
+    index("interview_attempts_user_cycle_idx").on(table.userId, table.cycleId),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
   jobs: many(jobs),
   applications: many(applications),
   preferences: one(userPreferences),
+  interviewCycles: many(userInterviewCycles),
 }));
 
 export const resumesRelations = relations(resumes, ({ one, many }) => ({
@@ -703,6 +881,76 @@ export const applicationAnalysesRelations = relations(
   }),
 );
 
+export const interviewQuestionPoolsRelations = relations(
+  interviewQuestionPools,
+  ({ many }) => ({
+    questions: many(interviewQuestions),
+    cycles: many(userInterviewCycles),
+  }),
+);
+
+export const interviewQuestionsRelations = relations(
+  interviewQuestions,
+  ({ one }) => ({
+    pool: one(interviewQuestionPools, {
+      fields: [interviewQuestions.poolId],
+      references: [interviewQuestionPools.id],
+    }),
+  }),
+);
+
+export const userInterviewCyclesRelations = relations(
+  userInterviewCycles,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [userInterviewCycles.userId],
+      references: [users.id],
+    }),
+    pool: one(interviewQuestionPools, {
+      fields: [userInterviewCycles.poolId],
+      references: [interviewQuestionPools.id],
+    }),
+    assignments: many(userInterviewQuestions),
+    attempts: many(interviewAttempts),
+  }),
+);
+
+export const userInterviewQuestionsRelations = relations(
+  userInterviewQuestions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userInterviewQuestions.userId],
+      references: [users.id],
+    }),
+    cycle: one(userInterviewCycles, {
+      fields: [userInterviewQuestions.cycleId],
+      references: [userInterviewCycles.id],
+    }),
+    question: one(interviewQuestions, {
+      fields: [userInterviewQuestions.questionId],
+      references: [interviewQuestions.id],
+    }),
+  }),
+);
+
+export const interviewAttemptsRelations = relations(
+  interviewAttempts,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [interviewAttempts.userId],
+      references: [users.id],
+    }),
+    cycle: one(userInterviewCycles, {
+      fields: [interviewAttempts.cycleId],
+      references: [userInterviewCycles.id],
+    }),
+    question: one(interviewQuestions, {
+      fields: [interviewAttempts.questionId],
+      references: [interviewQuestions.id],
+    }),
+  }),
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
@@ -732,3 +980,21 @@ export type BugCategory = (typeof bugCategory.enumValues)[number];
 export type BugStatus = (typeof bugStatus.enumValues)[number];
 export type UserRole = (typeof userRole.enumValues)[number];
 export type UsageAction = (typeof usageAction.enumValues)[number];
+export type InterviewQuestionPool = typeof interviewQuestionPools.$inferSelect;
+export type NewInterviewQuestionPool =
+  typeof interviewQuestionPools.$inferInsert;
+export type InterviewQuestion = typeof interviewQuestions.$inferSelect;
+export type NewInterviewQuestion = typeof interviewQuestions.$inferInsert;
+export type UserInterviewCycle = typeof userInterviewCycles.$inferSelect;
+export type NewUserInterviewCycle = typeof userInterviewCycles.$inferInsert;
+export type UserInterviewQuestion = typeof userInterviewQuestions.$inferSelect;
+export type NewUserInterviewQuestion =
+  typeof userInterviewQuestions.$inferInsert;
+export type InterviewAttempt = typeof interviewAttempts.$inferSelect;
+export type NewInterviewAttempt = typeof interviewAttempts.$inferInsert;
+export type InterviewDifficulty =
+  (typeof interviewDifficulty.enumValues)[number];
+export type InterviewQuestionBucket =
+  (typeof interviewQuestionBucket.enumValues)[number];
+export type InterviewPoolStatus =
+  (typeof interviewPoolStatus.enumValues)[number];

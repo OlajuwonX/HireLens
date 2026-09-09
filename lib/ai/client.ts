@@ -3,6 +3,11 @@ import "server-only";
 import { getServerEnv } from "@/lib/env/server";
 import { normalizeJsonModelOutput } from "./normalize";
 import { applicationIntelligenceSchema } from "./schemas/application-intelligence.schema";
+import {
+  assertGeneralizedInterviewPool,
+  assertValidInterviewPool,
+  generatedInterviewPoolSchema,
+} from "./schemas/interview-pool.schema";
 import { extractedJobResponseSchema } from "./schemas/job-extraction.schema";
 import { GeminiApplicationIntelligenceProvider } from "./providers/gemini-application-intelligence-provider";
 import { MockApplicationIntelligenceProvider } from "./providers/mock-application-intelligence-provider";
@@ -17,7 +22,6 @@ let provider: ApplicationIntelligenceProvider | undefined;
 
 export const DEFAULT_OPENROUTER_MODELS = [
   "nvidia/nemotron-3-super-120b-a12b:free",
-  "z-ai/glm-5.2:free",
 ];
 
 function splitModels(value: string | undefined) {
@@ -115,11 +119,21 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           totalBudgetMs: env.AI_TOTAL_BUDGET_MS,
           extractionTimeoutMs: env.AI_EXTRACTION_TIMEOUT_MS,
           extractionBudgetMs: env.AI_EXTRACTION_BUDGET_MS,
+          interviewTimeoutMs: env.AI_INTERVIEW_TIMEOUT_MS,
+          interviewBudgetMs: env.AI_INTERVIEW_BUDGET_MS,
           validateAnalysis: (raw) => {
             normalizeJsonModelOutput(raw, applicationIntelligenceSchema);
           },
           validateExtraction: (raw) => {
             normalizeJsonModelOutput(raw, extractedJobResponseSchema);
+          },
+          validateInterviewPool: (raw) => {
+            const pool = normalizeJsonModelOutput(
+              raw,
+              generatedInterviewPoolSchema,
+            );
+            assertValidInterviewPool(pool);
+            assertGeneralizedInterviewPool(pool);
           },
         })
       : new MockApplicationIntelligenceProvider();

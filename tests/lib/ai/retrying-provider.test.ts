@@ -12,6 +12,7 @@ function provider(
   return {
     analyzeApplication,
     extractJobPosting: vi.fn(),
+    generateInterviewPool: vi.fn(),
   };
 }
 
@@ -397,5 +398,80 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       status: 503,
       failureClass: "TRANSIENT",
     });
+  });
+
+  it("gives interview generation's primary provider the full timeout, not a per-provider slice", async () => {
+    const poolInput = {
+      roleFamily: "frontend-engineering",
+      seniorityBand: "senior",
+      coreSkills: ["react"],
+      secondarySkills: [],
+      topics: [],
+      responsibilities: [],
+      targetRequirements: [],
+    };
+
+    function poolProvider(
+      generateInterviewPool: ApplicationIntelligenceProvider["generateInterviewPool"],
+    ): ApplicationIntelligenceProvider {
+      return {
+        analyzeApplication: vi.fn(),
+        extractJobPosting: vi.fn(),
+        generateInterviewPool,
+      };
+    }
+
+    const stalling = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(success("never")), 5_000);
+        }),
+    );
+    const failFast = () =>
+      vi.fn().mockRejectedValue(
+        new AiProviderError("permanently unavailable", {
+          provider: "openrouter",
+          model: "dead",
+          status: 404,
+          failureClass: "PERMANENT",
+        }),
+      );
+
+    const retrying = new RetryingApplicationIntelligenceProvider({
+      providers: [
+        {
+          provider: poolProvider(stalling),
+          providerName: "gemini",
+          model: "primary",
+        },
+        {
+          provider: poolProvider(failFast()),
+          providerName: "openrouter",
+          model: "fallback-a",
+        },
+        {
+          provider: poolProvider(failFast()),
+          providerName: "openrouter",
+          model: "fallback-b",
+        },
+      ],
+      maxRetries: 0,
+      timeoutMs: 1_000,
+      totalBudgetMs: 3_000,
+      interviewTimeoutMs: 200,
+      interviewBudgetMs: 240,
+      baseDelayMs: 1,
+    });
+
+    const startedAt = Date.now();
+    const error = (await retrying
+      .generateInterviewPool(poolInput)
+      .catch((thrown: unknown) => thrown)) as AiProviderChainError;
+    const elapsed = Date.now() - startedAt;
+
+    expect(error).toBeInstanceOf(AiProviderChainError);
+    expect(elapsed).toBeGreaterThanOrEqual(170);
+    expect(elapsed).toBeLessThan(500);
+    expect(stalling).toHaveBeenCalledTimes(1);
   });
 });

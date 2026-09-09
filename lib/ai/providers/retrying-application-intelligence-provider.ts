@@ -9,6 +9,7 @@ import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
 } from "../types";
 
 export type NamedProvider = {
@@ -27,8 +28,11 @@ export type RetryingProviderConfig = {
   extractionTimeoutMs?: number;
   extractionBudgetMs?: number;
   baseDelayMs?: number;
+  interviewTimeoutMs?: number;
+  interviewBudgetMs?: number;
   validateAnalysis?: ResponseValidator;
   validateExtraction?: ResponseValidator;
+  validateInterviewPool?: ResponseValidator;
 };
 
 function delay(ms: number) {
@@ -106,21 +110,44 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     );
   }
 
+  async generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.generateInterviewPool(input),
+      this.config.validateInterviewPool,
+      {
+        timeoutMs: this.config.interviewTimeoutMs ?? this.config.timeoutMs,
+        budgetMs: this.config.interviewBudgetMs ?? this.totalBudgetMs,
+        reserveAcrossProviders: false,
+      },
+    );
+  }
+
   private async run(
     call: (
       provider: ApplicationIntelligenceProvider,
     ) => Promise<AIProviderResult>,
     validate?: ResponseValidator,
-    budget: { timeoutMs: number; budgetMs: number } = {
+    budget: {
+      timeoutMs: number;
+      budgetMs: number;
+      reserveAcrossProviders?: boolean;
+    } = {
       timeoutMs: this.config.timeoutMs,
       budgetMs: this.totalBudgetMs,
     },
   ) {
     const deadline = Date.now() + budget.budgetMs;
-    const reserveMs = Math.min(
-      budget.timeoutMs,
-      Math.floor(budget.budgetMs / Math.max(1, this.config.providers.length)),
-    );
+    const reserveMs =
+      budget.reserveAcrossProviders === false
+        ? 0
+        : Math.min(
+            budget.timeoutMs,
+            Math.floor(
+              budget.budgetMs / Math.max(1, this.config.providers.length),
+            ),
+          );
     const failures: AiAttemptFailure[] = [];
     const exhausted = new Set<string>();
     const candidates = this.config.providers;

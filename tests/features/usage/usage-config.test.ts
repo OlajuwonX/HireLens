@@ -3,6 +3,7 @@ import {
   AI_USAGE_ACTIONS,
   getDailyAllowance,
   getGlobalDailySafetyLimit,
+  getInterviewPoolGlobalDailyLimit,
   usageActionLabels,
 } from "@/lib/ai/usage";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -23,6 +24,7 @@ describe("usage actions", () => {
       "APPLICATION_ANALYSIS",
       "APPLICATION_REGENERATE",
       "JOB_EXTRACTION",
+      "INTERVIEW_POOL_GENERATION",
     ]);
   });
 
@@ -38,10 +40,18 @@ describe("daily allowances", () => {
     expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(4);
     expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(1);
     expect(getDailyAllowance("JOB_EXTRACTION")).toBe(3);
+    expect(getDailyAllowance("INTERVIEW_POOL_GENERATION")).toBe(2);
   });
 
   it("keeps the shared cap inside the free provider allowance", () => {
     expect(getGlobalDailySafetyLimit()).toBe(40);
+  });
+
+  it("caps interview pool generation with a small shared daily budget", () => {
+    expect(getInterviewPoolGlobalDailyLimit()).toBe(8);
+    expect(getInterviewPoolGlobalDailyLimit()).toBeLessThan(
+      getGlobalDailySafetyLimit(),
+    );
   });
 
   it("keeps the burst limit small", () => {

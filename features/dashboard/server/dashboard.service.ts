@@ -17,6 +17,7 @@ import {
   usageActionLabels,
 } from "@/lib/ai/usage";
 import { listActiveResumeTitles } from "@/features/resumes/server/resume.repository";
+import { getDashboardInterview } from "@/features/interviews/server/interview-dashboard.service";
 
 function startOfUtcDay(date = new Date()) {
   return new Date(
@@ -62,6 +63,7 @@ export async function getDashboardSummary(userId: string) {
     averageMatchRows,
     usageRows,
     resumeTitles,
+    interview,
   ] = await Promise.all([
     countResumeGroups(userId),
     countResumeVersions(userId),
@@ -112,6 +114,13 @@ export async function getDashboardSummary(userId: string) {
         ),
       ),
     listActiveResumeTitles(userId),
+    getDashboardInterview(userId).catch((error) => {
+      console.error("dashboard interview read rejected", {
+        reason: error instanceof Error ? error.message : "unknown",
+      });
+
+      return { state: "unavailable" as const };
+    }),
   ]);
 
   const statusCounts = statusRows.reduce<Record<string, number>>((acc, row) => {
@@ -140,5 +149,6 @@ export async function getDashboardSummary(userId: string) {
     recentApplications,
     recentDocuments,
     usage,
+    interview,
   };
 }

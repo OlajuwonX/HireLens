@@ -1,23 +1,28 @@
 import {
   BASE_SYSTEM_PROMPT,
+  INTERVIEW_POOL_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
   createApplicationIntelligencePrompt,
+  createInterviewPoolPrompt,
   formatPreviousOptimization,
 } from "../prompts";
 import { toStrictJsonSchema } from "../json-schema";
 import { AiProviderError, type AiFailureClass } from "../provider-errors";
 import { applicationIntelligenceSchema } from "../schemas/application-intelligence.schema";
+import { generatedInterviewPoolSchema } from "../schemas/interview-pool.schema";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import type {
   AIProviderResult,
   ApplicationIntelligenceInput,
   ApplicationIntelligenceProvider,
+  InterviewPoolInput,
 } from "../types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const ANALYSIS_SCHEMA = toStrictJsonSchema(applicationIntelligenceSchema);
 const EXTRACTION_SCHEMA = toStrictJsonSchema(extractedJobSchema);
+const INTERVIEW_POOL_SCHEMA = toStrictJsonSchema(generatedInterviewPoolSchema);
 
 export type OpenRouterProviderConfig = {
   apiKey: string;
@@ -256,6 +261,17 @@ export class OpenRouterApplicationIntelligenceProvider implements ApplicationInt
       user: `<job_posting_document>\n${input.content}\n</job_posting_document>`,
       schemaName: "extracted_job",
       schema: EXTRACTION_SCHEMA,
+    });
+  }
+
+  async generateInterviewPool(
+    input: InterviewPoolInput,
+  ): Promise<AIProviderResult> {
+    return this.complete({
+      system: INTERVIEW_POOL_SYSTEM_PROMPT,
+      user: createInterviewPoolPrompt(input),
+      schemaName: "interview_pool",
+      schema: INTERVIEW_POOL_SCHEMA,
     });
   }
 

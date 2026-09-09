@@ -13,6 +13,7 @@ import {
   AI_RESERVATION_TTL_SECONDS,
   getDailyAllowance,
   getGlobalDailySafetyLimit,
+  getInterviewPoolGlobalDailyLimit,
   type AiUsageAction,
 } from "@/lib/ai/usage";
 
@@ -85,6 +86,21 @@ async function countEveryUserCompletedToday() {
     .from(aiUsageEvents)
     .where(
       and(
+        eq(aiUsageEvents.status, "COMPLETED"),
+        gte(aiUsageEvents.createdAt, startOfUtcDay()),
+      ),
+    );
+
+  return row?.value ?? 0;
+}
+
+async function countEveryUserCompletedTodayForAction(action: AiUsageAction) {
+  const [row] = await db
+    .select({ value: count() })
+    .from(aiUsageEvents)
+    .where(
+      and(
+        eq(aiUsageEvents.action, action),
         eq(aiUsageEvents.status, "COMPLETED"),
         gte(aiUsageEvents.createdAt, startOfUtcDay()),
       ),
@@ -173,6 +189,21 @@ export async function checkAllowance(input: {
       message: usageLimitMessage("GLOBAL_LIMIT"),
       resetAt: nextUtcDay(),
     };
+  }
+
+  if (input.action === "INTERVIEW_POOL_GENERATION") {
+    const interviewGlobalUsed = await countEveryUserCompletedTodayForAction(
+      "INTERVIEW_POOL_GENERATION",
+    );
+
+    if (interviewGlobalUsed >= getInterviewPoolGlobalDailyLimit()) {
+      return {
+        ok: false,
+        reason: "GLOBAL_LIMIT",
+        message: usageLimitMessage("GLOBAL_LIMIT"),
+        resetAt: nextUtcDay(),
+      };
+    }
   }
 
   const used = await countCompletedToday(input);

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { getDashboardSummary } from "@/features/dashboard/server/dashboard.service";
 import { documentTypeLabels } from "@/features/documents/constants";
+import { InterviewReadinessCard } from "@/features/interviews/components/interview-readiness-card";
 import { AddResumeDialog } from "@/features/resumes/components/add-resume-dialog";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -82,6 +83,8 @@ export default async function DashboardPage() {
           }
         />
       </div>
+
+      <InterviewReadinessCard interview={summary.interview} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>

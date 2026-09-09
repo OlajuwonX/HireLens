@@ -1,0 +1,1 @@
+ALTER TYPE "public"."usage_action" ADD VALUE 'INTERVIEW_POOL_GENERATION';

@@ -134,6 +134,20 @@
       "when": 1788528194751,
       "tag": "0018_premium_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788814702078,
+      "tag": "0019_blushing_nebula",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788871829193,
+      "tag": "0020_unknown_pestilence",
+      "breakpoints": true
     }
   ]
 }
