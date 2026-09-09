@@ -5,7 +5,11 @@ import { z } from "zod";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { submitInterviewAnswer } from "../server/interview-answer.service";
-import type { InterviewAnswerState } from "./interview-form-state";
+import { getOrCreateInterviewCycle } from "../server/interview-cycle.service";
+import type {
+  InterviewAnswerState,
+  StartInterviewWeekState,
+} from "./interview-form-state";
 
 const submitAnswerSchema = z.object({
   questionPublicId: z.string().uuid(),
@@ -64,5 +68,42 @@ export async function submitInterviewAnswerAction(
     correct: outcome.correct,
     correctOption: outcome.correctOption,
     explanation: outcome.explanation,
+  };
+}
+
+const startErrorMessages: Record<string, string> = {
+  ineligible:
+    "Add a resume and a saved job before starting an interview week.",
+  no_source:
+    "We could not read a role to build questions from. Analyze an application first.",
+  quota_blocked:
+    "The shared daily budget for building new question sets is used up. Try again tomorrow.",
+  failed:
+    "Building this week's set did not finish. Try again in a little while.",
+};
+
+export async function startInterviewWeekAction(
+  _state: StartInterviewWeekState,
+  _formData: FormData,
+): Promise<StartInterviewWeekState> {
+  const user = await requireDatabaseUser();
+  const result = await getOrCreateInterviewCycle({ userId: user.id });
+
+  if (result.status === "ready") {
+    revalidatePath("/dashboard/interview");
+    revalidatePath("/dashboard");
+
+    return { status: "started" };
+  }
+
+  if (result.status === "pending") {
+    return { status: "pending_generation" };
+  }
+
+  return {
+    status: "error",
+    message:
+      startErrorMessages[result.status] ??
+      "This week's set could not be started.",
   };
 }

@@ -13,3 +13,13 @@ export type InterviewAnswerState =
 export const initialInterviewAnswerState: InterviewAnswerState = {
   status: "idle",
 };
+
+export type StartInterviewWeekState =
+  | { status: "idle" }
+  | { status: "error"; message: string }
+  | { status: "pending_generation" }
+  | { status: "started" };
+
+export const initialStartInterviewWeekState: StartInterviewWeekState = {
+  status: "idle",
+};
