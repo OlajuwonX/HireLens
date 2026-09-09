@@ -16,8 +16,9 @@ THE PROFILE:
 
 WHAT TO GENERATE:
 
-- Exactly 30 questions.
-- Difficulty counts, exactly: 6 easy, 8 challenging, 10 hard, 6 very_hard.
+- Exactly 30 questions — this count is mandatory.
+- Aim for this difficulty mix: 6 easy, 8 challenging, 10 hard, 6 very_hard. It does not have to be exact, but every level must have at least 2 questions and no level may exceed 18.
+- Before returning, count your questions by difficulty and adjust labels or questions so the mix is close to the target.
 - Each question must read like a real question asked in a professional interview for this exact profession and seniority.
 - Each question must test reasoning, judgement or applied understanding, not trivial recall or definitions.
 - Ground each question in the profile's skills, topics, responsibilities or target requirements.

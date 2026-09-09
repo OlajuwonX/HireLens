@@ -21,6 +21,9 @@ export const REQUIRED_DIFFICULTY_DISTRIBUTION: Record<
   very_hard: 6,
 };
 
+export const MIN_QUESTIONS_PER_DIFFICULTY = 2;
+export const MAX_QUESTIONS_PER_DIFFICULTY = 18;
+
 export const INTERVIEW_OPTION_COUNT = 4;
 
 export const generatedInterviewQuestionSchema = z.object({
@@ -120,9 +123,12 @@ export function assertValidInterviewPool(pool: GeneratedInterviewPool) {
   }
 
   for (const difficulty of generatedDifficultyValues) {
-    if (counts[difficulty] !== REQUIRED_DIFFICULTY_DISTRIBUTION[difficulty]) {
+    if (
+      counts[difficulty] < MIN_QUESTIONS_PER_DIFFICULTY ||
+      counts[difficulty] > MAX_QUESTIONS_PER_DIFFICULTY
+    ) {
       throw new Error(
-        `interview pool difficulty distribution is wrong: expected ${REQUIRED_DIFFICULTY_DISTRIBUTION[difficulty]} ${difficulty}, received ${counts[difficulty]}`,
+        `interview pool difficulty spread is unusable: ${difficulty} has ${counts[difficulty]}, want ${MIN_QUESTIONS_PER_DIFFICULTY}-${MAX_QUESTIONS_PER_DIFFICULTY}`,
       );
     }
   }

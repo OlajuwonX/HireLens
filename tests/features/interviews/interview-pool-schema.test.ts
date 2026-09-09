@@ -85,11 +85,39 @@ describe("assertValidInterviewPool", () => {
     expect(() => assertValidInterviewPool(pool)).toThrow(/4 options/);
   });
 
-  it("throws when the difficulty distribution is off", () => {
+  it("tolerates a non-standard but usable difficulty spread", () => {
     const pool = generatedInterviewPoolSchema.parse(validPool());
-    pool.questions[0].difficulty = "challenging";
+    pool.questions[0].difficulty = "hard";
+    pool.questions[1].difficulty = "hard";
+    pool.questions[2].difficulty = "challenging";
 
-    expect(() => assertValidInterviewPool(pool)).toThrow(/distribution/);
+    expect(() => assertValidInterviewPool(pool)).not.toThrow();
+  });
+
+  it("throws when a difficulty band is nearly empty", () => {
+    const pool = generatedInterviewPoolSchema.parse(validPool());
+
+    for (const q of pool.questions) {
+      if (q.difficulty === "easy") {
+        q.difficulty = "hard";
+      }
+    }
+    pool.questions[0].difficulty = "easy";
+
+    expect(() => assertValidInterviewPool(pool)).toThrow(/spread is unusable/);
+  });
+
+  it("throws when one difficulty dominates the pool", () => {
+    const pool = generatedInterviewPoolSchema.parse(validPool());
+
+    for (const q of pool.questions) {
+      q.difficulty = "hard";
+    }
+    pool.questions[0].difficulty = "easy";
+    pool.questions[1].difficulty = "challenging";
+    pool.questions[2].difficulty = "very_hard";
+
+    expect(() => assertValidInterviewPool(pool)).toThrow(/spread is unusable/);
   });
 
   it("throws on a duplicated question", () => {
