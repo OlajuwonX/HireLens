@@ -22,7 +22,6 @@ let provider: ApplicationIntelligenceProvider | undefined;
 
 export const DEFAULT_OPENROUTER_MODELS = [
   "nvidia/nemotron-3-super-120b-a12b:free",
-  "z-ai/glm-5.2:free",
 ];
 
 function splitModels(value: string | undefined) {

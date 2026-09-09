@@ -119,6 +119,7 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
       {
         timeoutMs: this.config.interviewTimeoutMs ?? this.config.timeoutMs,
         budgetMs: this.config.interviewBudgetMs ?? this.totalBudgetMs,
+        reserveAcrossProviders: false,
       },
     );
   }
@@ -128,16 +129,25 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
       provider: ApplicationIntelligenceProvider,
     ) => Promise<AIProviderResult>,
     validate?: ResponseValidator,
-    budget: { timeoutMs: number; budgetMs: number } = {
+    budget: {
+      timeoutMs: number;
+      budgetMs: number;
+      reserveAcrossProviders?: boolean;
+    } = {
       timeoutMs: this.config.timeoutMs,
       budgetMs: this.totalBudgetMs,
     },
   ) {
     const deadline = Date.now() + budget.budgetMs;
-    const reserveMs = Math.min(
-      budget.timeoutMs,
-      Math.floor(budget.budgetMs / Math.max(1, this.config.providers.length)),
-    );
+    const reserveMs =
+      budget.reserveAcrossProviders === false
+        ? 0
+        : Math.min(
+            budget.timeoutMs,
+            Math.floor(
+              budget.budgetMs / Math.max(1, this.config.providers.length),
+            ),
+          );
     const failures: AiAttemptFailure[] = [];
     const exhausted = new Set<string>();
     const candidates = this.config.providers;
