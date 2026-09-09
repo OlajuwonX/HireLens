@@ -11,6 +11,7 @@ import { listCycleAssignmentSummary } from "./interview-dashboard.repository";
 export type DashboardInterview =
   | { state: "prerequisites"; hasResume: boolean; hasJobContext: boolean }
   | { state: "ready_to_start" }
+  | { state: "unavailable" }
   | {
       state: "active";
       readiness: number;
@@ -28,6 +29,21 @@ export type DashboardInterview =
 export async function getDashboardInterview(
   userId: string,
   now: Date = new Date(),
+): Promise<DashboardInterview> {
+  try {
+    return await readDashboardInterview(userId, now);
+  } catch (error) {
+    console.error("dashboard interview read failed", {
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+
+    return { state: "unavailable" };
+  }
+}
+
+async function readDashboardInterview(
+  userId: string,
+  now: Date,
 ): Promise<DashboardInterview> {
   const eligibility = await getInterviewEligibility(userId);
 

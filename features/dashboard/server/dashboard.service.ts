@@ -114,7 +114,13 @@ export async function getDashboardSummary(userId: string) {
         ),
       ),
     listActiveResumeTitles(userId),
-    getDashboardInterview(userId),
+    getDashboardInterview(userId).catch((error) => {
+      console.error("dashboard interview read rejected", {
+        reason: error instanceof Error ? error.message : "unknown",
+      });
+
+      return { state: "unavailable" as const };
+    }),
   ]);
 
   const statusCounts = statusRows.reduce<Record<string, number>>((acc, row) => {

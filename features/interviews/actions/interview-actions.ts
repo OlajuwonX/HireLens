@@ -87,7 +87,21 @@ export async function startInterviewWeekAction(
   _formData: FormData,
 ): Promise<StartInterviewWeekState> {
   const user = await requireDatabaseUser();
-  const result = await getOrCreateInterviewCycle({ userId: user.id });
+
+  let result;
+
+  try {
+    result = await getOrCreateInterviewCycle({ userId: user.id });
+  } catch (error) {
+    console.error("start interview week failed", {
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+
+    return {
+      status: "error",
+      message: "This week's set could not be started. Try again in a moment.",
+    };
+  }
 
   if (result.status === "ready") {
     revalidatePath("/dashboard/interview");

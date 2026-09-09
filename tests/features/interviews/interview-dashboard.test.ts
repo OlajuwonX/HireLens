@@ -143,6 +143,22 @@ describe("getDashboardInterview", () => {
     expect(result.readiness).toBeGreaterThan(0);
   });
 
+  it("degrades to unavailable when a read throws, never rejecting", async () => {
+    listCycleAssignmentSummary.mockRejectedValue(new Error("db down"));
+
+    const result = await getDashboardInterview("u1");
+
+    expect(result).toEqual({ state: "unavailable" });
+  });
+
+  it("degrades to unavailable when eligibility itself throws", async () => {
+    getInterviewEligibility.mockRejectedValue(new Error("db down"));
+
+    await expect(getDashboardInterview("u1")).resolves.toEqual({
+      state: "unavailable",
+    });
+  });
+
   it("marks the week complete once every question is answered", async () => {
     listCycleAttempts.mockResolvedValue(
       assignments().map((a) => ({

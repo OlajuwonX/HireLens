@@ -59,6 +59,20 @@ function ReadyToStart() {
   );
 }
 
+function Unavailable() {
+  return (
+    <div className="space-y-3">
+      <p className="text-meta text-text-secondary">
+        Interview practice is briefly unavailable. The rest of your dashboard is
+        unaffected.
+      </p>
+      <Button asChild variant="outline" size="compact">
+        <Link href={INTERVIEW_HREF}>Open interview</Link>
+      </Button>
+    </div>
+  );
+}
+
 function Active({
   interview,
 }: {
@@ -122,6 +136,14 @@ export function InterviewReadinessCard({
     return (
       <Shell>
         <ReadyToStart />
+      </Shell>
+    );
+  }
+
+  if (interview.state === "unavailable") {
+    return (
+      <Shell>
+        <Unavailable />
       </Shell>
     );
   }
