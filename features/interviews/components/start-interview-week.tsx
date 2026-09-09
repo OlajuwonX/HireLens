@@ -1,11 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { notify } from "@/components/ui/toast";
 import { startInterviewWeekAction } from "../actions/interview-actions";
-import { initialStartInterviewWeekState } from "../actions/interview-form-state";
+import {
+  initialStartInterviewWeekState,
+  type StartInterviewWeekState,
+} from "../actions/interview-form-state";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -22,6 +26,27 @@ export function StartInterviewWeek() {
     startInterviewWeekAction,
     initialStartInterviewWeekState,
   );
+  const announced = useRef<StartInterviewWeekState>(
+    initialStartInterviewWeekState,
+  );
+
+  useEffect(() => {
+    if (state === announced.current || state.status === "idle") {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "error") {
+      notify.error(state.message);
+    } else if (state.status === "pending_generation") {
+      notify.info(
+        "Your set is being prepared. Refresh this page in a moment.",
+      );
+    } else if (state.status === "started") {
+      notify.success("Your interview set is ready.");
+    }
+  }, [state]);
 
   return (
     <Card>
@@ -38,18 +63,6 @@ export function StartInterviewWeek() {
         <form action={action}>
           <SubmitButton />
         </form>
-
-        {state.status === "error" ? (
-          <p role="alert" className="text-meta text-danger">
-            {state.message}
-          </p>
-        ) : null}
-
-        {state.status === "pending_generation" ? (
-          <p role="status" className="text-meta text-text-secondary">
-            Your set is being prepared. Refresh this page in a moment.
-          </p>
-        ) : null}
       </CardContent>
     </Card>
   );

@@ -1,12 +1,16 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { notify } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { submitInterviewAnswerAction } from "../actions/interview-actions";
-import { initialInterviewAnswerState } from "../actions/interview-form-state";
+import {
+  initialInterviewAnswerState,
+  type InterviewAnswerState,
+} from "../actions/interview-form-state";
 import { interviewDifficultyLabels } from "../constants";
 import type { InterviewPageQuestion } from "../server/interview-page.service";
 
@@ -194,6 +198,19 @@ export function InterviewQuestionCard({
     submitInterviewAnswerAction,
     initialInterviewAnswerState,
   );
+  const announced = useRef<InterviewAnswerState>(initialInterviewAnswerState);
+
+  useEffect(() => {
+    if (state === announced.current || state.status === "idle") {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "error") {
+      notify.error(state.message);
+    }
+  }, [state]);
 
   const resolved: Resolved | null =
     question.answered ??
@@ -225,12 +242,6 @@ export function InterviewQuestionCard({
           <QuestionForm question={question} index={index} />
         </form>
       )}
-
-      {state.status === "error" ? (
-        <p role="alert" className="mt-3 text-meta text-danger">
-          {state.message}
-        </p>
-      ) : null}
     </li>
   );
 }

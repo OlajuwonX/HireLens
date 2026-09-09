@@ -42,25 +42,6 @@ describe("generatedInterviewPoolSchema", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("rejects the wrong question count", () => {
-    const short = validPool();
-    short.questions.pop();
-
-    expect(generatedInterviewPoolSchema.safeParse(short).success).toBe(false);
-
-    const long = validPool();
-    long.questions.push(question(31, "easy"));
-
-    expect(generatedInterviewPoolSchema.safeParse(long).success).toBe(false);
-  });
-
-  it("rejects a question without exactly four options", () => {
-    const pool = validPool();
-    pool.questions[0].options = ["only", "three", "options"];
-
-    expect(generatedInterviewPoolSchema.safeParse(pool).success).toBe(false);
-  });
-
   it("rejects an out-of-range correct option", () => {
     const pool = validPool();
     pool.questions[0].correctOption = 4;
@@ -68,11 +49,13 @@ describe("generatedInterviewPoolSchema", () => {
     expect(generatedInterviewPoolSchema.safeParse(pool).success).toBe(false);
   });
 
-  it("converts to a JSON schema for both providers without throwing", () => {
-    expect(() => toStrictJsonSchema(generatedInterviewPoolSchema)).not.toThrow();
-    expect(() =>
-      toGeminiResponseSchema(generatedInterviewPoolSchema),
-    ).not.toThrow();
+  it("carries no array-length keywords into either provider's JSON schema", () => {
+    for (const build of [toStrictJsonSchema, toGeminiResponseSchema]) {
+      const json = JSON.stringify(build(generatedInterviewPoolSchema));
+
+      expect(json).not.toContain("minItems");
+      expect(json).not.toContain("maxItems");
+    }
   });
 });
 
@@ -83,6 +66,23 @@ describe("assertValidInterviewPool", () => {
         generatedInterviewPoolSchema.parse(validPool()),
       ),
     ).not.toThrow();
+  });
+
+  it("throws on the wrong question count", () => {
+    const short = generatedInterviewPoolSchema.parse(validPool());
+    short.questions.pop();
+    expect(() => assertValidInterviewPool(short)).toThrow(/30 questions/);
+
+    const long = generatedInterviewPoolSchema.parse(validPool());
+    long.questions.push(question(31, "easy"));
+    expect(() => assertValidInterviewPool(long)).toThrow(/30 questions/);
+  });
+
+  it("throws when a question does not have exactly four options", () => {
+    const pool = generatedInterviewPoolSchema.parse(validPool());
+    pool.questions[0].options = ["only", "three", "options"];
+
+    expect(() => assertValidInterviewPool(pool)).toThrow(/4 options/);
   });
 
   it("throws when the difficulty distribution is off", () => {

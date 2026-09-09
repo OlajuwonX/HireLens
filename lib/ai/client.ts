@@ -120,6 +120,8 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           totalBudgetMs: env.AI_TOTAL_BUDGET_MS,
           extractionTimeoutMs: env.AI_EXTRACTION_TIMEOUT_MS,
           extractionBudgetMs: env.AI_EXTRACTION_BUDGET_MS,
+          interviewTimeoutMs: env.AI_INTERVIEW_TIMEOUT_MS,
+          interviewBudgetMs: env.AI_INTERVIEW_BUDGET_MS,
           validateAnalysis: (raw) => {
             normalizeJsonModelOutput(raw, applicationIntelligenceSchema);
           },

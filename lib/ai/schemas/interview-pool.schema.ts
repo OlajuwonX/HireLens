@@ -21,9 +21,11 @@ export const REQUIRED_DIFFICULTY_DISTRIBUTION: Record<
   very_hard: 6,
 };
 
+export const INTERVIEW_OPTION_COUNT = 4;
+
 export const generatedInterviewQuestionSchema = z.object({
   question: z.string().min(12).max(600),
-  options: z.array(z.string().min(1).max(400)).min(4).max(4),
+  options: z.array(z.string().min(1).max(400)),
   correctOption: z.number().int().min(0).max(3),
   explanation: z.string().min(10).max(1200),
   difficulty: z.enum(generatedDifficultyValues),
@@ -35,10 +37,7 @@ export type GeneratedInterviewQuestion = z.infer<
 >;
 
 export const generatedInterviewPoolSchema = z.object({
-  questions: z
-    .array(generatedInterviewQuestionSchema)
-    .min(INTERVIEW_POOL_QUESTION_COUNT)
-    .max(INTERVIEW_POOL_QUESTION_COUNT),
+  questions: z.array(generatedInterviewQuestionSchema),
 });
 
 export type GeneratedInterviewPool = z.infer<
@@ -88,6 +87,12 @@ export function assertGeneralizedInterviewPool(pool: GeneratedInterviewPool) {
 }
 
 export function assertValidInterviewPool(pool: GeneratedInterviewPool) {
+  if (pool.questions.length !== INTERVIEW_POOL_QUESTION_COUNT) {
+    throw new Error(
+      `interview pool must have ${INTERVIEW_POOL_QUESTION_COUNT} questions, received ${pool.questions.length}`,
+    );
+  }
+
   const counts: Record<GeneratedDifficulty, number> = {
     easy: 0,
     challenging: 0,
@@ -97,6 +102,12 @@ export function assertValidInterviewPool(pool: GeneratedInterviewPool) {
   const seen = new Set<string>();
 
   for (const question of pool.questions) {
+    if (question.options.length !== INTERVIEW_OPTION_COUNT) {
+      throw new Error(
+        `each interview question must have ${INTERVIEW_OPTION_COUNT} options, received ${question.options.length}`,
+      );
+    }
+
     counts[question.difficulty] += 1;
 
     const key = normalizeQuestion(question.question);
