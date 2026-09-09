@@ -32,12 +32,15 @@ export {
   type JobExtractionInput,
 } from "./job-extraction.schema";
 export {
+  assertGeneralizedInterviewPool,
   assertValidInterviewPool,
+  containsIdentifiableContent,
   generatedDifficultyValues,
   generatedInterviewPoolSchema,
   generatedInterviewQuestionSchema,
   INTERVIEW_POOL_QUESTION_COUNT,
   REQUIRED_DIFFICULTY_DISTRIBUTION,
+  scrubIdentifiableContent,
   type GeneratedDifficulty,
   type GeneratedInterviewPool,
   type GeneratedInterviewQuestion,

@@ -4,6 +4,7 @@ import { getServerEnv } from "@/lib/env/server";
 import { normalizeJsonModelOutput } from "./normalize";
 import { applicationIntelligenceSchema } from "./schemas/application-intelligence.schema";
 import {
+  assertGeneralizedInterviewPool,
   assertValidInterviewPool,
   generatedInterviewPoolSchema,
 } from "./schemas/interview-pool.schema";
@@ -126,9 +127,12 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
             normalizeJsonModelOutput(raw, extractedJobResponseSchema);
           },
           validateInterviewPool: (raw) => {
-            assertValidInterviewPool(
-              normalizeJsonModelOutput(raw, generatedInterviewPoolSchema),
+            const pool = normalizeJsonModelOutput(
+              raw,
+              generatedInterviewPoolSchema,
             );
+            assertValidInterviewPool(pool);
+            assertGeneralizedInterviewPool(pool);
           },
         })
       : new MockApplicationIntelligenceProvider();

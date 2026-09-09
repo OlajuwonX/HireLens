@@ -1,4 +1,8 @@
-import { hashAnalysisInput } from "@/lib/ai";
+import {
+  containsIdentifiableContent,
+  hashAnalysisInput,
+  scrubIdentifiableContent,
+} from "@/lib/ai";
 import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
 import {
   INTERVIEW_CORE_SKILL_COUNT,
@@ -144,6 +148,16 @@ function collectSkillWeights(input: InterviewProfileInput) {
   return weights;
 }
 
+function generalize(raw: string): string | null {
+  const value = scrubIdentifiableContent(raw).slice(0, 160).trim();
+
+  if (!value || containsIdentifiableContent(value)) {
+    return null;
+  }
+
+  return value;
+}
+
 function deriveResponsibilities(analysis: StoredApplicationIntelligence | null) {
   if (!analysis) {
     return [];
@@ -161,10 +175,10 @@ function deriveResponsibilities(analysis: StoredApplicationIntelligence | null) 
       continue;
     }
 
-    const value = match.requirement.trim();
-    const key = value.toLowerCase();
+    const value = generalize(match.requirement);
+    const key = value?.toLowerCase();
 
-    if (!value || seen.has(key)) {
+    if (!value || !key || seen.has(key)) {
       continue;
     }
 
@@ -185,10 +199,10 @@ function deriveTargetRequirements(
   const seen = new Set<string>();
   const targets: string[] = [];
   const push = (raw: string) => {
-    const value = raw.trim();
-    const key = value.toLowerCase();
+    const value = generalize(raw);
+    const key = value?.toLowerCase();
 
-    if (!value || seen.has(key)) {
+    if (!value || !key || seen.has(key)) {
       return;
     }
 

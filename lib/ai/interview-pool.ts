@@ -1,6 +1,7 @@
 import { getApplicationIntelligenceProvider } from "./client";
 import { normalizeJsonModelOutput } from "./normalize";
 import {
+  assertGeneralizedInterviewPool,
   assertValidInterviewPool,
   generatedInterviewPoolSchema,
   type GeneratedInterviewQuestion,
@@ -29,6 +30,7 @@ export async function generateInterviewPoolCompletion(input: {
   );
 
   assertValidInterviewPool(pool);
+  assertGeneralizedInterviewPool(pool);
 
   return {
     questions: pool.questions,

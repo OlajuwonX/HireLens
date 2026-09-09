@@ -52,6 +52,41 @@ function normalizeQuestion(value: string) {
     .trim();
 }
 
+const IDENTIFIABLE_CONTENT_PATTERNS: RegExp[] = [
+  /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i,
+  /\bhttps?:\/\/\S+/i,
+  /\bwww\.[a-z0-9-]+\.[a-z]{2,}/i,
+  /\b(?:linkedin\.com|github\.com|twitter\.com|x\.com|gitlab\.com)\/[a-z0-9_-]+/i,
+  /(^|\s)@[a-z0-9_]{2,}\b/i,
+  /(?:\+?\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/,
+];
+
+export function containsIdentifiableContent(value: string): boolean {
+  return IDENTIFIABLE_CONTENT_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+export function scrubIdentifiableContent(value: string): string {
+  return IDENTIFIABLE_CONTENT_PATTERNS.reduce(
+    (text, pattern) =>
+      text.replace(new RegExp(pattern.source, `${pattern.flags}g`), " "),
+    value,
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function assertGeneralizedInterviewPool(pool: GeneratedInterviewPool) {
+  for (const question of pool.questions) {
+    const parts = [question.question, question.explanation, ...question.options];
+
+    if (parts.some(containsIdentifiableContent)) {
+      throw new Error(
+        "interview pool contains identifiable or contact information",
+      );
+    }
+  }
+}
+
 export function assertValidInterviewPool(pool: GeneratedInterviewPool) {
   const counts: Record<GeneratedDifficulty, number> = {
     easy: 0,
