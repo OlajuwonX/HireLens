@@ -38,8 +38,28 @@ function NavLink({
           className="absolute inset-y-1 left-0 w-0.5 bg-accent"
         />
       ) : null}
+      {collapsed && item.badge ? (
+        <span
+          aria-hidden="true"
+          className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-accent"
+        />
+      ) : null}
       <Icon aria-hidden="true" className="size-4 shrink-0" />
-      {collapsed ? <span className="sr-only">{item.label}</span> : item.label}
+      {collapsed ? (
+        <span className="sr-only">
+          {item.label}
+          {item.badge ? " (new)" : null}
+        </span>
+      ) : (
+        <>
+          <span>{item.label}</span>
+          {item.badge ? (
+            <span className="ml-auto shrink-0 rounded-full border border-transparent bg-action-dark px-1.5 py-px font-mono text-[0.5625rem] font-semibold uppercase leading-[1.6] tracking-wide text-action-dark-text dark:border-accent-hover/50 dark:bg-accent dark:text-accent-text">
+              {item.badge}
+            </span>
+          ) : null}
+        </>
+      )}
     </Link>
   );
 }

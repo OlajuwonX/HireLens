@@ -2,6 +2,7 @@ import {
   Briefcase,
   FileText,
   LayoutDashboard,
+  Mic,
   Send,
   Settings,
   Sparkles,
@@ -12,6 +13,7 @@ export type NavItem = {
   href: string;
   Icon: typeof LayoutDashboard;
   ready: boolean;
+  badge?: "NEW";
 };
 
 const allNavigation: NavItem[] = [
@@ -39,6 +41,13 @@ const allNavigation: NavItem[] = [
     href: "/dashboard/documents",
     Icon: Sparkles,
     ready: true,
+  },
+  {
+    label: "Interview",
+    href: "/dashboard/interview",
+    Icon: Mic,
+    ready: true,
+    badge: "NEW",
   },
 ];
 
