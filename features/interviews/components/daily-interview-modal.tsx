@@ -64,12 +64,7 @@ function DailyForm({ question }: { question: InterviewPageQuestion }) {
               checked={choice === optionIndex}
               onChange={() => setChoice(optionIndex)}
             />
-            <span
-              className="line-clamp-2 flex-1 text-text-primary"
-              title={option}
-            >
-              {option}
-            </span>
+            <span className="flex-1 text-text-primary">{option}</span>
           </label>
         ))}
       </fieldset>
@@ -111,12 +106,7 @@ function DailyResolved({
                 !isAnswer && !isWrongPick && "border-border opacity-70",
               )}
             >
-              <span
-                className="line-clamp-2 flex-1 text-text-primary"
-                title={option}
-              >
-                {option}
-              </span>
+              <span className="flex-1 text-text-primary">{option}</span>
               {isAnswer ? (
                 <span className="flex shrink-0 items-center gap-1 text-label text-text-secondary">
                   <Check className="size-3.5" aria-hidden />
@@ -133,11 +123,7 @@ function DailyResolved({
         })}
       </ul>
 
-      <p
-        role="status"
-        className="mt-3 line-clamp-3 text-meta text-text-secondary"
-        title={resolved.explanation}
-      >
+      <p role="status" className="mt-3 text-meta text-text-secondary">
         {resolved.correct ? "Correct. " : "Not quite. "}
         {resolved.explanation}
       </p>
@@ -192,10 +178,7 @@ function DailyQuestion({
 
   return (
     <div>
-      <p
-        className="mb-3 line-clamp-4 text-meta font-medium text-text-primary"
-        title={question.question}
-      >
+      <p className="mb-3 text-meta font-medium text-text-primary">
         {position}. {question.question}
       </p>
 
