@@ -52,8 +52,8 @@ export async function closeCycle(input: {
   cycleId: string;
   readinessScore: number;
   closedAt: Date;
-}) {
-  await db
+}): Promise<boolean> {
+  const closed = await db
     .update(userInterviewCycles)
     .set({
       closedAt: input.closedAt,
@@ -65,7 +65,10 @@ export async function closeCycle(input: {
         eq(userInterviewCycles.id, input.cycleId),
         isNull(userInterviewCycles.closedAt),
       ),
-    );
+    )
+    .returning({ id: userInterviewCycles.id });
+
+  return closed.length > 0;
 }
 
 export async function listClosedCycles(userId: string) {
