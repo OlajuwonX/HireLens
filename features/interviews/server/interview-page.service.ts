@@ -48,7 +48,9 @@ function toOptions(value: unknown): string[] {
   return Array.isArray(value) ? value.map((option) => String(option)) : [];
 }
 
-function toQuestion(row: CyclePageQuestionRow): InterviewPageQuestion {
+export function toInterviewPageQuestion(
+  row: CyclePageQuestionRow,
+): InterviewPageQuestion {
   const isAnswered = row.selectedOption !== null && row.isCorrect !== null;
 
   return {
@@ -96,13 +98,13 @@ export async function getInterviewPageData(input: {
 
   const dailyToday = rows
     .filter((row) => row.bucket === "DAILY" && unlocked(row))
-    .map(toQuestion);
+    .map(toInterviewPageQuestion);
   const dailyUpcoming = rows.filter(
     (row) => row.bucket === "DAILY" && !unlocked(row),
   ).length;
   const practice = rows
     .filter((row) => row.bucket === "PRACTICE")
-    .map(toQuestion);
+    .map(toInterviewPageQuestion);
 
   const attempts = rows
     .filter((row) => row.selectedOption !== null && row.isCorrect !== null)
