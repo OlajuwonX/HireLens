@@ -54,7 +54,7 @@ function NavLink({
         <>
           <span>{item.label}</span>
           {item.badge ? (
-            <span className="ml-auto shrink-0 rounded-full border border-transparent bg-action-dark px-1.5 py-px font-mono text-[0.5625rem] font-semibold uppercase leading-[1.6] tracking-wide text-action-dark-text dark:border-accent-hover/50 dark:bg-accent dark:text-accent-text">
+            <span className="rounded-control bg-accent px-2 py-0.5 font-mono text-[0.625rem] font-semibold uppercase tracking-wide text-accent-text">
               {item.badge}
             </span>
           ) : null}

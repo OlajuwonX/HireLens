@@ -4,7 +4,7 @@ import { IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { MobileNavProvider } from "./mobile-nav-context";
 import { isActivePath, primaryNavigation, utilityRoutes } from "./navigation";
@@ -29,6 +29,7 @@ export function AppShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const pageTitle = useUiStore((state) => state.pageTitle);
+  const mainRef = useRef<HTMLElement>(null);
 
   const closeMobileNav = useCallback(() => setMobileOpen(false), []);
 
@@ -38,6 +39,7 @@ export function AppShell({
 
   useEffect(() => {
     setMobileOpen(false);
+    mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
   const title = pageTitle ?? titleFromPathname(pathname);
@@ -71,7 +73,10 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="hl-scroll min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
+          <main
+            ref={mainRef}
+            className="hl-scroll min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8"
+          >
             {children}
           </main>
         </div>

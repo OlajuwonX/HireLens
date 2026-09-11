@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { getDashboardSummary } from "@/features/dashboard/server/dashboard.service";
 import { documentTypeLabels } from "@/features/documents/constants";
+import { DailyInterviewModal } from "@/features/interviews/components/daily-interview-modal";
 import { InterviewReadinessCard } from "@/features/interviews/components/interview-readiness-card";
+import { getDailyInterviewPrompt } from "@/features/interviews/server/interview-daily.service";
 import { AddResumeDialog } from "@/features/resumes/components/add-resume-dialog";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,10 +27,15 @@ function greeting(name: string | null) {
 
 export default async function DashboardPage() {
   const user = await requireDatabaseUser();
-  const summary = await getDashboardSummary(user.id);
+  const [summary, dailyPrompt] = await Promise.all([
+    getDashboardSummary(user.id),
+    getDailyInterviewPrompt(user.id),
+  ]);
 
   return (
     <div className="space-y-6">
+      {dailyPrompt.due ? <DailyInterviewModal prompt={dailyPrompt} /> : null}
+
       <PageTitle title="Overview" />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

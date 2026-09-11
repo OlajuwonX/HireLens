@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/page-header";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { InterviewConsole } from "@/features/interviews/components/interview-console";
@@ -6,6 +5,7 @@ import { InterviewPrerequisites } from "@/features/interviews/components/intervi
 import { StartInterviewWeek } from "@/features/interviews/components/start-interview-week";
 import { getInterviewEligibility } from "@/features/interviews/server/interview-eligibility.service";
 import { getInterviewPageData } from "@/features/interviews/server/interview-page.service";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Interview",
