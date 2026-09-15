@@ -6,6 +6,7 @@ const getInterviewEligibility = vi.fn();
 const findCycleForWeek = vi.fn();
 const listCycleAssignmentSummary = vi.fn();
 const listCycleAttempts = vi.fn();
+const listDailyAssignmentActivity = vi.fn();
 
 vi.mock("@/features/interviews/server/interview-eligibility.service", () => ({
   getInterviewEligibility: (id: string) => getInterviewEligibility(id),
@@ -18,6 +19,9 @@ vi.mock("@/features/interviews/server/interview-dashboard.repository", () => ({
 }));
 vi.mock("@/features/interviews/server/interview-attempt.repository", () => ({
   listCycleAttempts: (input: unknown) => listCycleAttempts(input),
+}));
+vi.mock("@/features/interviews/server/interview-streak.repository", () => ({
+  listDailyAssignmentActivity: (id: string) => listDailyAssignmentActivity(id),
 }));
 
 const { getDashboardInterview } = await import(
@@ -66,6 +70,7 @@ beforeEach(() => {
   } as UserInterviewCycle);
   listCycleAssignmentSummary.mockResolvedValue(assignments());
   listCycleAttempts.mockResolvedValue([]);
+  listDailyAssignmentActivity.mockResolvedValue([]);
 });
 
 describe("getDashboardInterview", () => {
@@ -94,6 +99,7 @@ describe("getDashboardInterview", () => {
 
     expect(result).toEqual({ state: "ready_to_start" });
     expect(listCycleAssignmentSummary).not.toHaveBeenCalled();
+    expect(listDailyAssignmentActivity).not.toHaveBeenCalled();
   });
 
   it("shows zero progress for a fresh cycle", async () => {
@@ -141,6 +147,45 @@ describe("getDashboardInterview", () => {
     expect(result.dailyDueToday).toBe(2);
     expect(result.dailyAnsweredToday).toBe(2);
     expect(result.readiness).toBeGreaterThan(0);
+  });
+
+  it("surfaces the interview streak computed from daily activity", async () => {
+    listDailyAssignmentActivity.mockResolvedValue([
+      {
+        weekStart: new Date("2026-09-07T00:00:00Z"),
+        dayIndex: 1,
+        questionId: "q-0",
+        answered: true,
+      },
+      {
+        weekStart: new Date("2026-09-07T00:00:00Z"),
+        dayIndex: 1,
+        questionId: "q-1",
+        answered: true,
+      },
+      {
+        weekStart: new Date("2026-09-07T00:00:00Z"),
+        dayIndex: 2,
+        questionId: "q-2",
+        answered: true,
+      },
+      {
+        weekStart: new Date("2026-09-07T00:00:00Z"),
+        dayIndex: 2,
+        questionId: "q-3",
+        answered: true,
+      },
+    ]);
+
+    const result = await getDashboardInterview(
+      "u1",
+      new Date("2026-09-08T12:00:00Z"),
+    );
+
+    expect(result).toMatchObject({
+      state: "active",
+      streak: { current: 2, longest: 2, todayComplete: true },
+    });
   });
 
   it("degrades to unavailable when a read throws, never rejecting", async () => {

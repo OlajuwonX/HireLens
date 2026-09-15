@@ -5,6 +5,7 @@ import type { CyclePageQuestionRow } from "@/features/interviews/server/intervie
 const findCycleForWeek = vi.fn();
 const listCyclePageQuestions = vi.fn();
 const closeStaleCyclesForUser = vi.fn();
+const listDailyAssignmentActivity = vi.fn();
 
 vi.mock("@/features/interviews/server/interview-cycle.repository", () => ({
   findCycleForWeek: (input: unknown) => findCycleForWeek(input),
@@ -14,6 +15,9 @@ vi.mock("@/features/interviews/server/interview-page.repository", () => ({
 }));
 vi.mock("@/features/interviews/server/interview-readiness.service", () => ({
   closeStaleCyclesForUser: (input: unknown) => closeStaleCyclesForUser(input),
+}));
+vi.mock("@/features/interviews/server/interview-streak.repository", () => ({
+  listDailyAssignmentActivity: (id: string) => listDailyAssignmentActivity(id),
 }));
 
 const { getInterviewPageData } = await import(
@@ -53,6 +57,7 @@ beforeEach(() => {
     publicId: "cycle-pub",
     weekStart,
   } as UserInterviewCycle);
+  listDailyAssignmentActivity.mockResolvedValue([]);
 });
 
 describe("getInterviewPageData", () => {
@@ -63,6 +68,7 @@ describe("getInterviewPageData", () => {
       getInterviewPageData({ userId: "u1" }),
     ).resolves.toEqual({ status: "none" });
     expect(listCyclePageQuestions).not.toHaveBeenCalled();
+    expect(listDailyAssignmentActivity).not.toHaveBeenCalled();
   });
 
   it("never leaks the correct answer or explanation for an unanswered question", async () => {
@@ -155,6 +161,34 @@ describe("getInterviewPageData", () => {
       readiness: 100,
       completed: true,
       progress: { attempted: 30, correct: 30, incorrect: 0, total: 30 },
+    });
+  });
+
+  it("surfaces the interview streak computed from daily activity", async () => {
+    listCyclePageQuestions.mockResolvedValue([row(0), row(1)]);
+    listDailyAssignmentActivity.mockResolvedValue([
+      {
+        weekStart,
+        dayIndex: 1,
+        questionId: "pub-0",
+        answered: true,
+      },
+      {
+        weekStart,
+        dayIndex: 1,
+        questionId: "pub-1",
+        answered: true,
+      },
+    ]);
+
+    const data = await getInterviewPageData({
+      userId: "u1",
+      now: new Date("2026-09-07T09:00:00Z"),
+    });
+
+    expect(data).toMatchObject({
+      status: "ready",
+      streak: { current: 1, longest: 1, todayComplete: true },
     });
   });
 });

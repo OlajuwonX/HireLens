@@ -2,6 +2,7 @@ import "server-only";
 
 import type { InterviewDifficulty } from "@/lib/db/schema";
 import { computeReadiness } from "../readiness";
+import { computeStreak, type Streak } from "../streak";
 import { getCycleDayIndex, getWeekStart } from "../week";
 import { findCycleForWeek } from "./interview-cycle.repository";
 import {
@@ -9,6 +10,7 @@ import {
   type CyclePageQuestionRow,
 } from "./interview-page.repository";
 import { closeStaleCyclesForUser } from "./interview-readiness.service";
+import { listDailyAssignmentActivity } from "./interview-streak.repository";
 
 export type InterviewPageQuestion = {
   questionPublicId: string;
@@ -39,6 +41,7 @@ export type InterviewPageData =
         total: number;
       };
       completed: boolean;
+      streak: Streak;
       dailyToday: InterviewPageQuestion[];
       dailyUpcoming: number;
       practice: InterviewPageQuestion[];
@@ -88,10 +91,13 @@ export async function getInterviewPageData(input: {
   }
 
   const dayIndex = getCycleDayIndex(cycle.weekStart, now);
-  const rows = await listCyclePageQuestions({
-    userId: input.userId,
-    cycleId: cycle.id,
-  });
+  const [rows, streakRows] = await Promise.all([
+    listCyclePageQuestions({
+      userId: input.userId,
+      cycleId: cycle.id,
+    }),
+    listDailyAssignmentActivity(input.userId),
+  ]);
 
   const unlocked = (row: CyclePageQuestionRow) =>
     (row.dayIndex ?? Number.MAX_SAFE_INTEGER) <= dayIndex;
@@ -145,6 +151,7 @@ export async function getInterviewPageData(input: {
       total: rows.length,
     },
     completed: rows.length > 0 && attempts.length >= rows.length,
+    streak: computeStreak({ rows: streakRows, now }),
     dailyToday,
     dailyUpcoming,
     practice,
