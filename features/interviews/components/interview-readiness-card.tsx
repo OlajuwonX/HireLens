@@ -1,6 +1,8 @@
+import { Flame } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 import type { DashboardInterview } from "../server/interview-dashboard.service";
 
 const INTERVIEW_HREF = "/dashboard/interview";
@@ -106,6 +108,23 @@ function Active({
           incorrect
         </span>
         <span className="text-text-secondary">{dailyLabel}</span>
+        {interview.streak.current > 0 ? (
+          <span className="flex items-center gap-1 text-text-secondary">
+            <Flame
+              className={cn(
+                "size-3.5",
+                interview.streak.todayComplete
+                  ? "text-accent-hover"
+                  : "text-text-muted",
+              )}
+              aria-hidden
+            />
+            <span className="text-text-primary">
+              {interview.streak.current}
+            </span>{" "}
+            day streak
+          </span>
+        ) : null}
       </div>
 
       <Button asChild size="compact">
