@@ -1,3 +1,4 @@
+import { Flame } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { InterviewPageData } from "../server/interview-page.service";
 import { INTERVIEW_CYCLE_DAYS } from "../constants";
@@ -31,12 +32,32 @@ function Stat({
   );
 }
 
-function SectionHeading({ title, hint }: { title: string; hint: string }) {
+function StreakBadge({ current }: { current: number }) {
+  return (
+    <span className="flex items-center gap-1 rounded-control bg-accent px-2 py-0.5 font-mono text-[0.625rem] font-semibold uppercase tracking-wide text-accent-text">
+      <Flame className="size-3" aria-hidden />
+      {current} day streak
+    </span>
+  );
+}
+
+function SectionHeading({
+  title,
+  hint,
+  badge,
+}: {
+  title: string;
+  hint: string;
+  badge?: React.ReactNode;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <h2 className="text-section-title font-semibold text-text-primary">
-        {title}
-      </h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-section-title font-semibold text-text-primary">
+          {title}
+        </h2>
+        {badge}
+      </div>
       <span className="font-mono text-system uppercase text-text-muted">
         {hint}
       </span>
@@ -82,6 +103,11 @@ export function InterviewConsole({ data }: { data: ReadyData }) {
         <SectionHeading
           title="Daily questions"
           hint={`Day ${data.dayIndex} of ${INTERVIEW_CYCLE_DAYS}`}
+          badge={
+            data.streak.current > 0 ? (
+              <StreakBadge current={data.streak.current} />
+            ) : null
+          }
         />
         {data.dailyToday.length === 0 ? (
           <p className="text-meta text-text-secondary">

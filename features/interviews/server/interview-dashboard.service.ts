@@ -2,11 +2,13 @@ import "server-only";
 
 import type { InterviewDifficulty } from "@/lib/db/schema";
 import { computeReadiness } from "../readiness";
+import { computeStreak, type Streak } from "../streak";
 import { getCycleDayIndex, getWeekStart } from "../week";
 import { getInterviewEligibility } from "./interview-eligibility.service";
 import { listCycleAttempts } from "./interview-attempt.repository";
 import { findCycleForWeek } from "./interview-cycle.repository";
 import { listCycleAssignmentSummary } from "./interview-dashboard.repository";
+import { listDailyAssignmentActivity } from "./interview-streak.repository";
 
 export type DashboardInterview =
   | { state: "prerequisites"; hasResume: boolean; hasJobContext: boolean }
@@ -24,6 +26,7 @@ export type DashboardInterview =
       dailyDueToday: number;
       dailyAnsweredToday: number;
       completed: boolean;
+      streak: Streak;
     };
 
 export async function getDashboardInterview(
@@ -64,9 +67,10 @@ async function readDashboardInterview(
     return { state: "ready_to_start" };
   }
 
-  const [assignments, attempts] = await Promise.all([
+  const [assignments, attempts, streakRows] = await Promise.all([
     listCycleAssignmentSummary(cycle.id),
     listCycleAttempts({ userId, cycleId: cycle.id }),
+    listDailyAssignmentActivity(userId),
   ]);
 
   const dayIndex = getCycleDayIndex(cycle.weekStart, now);
@@ -113,5 +117,6 @@ async function readDashboardInterview(
       answeredIds.has(assignment.questionId),
     ).length,
     completed: total > 0 && attempted >= total,
+    streak: computeStreak({ rows: streakRows, now }),
   };
 }
