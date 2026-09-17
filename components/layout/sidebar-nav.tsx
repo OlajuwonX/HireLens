@@ -3,7 +3,15 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isActivePath, primaryNavigation, type NavItem } from "./navigation";
+import {
+  adminEntry,
+  adminNavigation,
+  backToAppEntry,
+  isActivePath,
+  isAdminModePath,
+  primaryNavigation,
+  type NavItem,
+} from "./navigation";
 
 function NavLink({
   item,
@@ -67,10 +75,31 @@ function NavLink({
 export function SidebarNav({
   collapsed = false,
   onNavigate,
+  isAdmin = false,
 }: {
   collapsed?: boolean;
   onNavigate?: () => void;
+  isAdmin?: boolean;
 }) {
+  const pathname = usePathname();
+
+  if (isAdmin && isAdminModePath(pathname)) {
+    return (
+      <nav aria-label="Administration" className="flex flex-1 flex-col gap-1">
+        <NavLink item={backToAppEntry} collapsed={collapsed} onNavigate={onNavigate} />
+        <div role="separator" className="my-1 border-t border-border" />
+        {adminNavigation.map((item) => (
+          <NavLink
+            key={item.href}
+            item={item}
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </nav>
+    );
+  }
+
   return (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-1">
       {primaryNavigation.map((item) => (
@@ -81,6 +110,16 @@ export function SidebarNav({
           onNavigate={onNavigate}
         />
       ))}
+      {isAdmin ? (
+        <>
+          <div role="separator" className="my-1 border-t border-border" />
+          <NavLink
+            item={adminEntry}
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        </>
+      ) : null}
     </nav>
   );
 }

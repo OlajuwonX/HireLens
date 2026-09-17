@@ -7,12 +7,21 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { MobileNavProvider } from "./mobile-nav-context";
-import { isActivePath, primaryNavigation, utilityRoutes } from "./navigation";
+import {
+  adminEntry,
+  adminNavigation,
+  isActivePath,
+  primaryNavigation,
+  utilityRoutes,
+} from "./navigation";
 
 function titleFromPathname(pathname: string) {
-  const match = [...primaryNavigation, ...utilityRoutes].find((item) =>
-    isActivePath(pathname, item.href),
-  );
+  const match = [
+    ...primaryNavigation,
+    ...utilityRoutes,
+    adminEntry,
+    ...adminNavigation,
+  ].find((item) => isActivePath(pathname, item.href));
 
   return match?.label ?? "";
 }
@@ -21,10 +30,12 @@ export function AppShell({
   sidebarFooter,
   headerSlot,
   children,
+  isAdmin = false,
 }: {
   sidebarFooter?: React.ReactNode;
   headerSlot?: React.ReactNode;
   children: React.ReactNode;
+  isAdmin?: boolean;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -51,6 +62,7 @@ export function AppShell({
           footer={sidebarFooter}
           mobileOpen={mobileOpen}
           onMobileClose={closeMobileNav}
+          isAdmin={isAdmin}
         />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
