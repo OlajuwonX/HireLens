@@ -74,7 +74,7 @@ export const adminEntry: NavItem = {
 };
 
 const allAdminNavigation: NavItem[] = [
-  { label: "Users", href: "/admin/users", Icon: Users, ready: false },
+  { label: "Users", href: "/admin/users", Icon: Users, ready: true },
   { label: "Feature Usage", href: "/admin/usage", Icon: Activity, ready: false },
   { label: "Errors", href: "/admin/errors", Icon: AlertTriangle, ready: false },
   {
