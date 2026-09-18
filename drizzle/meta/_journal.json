@@ -148,6 +148,13 @@
       "when": 1788871829193,
       "tag": "0020_unknown_pestilence",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789754488846,
+      "tag": "0021_burly_paper_doll",
+      "breakpoints": true
     }
   ]
 }

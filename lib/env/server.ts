@@ -108,6 +108,8 @@ const serverEnvSchema = z.object({
   CRON_SECRET: optionalString,
   PURGE_DRY_RUN: optionalBooleanWithDefault(true),
 
+  SENTRY_WEBHOOK_SECRET: optionalString,
+
   SITE_URL: optionalString,
   VERCEL_PROJECT_PRODUCTION_URL: optionalString,
   VERCEL_URL: optionalString,

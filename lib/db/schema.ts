@@ -597,6 +597,28 @@ export const bugReports = pgTable(
   ],
 );
 
+export const adminErrorEvents = pgTable(
+  "admin_error_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    issueId: text("issue_id").notNull(),
+    sentryEventId: text("sentry_event_id"),
+    title: text("title").notNull(),
+    level: text("level"),
+    culprit: text("culprit"),
+    environment: text("environment"),
+    eventCount: integer("event_count").notNull().default(1),
+    firstSeen: timestamp("first_seen", { withTimezone: true }),
+    lastSeen: timestamp("last_seen", { withTimezone: true }),
+    permalink: text("permalink"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("admin_error_events_issue_id_idx").on(table.issueId),
+    index("admin_error_events_last_seen_idx").on(table.lastSeen),
+  ],
+);
+
 export const userPreferences = pgTable(
   "user_preferences",
   {
@@ -953,6 +975,8 @@ export const interviewAttemptsRelations = relations(
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type AdminErrorEvent = typeof adminErrorEvents.$inferSelect;
+export type NewAdminErrorEvent = typeof adminErrorEvents.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type NewResume = typeof resumes.$inferInsert;
 export type ResumeVersion = typeof resumeVersions.$inferSelect;

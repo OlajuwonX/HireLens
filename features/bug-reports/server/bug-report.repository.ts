@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, ilike, or, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   bugReports,
@@ -110,6 +110,20 @@ export async function findBugReportByPublicId(publicId: string) {
     .limit(1);
 
   return row ?? null;
+}
+
+export async function findBugReportsBySentryEventIds(sentryEventIds: string[]) {
+  if (sentryEventIds.length === 0) {
+    return [];
+  }
+
+  return db
+    .select({
+      publicId: bugReports.publicId,
+      sentryEventId: bugReports.sentryEventId,
+    })
+    .from(bugReports)
+    .where(inArray(bugReports.sentryEventId, sentryEventIds));
 }
 
 export async function updateBugReportStatus(input: {
