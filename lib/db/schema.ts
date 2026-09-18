@@ -619,6 +619,32 @@ export const adminErrorEvents = pgTable(
   ],
 );
 
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("admin_audit_log_public_id_idx").on(table.publicId),
+    index("admin_audit_log_actor_created_idx").on(
+      table.actorUserId,
+      table.createdAt,
+    ),
+    index("admin_audit_log_target_idx").on(table.targetType, table.targetId),
+  ],
+);
+
 export const userPreferences = pgTable(
   "user_preferences",
   {
@@ -977,6 +1003,8 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type AdminErrorEvent = typeof adminErrorEvents.$inferSelect;
 export type NewAdminErrorEvent = typeof adminErrorEvents.$inferInsert;
+export type AdminAuditLogEntry = typeof adminAuditLog.$inferSelect;
+export type NewAdminAuditLogEntry = typeof adminAuditLog.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type NewResume = typeof resumes.$inferInsert;
 export type ResumeVersion = typeof resumeVersions.$inferSelect;

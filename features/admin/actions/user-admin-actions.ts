@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireAdminUser } from "@/features/admin/server/require-admin";
 import { userActionSchema } from "@/features/admin/schemas/user-admin.schema";
+import { recordAdminAction } from "@/features/admin/server/audit-log";
+import { ADMIN_ACTIONS, ADMIN_TARGET_TYPES } from "@/features/admin/constants";
 import {
   countAdmins,
   findUserByPublicId,
@@ -26,7 +28,7 @@ function getPublicId(formData: FormData) {
 }
 
 export async function promoteToAdminAction(formData: FormData) {
-  await requireAdminUser();
+  const admin = await requireAdminUser();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -37,10 +39,18 @@ export async function promoteToAdminAction(formData: FormData) {
 
   await setUserRole({ publicId, role: "ADMIN" });
   revalidatePath(ADMIN_USERS_PATH);
+
+  await recordAdminAction({
+    actorId: admin.id,
+    action: ADMIN_ACTIONS.PROMOTE_ADMIN,
+    targetType: ADMIN_TARGET_TYPES.USER,
+    targetId: publicId,
+    metadata: { targetEmail: target.email },
+  });
 }
 
 export async function revokeAdminAction(formData: FormData) {
-  await requireAdminUser();
+  const admin = await requireAdminUser();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -57,6 +67,14 @@ export async function revokeAdminAction(formData: FormData) {
 
   await setUserRole({ publicId, role: "USER" });
   revalidatePath(ADMIN_USERS_PATH);
+
+  await recordAdminAction({
+    actorId: admin.id,
+    action: ADMIN_ACTIONS.REVOKE_ADMIN,
+    targetType: ADMIN_TARGET_TYPES.USER,
+    targetId: publicId,
+    metadata: { targetEmail: target.email },
+  });
 }
 
 export async function disableUserAction(formData: FormData) {
@@ -73,10 +91,18 @@ export async function disableUserAction(formData: FormData) {
 
   await setUserDisabled({ publicId, disabled: true });
   revalidatePath(ADMIN_USERS_PATH);
+
+  await recordAdminAction({
+    actorId: admin.id,
+    action: ADMIN_ACTIONS.DISABLE_USER,
+    targetType: ADMIN_TARGET_TYPES.USER,
+    targetId: publicId,
+    metadata: { targetEmail: target.email },
+  });
 }
 
 export async function enableUserAction(formData: FormData) {
-  await requireAdminUser();
+  const admin = await requireAdminUser();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -87,4 +113,12 @@ export async function enableUserAction(formData: FormData) {
 
   await setUserDisabled({ publicId, disabled: false });
   revalidatePath(ADMIN_USERS_PATH);
+
+  await recordAdminAction({
+    actorId: admin.id,
+    action: ADMIN_ACTIONS.ENABLE_USER,
+    targetType: ADMIN_TARGET_TYPES.USER,
+    targetId: publicId,
+    metadata: { targetEmail: target.email },
+  });
 }

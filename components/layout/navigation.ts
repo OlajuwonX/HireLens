@@ -81,7 +81,7 @@ const allAdminNavigation: NavItem[] = [
     label: "Audit Log",
     href: "/admin/audit-log",
     Icon: ScrollText,
-    ready: false,
+    ready: true,
   },
   { label: "Bug Reports", href: OPS_CONSOLE_PATH, Icon: Bug, ready: true },
   { label: "System Health", href: "/admin/health", Icon: HeartPulse, ready: false },

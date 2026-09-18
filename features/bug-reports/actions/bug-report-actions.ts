@@ -6,6 +6,8 @@ import {
   requireAdminUser,
   OPS_CONSOLE_PATH,
 } from "@/features/admin/server/require-admin";
+import { recordAdminAction } from "@/features/admin/server/audit-log";
+import { ADMIN_ACTIONS, ADMIN_TARGET_TYPES } from "@/features/admin/constants";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 import {
   createBugReportSchema,
@@ -56,7 +58,7 @@ export async function submitBugReportAction(
 }
 
 export async function updateBugStatusAction(formData: FormData) {
-  await requireAdminUser();
+  const admin = await requireAdminUser();
 
   const parsed = updateBugStatusSchema.safeParse({
     publicId: getString(formData, "publicId"),
@@ -71,4 +73,12 @@ export async function updateBugStatusAction(formData: FormData) {
 
   revalidatePath(OPS_CONSOLE_PATH);
   revalidatePath(`${OPS_CONSOLE_PATH}/${parsed.data.publicId}`);
+
+  await recordAdminAction({
+    actorId: admin.id,
+    action: ADMIN_ACTIONS.UPDATE_BUG_STATUS,
+    targetType: ADMIN_TARGET_TYPES.BUG_REPORT,
+    targetId: parsed.data.publicId,
+    metadata: { status: parsed.data.status },
+  });
 }
