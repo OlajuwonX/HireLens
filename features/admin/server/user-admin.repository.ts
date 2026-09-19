@@ -1,8 +1,9 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { users, type UserRole } from "@/lib/db/schema";
+import type { UserSortKey } from "@/features/admin/schemas/user-search.schema";
 
 const listRowShape = {
   publicId: users.publicId,
@@ -26,8 +27,16 @@ export type AdminUserListRow = {
   createdAt: Date;
 };
 
+const sortColumns = {
+  name: users.name,
+  createdAt: users.createdAt,
+  lastLoginAt: users.lastLoginAt,
+} satisfies Record<UserSortKey, unknown>;
+
 export async function listUsers(input: {
   q?: string;
+  sort?: UserSortKey;
+  dir?: "asc" | "desc";
   limit: number;
   offset: number;
 }): Promise<AdminUserListRow[]> {
@@ -38,11 +47,14 @@ export async function listUsers(input: {
     conditions.push(or(ilike(users.name, term), ilike(users.email, term))!);
   }
 
+  const sortColumn = sortColumns[input.sort ?? "createdAt"];
+  const order = input.dir === "asc" ? asc : desc;
+
   return db
     .select(listRowShape)
     .from(users)
     .where(and(...conditions))
-    .orderBy(desc(users.createdAt))
+    .orderBy(order(sortColumn))
     .limit(input.limit)
     .offset(input.offset);
 }

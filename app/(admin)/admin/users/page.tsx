@@ -27,8 +27,14 @@ export default async function AdminUsersPage({
   await requireAdminUser();
 
   const raw = await searchParams;
-  const parsed = userSearchSchema.safeParse({ q: raw.q });
+  const parsed = userSearchSchema.safeParse({
+    q: raw.q,
+    sort: raw.sort,
+    dir: raw.dir,
+  });
   const filters = parsed.success ? parsed.data : {};
+  const sort = filters.sort ?? "createdAt";
+  const dir = filters.dir ?? "desc";
 
   const page = Number.parseInt(
     typeof raw.page === "string" ? raw.page : "1",
@@ -39,6 +45,8 @@ export default async function AdminUsersPage({
   const [rows, metrics] = await Promise.all([
     listUsers({
       q: filters.q,
+      sort,
+      dir,
       limit: PAGE_SIZE + 1,
       offset: (currentPage - 1) * PAGE_SIZE,
     }),
@@ -52,7 +60,7 @@ export default async function AdminUsersPage({
     <div className="space-y-6">
       <PageHeader
         title="Users"
-        description="Everyone with a HireLens account, newest first."
+        description="Everyone with a HireLens account."
       />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -71,7 +79,7 @@ export default async function AdminUsersPage({
         />
       ) : (
         <>
-          <UserTable rows={visible} />
+          <UserTable rows={visible} q={filters.q} sort={sort} dir={dir} />
           {hasMore ? (
             <LoadMore basePath={USERS_PATH} page={currentPage + 1} />
           ) : null}
