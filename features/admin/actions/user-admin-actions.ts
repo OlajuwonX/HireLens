@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminUser } from "@/features/admin/server/require-admin";
 import { userActionSchema } from "@/features/admin/schemas/user-admin.schema";
 import { recordAdminAction } from "@/features/admin/server/audit-log";
+import { assertNotImpersonating } from "@/features/auth/server/impersonation";
 import { ADMIN_ACTIONS, ADMIN_TARGET_TYPES } from "@/features/admin/constants";
 import {
   countAdmins,
@@ -29,6 +30,7 @@ function getPublicId(formData: FormData) {
 
 export async function promoteToAdminAction(formData: FormData) {
   const admin = await requireAdminUser();
+  await assertNotImpersonating();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -51,6 +53,7 @@ export async function promoteToAdminAction(formData: FormData) {
 
 export async function revokeAdminAction(formData: FormData) {
   const admin = await requireAdminUser();
+  await assertNotImpersonating();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -79,6 +82,7 @@ export async function revokeAdminAction(formData: FormData) {
 
 export async function disableUserAction(formData: FormData) {
   const admin = await requireAdminUser();
+  await assertNotImpersonating();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);
@@ -103,6 +107,7 @@ export async function disableUserAction(formData: FormData) {
 
 export async function enableUserAction(formData: FormData) {
   const admin = await requireAdminUser();
+  await assertNotImpersonating();
 
   const publicId = getPublicId(formData);
   const target = await findUserByPublicId(publicId);

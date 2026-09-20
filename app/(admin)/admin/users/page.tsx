@@ -24,7 +24,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdminUser();
+  const admin = await requireAdminUser();
 
   const raw = await searchParams;
   const parsed = userSearchSchema.safeParse({
@@ -79,7 +79,13 @@ export default async function AdminUsersPage({
         />
       ) : (
         <>
-          <UserTable rows={visible} q={filters.q} sort={sort} dir={dir} />
+          <UserTable
+            rows={visible}
+            q={filters.q}
+            sort={sort}
+            dir={dir}
+            currentAdminEmail={admin.email}
+          />
           {hasMore ? (
             <LoadMore basePath={USERS_PATH} page={currentPage + 1} />
           ) : null}

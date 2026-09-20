@@ -1,0 +1,36 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat-admin-panel",
+    "feat-ai-fix",
+    "feat-auth-verification",
+    "feat-cover-letter-fix",
+    "feat-gmail-watcher-integration",
+    "feat-interview-branch",
+    "feat-onboarding-flow",
+    "feat-resume-templates",
+    "main"
+  ],
+  "parent": {
+    "feat-admin-panel": "main",
+    "feat-ai-fix": "main",
+    "feat-auth-verification": "main",
+    "feat-cover-letter-fix": "main",
+    "feat-gmail-watcher-integration": "main",
+    "feat-interview-branch": "main",
+    "feat-onboarding-flow": "main",
+    "feat-resume-templates": "main",
+    "main": null
+  },
+  "order": [
+    "main",
+    "feat-admin-panel",
+    "feat-ai-fix",
+    "feat-auth-verification",
+    "feat-cover-letter-fix",
+    "feat-gmail-watcher-integration",
+    "feat-interview-branch",
+    "feat-onboarding-flow",
+    "feat-resume-templates"
+  ]
+}

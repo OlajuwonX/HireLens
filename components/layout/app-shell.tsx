@@ -5,6 +5,7 @@ import { useUiStore } from "@/lib/stores/ui-store";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ImpersonationBanner } from "@/features/admin/components/impersonation-banner";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { MobileNavProvider } from "./mobile-nav-context";
 import {
@@ -31,11 +32,13 @@ export function AppShell({
   headerSlot,
   children,
   isAdmin = false,
+  impersonation,
 }: {
   sidebarFooter?: React.ReactNode;
   headerSlot?: React.ReactNode;
   children: React.ReactNode;
   isAdmin?: boolean;
+  impersonation?: { targetEmail: string; expiresAt: string } | null;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -66,6 +69,13 @@ export function AppShell({
         />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {impersonation ? (
+            <ImpersonationBanner
+              targetEmail={impersonation.targetEmail}
+              expiresAt={impersonation.expiresAt}
+            />
+          ) : null}
+
           <header className="z-30 shrink-0 border-b border-border bg-background/95 backdrop-blur">
             <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
               <IconButton

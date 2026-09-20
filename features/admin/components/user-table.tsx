@@ -14,6 +14,7 @@ import type {
 import type { AdminUserListRow } from "@/features/admin/server/user-admin.repository";
 import { AdminConfirmActionButton } from "./admin-confirm-action-button";
 import { AdminInlineActionButton } from "./admin-inline-action-button";
+import { ImpersonateActionButton } from "./impersonate-action-button";
 
 const DEFAULT_DIR: Record<UserSortKey, "asc" | "desc"> = {
   name: "asc",
@@ -98,11 +99,13 @@ export function UserTable({
   q,
   sort,
   dir,
+  currentAdminEmail,
 }: {
   rows: AdminUserListRow[];
   q?: UserSearchFilters["q"];
   sort: UserSortKey;
   dir: "asc" | "desc";
+  currentAdminEmail: string;
 }) {
   return (
     <div className="overflow-hidden rounded-card border border-border bg-surface">
@@ -207,6 +210,13 @@ export function UserTable({
                         successMessage="Account disabled."
                       />
                     )}
+
+                    {row.role !== "ADMIN" && row.email !== currentAdminEmail ? (
+                      <ImpersonateActionButton
+                        publicId={row.publicId}
+                        targetLabel={row.name ?? row.email}
+                      />
+                    ) : null}
                   </div>
                 </td>
               </tr>
