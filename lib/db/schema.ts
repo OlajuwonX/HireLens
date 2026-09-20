@@ -597,6 +597,87 @@ export const bugReports = pgTable(
   ],
 );
 
+export const adminErrorEvents = pgTable(
+  "admin_error_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    issueId: text("issue_id").notNull(),
+    sentryEventId: text("sentry_event_id"),
+    title: text("title").notNull(),
+    level: text("level"),
+    culprit: text("culprit"),
+    environment: text("environment"),
+    eventCount: integer("event_count").notNull().default(1),
+    firstSeen: timestamp("first_seen", { withTimezone: true }),
+    lastSeen: timestamp("last_seen", { withTimezone: true }),
+    permalink: text("permalink"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("admin_error_events_issue_id_idx").on(table.issueId),
+    index("admin_error_events_last_seen_idx").on(table.lastSeen),
+  ],
+);
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("admin_audit_log_public_id_idx").on(table.publicId),
+    index("admin_audit_log_actor_created_idx").on(
+      table.actorUserId,
+      table.createdAt,
+    ),
+    index("admin_audit_log_target_idx").on(table.targetType, table.targetId),
+  ],
+);
+
+export const adminImpersonationSessions = pgTable(
+  "admin_impersonation_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    targetUserId: uuid("target_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    reason: text("reason").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("admin_impersonation_sessions_public_id_idx").on(
+      table.publicId,
+    ),
+    index("admin_impersonation_sessions_actor_idx").on(
+      table.actorUserId,
+      table.startedAt,
+    ),
+    index("admin_impersonation_sessions_target_idx").on(table.targetUserId),
+  ],
+);
+
 export const userPreferences = pgTable(
   "user_preferences",
   {
@@ -953,6 +1034,14 @@ export const interviewAttemptsRelations = relations(
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type AdminErrorEvent = typeof adminErrorEvents.$inferSelect;
+export type NewAdminErrorEvent = typeof adminErrorEvents.$inferInsert;
+export type AdminAuditLogEntry = typeof adminAuditLog.$inferSelect;
+export type NewAdminAuditLogEntry = typeof adminAuditLog.$inferInsert;
+export type AdminImpersonationSession =
+  typeof adminImpersonationSessions.$inferSelect;
+export type NewAdminImpersonationSession =
+  typeof adminImpersonationSessions.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type NewResume = typeof resumes.$inferInsert;
 export type ResumeVersion = typeof resumeVersions.$inferSelect;

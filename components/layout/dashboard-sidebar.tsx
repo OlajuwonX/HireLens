@@ -36,10 +36,12 @@ export function DashboardSidebar({
   footer,
   mobileOpen,
   onMobileClose,
+  isAdmin = false,
 }: {
   footer?: React.ReactNode;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  isAdmin?: boolean;
 }) {
   const collapsed = useUiStore((state) => state.sidebarCollapsed);
   const toggleCollapsed = useUiStore((state) => state.toggleSidebar);
@@ -75,7 +77,7 @@ export function DashboardSidebar({
         </div>
 
         <div className="flex flex-1 flex-col px-3 pb-3">
-          <SidebarNav collapsed={collapsed} />
+          <SidebarNav collapsed={collapsed} isAdmin={isAdmin} />
 
           <div className="mt-auto space-y-1 pt-3">
             {footer ? (
@@ -132,7 +134,7 @@ export function DashboardSidebar({
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">
-          <SidebarNav onNavigate={onMobileClose} />
+          <SidebarNav onNavigate={onMobileClose} isAdmin={isAdmin} />
           {footer ? (
             <div className="mt-auto border-t border-border pt-3">{footer}</div>
           ) : null}

@@ -2,6 +2,7 @@
 
 import { passwordSchema } from "@/features/auth/schemas/credentials.schema";
 import { passwordProblemMessage } from "@/features/auth/schemas/password-rules";
+import { isImpersonating } from "@/features/auth/server/impersonation";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { setAccountPassword } from "@/features/auth/server/user.service";
 import { revalidatePath } from "next/cache";
@@ -16,6 +17,13 @@ export async function setAccountPasswordAction(
   _state: PasswordFormState,
   formData: FormData,
 ): Promise<PasswordFormState> {
+  if (await isImpersonating()) {
+    return {
+      status: "error",
+      message: "Unavailable while impersonating a user.",
+    };
+  }
+
   const user = await requireDatabaseUser();
   const password = getString(formData, "password");
 

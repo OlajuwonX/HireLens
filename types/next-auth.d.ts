@@ -8,6 +8,11 @@ declare module "next-auth" {
       lastLoginAt: string | null;
       onboardingCompleted: boolean;
     };
+    impersonation: {
+      actingAdminId: string;
+      targetUserId: string;
+      expiresAt: string;
+    } | null;
   }
 }
 
@@ -16,5 +21,8 @@ declare module "next-auth/jwt" {
     dbUserId?: string;
     lastLoginAt?: string | null;
     onboardingCompleted?: boolean;
+    impersonatedUserId?: string;
+    actingAdminId?: string;
+    impersonationExpiresAt?: string;
   }
 }

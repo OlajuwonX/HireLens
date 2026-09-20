@@ -1,5 +1,6 @@
 "use server";
 
+import { isImpersonating } from "@/features/auth/server/impersonation";
 import {
   requireDatabaseUser,
   requireSessionUserId,
@@ -28,6 +29,13 @@ export async function disableAccountAction(
   _state: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  if (await isImpersonating()) {
+    return {
+      status: "error",
+      message: "Unavailable while impersonating a user.",
+    };
+  }
+
   const user = await requireDatabaseUser();
 
   if (getString(formData, "confirm").toUpperCase() !== DISABLE_CONFIRM_PHRASE) {
@@ -66,6 +74,13 @@ export async function requestAccountDeletionAction(
   _state: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
+  if (await isImpersonating()) {
+    return {
+      status: "error",
+      message: "Unavailable while impersonating a user.",
+    };
+  }
+
   const user = await requireDatabaseUser();
 
   if (getString(formData, "confirm").toUpperCase() !== DELETE_CONFIRM_PHRASE) {
