@@ -84,7 +84,7 @@ const allAdminNavigation: NavItem[] = [
     ready: true,
   },
   { label: "Bug Reports", href: OPS_CONSOLE_PATH, Icon: Bug, ready: true },
-  { label: "System Health", href: "/admin/health", Icon: HeartPulse, ready: false },
+  { label: "System Health", href: "/admin/health", Icon: HeartPulse, ready: true },
 ];
 
 export const adminNavigation = allAdminNavigation.filter((item) => item.ready);
