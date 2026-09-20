@@ -1,13 +1,34 @@
 import { signInSchema } from "@/features/auth/schemas/credentials.schema";
+import { isClaimExpired } from "@/features/auth/impersonation-token";
 import {
   recordSignIn,
   verifyCredentials,
 } from "@/features/auth/server/user.service";
+import { resolveImpersonationClaimForUpdate } from "@/features/admin/server/impersonation.service";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+function readImpersonationUpdateSessionId(session: unknown) {
+  if (!session || typeof session !== "object" || !("impersonation" in session)) {
+    return undefined;
+  }
+
+  const value = (session as { impersonation: unknown }).impersonation;
+
+  if (value === null) {
+    return null;
+  }
+
+  if (value && typeof value === "object" && "sessionPublicId" in value) {
+    const raw = (value as { sessionPublicId: unknown }).sessionPublicId;
+    return typeof raw === "string" ? raw : undefined;
+  }
+
+  return undefined;
+}
+
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -45,7 +66,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/sign-in",
   },
   callbacks: {
-    async jwt({ token, account, profile, user }) {
+    async jwt({ token, account, profile, user, trigger, session }) {
+      const currentImpersonationExpiresAt =
+        typeof token.impersonationExpiresAt === "string"
+          ? token.impersonationExpiresAt
+          : undefined;
+
+      if (isClaimExpired(currentImpersonationExpiresAt, new Date())) {
+        delete token.impersonatedUserId;
+        delete token.actingAdminId;
+        delete token.impersonationExpiresAt;
+      }
+
+      if (trigger === "update") {
+        const sessionId = readImpersonationUpdateSessionId(session);
+
+        if (sessionId === null) {
+          delete token.impersonatedUserId;
+          delete token.actingAdminId;
+          delete token.impersonationExpiresAt;
+        } else if (
+          typeof sessionId === "string" &&
+          typeof token.dbUserId === "string"
+        ) {
+          const claim = await resolveImpersonationClaimForUpdate({
+            sessionPublicId: sessionId,
+            callerRealUserId: token.dbUserId,
+          });
+
+          if (claim) {
+            token.impersonatedUserId = claim.targetUserId;
+            token.actingAdminId = claim.actingAdminId;
+            token.impersonationExpiresAt = claim.expiresAt;
+          }
+        }
+      }
+
       if (account?.provider === "google" && profile?.email) {
         const record = await recordSignIn({
           profile: {
@@ -79,6 +135,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           typeof token.lastLoginAt === "string" ? token.lastLoginAt : null,
         onboardingCompleted: Boolean(token.onboardingCompleted),
       };
+      const impersonatedUserId =
+        typeof token.impersonatedUserId === "string"
+          ? token.impersonatedUserId
+          : undefined;
+      const actingAdminId =
+        typeof token.actingAdminId === "string"
+          ? token.actingAdminId
+          : undefined;
+      const impersonationExpiresAt =
+        typeof token.impersonationExpiresAt === "string"
+          ? token.impersonationExpiresAt
+          : undefined;
+
+      session.impersonation =
+        impersonatedUserId &&
+        actingAdminId &&
+        !isClaimExpired(impersonationExpiresAt, new Date())
+          ? {
+              actingAdminId,
+              targetUserId: impersonatedUserId,
+              expiresAt: impersonationExpiresAt!,
+            }
+          : null;
       return session;
     },
   },

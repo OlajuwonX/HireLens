@@ -34,7 +34,7 @@ export async function requireSessionUserId(): Promise<string> {
   return record.id;
 }
 
-export async function requireDatabaseUser(): Promise<SessionUser> {
+async function requireRealAccountRecord() {
   const userId = await requireSessionUserId();
   const record = await getAccountRecord(userId);
 
@@ -48,7 +48,34 @@ export async function requireDatabaseUser(): Promise<SessionUser> {
     redirect(blocked);
   }
 
+  return record;
+}
+
+export async function requireRealDatabaseUser(): Promise<SessionUser> {
+  const record = await requireRealAccountRecord();
+
   return { id: record.id, name: record.name, email: record.email };
+}
+
+export async function requireDatabaseUser(): Promise<SessionUser> {
+  const realRecord = await requireRealAccountRecord();
+
+  const session = await auth();
+  const impersonation = session?.impersonation;
+
+  if (impersonation) {
+    const targetRecord = await getAccountRecord(impersonation.targetUserId);
+
+    if (targetRecord) {
+      return {
+        id: targetRecord.id,
+        name: targetRecord.name,
+        email: targetRecord.email,
+      };
+    }
+  }
+
+  return { id: realRecord.id, name: realRecord.name, email: realRecord.email };
 }
 
 export async function requireVerifiedDatabaseUser() {

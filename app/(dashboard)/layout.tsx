@@ -3,7 +3,11 @@ import { PageContainer } from "@/components/layout/page-container";
 import { ProfileMenu } from "@/components/layout/profile-menu";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { getAccountRecord } from "@/features/auth/server/current-account";
-import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { getImpersonationBannerData } from "@/features/auth/server/impersonation";
+import {
+  requireDatabaseUser,
+  requireRealDatabaseUser,
+} from "@/features/auth/server/require-database-user";
 import { requireCurrentUser } from "@/features/auth/server/require-user";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { getUnreadNotificationCount } from "@/features/notifications/server/notification.service";
@@ -17,15 +21,19 @@ export default async function DashboardLayout({
 }) {
   const { user, account } = await requireCurrentUser();
   const databaseUser = await requireDatabaseUser();
-  const [onboarding, unreadCount, record] = await Promise.all([
-    getOnboardingProgress(databaseUser.id),
-    getUnreadNotificationCount(databaseUser.id),
-    getAccountRecord(databaseUser.id),
-  ]);
+  const realUser = await requireRealDatabaseUser();
+  const [onboarding, unreadCount, realRecord, impersonation] =
+    await Promise.all([
+      getOnboardingProgress(databaseUser.id),
+      getUnreadNotificationCount(databaseUser.id),
+      getAccountRecord(realUser.id),
+      getImpersonationBannerData(),
+    ]);
 
   return (
     <AppShell
-      isAdmin={record?.role === "ADMIN"}
+      isAdmin={realRecord?.role === "ADMIN"}
+      impersonation={impersonation}
       headerSlot={<NotificationBell unreadCount={unreadCount} />}
       sidebarFooter={
         <ProfileMenu
