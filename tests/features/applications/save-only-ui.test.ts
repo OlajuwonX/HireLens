@@ -4,11 +4,7 @@ import { describe, expect, it } from "vitest";
 const read = (file: string) => readFileSync(file, "utf8");
 
 describe("migration", () => {
-  const journal = JSON.parse(read("drizzle/meta/_journal.json")) as {
-    entries: { tag: string }[];
-  };
-  const tag = journal.entries.at(-1)?.tag ?? "";
-  const sql = read(`drizzle/${tag}.sql`);
+  const sql = read("drizzle/0024_numerous_salo.sql");
 
   it("is a single additive column with a constant default", () => {
     expect(sql.trim()).toBe(

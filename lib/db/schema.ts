@@ -62,6 +62,8 @@ export const employmentType = pgEnum("employment_type", [
 
 export const applicationStatus = pgEnum("application_stage", [
   "PENDING",
+  "SHORTLISTED",
+  "INTERVIEW",
   "ACCEPTED",
   "REJECTED",
 ]);

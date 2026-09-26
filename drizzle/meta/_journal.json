@@ -176,6 +176,13 @@
       "when": 1790390487417,
       "tag": "0024_numerous_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790423417718,
+      "tag": "0025_overrated_pet_avengers",
+      "breakpoints": true
     }
   ]
 }

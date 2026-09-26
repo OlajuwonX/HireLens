@@ -76,7 +76,7 @@ export default async function DashboardPage() {
           hint={`${summary.pendingCount} pending`}
         />
         <MetricCard
-          label="Accepted"
+          label="Approved"
           value={summary.acceptedCount}
           hint={`${summary.rejectedCount} rejected`}
         />
