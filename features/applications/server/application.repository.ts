@@ -55,11 +55,13 @@ const listRowShape = {
   deadlineAt: jobs.deadlineAt,
   versionLabel: resumeVersions.label,
   matchScore: applicationAnalyses.overallScore,
+  saveOnly: applications.saveOnly,
 };
 
 export type ApplicationListRow = {
   publicId: string;
   status: Application["status"];
+  saveOnly: boolean;
   archivedAt: Date | null;
   createdAt: Date;
   title: string;
@@ -232,6 +234,7 @@ export async function createJobWithApplication(input: {
   job: Omit<NewJob, "userId">;
   resumeVersionId: string;
   activityTitle: string;
+  saveOnly?: boolean;
 }) {
   return db.transaction(async (tx) => {
     const [job] = await tx
@@ -246,6 +249,7 @@ export async function createJobWithApplication(input: {
         jobId: job.id,
         resumeVersionId: input.resumeVersionId,
         status: "PENDING",
+        saveOnly: input.saveOnly ?? false,
       })
       .returning();
 

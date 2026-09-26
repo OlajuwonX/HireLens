@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AnalysisNoticeToast } from "@/features/applications/components/analysis-notice-toast";
 import { ApplicationFilters } from "@/features/applications/components/application-filters";
+import { JobSavedToast } from "@/features/applications/components/job-saved-toast";
 import { SavedJobDrawer } from "@/features/applications/components/saved-job-drawer";
 import { SavedJobFeed } from "@/features/applications/components/saved-job-feed";
 import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
@@ -67,6 +68,7 @@ export default async function SavedJobsPage({
   if (filters.sort !== "activity_desc") query.set("sort", filters.sort);
 
   const openId = typeof raw.open === "string" ? raw.open : null;
+  const justSaved = raw.saved === "1" && raw.analysis !== "failed";
   const analysisFailed = raw.analysis === "failed";
   const analysisLimitReason = analysisFailed
     ? readUsageDenialReason(raw.reason)
@@ -118,6 +120,8 @@ export default async function SavedJobsPage({
       {analysisFailed ? (
         <AnalysisNoticeToast limitReason={analysisLimitReason} />
       ) : null}
+
+      {justSaved ? <JobSavedToast /> : null}
 
       {openId ? (
         <SavedJobDrawer

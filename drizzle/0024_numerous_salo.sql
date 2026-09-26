@@ -1,0 +1,1 @@
+ALTER TABLE "applications" ADD COLUMN "save_only" boolean DEFAULT false NOT NULL;

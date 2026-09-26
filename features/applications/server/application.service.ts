@@ -4,6 +4,7 @@ import { attachAnalysisApplication } from "@/features/analyses/server/analysis.r
 import { analyzeApplication } from "@/features/analyses/server/analysis.service";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
 import type { UsageDenialReason } from "@/features/usage/limit-notice";
+import { SAVE_ONLY_ANALYZE_MESSAGE } from "../analysis-state";
 import { applicationStatusLabels } from "../constants";
 import type {
   ApplicationFilters,
@@ -26,7 +27,7 @@ export type ApplicationResult<T> =
   | { ok: true; value: T }
   | {
       ok: false;
-      error: "NOT_FOUND" | "ANALYSIS_FAILED" | "LIMIT_REACHED";
+      error: "NOT_FOUND" | "ANALYSIS_FAILED" | "LIMIT_REACHED" | "SAVE_ONLY";
       message: string;
       limitReason?: UsageDenialReason;
     };
@@ -83,6 +84,56 @@ export async function getApplicationTimeline(input: {
   });
 }
 
+function toJobValues(values: SaveAndAnalyzeInput) {
+  return {
+    title: values.title,
+    company: values.company,
+    location: values.location ?? null,
+    workArrangement: values.workArrangement,
+    employmentType: values.employmentType,
+    salaryMin: values.salaryMin ?? null,
+    salaryMax: values.salaryMax ?? null,
+    currency: values.currency ?? null,
+    source: values.source ?? null,
+    sourceUrl: values.sourceUrl ?? null,
+    description: values.description,
+    requirements: values.requirements ?? null,
+    deadlineAt: values.deadlineAt ?? null,
+    notes: values.notes ?? null,
+  };
+}
+
+export async function saveJobOnly(input: {
+  userId: string;
+  values: SaveAndAnalyzeInput;
+}): Promise<ApplicationResult<{ applicationPublicId: string }>> {
+  const version = await getOwnedResumeVersion({
+    userId: input.userId,
+    versionPublicId: input.values.resumeVersionPublicId,
+  });
+
+  if (!version) {
+    return {
+      ok: false,
+      error: "NOT_FOUND",
+      message: "That resume version could not be found.",
+    };
+  }
+
+  const { application } = await createJobWithApplication({
+    userId: input.userId,
+    resumeVersionId: version.id,
+    activityTitle: "Job saved",
+    saveOnly: true,
+    job: toJobValues(input.values),
+  });
+
+  return {
+    ok: true,
+    value: { applicationPublicId: application.publicId },
+  };
+}
+
 export async function saveAndAnalyze(input: {
   userId: string;
   values: SaveAndAnalyzeInput;
@@ -111,22 +162,7 @@ export async function saveAndAnalyze(input: {
     userId: input.userId,
     resumeVersionId: version.id,
     activityTitle: "Application created",
-    job: {
-      title: input.values.title,
-      company: input.values.company,
-      location: input.values.location ?? null,
-      workArrangement: input.values.workArrangement,
-      employmentType: input.values.employmentType,
-      salaryMin: input.values.salaryMin ?? null,
-      salaryMax: input.values.salaryMax ?? null,
-      currency: input.values.currency ?? null,
-      source: input.values.source ?? null,
-      sourceUrl: input.values.sourceUrl ?? null,
-      description: input.values.description,
-      requirements: input.values.requirements ?? null,
-      deadlineAt: input.values.deadlineAt ?? null,
-      notes: input.values.notes ?? null,
-    },
+    job: toJobValues(input.values),
   });
 
   const analysis = await analyzeApplication({
@@ -218,6 +254,14 @@ export async function analyzeOwnedApplication(input: {
       ok: false,
       error: "NOT_FOUND",
       message: "That application could not be found.",
+    };
+  }
+
+  if (row.application.saveOnly) {
+    return {
+      ok: false,
+      error: "SAVE_ONLY",
+      message: SAVE_ONLY_ANALYZE_MESSAGE,
     };
   }
 

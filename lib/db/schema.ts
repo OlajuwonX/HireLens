@@ -416,6 +416,7 @@ export const applications = pgTable(
       onDelete: "set null",
     }),
     status: applicationStatus("stage").notNull().default("PENDING"),
+    saveOnly: boolean("save_only").notNull().default(false),
     appliedAt: timestamp("applied_at", { withTimezone: true }),
     followUpAt: timestamp("follow_up_at", { withTimezone: true }),
     interviewAt: timestamp("interview_at", { withTimezone: true }),

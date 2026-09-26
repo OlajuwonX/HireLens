@@ -169,6 +169,13 @@
       "when": 1789872375808,
       "tag": "0023_bouncy_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790390487417,
+      "tag": "0024_numerous_salo",
+      "breakpoints": true
     }
   ]
 }

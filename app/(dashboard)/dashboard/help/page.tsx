@@ -19,7 +19,7 @@ const guides = [
   },
   {
     title: "Save and analyze a job",
-    body: "Paste the posting into the application form and choose a resume. One analysis produces your match scores, requirement coverage and every AI document for that job.",
+    body: "Paste the posting into the application form and choose a resume. One analysis produces your match scores, requirement coverage and every AI document for that job. Choose Save instead to keep the job without AI; it will have no score or AI documents.",
     href: "/dashboard/applications",
     action: "Create an application",
   },

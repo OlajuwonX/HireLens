@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { JobCardSkeleton } from "@/components/ui/skeletons";
-import { ScoreRing } from "@/components/data-display/score-ring";
 import type { ApplicationListRow } from "../server/application.repository";
 import { shiftOffset } from "../feed-window";
 import {
@@ -12,6 +11,7 @@ import {
   type ApplicationFeedPage,
 } from "../actions/application-feed-actions";
 import { ApplicationStatusBadge } from "./application-status-badge";
+import { JobScoreSlot } from "./job-score-slot";
 import { SavedJobCard } from "./saved-job-card";
 
 const PREFETCH_MARGIN = "600px";
@@ -138,13 +138,15 @@ export function SavedJobFeed({
                   {row.company}
                 </p>
               </Link>
-              <ScoreRing
-                score={row.matchScore}
+              <JobScoreSlot
+                saveOnly={row.saveOnly}
+                matchScore={row.matchScore}
                 size={44}
                 className="max-sm:hidden"
               />
-              <ScoreRing
-                score={row.matchScore}
+              <JobScoreSlot
+                saveOnly={row.saveOnly}
+                matchScore={row.matchScore}
                 size={38}
                 className="sm:hidden"
               />

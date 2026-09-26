@@ -27,13 +27,36 @@ export type VersionOption = {
   isDefault: boolean;
 };
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButtons() {
+  const { pending, data } = useFormStatus();
+  const running = pending ? data?.get("intent") : null;
 
   return (
-    <Button type="submit" size="primary" disabled={pending}>
-      {pending ? "Saving and analysing…" : "Save & Analyze"}
-    </Button>
+    <div className="flex w-full flex-col-reverse gap-3 sm:w-auto sm:flex-row">
+      <Button
+        type="submit"
+        name="intent"
+        value="save"
+        variant="outline"
+        size="primary"
+        disabled={pending}
+        className="w-full justify-center sm:w-auto"
+      >
+        {running === "save" ? "Saving…" : "Save"}
+      </Button>
+      <span data-onboarding="save-analyze" className="inline-flex max-sm:w-full">
+        <Button
+          type="submit"
+          name="intent"
+          value="analyze"
+          size="primary"
+          disabled={pending}
+          className="w-full justify-center sm:w-auto"
+        >
+          {running === "analyze" ? "Saving and analysing…" : "Save & Analyze"}
+        </Button>
+      </span>
+    </div>
   );
 }
 
@@ -346,9 +369,7 @@ export function SaveAndAnalyzeForm({
       </section>
 
       <div className="flex justify-end border-t border-border pt-5">
-        <span data-onboarding="save-analyze" className="inline-flex">
-          <SubmitButton />
-        </span>
+        <SubmitButtons />
       </div>
     </form>
   );
