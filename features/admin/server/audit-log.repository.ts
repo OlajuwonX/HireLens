@@ -4,6 +4,7 @@ import { and, desc, eq, ilike } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { adminAuditLog, users } from "@/lib/db/schema";
 import type { AdminAction } from "@/features/admin/constants";
+import { likePattern } from "@/lib/search/query";
 
 const listRowShape = {
   publicId: adminAuditLog.publicId,
@@ -34,7 +35,7 @@ export async function listAuditLogEntries(input: {
   const conditions = [];
 
   if (input.actorEmail) {
-    conditions.push(ilike(users.email, `%${input.actorEmail}%`));
+    conditions.push(ilike(users.email, likePattern(input.actorEmail)));
   }
 
   if (input.action) {

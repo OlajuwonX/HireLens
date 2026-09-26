@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { users, type UserRole } from "@/lib/db/schema";
 import type { UserSortKey } from "@/features/admin/schemas/user-search.schema";
+import { likePattern } from "@/lib/search/query";
 
 const listRowShape = {
   publicId: users.publicId,
@@ -43,7 +44,7 @@ export async function listUsers(input: {
   const conditions = [isNull(users.deletedAt)];
 
   if (input.q) {
-    const term = `%${input.q}%`;
+    const term = likePattern(input.q);
     conditions.push(or(ilike(users.name, term), ilike(users.email, term))!);
   }
 
