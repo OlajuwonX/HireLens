@@ -21,6 +21,10 @@ export default async function ResumesPage() {
       <PageHeader
         title="Resumes"
         description="Every resume you upload sits under a job title. Versions you add and AI-improved resumes for that role stay in the same place."
+      />
+
+      <ResumeList
+        resumes={resumes}
         action={
           <AddResumeDialog
             options={options}
@@ -28,8 +32,6 @@ export default async function ResumesPage() {
           />
         }
       />
-
-      <ResumeList resumes={resumes} />
     </div>
   );
 }

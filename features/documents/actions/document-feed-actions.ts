@@ -9,7 +9,6 @@ import { getDocumentBoard } from "../server/document.service";
 
 const feedPageSchema = z.object({
   cursor: z.preprocess(blankToUndefined, z.iso.datetime().optional()),
-  q: z.preprocess(blankToUndefined, z.string().trim().max(200).optional()),
   type: z.preprocess(blankToUndefined, z.string().trim().max(64).optional()),
   from: z.preprocess(blankToUndefined, z.string().trim().max(32).optional()),
   to: z.preprocess(blankToUndefined, z.string().trim().max(32).optional()),

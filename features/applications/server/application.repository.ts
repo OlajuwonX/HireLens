@@ -6,11 +6,9 @@ import {
   desc,
   eq,
   gte,
-  ilike,
   isNotNull,
   isNull,
   lt,
-  or,
   type SQL,
 } from "drizzle-orm";
 import { db } from "@/lib/db/client";
@@ -151,15 +149,6 @@ export async function listApplicationsForUser(input: {
 
     if (input.filters.tab !== "ALL") {
       conditions.push(eq(applications.status, input.filters.tab));
-    }
-  }
-
-  if (input.filters.q) {
-    const pattern = `%${input.filters.q}%`;
-    const match = or(ilike(jobs.title, pattern), ilike(jobs.company, pattern));
-
-    if (match) {
-      conditions.push(match);
     }
   }
 

@@ -23,6 +23,14 @@ function readParam(
   return typeof value === "string" ? value : "";
 }
 
+function GoToSavedJobsButton() {
+  return (
+    <Button asChild className="w-full sm:w-auto">
+      <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
+    </Button>
+  );
+}
+
 export default async function DocumentsPage({
   searchParams,
 }: {
@@ -32,7 +40,6 @@ export default async function DocumentsPage({
   const raw = await searchParams;
 
   const filters = {
-    q: readParam(raw, "q"),
     type: readParam(raw, "type"),
     from: readParam(raw, "from"),
     to: readParam(raw, "to"),
@@ -56,15 +63,10 @@ export default async function DocumentsPage({
       <PageHeader
         title="AI Documents"
         description="Everything you have saved from an analysis, ready to edit or download."
-        action={
-          <Button asChild>
-            <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
-          </Button>
-        }
       />
 
       <Suspense fallback={null}>
-        <DocumentFilters />
+        <DocumentFilters action={<GoToSavedJobsButton />} />
       </Suspense>
 
       {page.length === 0 ? (
@@ -74,16 +76,10 @@ export default async function DocumentsPage({
           }
           description={
             hasFilters
-              ? "Try a different search, type or date range."
+              ? "Try a different type or date range."
               : "Open a saved job and save any AI result to keep it here."
           }
-          action={
-            hasFilters ? null : (
-              <Button asChild>
-                <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
-              </Button>
-            )
-          }
+          action={hasFilters ? null : <GoToSavedJobsButton />}
         />
       ) : (
         <DocumentFeed

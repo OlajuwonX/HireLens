@@ -11,6 +11,7 @@ import {
   getApplicationBoard,
   getStatusCounts,
 } from "@/features/applications/server/application.service";
+import { resolveJobsEmptyState } from "@/features/applications/toolbar";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { readUsageDenialReason } from "@/features/usage/limit-notice";
 import type { Metadata } from "next";
@@ -27,6 +28,14 @@ type SavedJobsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+function CreateApplicationButton() {
+  return (
+    <Button asChild className="w-full sm:w-auto">
+      <Link href="/dashboard/applications">Create application</Link>
+    </Button>
+  );
+}
+
 export default async function SavedJobsPage({
   searchParams,
 }: SavedJobsPageProps) {
@@ -34,7 +43,6 @@ export default async function SavedJobsPage({
   const raw = await searchParams;
 
   const parsed = applicationFiltersSchema.safeParse({
-    q: raw.q,
     tab: raw.tab ?? "PENDING",
     sort: raw.sort ?? "activity_desc",
     from: raw.from,
@@ -55,7 +63,6 @@ export default async function SavedJobsPage({
   ]);
 
   const query = new URLSearchParams();
-  if (filters.q) query.set("q", filters.q);
   if (filters.tab !== "PENDING") query.set("tab", filters.tab);
   if (filters.sort !== "activity_desc") query.set("sort", filters.sort);
 
@@ -68,40 +75,35 @@ export default async function SavedJobsPage({
   const visible = rows.slice(0, APPLICATION_PAGE_SIZE);
   const nextOffset =
     rows.length > APPLICATION_PAGE_SIZE ? APPLICATION_PAGE_SIZE : null;
+  const emptyKind = resolveJobsEmptyState({ counts });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Saved Jobs"
         description="Everything you are tracking, from pending through to a decision."
-        action={
-          <Button asChild>
-            <Link href="/dashboard/applications">Create application</Link>
-          </Button>
-        }
       />
 
       <Suspense fallback={null}>
-        <ApplicationFilters counts={counts} />
+        <ApplicationFilters
+          counts={counts}
+          action={<CreateApplicationButton />}
+        />
       </Suspense>
 
       {visible.length === 0 ? (
         <EmptyState
           title={
-            filters.q ? "Nothing matches that search" : "No applications yet"
+            emptyKind === "none-saved"
+              ? "No applications yet"
+              : "Nothing matches those filters"
           }
           description={
-            filters.q
-              ? "Try a different search or another status tab."
-              : "Create an application to save the job and analyze your resume against it."
+            emptyKind === "none-saved"
+              ? "Create an application to save the job and analyze your resume against it."
+              : "Try another status, sort order or date range."
           }
-          action={
-            filters.q ? null : (
-              <Button asChild>
-                <Link href="/dashboard/applications">Create application</Link>
-              </Button>
-            )
-          }
+          action={emptyKind === "none-saved" ? <CreateApplicationButton /> : null}
         />
       ) : (
         <SavedJobFeed

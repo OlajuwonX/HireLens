@@ -4,76 +4,62 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Dropdown } from "@/components/ui/dropdown";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SearchInput } from "@/components/ui/search-input";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import type { ResumeLibraryItem } from "@/features/resumes/types";
 import { deleteResumeAction } from "../actions/resume-actions";
+import {
+  RESUME_SCOPES,
+  filterResumesByScope,
+  resumeScopeLabels,
+  type ResumeScope,
+} from "../resume-scope";
 import { ResumeStatusBadge } from "./resume-status-badge";
 
-type ScopeValue = "ACTIVE" | "ARCHIVED" | "ALL";
+export function ResumeList({
+  resumes,
+  action,
+}: {
+  resumes: ResumeLibraryItem[];
+  action?: React.ReactNode;
+}) {
+  const [scope, setScope] = useState<ResumeScope>("ACTIVE");
 
-const scopeOptions = [
-  { value: "ACTIVE" as const, label: "Active job titles" },
-  { value: "ARCHIVED" as const, label: "Archived" },
-  { value: "ALL" as const, label: "All" },
-];
-
-export function ResumeList({ resumes }: { resumes: ResumeLibraryItem[] }) {
-  const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<ScopeValue>("ACTIVE");
-
-  const visible = useMemo(() => {
-    const term = query.trim().toLowerCase();
-
-    return resumes.filter((resume) => {
-      const archived = Boolean(resume.archivedAt);
-
-      if (scope === "ACTIVE" && archived) {
-        return false;
-      }
-
-      if (scope === "ARCHIVED" && !archived) {
-        return false;
-      }
-
-      return !term || resume.title.toLowerCase().includes(term);
-    });
-  }, [resumes, query, scope]);
+  const visible = useMemo(
+    () => filterResumesByScope(resumes, scope),
+    [resumes, scope],
+  );
 
   if (resumes.length === 0) {
     return (
       <EmptyState
         title="No job titles yet"
         description="Use Add resume to upload your first one. The job title you give it becomes the folder every version and AI-improved resume is filed under."
+        action={action}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <div className="min-w-0 flex-1">
-          <SearchInput
-            value={query}
-            aria-label="Search job titles"
-            placeholder="Search job titles"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
-
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Dropdown
           label="Filter job titles"
-          className="lg:w-56 lg:shrink-0"
+          className="sm:w-56 sm:shrink-0"
           value={scope}
-          onChange={(value) => setScope(value as ScopeValue)}
-          options={scopeOptions}
+          onChange={(value) => setScope(value as ResumeScope)}
+          options={RESUME_SCOPES.map((value) => ({
+            value,
+            label: resumeScopeLabels[value],
+          }))}
         />
+
+        {action ? <div className="flex shrink-0">{action}</div> : null}
       </div>
 
       {visible.length === 0 ? (
         <EmptyState
           title="No matching job titles"
-          description="Try a different search, or switch the filter to see archived job titles."
+          description="Switch the filter to see archived job titles."
         />
       ) : (
         <ul className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">

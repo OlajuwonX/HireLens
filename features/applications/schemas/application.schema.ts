@@ -54,7 +54,6 @@ const isoDate = z.preprocess(
 );
 
 export const applicationFiltersSchema = z.object({
-  q: z.preprocess(blankToUndefined, z.string().trim().max(200).optional()),
   tab: z.enum(APPLICATION_TABS).default("PENDING"),
   sort: z.enum(APPLICATION_SORT_OPTIONS).default("activity_desc"),
   from: isoDate,

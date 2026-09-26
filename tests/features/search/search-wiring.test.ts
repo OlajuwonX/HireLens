@@ -110,7 +110,7 @@ describe("palette safety and mobile behaviour", () => {
 
   it("shows an icon on mobile and a labelled shortcut button on desktop", () => {
     expect(trigger).toContain("sm:hidden");
-    expect(trigger).toContain("hidden h-9");
+    expect(trigger).toContain("hidden h-10");
     expect(trigger).toContain('aria-keyshortcuts="Control+K Meta+K"');
   });
 });
