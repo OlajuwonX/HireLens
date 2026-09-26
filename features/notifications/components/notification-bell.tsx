@@ -1,11 +1,14 @@
 "use client";
 
-import { IconButton } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
+import { notify } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import {
+  clearAllNotificationsAction,
+  deleteNotificationAction,
   loadNotificationsAction,
   markAllNotificationsReadAction,
   markNotificationReadAction,
@@ -15,6 +18,13 @@ import {
   formatUnreadBadge,
   type NotificationItem,
 } from "../notification-item";
+import {
+  CLEAR_ALL_CONFIRM_COPY,
+  removeNotification,
+  restoreNotification,
+  unreadAfterRemoval,
+  unreadAfterRestore,
+} from "../panel-state";
 
 function NotificationBody({ item }: { item: NotificationItem }) {
   return (
@@ -55,6 +65,8 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [status, setStatus] = useState<PanelStatus>("idle");
   const [unread, setUnread] = useState(unreadCount);
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
   const [, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
@@ -71,12 +83,14 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
     const onPointerDown = (event: PointerEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) {
         setOpen(false);
+        setConfirmingClear(false);
       }
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
+        setConfirmingClear(false);
       }
     };
 
@@ -93,6 +107,7 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
     const next = !open;
 
     setOpen(next);
+    setConfirmingClear(false);
 
     if (!next || status === "loading" || status === "ready") {
       return;
@@ -143,9 +158,72 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
     });
   }
 
+  function onDelete(item: NotificationItem) {
+    const { items: next, removed } = removeNotification(items, item.publicId);
+
+    if (!removed) {
+      return;
+    }
+
+    setItems(next);
+    setUnread((current) => unreadAfterRemoval(current, removed));
+    setAnnouncement(`Notification deleted: ${item.title}`);
+
+    startTransition(async () => {
+      let failure: string | null = null;
+
+      try {
+        const result = await deleteNotificationAction(item.publicId);
+
+        if (!result.ok) {
+          failure = result.message;
+        }
+      } catch {
+        failure = "The notification could not be deleted.";
+      }
+
+      if (failure) {
+        setItems((current) => restoreNotification(current, removed));
+        setUnread((current) => unreadAfterRestore(current, removed));
+        setAnnouncement("");
+        notify.error(failure);
+      }
+    });
+  }
+
+  function onClearAll() {
+    const snapshot = items;
+    const previousUnread = unread;
+
+    setConfirmingClear(false);
+    setItems([]);
+    setUnread(0);
+    setAnnouncement("All notifications deleted");
+
+    startTransition(async () => {
+      let failure: string | null = null;
+
+      try {
+        const result = await clearAllNotificationsAction();
+
+        if (!result.ok) {
+          failure = result.message;
+        }
+      } catch {
+        failure = "Notifications could not be cleared.";
+      }
+
+      if (failure) {
+        setItems((current) => (current.length === 0 ? snapshot : current));
+        setUnread(previousUnread);
+        setAnnouncement("");
+        notify.error(failure);
+      }
+    });
+  }
+
   const badge = formatUnreadBadge(unread);
-  const itemClassName =
-    "block w-full border-b border-border px-3 py-2.5 text-left last:border-b-0 hover:bg-surface-secondary";
+  const itemClassName = "block min-w-0 flex-1 px-3 py-2.5 text-left";
 
   return (
     <div ref={containerRef} className="relative shrink-0">
@@ -204,7 +282,10 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
             ) : (
               <ul>
                 {items.map((item) => (
-                  <li key={item.publicId}>
+                  <li
+                    key={item.publicId}
+                    className="flex items-start border-b border-border last:border-b-0 hover:bg-surface-secondary"
+                  >
                     {item.href ? (
                       <Link
                         href={item.href}
@@ -222,11 +303,64 @@ export function NotificationBell({ unreadCount }: { unreadCount: number }) {
                         <NotificationBody item={item} />
                       </button>
                     )}
+                    <IconButton
+                      label={`Delete notification: ${item.title}`}
+                      onClick={() => onDelete(item)}
+                      className="mr-1 mt-1 shrink-0 text-text-muted"
+                    >
+                      <Trash2 aria-hidden="true" className="size-4" />
+                    </IconButton>
                   </li>
                 ))}
               </ul>
             )}
           </div>
+
+          {status === "ready" && items.length > 0 ? (
+            <div className="border-t border-border px-3 py-2.5">
+              {confirmingClear ? (
+                <div
+                  role="group"
+                  aria-label="Confirm clear all"
+                  className="space-y-2"
+                >
+                  <p className="text-label text-text-secondary">
+                    {CLEAR_ALL_CONFIRM_COPY}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="danger"
+                      size="compact"
+                      onClick={onClearAll}
+                    >
+                      Yes, clear all
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="compact"
+                      onClick={() => setConfirmingClear(false)}
+                    >
+                      Keep
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingClear(true)}
+                  className="text-label text-text-secondary underline underline-offset-4 hover:text-text-primary"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          ) : null}
+
+          <p aria-live="polite" className="sr-only">
+            {announcement}
+          </p>
         </div>
       ) : null}
     </div>
