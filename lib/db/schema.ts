@@ -90,6 +90,7 @@ export const documentType = pgEnum("document_type", [
   "PROFESSIONAL_INTRO",
   "CAREER_CHANGE_EXPLANATION",
   "ENTRY_LEVEL_NOTE",
+  "REASON_TO_JOIN",
 ]);
 
 export const usageAction = pgEnum("usage_action", [

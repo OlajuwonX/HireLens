@@ -190,6 +190,13 @@
       "when": 1791004644627,
       "tag": "0026_zippy_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1791016196086,
+      "tag": "0027_eager_absorbing_man",
+      "breakpoints": true
     }
   ]
 }
