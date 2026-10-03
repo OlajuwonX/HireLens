@@ -109,7 +109,7 @@ export default function HomePage() {
       <SiteHeader />
 
       <main className="mx-auto w-full max-w-page px-6">
-        <section className="grid gap-12 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
+        <section className="grid gap-8 py-10 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24">
           <div>
             <h1 className="text-display font-semibold text-text-primary">
               Build a stronger application for every job you want.
@@ -137,7 +137,7 @@ export default function HomePage() {
         <section
           id="features"
           aria-labelledby="features-heading"
-          className="scroll-mt-20 border-t border-border py-16"
+          className="scroll-mt-20 border-t border-border py-10 sm:py-16"
         >
           <h2
             id="features-heading"
@@ -147,7 +147,7 @@ export default function HomePage() {
             <br />
             Every application.
           </h2>
-          <div className="mt-10 grid gap-px overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2">
+          <div className="mt-6 grid gap-px sm:mt-10 overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2">
             {capabilities.map((item) => (
               <div key={item.title} className="bg-surface p-6">
                 <h3 className="text-section-title font-semibold text-text-primary">
@@ -164,7 +164,7 @@ export default function HomePage() {
         <section
           id="how-it-works"
           aria-labelledby="how-it-works-heading"
-          className="scroll-mt-20 border-t border-border py-16"
+          className="scroll-mt-20 border-t border-border py-10 sm:py-16"
         >
           <h2
             id="how-it-works-heading"
@@ -176,7 +176,7 @@ export default function HomePage() {
             One analysis per job. Everything else reads from it, so nothing is
             generated twice.
           </p>
-          <ol className="mt-10 grid gap-px overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-6 grid gap-px sm:mt-10 overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => (
               <li key={step.title} className="bg-surface p-6">
                 <p className="font-mono text-system font-medium text-text-muted">
@@ -195,7 +195,7 @@ export default function HomePage() {
 
         <section
           aria-labelledby="honesty-heading"
-          className="border-t border-border py-16"
+          className="border-t border-border py-10 sm:py-16"
         >
           <h2
             id="honesty-heading"
@@ -214,7 +214,7 @@ export default function HomePage() {
         <section
           id="faq"
           aria-labelledby="faq-heading"
-          className="scroll-mt-20 border-t border-border py-16"
+          className="scroll-mt-20 border-t border-border py-10 sm:py-16"
         >
           <h2
             id="faq-heading"
@@ -222,7 +222,7 @@ export default function HomePage() {
           >
             Common questions
           </h2>
-          <dl className="mt-10 grid gap-px overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2">
+          <dl className="mt-6 grid gap-px sm:mt-10 overflow-hidden rounded-card border border-border bg-border sm:grid-cols-2">
             {FAQ.map((item) => (
               <div key={item.question} className="bg-surface p-6">
                 <dt className="text-section-title font-semibold text-text-primary">
@@ -238,7 +238,7 @@ export default function HomePage() {
 
         <section
           aria-labelledby="cta-heading"
-          className="border-t border-border py-16"
+          className="border-t border-border py-10 sm:py-16"
         >
           <h2
             id="cta-heading"

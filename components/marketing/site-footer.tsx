@@ -23,8 +23,8 @@ const author = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto w-full max-w-page px-6 py-12">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto w-full max-w-page px-6 py-8 sm:py-12">
+        <div className="grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <p className="text-section-title font-semibold text-text-primary">
               HireLens
@@ -77,7 +77,7 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-4 border-t sm:mt-10 border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-system text-text-muted">
             © 2026 HireLens
           </p>
