@@ -146,6 +146,7 @@ export const users = pgTable(
     email: text("email").notNull(),
     image: text("image"),
     passwordHash: text("password_hash"),
+    passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     onboardingCompleted: boolean("onboarding_completed")

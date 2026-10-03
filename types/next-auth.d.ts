@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface Session {
     user: DefaultSession["user"];
     dbUserId: string | null;
+    authTime: number | null;
     account: {
       lastLoginAt: string | null;
       onboardingCompleted: boolean;
@@ -19,6 +20,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     dbUserId?: string;
+    authTime?: number;
     lastLoginAt?: string | null;
     onboardingCompleted?: boolean;
     impersonatedUserId?: string;

@@ -24,7 +24,11 @@ export async function setUserPasswordHash(input: {
 }) {
   const [user] = await db
     .update(users)
-    .set({ passwordHash: input.passwordHash, updatedAt: new Date() })
+    .set({
+      passwordHash: input.passwordHash,
+      passwordChangedAt: new Date(),
+      updatedAt: new Date(),
+    })
     .where(eq(users.id, input.userId))
     .returning();
 
@@ -40,7 +44,9 @@ export async function markEmailVerified(input: {
     .set({
       emailVerifiedAt: new Date(),
       updatedAt: new Date(),
-      ...(input.clearPasswordHash ? { passwordHash: null } : {}),
+      ...(input.clearPasswordHash
+        ? { passwordHash: null, passwordChangedAt: new Date() }
+        : {}),
     })
     .where(eq(users.id, input.userId))
     .returning();

@@ -124,7 +124,15 @@ describe("database enum", () => {
     const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
       entries: { tag: string }[];
     };
-    const sql = readFileSync(`drizzle/${journal.entries.at(-1)?.tag}.sql`, "utf8");
+    const sql = journal.entries
+      .map((entry) => readFileSync(`drizzle/${entry.tag}.sql`, "utf8"))
+      .reverse()
+      .find((text) => text.includes("ADD VALUE 'SHORTLISTED'"));
+
+    if (!sql) {
+      throw new Error("The status enum migration is missing.");
+    }
+
     const statements = sql
       .split("--> statement-breakpoint")
       .map((s) => s.trim())

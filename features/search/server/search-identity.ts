@@ -6,6 +6,7 @@ import {
   resolveAccountState,
 } from "@/features/auth/account-state";
 import { getAccountRecord } from "@/features/auth/server/current-account";
+import { isSessionRevoked } from "@/features/auth/session-revocation";
 
 export type SearchIdentity =
   | { status: "ok"; userId: string }
@@ -21,7 +22,7 @@ export async function resolveSearchIdentity(): Promise<SearchIdentity> {
 
   const real = await getAccountRecord(session.dbUserId);
 
-  if (!real) {
+  if (!real || isSessionRevoked(real, session.authTime)) {
     return { status: "unauthenticated" };
   }
 
