@@ -1,6 +1,7 @@
 "use client";
 
 import { notify } from "@/components/ui/toast";
+import { clearUrlFlags } from "@/features/applications/url-flags";
 import { useEffect, useRef } from "react";
 
 export function JobSavedToast() {
@@ -13,6 +14,7 @@ export function JobSavedToast() {
 
     announced.current = true;
     notify.success("Job saved.");
+    clearUrlFlags(["saved"]);
   }, []);
 
   return null;

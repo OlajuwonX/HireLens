@@ -1,6 +1,7 @@
 "use client";
 
 import { notify } from "@/components/ui/toast";
+import { clearUrlFlags } from "@/features/applications/url-flags";
 import {
   usageLimitMessage,
   type UsageDenialReason,
@@ -27,6 +28,7 @@ export function AnalysisNoticeToast({
         ? usageLimitMessage(limitReason)
         : "The job was saved, but the analysis could not be completed. Use Analyze to try again.",
     );
+    clearUrlFlags(["saved", "analysis", "reason"]);
   }, [key, limitReason]);
 
   return null;
