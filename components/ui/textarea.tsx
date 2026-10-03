@@ -11,7 +11,7 @@ export function Textarea({ className, ref, ...props }: TextareaProps) {
     <textarea
       ref={ref}
       className={cn(
-        "field-sizing-content min-h-24 w-full resize-y rounded-control border border-border bg-surface px-3 py-2 text-body text-text-primary transition-colors",
+        "field-sizing-content min-h-24 max-h-[50dvh] w-full resize-y overflow-y-auto rounded-control border border-border bg-surface px-3 py-2 text-body text-text-primary transition-colors",
         "placeholder:text-text-muted",
         "hover:border-border-strong",
         "focus:border-accent-hover focus:outline-none focus-visible:outline-none",
