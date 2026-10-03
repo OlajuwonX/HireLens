@@ -93,7 +93,7 @@ export function ApplicationDrawer({
                   title={disabled ? (documentsDisabledReason ?? undefined) : undefined}
                   onClick={() => setTab(name)}
                   className={cn(
-                    "h-9 min-w-0 flex-1 truncate whitespace-nowrap rounded-control px-2 text-meta font-semibold transition-colors sm:px-3",
+                    "h-9 min-w-0 flex-auto truncate whitespace-nowrap rounded-control px-2 text-meta font-semibold transition-colors sm:px-3",
                     "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-text-secondary",
                     tab === name
                       ? "bg-accent text-accent-text"
