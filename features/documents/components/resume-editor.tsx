@@ -56,7 +56,7 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="min-w-0 space-y-1">
       <Label>{label}</Label>
       <Input
         value={value}
@@ -563,7 +563,7 @@ export function ResumeEditor({
           {resume.education.map((entry, index) => (
             <div
               key={index}
-              className="grid gap-3 rounded-card border border-border p-3 sm:grid-cols-[1fr_1fr_auto]"
+              className="grid gap-3 rounded-card border border-border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
             >
               <Field
                 label="Qualification"
