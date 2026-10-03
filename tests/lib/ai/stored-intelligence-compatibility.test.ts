@@ -85,6 +85,10 @@ describe("an analysis stored before this change stays readable", () => {
     expect(parsed.optimizationPlan.droppedEvidence).toEqual([]);
   });
 
+  it("reads a missing reason as empty instead of failing", () => {
+    expect(parsed.reasonToJoin).toBe("");
+  });
+
   it("leaves every previously stored section intact", () => {
     expect(parsed.scoring.overallScore).toBe(71);
     expect(parsed.coverLetter).toBe("Dear hiring manager.");

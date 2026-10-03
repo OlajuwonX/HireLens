@@ -25,6 +25,7 @@ export { KEYWORD_ANALYSIS_PROMPT } from "./keyword-analysis.prompt";
 export { OPTIMIZATION_PLAN_PROMPT } from "./optimization-plan.prompt";
 export { PROFESSIONAL_SUMMARY_PROMPT } from "./professional-summary.prompt";
 export { RECOMMENDATIONS_PROMPT } from "./recommendations.prompt";
+export { REASON_TO_JOIN_PROMPT } from "./reason-to-join.prompt";
 export { REFINEMENT_PASS_PROMPT } from "./refinement-pass.prompt";
 export { REQUIREMENT_COVERAGE_PROMPT } from "./requirement-coverage.prompt";
 export { SCORING_PROMPT } from "./scoring.prompt";

@@ -143,6 +143,7 @@ function analysisWithResponsibilities(
     bulletRewrites: [],
     professionalSummary: "",
     coverLetter: "",
+    reasonToJoin: "",
     applicationEmail: { subject: "", body: "" },
     followUpMessage: "",
   } as StoredApplicationIntelligence;

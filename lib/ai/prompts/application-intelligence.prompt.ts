@@ -6,13 +6,14 @@ import { IMPROVED_RESUME_PROMPT } from "./improved-resume.prompt";
 import { KEYWORD_ANALYSIS_PROMPT } from "./keyword-analysis.prompt";
 import { OPTIMIZATION_PLAN_PROMPT } from "./optimization-plan.prompt";
 import { PROFESSIONAL_SUMMARY_PROMPT } from "./professional-summary.prompt";
+import { REASON_TO_JOIN_PROMPT } from "./reason-to-join.prompt";
 import { RECOMMENDATIONS_PROMPT } from "./recommendations.prompt";
 import { REFINEMENT_PASS_PROMPT } from "./refinement-pass.prompt";
 import { REQUIREMENT_COVERAGE_PROMPT } from "./requirement-coverage.prompt";
 import { SCORING_PROMPT } from "./scoring.prompt";
 
 export const APPLICATION_INTELLIGENCE_PROMPT_VERSION =
-  "application-intelligence-v2";
+  "application-intelligence-v3";
 
 const sections = [
   REQUIREMENT_COVERAGE_PROMPT,
@@ -22,6 +23,7 @@ const sections = [
   BULLET_REWRITER_PROMPT,
   PROFESSIONAL_SUMMARY_PROMPT,
   COVER_LETTER_PROMPT,
+  REASON_TO_JOIN_PROMPT,
   APPLICATION_EMAIL_PROMPT,
   FOLLOW_UP_PROMPT,
   RECOMMENDATIONS_PROMPT,

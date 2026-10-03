@@ -188,6 +188,7 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
         ],
         professionalSummary: `Mock professional summary for ${title}.`,
         coverLetter: `Mock cover letter for ${title} at ${company}. Configure GEMINI_API_KEY for real output.`,
+        reasonToJoin: `Mock reason for joining ${company} as ${title}. Configure GEMINI_API_KEY for real output.`,
         applicationEmail: {
           subject: `Application for ${title}`,
           body: "Mock application email body. Configure GEMINI_API_KEY for real output.",
