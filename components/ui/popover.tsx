@@ -36,6 +36,7 @@ export function Popover({
   onOpenChange?: (open: boolean) => void;
 }) {
   const [uncontrolled, setUncontrolled] = useState(false);
+  const [inDialog, setInDialog] = useState(false);
   const isOpen = open ?? uncontrolled;
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -69,6 +70,10 @@ export function Popover({
       rootRef.current?.querySelector<HTMLElement>(
         `#${CSS.escape(triggerId)}`,
       ) ?? null;
+
+    // A transformed dialog becomes the containing block for `fixed`, so the
+    // phone bottom sheet would anchor to the dialog instead of the screen.
+    setInDialog(Boolean(rootRef.current?.closest('[role="dialog"]')));
 
     const focusable = panelRef.current?.querySelector<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
@@ -124,7 +129,9 @@ export function Popover({
           aria-label={title}
           className={cn(
             "hl-scroll z-50 max-h-[min(26rem,calc(100dvh-6rem))] overflow-y-auto rounded-card border border-border bg-surface p-3 shadow-lg",
-            "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:w-auto",
+            inDialog
+              ? "max-sm:static max-sm:mt-2 max-sm:w-full"
+              : "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:w-auto",
             "sm:absolute sm:mt-2 sm:w-64",
             align === "end" ? "sm:right-0" : "sm:left-0",
             panelClassName,
