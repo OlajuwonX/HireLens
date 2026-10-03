@@ -45,16 +45,22 @@ export function ErrorEventTable({
             key={row.id}
             className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between md:gap-4"
           >
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-meta font-medium text-text-primary">
-                {row.title}
-              </p>
-              {row.culprit ? (
-                <p className="truncate font-mono text-system text-text-muted">
-                  {row.culprit}
+            <details className="group min-w-0 flex-1">
+              <summary className="cursor-pointer list-none rounded-control [&::-webkit-details-marker]:hidden">
+                <p className="line-clamp-2 text-meta font-medium wrap-break-word text-text-primary group-open:line-clamp-none">
+                  {row.title}
                 </p>
-              ) : null}
-            </div>
+                {row.culprit ? (
+                  <p className="truncate font-mono text-system text-text-muted group-open:whitespace-normal group-open:wrap-break-word">
+                    {row.culprit}
+                  </p>
+                ) : null}
+                <span className="font-mono text-system text-info">
+                  <span className="group-open:hidden">Show full message</span>
+                  <span className="hidden group-open:inline">Show less</span>
+                </span>
+              </summary>
+            </details>
 
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {row.level ? (
