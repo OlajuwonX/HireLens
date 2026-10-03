@@ -41,6 +41,16 @@ describe("createJobSchema", () => {
     expect(result.data?.sourceUrl).toBeUndefined();
   });
 
+  it("rejects a source URL that is not http or https", () => {
+    for (const sourceUrl of [
+      "javascript:alert(1)",
+      "data:text/html,hi",
+      "ftp://careers.turner.com",
+    ]) {
+      expect(parse({ sourceUrl }).success, sourceUrl).toBe(false);
+    }
+  });
+
   it("rejects a source URL that is not a URL", () => {
     expect(parse({ sourceUrl: "careers.turner.com" }).success).toBe(false);
     expect(parse({ sourceUrl: "https://careers.turner.com" }).success).toBe(

@@ -42,7 +42,13 @@ export const jobFieldsSchema = z.object({
   source: optionalText(120),
   sourceUrl: z.preprocess(
     blankToUndefined,
-    z.url("Enter a valid URL, including https://").max(2048).optional(),
+    z
+      .url({
+        protocol: /^https?$/,
+        error: "Enter a valid URL, including https://",
+      })
+      .max(2048)
+      .optional(),
   ),
   description: z
     .string()

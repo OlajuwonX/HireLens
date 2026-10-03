@@ -135,7 +135,7 @@ export async function SavedJobDrawer({
         />
       </dl>
 
-      {row.job.sourceUrl ? (
+      {row.job.sourceUrl && /^https?:\/\//i.test(row.job.sourceUrl) ? (
         <Link
           href={row.job.sourceUrl}
           target="_blank"
