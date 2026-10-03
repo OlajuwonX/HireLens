@@ -14,6 +14,7 @@ export const AI_VIEWS = [
   "BULLET_REWRITE",
   "PROFESSIONAL_SUMMARY",
   "COVER_LETTER",
+  "REASON_TO_JOIN",
   "APPLICATION_EMAIL",
   "FOLLOW_UP_MESSAGE",
 ] as const;
@@ -27,6 +28,7 @@ export const aiViewLabels: Record<AiView, string> = {
   BULLET_REWRITE: "Bullet rewrites",
   PROFESSIONAL_SUMMARY: "Professional summary",
   COVER_LETTER: "Cover letter",
+  REASON_TO_JOIN: "Reason",
   APPLICATION_EMAIL: "Application email",
   FOLLOW_UP_MESSAGE: "Follow-up message",
 };
@@ -66,6 +68,8 @@ export function viewIsPopulated(
       return result.professionalSummary.length > 0;
     case "COVER_LETTER":
       return result.coverLetter.length > 0;
+    case "REASON_TO_JOIN":
+      return result.reasonToJoin.length > 0;
     case "APPLICATION_EMAIL":
       return result.applicationEmail.body.length > 0;
     case "FOLLOW_UP_MESSAGE":
@@ -131,6 +135,8 @@ export function viewToPlainText(
       return result.professionalSummary;
     case "COVER_LETTER":
       return result.coverLetter;
+    case "REASON_TO_JOIN":
+      return result.reasonToJoin;
     case "APPLICATION_EMAIL":
       return [
         `Subject: ${result.applicationEmail.subject}`,

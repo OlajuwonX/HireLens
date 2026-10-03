@@ -3,6 +3,7 @@ import type { AiView } from "@/features/analyses/server/analysis.mapper";
 export const DOCUMENT_TYPES = [
   "IMPROVED_RESUME",
   "COVER_LETTER",
+  "REASON_TO_JOIN",
   "APPLICATION_EMAIL",
   "PROFESSIONAL_SUMMARY",
   "KEYWORD_ANALYSIS",
@@ -19,6 +20,7 @@ export const documentTypeForView: Record<AiView, DocumentType> = {
   BULLET_REWRITE: "BULLET_REWRITE",
   PROFESSIONAL_SUMMARY: "PROFESSIONAL_SUMMARY",
   COVER_LETTER: "COVER_LETTER",
+  REASON_TO_JOIN: "REASON_TO_JOIN",
   APPLICATION_EMAIL: "APPLICATION_EMAIL",
   FOLLOW_UP_MESSAGE: "FOLLOW_UP_MESSAGE",
 };
@@ -26,6 +28,7 @@ export const documentTypeForView: Record<AiView, DocumentType> = {
 export const documentTypeLabels: Record<string, string> = {
   IMPROVED_RESUME: "Improved resume",
   COVER_LETTER: "Cover letter",
+  REASON_TO_JOIN: "Reason",
   APPLICATION_EMAIL: "Application email",
   PROFESSIONAL_SUMMARY: "Professional summary",
   KEYWORD_ANALYSIS: "Keyword gap analysis",

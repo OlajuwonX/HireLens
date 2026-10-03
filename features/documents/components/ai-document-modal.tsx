@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Search,
   Sparkles,
+  Target,
   UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ const icons: Record<
   BULLET_REWRITE: FileText,
   PROFESSIONAL_SUMMARY: UserRound,
   COVER_LETTER: FileText,
+  REASON_TO_JOIN: Target,
   APPLICATION_EMAIL: Mail,
   FOLLOW_UP_MESSAGE: MessageSquare,
 };
@@ -102,6 +104,7 @@ export function AiDocumentModal({
   title,
   content,
   disabled,
+  disabledReason,
   applicationPublicId,
   view,
   savedDocumentId,
@@ -110,6 +113,7 @@ export function AiDocumentModal({
   title: string;
   content: string;
   disabled: boolean;
+  disabledReason?: string;
   applicationPublicId: string;
   view: AiView;
   savedDocumentId: string | null;
@@ -170,6 +174,7 @@ export function AiDocumentModal({
           align="start"
           block
           disabled={disabled}
+          title={disabled ? disabledReason : undefined}
           className="gap-2"
         >
           <Icon className="size-4 shrink-0" aria-hidden />
