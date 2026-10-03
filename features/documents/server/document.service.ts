@@ -10,6 +10,7 @@ import {
   viewToPlainText,
   type AiView,
 } from "@/features/analyses/server/analysis.mapper";
+import { SAVE_ONLY_DOCUMENT_MESSAGE } from "@/features/applications/analysis-state";
 import { getOwnedApplication } from "@/features/applications/server/application.service";
 import { resumeVersionExistsWithAnyLabel } from "@/features/resumes/server/resume-version.repository";
 import { findOrCreateResumeGroupByTitle } from "@/features/resumes/server/resume.repository";
@@ -160,6 +161,13 @@ export async function saveApplicationView(input: {
     return {
       ok: false as const,
       message: "That application could not be found.",
+    };
+  }
+
+  if (row.application.saveOnly) {
+    return {
+      ok: false as const,
+      message: SAVE_ONLY_DOCUMENT_MESSAGE,
     };
   }
 

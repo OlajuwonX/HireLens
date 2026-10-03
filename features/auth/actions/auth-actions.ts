@@ -2,13 +2,20 @@
 
 import { signIn, signOut } from "@/auth";
 import {
+  isRateLimitedSignIn,
+  RATE_LIMITED_MESSAGE,
+} from "@/features/auth/rate-limited-sign-in";
+import {
   signInSchema,
   signUpSchema,
 } from "@/features/auth/schemas/credentials.schema";
 import { passwordProblemMessage } from "@/features/auth/schemas/password-rules";
 import { registerCredentialsUser } from "@/features/auth/server/user.service";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
+import { isRateLimited } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/rate-limit/client-ip";
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthFormState } from "./auth-form-state";
 
@@ -47,6 +54,10 @@ export async function signInWithCredentials(
   try {
     await signIn("credentials", { ...parsed.data, redirect: false });
   } catch (error) {
+    if (isRateLimitedSignIn(error)) {
+      return { status: "error", message: RATE_LIMITED_MESSAGE };
+    }
+
     if (error instanceof AuthError) {
       return {
         status: "error",
@@ -64,6 +75,10 @@ export async function signUpWithCredentials(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  if (await isRateLimited("signUpIp", clientIp(await headers()))) {
+    return { status: "error", message: RATE_LIMITED_MESSAGE };
+  }
+
   const password = getString(formData, "password");
   const parsed = signUpSchema.safeParse({
     name: getString(formData, "name"),
@@ -98,7 +113,7 @@ export async function signUpWithCredentials(
       redirect: false,
     });
   } catch (error) {
-    if (error instanceof AuthError) {
+    if (isRateLimitedSignIn(error) || error instanceof AuthError) {
       return {
         status: "error",
         message: "Account created, but sign-in failed. Try signing in.",

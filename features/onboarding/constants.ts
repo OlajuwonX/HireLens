@@ -43,7 +43,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     route: "/dashboard/applications",
     anchors: ["save-analyze"],
     title: "Check it, then analyze",
-    body: "Correct anything the extraction got wrong, and paste the job's own link into Job posting URL. When it reads right, press Save & Analyze.",
+    body: "Correct anything the extraction got wrong, and paste the job's own link into Job posting URL. When it reads right, press Save & Analyze to get your match score, or Save to keep the job without AI.",
     isDone: (progress) => progress.hasApplication,
   },
   {

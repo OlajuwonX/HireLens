@@ -49,12 +49,11 @@ const isoDate = z.preprocess(
   blankToUndefined,
   z
     .string()
-    .regex(/^d{4}-d{2}-d{2}$/)
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
 );
 
 export const applicationFiltersSchema = z.object({
-  q: z.preprocess(blankToUndefined, z.string().trim().max(200).optional()),
   tab: z.enum(APPLICATION_TABS).default("PENDING"),
   sort: z.enum(APPLICATION_SORT_OPTIONS).default("activity_desc"),
   from: isoDate,

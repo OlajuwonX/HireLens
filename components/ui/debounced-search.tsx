@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { SEARCH_DEBOUNCE_MS } from "@/lib/search/constants";
+import { createDraftSync, type DraftSync } from "@/lib/search/draft-sync";
+import { useEffect, useRef, useState } from "react";
 import { SearchInput } from "./search-input";
 
 export function DebouncedSearch({
@@ -8,7 +10,7 @@ export function DebouncedSearch({
   onSearch,
   placeholder,
   label,
-  delay = 350,
+  delay = SEARCH_DEBOUNCE_MS,
   className,
 }: {
   value: string;
@@ -19,20 +21,45 @@ export function DebouncedSearch({
   className?: string;
 }) {
   const [draft, setDraft] = useState(value);
+  const draftRef = useRef(draft);
+  const onSearchRef = useRef(onSearch);
+  const syncRef = useRef<DraftSync | null>(null);
+
+  if (syncRef.current === null) {
+    syncRef.current = createDraftSync(value);
+  }
+
+  const sync = syncRef.current;
 
   useEffect(() => {
-    setDraft(value);
-  }, [value]);
+    draftRef.current = draft;
+    onSearchRef.current = onSearch;
+  });
 
   useEffect(() => {
-    if (draft === value) {
+    const next = sync.reconcile(draftRef.current, value);
+
+    if (next !== draftRef.current) {
+      setDraft(next);
+    }
+  }, [value, sync]);
+
+  useEffect(() => {
+    if (draft === sync.lastCommitted()) {
       return;
     }
 
-    const timer = setTimeout(() => onSearch(draft), delay);
+    const timer = setTimeout(() => {
+      if (draft === sync.lastCommitted()) {
+        return;
+      }
+
+      sync.commit(draft);
+      onSearchRef.current(draft);
+    }, delay);
 
     return () => clearTimeout(timer);
-  }, [draft, value, delay, onSearch]);
+  }, [draft, delay, sync]);
 
   return (
     <SearchInput
@@ -44,7 +71,11 @@ export function DebouncedSearch({
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           event.preventDefault();
-          onSearch(draft);
+
+          if (draft !== sync.lastCommitted()) {
+            sync.commit(draft);
+            onSearchRef.current(draft);
+          }
         }
       }}
     />

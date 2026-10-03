@@ -20,7 +20,7 @@ export function DocumentFeed({
 }: {
   initialRows: DocumentListRow[];
   initialCursor: string | null;
-  filters: { q: string; type: string; from: string; to: string };
+  filters: { type: string; from: string; to: string };
 }) {
   const [rows, setRows] = useState(initialRows);
   const [cursor, setCursor] = useState(initialCursor);

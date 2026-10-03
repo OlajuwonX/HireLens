@@ -15,6 +15,7 @@ export function ApplicationDrawer({
   overview,
   analysis,
   documents,
+  documentsDisabledReason = null,
 }: {
   title: string;
   subtitle: string;
@@ -22,6 +23,7 @@ export function ApplicationDrawer({
   overview: React.ReactNode;
   analysis: React.ReactNode;
   documents: React.ReactNode;
+  documentsDisabledReason?: string | null;
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
 
@@ -73,24 +75,35 @@ export function ApplicationDrawer({
             aria-label="Application sections"
             className="hl-scroll flex gap-1 overflow-x-auto rounded-control border border-border bg-surface p-1"
           >
-            {TABS.map((name) => (
-              <button
-                key={name}
-                type="button"
-                role="tab"
-                data-onboarding={name === "Analysis" ? "analysis-tab" : undefined}
-                aria-selected={tab === name}
-                onClick={() => setTab(name)}
-                className={cn(
-                  "h-9 flex-1 shrink-0 whitespace-nowrap rounded-control px-3 text-meta font-semibold transition-colors",
-                  tab === name
-                    ? "bg-accent text-accent-text"
-                    : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary",
-                )}
-              >
-                {name}
-              </button>
-            ))}
+            {TABS.map((name) => {
+              const disabled =
+                name === "AI Documents" && documentsDisabledReason !== null;
+
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  role="tab"
+                  data-onboarding={
+                    name === "Analysis" ? "analysis-tab" : undefined
+                  }
+                  aria-selected={tab === name}
+                  aria-disabled={disabled || undefined}
+                  disabled={disabled}
+                  title={disabled ? (documentsDisabledReason ?? undefined) : undefined}
+                  onClick={() => setTab(name)}
+                  className={cn(
+                    "h-9 flex-1 shrink-0 whitespace-nowrap rounded-control px-3 text-meta font-semibold transition-colors",
+                    "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-text-secondary",
+                    tab === name
+                      ? "bg-accent text-accent-text"
+                      : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary",
+                  )}
+                >
+                  {name}
+                </button>
+              );
+            })}
           </div>
         </div>
 

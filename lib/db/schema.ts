@@ -62,6 +62,8 @@ export const employmentType = pgEnum("employment_type", [
 
 export const applicationStatus = pgEnum("application_stage", [
   "PENDING",
+  "SHORTLISTED",
+  "INTERVIEW",
   "ACCEPTED",
   "REJECTED",
 ]);
@@ -144,6 +146,7 @@ export const users = pgTable(
     email: text("email").notNull(),
     image: text("image"),
     passwordHash: text("password_hash"),
+    passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     onboardingCompleted: boolean("onboarding_completed")
@@ -416,6 +419,7 @@ export const applications = pgTable(
       onDelete: "set null",
     }),
     status: applicationStatus("stage").notNull().default("PENDING"),
+    saveOnly: boolean("save_only").notNull().default(false),
     appliedAt: timestamp("applied_at", { withTimezone: true }),
     followUpAt: timestamp("follow_up_at", { withTimezone: true }),
     interviewAt: timestamp("interview_at", { withTimezone: true }),

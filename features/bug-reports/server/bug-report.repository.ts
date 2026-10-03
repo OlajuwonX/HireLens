@@ -8,6 +8,7 @@ import {
   type BugStatus,
   type NewBugReport,
 } from "@/lib/db/schema";
+import { likePattern } from "@/lib/search/query";
 import type { BugFilters } from "../schemas/bug-report.schema";
 
 const listRowShape = {
@@ -60,7 +61,7 @@ export async function listBugReports(input: {
   const conditions: (SQL | undefined)[] = [];
 
   if (input.filters.q) {
-    const term = `%${input.filters.q}%`;
+    const term = likePattern(input.filters.q);
 
     conditions.push(
       or(ilike(bugReports.title, term), ilike(users.email, term)),

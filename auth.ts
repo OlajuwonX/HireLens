@@ -1,10 +1,14 @@
 import { signInSchema } from "@/features/auth/schemas/credentials.schema";
 import { isClaimExpired } from "@/features/auth/impersonation-token";
+import { RateLimitedSignIn } from "@/features/auth/rate-limited-sign-in";
+import { SESSION_MAX_AGE_SECONDS } from "@/features/auth/session-revocation";
 import {
   recordSignIn,
   verifyCredentials,
 } from "@/features/auth/server/user.service";
 import { resolveImpersonationClaimForUpdate } from "@/features/admin/server/impersonation.service";
+import { isRateLimited } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/rate-limit/client-ip";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -39,11 +43,20 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = signInSchema.safeParse(raw);
 
         if (!parsed.success) {
           return null;
+        }
+
+        const [ipLimited, emailLimited] = await Promise.all([
+          isRateLimited("signInIp", clientIp(request.headers)),
+          isRateLimited("signInEmail", parsed.data.email),
+        ]);
+
+        if (ipLimited || emailLimited) {
+          throw new RateLimitedSignIn();
         }
 
         const user = await verifyCredentials(parsed.data);
@@ -61,7 +74,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: SESSION_MAX_AGE_SECONDS },
   pages: {
     signIn: "/sign-in",
   },
@@ -117,12 +130,14 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         token.dbUserId = record.id;
         token.lastLoginAt = record.lastLoginAt?.toISOString() ?? null;
         token.onboardingCompleted = record.onboardingCompleted;
+        token.authTime = Date.now();
       }
 
       if (account?.provider === "credentials" && user) {
         token.dbUserId = typeof user.id === "string" ? user.id : token.dbUserId;
         token.lastLoginAt = new Date().toISOString();
         token.onboardingCompleted = Boolean(token.onboardingCompleted);
+        token.authTime = Date.now();
       }
 
       return token;
@@ -130,6 +145,8 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     session({ session, token }) {
       session.dbUserId =
         typeof token.dbUserId === "string" ? token.dbUserId : null;
+      session.authTime =
+        typeof token.authTime === "number" ? token.authTime : null;
       session.account = {
         lastLoginAt:
           typeof token.lastLoginAt === "string" ? token.lastLoginAt : null,

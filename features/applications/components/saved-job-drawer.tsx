@@ -26,6 +26,7 @@ import {
   type UsageDenialReason,
 } from "@/features/usage/limit-notice";
 import Link from "next/link";
+import { SAVE_ONLY_REASON } from "../analysis-state";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { ReanalyzeButton } from "./reanalyze-button";
@@ -65,7 +66,8 @@ export async function SavedJobDrawer({
     listDocumentsForApplication({ userId, applicationId: row.application.id }),
   ]);
 
-  const result = report?.result ?? null;
+  const saveOnly = row.application.saveOnly;
+  const result = saveOnly ? null : (report?.result ?? null);
   const savedDocuments = AI_VIEWS.reduce<Partial<Record<AiView, string>>>(
     (found, view) => {
       const match = documents.find(
@@ -93,10 +95,16 @@ export async function SavedJobDrawer({
           />
         </div>
 
-        <ReanalyzeButton
-          publicId={row.application.publicId}
-          hasAnalysis={Boolean(result)}
-        />
+        {saveOnly ? (
+          <span className="border border-border bg-surface-secondary px-2 py-1 text-label font-semibold text-text-secondary">
+            Saved without analysis
+          </span>
+        ) : (
+          <ReanalyzeButton
+            publicId={row.application.publicId}
+            hasAnalysis={Boolean(result)}
+          />
+        )}
       </div>
 
       <dl>
@@ -127,7 +135,7 @@ export async function SavedJobDrawer({
         />
       </dl>
 
-      {row.job.sourceUrl ? (
+      {row.job.sourceUrl && /^https?:\/\//i.test(row.job.sourceUrl) ? (
         <Link
           href={row.job.sourceUrl}
           target="_blank"
@@ -178,7 +186,9 @@ export async function SavedJobDrawer({
     </div>
   );
 
-  const analysis = result ? (
+  const analysis = saveOnly ? (
+    <Alert tone="info">{SAVE_ONLY_REASON}</Alert>
+  ) : result ? (
     <div className="space-y-6">
       <ScorePanel scoring={result.scoring} />
 
@@ -252,6 +262,7 @@ export async function SavedJobDrawer({
       overview={overview}
       analysis={analysis}
       documents={documentsPanel}
+      documentsDisabledReason={saveOnly ? SAVE_ONLY_REASON : null}
     />
   );
 }

@@ -67,7 +67,7 @@ describe("changeStatusSchema", () => {
   });
 
   it("rejects a retired seven-stage value", () => {
-    for (const old of ["SAVED", "PREPARING", "APPLIED", "INTERVIEW", "OFFER"]) {
+    for (const old of ["SAVED", "PREPARING", "APPLIED", "OFFER"]) {
       expect(
         changeStatusSchema.safeParse({ publicId: uuid, status: old }).success,
         old,
@@ -121,8 +121,14 @@ describe("applicationFiltersSchema", () => {
 });
 
 describe("status taxonomy", () => {
-  it("is exactly the three statuses the update defines", () => {
-    expect(APPLICATION_STATUSES).toEqual(["PENDING", "ACCEPTED", "REJECTED"]);
+  it("is the five statuses in display order", () => {
+    expect(APPLICATION_STATUSES).toEqual([
+      "PENDING",
+      "SHORTLISTED",
+      "INTERVIEW",
+      "ACCEPTED",
+      "REJECTED",
+    ]);
   });
 
   it("labels every status", () => {

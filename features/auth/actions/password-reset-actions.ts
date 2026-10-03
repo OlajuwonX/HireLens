@@ -1,12 +1,16 @@
 "use server";
 
 import { passwordSchema } from "@/features/auth/schemas/credentials.schema";
+import { RATE_LIMITED_MESSAGE } from "@/features/auth/rate-limited-sign-in";
 import { passwordProblemMessage } from "@/features/auth/schemas/password-rules";
 import {
   completePasswordReset,
   requestPasswordReset,
 } from "@/features/auth/server/password-reset.service";
+import { isRateLimited } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/rate-limit/client-ip";
 import * as Sentry from "@sentry/nextjs";
+import { headers } from "next/headers";
 import { z } from "zod";
 import type { PasswordFormState } from "./password-form-state";
 
@@ -26,6 +30,10 @@ export async function requestPasswordResetAction(
 
   if (!parsed.success) {
     return { status: "error", message: "Enter a valid email address." };
+  }
+
+  if (await isRateLimited("passwordResetIp", clientIp(await headers()))) {
+    return { status: "error", message: RATE_LIMITED_MESSAGE };
   }
 
   try {

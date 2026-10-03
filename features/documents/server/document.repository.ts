@@ -5,10 +5,8 @@ import {
   desc,
   eq,
   gte,
-  ilike,
   inArray,
   lt,
-  or,
   type SQL,
 } from "drizzle-orm";
 import { db } from "@/lib/db/client";
@@ -47,7 +45,6 @@ const rowShape = {
 };
 
 export type DocumentFilters = {
-  q?: string;
   type?: string;
   from?: string;
   to?: string;
@@ -82,12 +79,6 @@ export async function listDocumentsForUser(
   const conditions: (SQL | undefined)[] = [
     eq(generatedDocuments.userId, userId),
   ];
-
-  if (filters.q) {
-    const term = `%${filters.q}%`;
-
-    conditions.push(or(ilike(jobs.title, term), ilike(jobs.company, term)));
-  }
 
   if (filters.type) {
     conditions.push(

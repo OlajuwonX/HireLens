@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, IconButton } from "@/components/ui/button";
+import { SearchTrigger } from "@/features/search/components/search-trigger";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
@@ -134,6 +135,9 @@ export function DashboardSidebar({
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">
+          <div className="mb-3">
+            <SearchTrigger variant="row" />
+          </div>
           <SidebarNav onNavigate={onMobileClose} isAdmin={isAdmin} />
           {footer ? (
             <div className="mt-auto border-t border-border pt-3">{footer}</div>

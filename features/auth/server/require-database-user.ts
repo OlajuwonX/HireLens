@@ -6,6 +6,10 @@ import {
   blockedAccountRoute,
   resolveAccountState,
 } from "@/features/auth/account-state";
+import {
+  isSessionRevoked,
+  SESSION_ENDED_PATH,
+} from "@/features/auth/session-revocation";
 import { getAccountRecord } from "./current-account";
 import { requireCurrentUser } from "./require-user";
 import { findOrCreateUserFromPublicProfile } from "./user.service";
@@ -24,6 +28,12 @@ export async function requireSessionUserId(): Promise<string> {
   }
 
   if (session.dbUserId) {
+    const record = await getAccountRecord(session.dbUserId);
+
+    if (record && isSessionRevoked(record, session.authTime)) {
+      redirect(SESSION_ENDED_PATH);
+    }
+
     return session.dbUserId;
   }
 

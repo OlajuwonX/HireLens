@@ -194,8 +194,8 @@ export function JobPasteDialog({
               className="min-h-44"
             />
             <p id="job-posting-hint" className="text-label text-text-muted">
-              Nothing is saved until you review the form and press Save &amp;
-              Analyze.
+              Nothing is saved until you review the form and press Save or Save
+              &amp; Analyze.
             </p>
           </div>
 

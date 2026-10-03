@@ -8,6 +8,8 @@ import {
 } from "../notification-item";
 import {
   countUnreadNotifications,
+  deleteAllNotificationsForUser,
+  deleteNotificationForUser,
   insertNotification,
   listNotificationsForUser,
   markAllNotificationsReadForUser,
@@ -37,6 +39,17 @@ export async function readNotification(input: {
 
 export async function readAllNotifications(userId: string) {
   await markAllNotificationsReadForUser(userId);
+}
+
+export async function removeNotificationForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
+  await deleteNotificationForUser(input);
+}
+
+export async function removeAllNotificationsForUser(userId: string) {
+  return deleteAllNotificationsForUser(userId);
 }
 
 export async function notifyUser(input: {

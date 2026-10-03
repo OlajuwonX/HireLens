@@ -1,5 +1,7 @@
 export const APPLICATION_STATUSES = [
   "PENDING",
+  "SHORTLISTED",
+  "INTERVIEW",
   "ACCEPTED",
   "REJECTED",
 ] as const;
@@ -8,7 +10,9 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 export const applicationStatusLabels: Record<ApplicationStatus, string> = {
   PENDING: "Pending",
-  ACCEPTED: "Accepted",
+  SHORTLISTED: "Shortlisted",
+  INTERVIEW: "Interviewing",
+  ACCEPTED: "Approved",
   REJECTED: "Rejected",
 };
 
@@ -17,6 +21,8 @@ export const applicationStatusTone: Record<
   "neutral" | "green" | "yellow" | "red" | "blue"
 > = {
   PENDING: "yellow",
+  SHORTLISTED: "blue",
+  INTERVIEW: "neutral",
   ACCEPTED: "green",
   REJECTED: "red",
 };

@@ -72,3 +72,29 @@ export async function insertNotification(values: NewNotification) {
 
   return row ?? null;
 }
+
+export async function deleteNotificationForUser(input: {
+  userId: string;
+  publicId: string;
+}) {
+  const [row] = await db
+    .delete(notifications)
+    .where(
+      and(
+        eq(notifications.userId, input.userId),
+        eq(notifications.publicId, input.publicId),
+      ),
+    )
+    .returning({ publicId: notifications.publicId });
+
+  return row ?? null;
+}
+
+export async function deleteAllNotificationsForUser(userId: string) {
+  const rows = await db
+    .delete(notifications)
+    .where(eq(notifications.userId, userId))
+    .returning({ publicId: notifications.publicId });
+
+  return rows.length;
+}

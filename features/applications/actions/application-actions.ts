@@ -1,5 +1,6 @@
 "use server";
 
+import { parseSaveIntent } from "@/features/applications/analysis-state";
 import {
   applicationActionSchema,
   changeStatusSchema,
@@ -11,6 +12,7 @@ import {
   changeApplicationStatus,
   deleteOwnedApplication,
   saveAndAnalyze,
+  saveJobOnly,
   updateOwnedApplication,
 } from "@/features/applications/server/application.service";
 import { setApplicationArchivedForUser } from "@/features/applications/server/application.repository";
@@ -43,6 +45,15 @@ export async function saveAndAnalyzeAction(
   formData: FormData,
 ): Promise<ApplicationFormState> {
   const user = await requireDatabaseUser();
+  const intent = parseSaveIntent(formData.get("intent"));
+
+  if (!intent) {
+    return {
+      status: "error",
+      message: "That action is not recognised. Reload the page and try again.",
+      fieldErrors: {},
+    };
+  }
 
   const parsed = saveAndAnalyzeSchema.safeParse({
     resumeVersionPublicId: getString(formData, "resumeVersionPublicId"),
@@ -68,6 +79,20 @@ export async function saveAndAnalyzeAction(
       message: "Check the highlighted fields and try again.",
       fieldErrors: toFieldErrors(parsed.error),
     };
+  }
+
+  if (intent === "save") {
+    const saved = await saveJobOnly({ userId: user.id, values: parsed.data });
+
+    if (!saved.ok) {
+      return { status: "error", message: saved.message, fieldErrors: {} };
+    }
+
+    revalidatePath("/dashboard/jobs");
+    revalidatePath("/dashboard");
+    redirect(
+      `/dashboard/jobs?open=${saved.value.applicationPublicId}&saved=1`,
+    );
   }
 
   const result = await saveAndAnalyze({ userId: user.id, values: parsed.data });

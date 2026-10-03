@@ -1,5 +1,6 @@
 "use server";
 
+import { signIn } from "@/auth";
 import { passwordSchema } from "@/features/auth/schemas/credentials.schema";
 import { passwordProblemMessage } from "@/features/auth/schemas/password-rules";
 import { isImpersonating } from "@/features/auth/server/impersonation";
@@ -44,6 +45,21 @@ export async function setAccountPasswordAction(
 
   if (!result.ok) {
     return { status: "error", message: result.message };
+  }
+
+  // The change ends every existing session, this one included, so sign this
+  // device back in with the new password.
+  try {
+    await signIn("credentials", {
+      email: user.email,
+      password,
+      redirect: false,
+    });
+  } catch {
+    return {
+      status: "saved",
+      message: "Your password has been updated. Sign in again to continue.",
+    };
   }
 
   revalidatePath("/settings/account");
