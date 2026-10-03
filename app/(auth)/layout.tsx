@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-dvh flex-col bg-background px-6 py-10">
+    <main className="flex min-h-dvh flex-col bg-background px-6 py-6 sm:py-10">
       <div className="flex gap-2">
         <Image
           src="/hllogo-64.png"
@@ -24,7 +24,7 @@ export default function AuthLayout({
           HireLens
         </Link>
       </div>
-      <div className="flex flex-1 items-center justify-center py-10">
+      <div className="flex flex-1 items-start justify-center pt-8 sm:items-center sm:pt-0">
         <div className="w-full max-w-form">{children}</div>
       </div>
     </main>
