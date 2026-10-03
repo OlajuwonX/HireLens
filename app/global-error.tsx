@@ -17,7 +17,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-text-primary">
+        <main className="flex min-h-dvh items-center justify-center bg-surface px-6 text-text-primary">
           <section className="max-w-md text-center">
             <p className="text-meta font-semibold text-red-700">Fatal error</p>
             <h1 className="mt-3 text-card-metric font-semibold">

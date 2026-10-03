@@ -177,7 +177,7 @@ export function AiDocumentModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[88vh] flex-col gap-0 p-0 sm:max-w-2xl">
+      <DialogContent className="flex max-h-[88dvh] flex-col gap-0 p-0 sm:max-w-2xl">
         <div className="shrink-0 border-b border-border p-4 pr-12 sm:p-5">
           <DialogTitle className="text-section-title font-semibold text-text-primary">
             {title}

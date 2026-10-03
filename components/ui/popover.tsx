@@ -123,7 +123,7 @@ export function Popover({
           role="dialog"
           aria-label={title}
           className={cn(
-            "hl-scroll z-50 max-h-[min(26rem,calc(100vh-6rem))] overflow-y-auto rounded-card border border-border bg-surface p-3 shadow-lg",
+            "hl-scroll z-50 max-h-[min(26rem,calc(100dvh-6rem))] overflow-y-auto rounded-card border border-border bg-surface p-3 shadow-lg",
             "max-sm:fixed max-sm:inset-x-3 max-sm:bottom-3 max-sm:w-auto",
             "sm:absolute sm:mt-2 sm:w-64",
             align === "end" ? "sm:right-0" : "sm:left-0",

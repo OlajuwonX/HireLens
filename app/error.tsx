@@ -21,7 +21,7 @@ export default function Error({
   }, [error, setLastErrorEventId]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-text-primary">
+    <main className="flex min-h-dvh items-center justify-center bg-surface px-6 text-text-primary">
       <section className="max-w-md text-center">
         <p className="font-mono text-system font-medium uppercase text-danger">
           Error

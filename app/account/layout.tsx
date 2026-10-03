@@ -10,7 +10,7 @@ export default async function AccountRecoveryLayout({
   await requireCurrentUser();
 
   return (
-    <main className="flex min-h-screen flex-col bg-background px-6 py-10">
+    <main className="flex min-h-dvh flex-col bg-background px-6 py-10">
       <div className="flex gap-2">
         <Image
           src="/hllogo-64.png"

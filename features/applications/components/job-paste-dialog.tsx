@@ -139,7 +139,7 @@ export function JobPasteDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[88vh] w-[calc(100%-1.5rem)] flex-col gap-0 p-0 sm:max-w-xl">
+      <DialogContent className="flex max-h-[88dvh] w-[calc(100%-1.5rem)] flex-col gap-0 p-0 sm:max-w-xl">
         <div className="shrink-0 space-y-1.5 border-b border-border p-4 pr-12 sm:p-5">
           <DialogTitle className="text-section-title font-semibold text-text-primary">
             Paste job posting

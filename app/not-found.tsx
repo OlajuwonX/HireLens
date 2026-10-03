@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-text-primary">
+    <main className="flex min-h-dvh items-center justify-center bg-surface px-6 text-text-primary">
       <section className="max-w-md text-center">
         <p className="text-meta font-semibold text-text-primary">404</p>
         <h1 className="mt-3 text-card-metric font-semibold">Page not found</h1>
