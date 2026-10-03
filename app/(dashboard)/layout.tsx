@@ -44,7 +44,7 @@ export default async function DashboardLayout({
         impersonation={impersonation}
         headerSlot={
           <div className="flex items-center gap-1">
-            <SearchTrigger variant="header" />
+            <SearchTrigger />
             <NotificationBell unreadCount={unreadCount} />
           </div>
         }
