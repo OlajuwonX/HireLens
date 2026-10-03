@@ -23,7 +23,7 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-card bg-surface p-6 shadow-xl focus-visible:outline-none [&.p-0>[data-dialog-close]]:m-0",
+          "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-card bg-surface p-6 shadow-xl focus-visible:outline-none [&.p-0>[data-dialog-close]]:top-0 [&.p-0>[data-dialog-close]]:m-0",
           className,
         )}
         onOpenAutoFocus={(event) => {
@@ -49,7 +49,7 @@ export function DialogContent({
       >
         <div
           data-dialog-close
-          className="pointer-events-none sticky top-0 z-10 -mx-6 -mt-6 mb-6 h-0"
+          className="pointer-events-none sticky -top-6 z-10 -mx-6 -mt-6 mb-6 h-0"
         >
           <DialogPrimitive.Close asChild>
             <AccessibleIconButton
