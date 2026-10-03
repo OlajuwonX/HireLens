@@ -71,8 +71,6 @@ export function Popover({
         `#${CSS.escape(triggerId)}`,
       ) ?? null;
 
-    // A transformed dialog becomes the containing block for `fixed`, so the
-    // phone bottom sheet would anchor to the dialog instead of the screen.
     setInDialog(Boolean(rootRef.current?.closest('[role="dialog"]')));
 
     const focusable = panelRef.current?.querySelector<HTMLElement>(

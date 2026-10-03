@@ -33,8 +33,6 @@ export function DialogContent({
             return;
           }
 
-          // The close button comes first in the DOM so it can stay pinned
-          // while the dialog scrolls; start focus on the dialog's own content.
           const content = event.currentTarget as HTMLElement | null;
           const first = Array.from(
             content?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [],

@@ -11,7 +11,6 @@ export function parseFilterDate(value: string | undefined) {
     return null;
   }
 
-  // Rejects impossible days such as 2026-02-31, which Date rolls forward.
   return date.toISOString().slice(0, 10) === value ? date : null;
 }
 

@@ -77,7 +77,6 @@ function hashIdentifier(value: string) {
   return createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
 }
 
-// Fails open: an Upstash outage must not lock every user out of sign-in.
 export async function isRateLimited(
   rule: RateLimitRule,
   identifier: string,

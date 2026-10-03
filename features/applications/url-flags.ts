@@ -8,8 +8,6 @@ export function withoutSearchParams(href: string, keys: readonly string[]) {
   return url.toString();
 }
 
-// One-time flags (saved=1, analysis=failed) would replay their toast on every
-// reload or Back. Drop them from the address bar without a navigation.
 export function clearUrlFlags(keys: readonly string[]) {
   const next = withoutSearchParams(window.location.href, keys);
 

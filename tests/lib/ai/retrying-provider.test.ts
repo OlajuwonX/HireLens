@@ -258,7 +258,6 @@ describe("RetryingApplicationIntelligenceProvider", () => {
   });
 
   it("keeps a usable window for the middle provider when the first one retries", async () => {
-    // Fake timers keep the 60ms/100ms windows exact, even on a busy machine.
     vi.useFakeTimers();
     onTestFinished(() => {
       vi.useRealTimers();
