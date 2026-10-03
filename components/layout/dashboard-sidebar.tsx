@@ -69,7 +69,7 @@ export function DashboardSidebar({
       <aside
         data-collapsed={collapsed}
         className={cn(
-          "hidden h-screen shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
+          "hidden h-full shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
           collapsed ? "w-18" : "w-60",
         )}
       >
