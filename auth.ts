@@ -1,10 +1,13 @@
 import { signInSchema } from "@/features/auth/schemas/credentials.schema";
 import { isClaimExpired } from "@/features/auth/impersonation-token";
+import { RateLimitedSignIn } from "@/features/auth/rate-limited-sign-in";
 import {
   recordSignIn,
   verifyCredentials,
 } from "@/features/auth/server/user.service";
 import { resolveImpersonationClaimForUpdate } from "@/features/admin/server/impersonation.service";
+import { isRateLimited } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/rate-limit/client-ip";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -39,11 +42,20 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = signInSchema.safeParse(raw);
 
         if (!parsed.success) {
           return null;
+        }
+
+        const [ipLimited, emailLimited] = await Promise.all([
+          isRateLimited("signInIp", clientIp(request.headers)),
+          isRateLimited("signInEmail", parsed.data.email),
+        ]);
+
+        if (ipLimited || emailLimited) {
+          throw new RateLimitedSignIn();
         }
 
         const user = await verifyCredentials(parsed.data);

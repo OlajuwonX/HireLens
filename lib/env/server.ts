@@ -110,6 +110,11 @@ const serverEnvSchema = z.object({
 
   SENTRY_WEBHOOK_SECRET: optionalString,
 
+  UPSTASH_REDIS_REST_URL: optionalString,
+  UPSTASH_REDIS_REST_TOKEN: optionalString,
+  KV_REST_API_URL: optionalString,
+  KV_REST_API_TOKEN: optionalString,
+
   SITE_URL: optionalString,
   VERCEL_PROJECT_PRODUCTION_URL: optionalString,
   VERCEL_URL: optionalString,
