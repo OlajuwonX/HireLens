@@ -87,6 +87,7 @@ const VALID_RESULT = {
   bulletRewrites: [],
   professionalSummary: "Backend engineer.",
   coverLetter: "Dear hiring team,",
+  reasonToJoin: "I want to grow with this team.",
   applicationEmail: { subject: "Application", body: "Hello" },
   followUpMessage: "Following up on my application.",
 };

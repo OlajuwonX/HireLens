@@ -45,6 +45,7 @@ function analysisWith(
     bulletRewrites: [],
     professionalSummary: "",
     coverLetter: "",
+    reasonToJoin: "",
     applicationEmail: { subject: "", body: "" },
     followUpMessage: "",
     ...overrides,

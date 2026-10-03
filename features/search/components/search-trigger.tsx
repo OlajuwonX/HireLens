@@ -1,7 +1,6 @@
 "use client";
 
 import { IconButton } from "@/components/ui/button";
-import { useCloseMobileNav } from "@/components/layout/mobile-nav-context";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearch } from "./search-provider";
@@ -21,30 +20,12 @@ function usePlatformShortcut() {
   return label;
 }
 
-export function SearchTrigger({ variant }: { variant: "header" | "row" }) {
+export function SearchTrigger() {
   const search = useSearch();
   const shortcut = usePlatformShortcut();
-  const closeMobileNav = useCloseMobileNav();
 
   if (!search) {
     return null;
-  }
-
-  if (variant === "row") {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          closeMobileNav();
-          search.openSearch();
-        }}
-        aria-haspopup="dialog"
-        className="flex h-11 w-full items-center gap-3 rounded-control border border-border bg-surface px-3 text-meta text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
-      >
-        <Search aria-hidden="true" className="size-4 shrink-0" />
-        Search
-      </button>
-    );
   }
 
   return (

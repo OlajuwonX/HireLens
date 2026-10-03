@@ -19,6 +19,7 @@ export const applicationIntelligenceSchema = z.object({
   bulletRewrites: z.array(bulletRewriteSchema),
   professionalSummary: z.string().min(1),
   coverLetter: z.string().min(1),
+  reasonToJoin: z.string().min(1),
   applicationEmail: applicationEmailSchema,
   followUpMessage: z.string().min(1),
   recommendations: z.array(recommendationSchema),
@@ -64,6 +65,7 @@ export const storedApplicationIntelligenceSchema = z.object({
   bulletRewrites: z.array(bulletRewriteSchema).catch([]),
   professionalSummary: z.string().catch(""),
   coverLetter: z.string().catch(""),
+  reasonToJoin: z.string().catch(""),
   applicationEmail: applicationEmailSchema
     .partial()
     .catch({})

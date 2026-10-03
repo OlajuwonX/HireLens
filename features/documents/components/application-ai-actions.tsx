@@ -47,6 +47,7 @@ function AiResultCard({
       title={aiViewLabels[view]}
       content={viewToPlainText(result, view)}
       disabled={!viewIsPopulated(result, view)}
+      disabledReason="Re-analyze this job to generate it."
       applicationPublicId={applicationPublicId}
       view={view}
       savedDocumentId={savedDocumentId}

@@ -9,7 +9,7 @@ type LegalLayoutProps = {
 
 export function LegalLayout({ title, updated, children }: LegalLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <SiteHeader />
       <main className="mx-auto w-full max-w-page px-6 py-16">
         <h1 className="text-page-title font-semibold text-text-primary">

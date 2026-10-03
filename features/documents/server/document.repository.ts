@@ -11,6 +11,11 @@ import {
 } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
+  parseFilterCursor,
+  parseFilterDate,
+  pickDocumentType,
+} from "../filter-values";
+import {
   applications,
   documentActivities,
   documentActivityKind,
@@ -80,27 +85,31 @@ export async function listDocumentsForUser(
     eq(generatedDocuments.userId, userId),
   ];
 
-  if (filters.type) {
-    conditions.push(
-      inArray(generatedDocuments.type, [
-        filters.type as (typeof generatedDocuments.type.enumValues)[number],
-      ]),
-    );
+  const type = pickDocumentType(
+    filters.type,
+    generatedDocuments.type.enumValues,
+  );
+  const from = parseFilterDate(filters.from);
+  const to = parseFilterDate(filters.to);
+  const before = parseFilterCursor(cursor);
+
+  if (type) {
+    conditions.push(inArray(generatedDocuments.type, [type]));
   }
 
-  if (filters.from) {
-    conditions.push(gte(generatedDocuments.createdAt, new Date(filters.from)));
+  if (from) {
+    conditions.push(gte(generatedDocuments.createdAt, from));
   }
 
-  if (filters.to) {
-    const end = new Date(filters.to);
+  if (to) {
+    const end = new Date(to);
 
-    end.setDate(end.getDate() + 1);
+    end.setUTCDate(end.getUTCDate() + 1);
     conditions.push(lt(generatedDocuments.createdAt, end));
   }
 
-  if (cursor) {
-    conditions.push(lt(generatedDocuments.createdAt, new Date(cursor)));
+  if (before) {
+    conditions.push(lt(generatedDocuments.createdAt, before));
   }
 
   return db

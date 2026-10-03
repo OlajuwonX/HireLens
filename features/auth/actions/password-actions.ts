@@ -47,8 +47,6 @@ export async function setAccountPasswordAction(
     return { status: "error", message: result.message };
   }
 
-  // The change ends every existing session, this one included, so sign this
-  // device back in with the new password.
   try {
     await signIn("credentials", {
       email: user.email,

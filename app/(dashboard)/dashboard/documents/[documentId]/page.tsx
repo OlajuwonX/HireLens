@@ -45,7 +45,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
   const { document, jobTitle, jobCompany, resumeTitle, versionLabel } = row;
 
   const sourceCard = (
-    <Card className="flex flex-col overflow-hidden">
+    <Card className="flex min-h-0 flex-col overflow-hidden">
       <CardHeader className="shrink-0">
         <CardTitle>Source</CardTitle>
       </CardHeader>
@@ -124,7 +124,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
             </CardContent>
           </Card>
 
-          <div className="lg:sticky lg:top-0 lg:max-h-[calc(100vh-8rem)]">
+          <div className="lg:sticky lg:top-0 lg:flex lg:max-h-[calc(100dvh-8rem)] lg:flex-col">
             {sourceCard}
           </div>
         </div>

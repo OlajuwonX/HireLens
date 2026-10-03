@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import {
   AiProviderChainError,
   AiProviderError,
@@ -258,6 +258,11 @@ describe("RetryingApplicationIntelligenceProvider", () => {
   });
 
   it("keeps a usable window for the middle provider when the first one retries", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+
     const rejectsSlowly = vi.fn().mockImplementation(
       () =>
         new Promise((_resolve, reject) => {
@@ -298,9 +303,10 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       baseDelayMs: 1,
     });
 
-    await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
-      model: "middle",
-    });
+    const result = retrying.analyzeApplication(input);
+
+    await vi.runAllTimersAsync();
+    await expect(result).resolves.toMatchObject({ model: "middle" });
     expect(last).not.toHaveBeenCalled();
   });
 

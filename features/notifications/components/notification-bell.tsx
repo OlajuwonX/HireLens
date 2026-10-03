@@ -39,14 +39,14 @@ function NotificationBody({ item }: { item: NotificationItem }) {
       <span className="min-w-0 flex-1">
         <span
           className={cn(
-            "block text-meta",
+            "block text-meta wrap-break-word",
             item.read ? "text-text-secondary" : "font-medium text-text-primary",
           )}
         >
           {item.title}
         </span>
         {item.body ? (
-          <span className="mt-0.5 block text-label text-text-muted">
+          <span className="mt-0.5 block text-label wrap-break-word text-text-muted">
             {item.body}
           </span>
         ) : null}

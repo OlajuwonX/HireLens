@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 const card = readFileSync(
   "features/applications/components/saved-job-card.tsx",
   "utf8",
-);
+).replace(/\r\n/g, "\n");
 const grid = readFileSync(
   "features/applications/components/saved-job-feed.tsx",
   "utf8",

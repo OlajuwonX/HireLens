@@ -358,7 +358,7 @@ export function ResumeDesignControls({
             {pageCount > 1 ? " · page 1 of " + pageCount : null}
           </DialogDescription>
 
-          <div className="hl-scroll mt-3 max-h-[62vh] overflow-auto rounded-card border border-border bg-white">
+          <div className="hl-scroll mt-3 max-h-[62dvh] overflow-auto rounded-card border border-border bg-white">
             {svg ? (
               <div dangerouslySetInnerHTML={{ __html: svg }} />
             ) : (

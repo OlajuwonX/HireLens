@@ -1,7 +1,6 @@
 "use client";
 
 import { Button, IconButton } from "@/components/ui/button";
-import { SearchTrigger } from "@/features/search/components/search-trigger";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
@@ -69,7 +68,7 @@ export function DashboardSidebar({
       <aside
         data-collapsed={collapsed}
         className={cn(
-          "hidden h-screen shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
+          "hidden h-full shrink-0 border-r border-border bg-sidebar md:flex md:flex-col",
           collapsed ? "w-18" : "w-60",
         )}
       >
@@ -135,9 +134,6 @@ export function DashboardSidebar({
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">
-          <div className="mb-3">
-            <SearchTrigger variant="row" />
-          </div>
           <SidebarNav onNavigate={onMobileClose} isAdmin={isAdmin} />
           {footer ? (
             <div className="mt-auto border-t border-border pt-3">{footer}</div>

@@ -93,6 +93,7 @@ describe("toGeminiResponseSchema", () => {
         "requirementMatches",
         "improvedResume",
         "coverLetter",
+        "reasonToJoin",
       ]),
     );
   });

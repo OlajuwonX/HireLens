@@ -20,7 +20,7 @@ export default function Loading() {
 
       <ul
         aria-hidden
-        className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4"
+        className="grid grid-cols-1 gap-2.5 min-[420px]:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4"
       >
         {Array.from({ length: 8 }).map((_, index) => (
           <li key={index}>

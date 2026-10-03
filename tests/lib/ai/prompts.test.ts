@@ -1,4 +1,5 @@
 import {
+  APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   BASE_SYSTEM_PROMPT,
   createApplicationIntelligencePrompt,
   formatEvidenceCorrections,
@@ -53,11 +54,27 @@ describe("createApplicationIntelligencePrompt", () => {
       "BULLET REWRITES:",
       "PROFESSIONAL SUMMARY:",
       "COVER LETTER:",
+      "REASON TO JOIN:",
       "APPLICATION EMAIL:",
       "FOLLOW-UP MESSAGE:",
     ]) {
       expect(prompt).toContain(section);
     }
+  });
+
+  it("asks for the reason right after the cover letter", () => {
+    expect(prompt.indexOf("REASON TO JOIN:")).toBeGreaterThan(
+      prompt.indexOf("COVER LETTER:"),
+    );
+    expect(prompt.indexOf("REASON TO JOIN:")).toBeLessThan(
+      prompt.indexOf("APPLICATION EMAIL:"),
+    );
+  });
+
+  it("is versioned for the reason section", () => {
+    expect(APPLICATION_INTELLIGENCE_PROMPT_VERSION).toBe(
+      "application-intelligence-v3",
+    );
   });
 
   it("states that one response must carry all of it", () => {
@@ -114,5 +131,39 @@ describe("formatEvidenceCorrections", () => {
 
     expect(block?.startsWith("<candidate_corrections>")).toBe(true);
     expect(block?.endsWith("</candidate_corrections>")).toBe(true);
+  });
+});
+
+describe("reason to join section", () => {
+  const prompt = createApplicationIntelligencePrompt();
+
+  it("analyses the role before writing", () => {
+    expect(prompt).toContain("FIRST, ANALYSE THE ROLE");
+    expect(prompt).toContain("do not output this analysis");
+  });
+
+  it("ties key experience to the role's responsibilities", () => {
+    expect(prompt).toContain("relates to a named responsibility of this role");
+    expect(prompt).toContain("verified results");
+  });
+
+  it("covers collaboration, growth and learning from the posting", () => {
+    expect(prompt).toContain("Collaboration. Only if the posting mentions");
+    expect(prompt).toContain("Growth and learning.");
+    expect(prompt).toContain("never point out a weakness");
+  });
+
+  it("keeps motivation grounded in the posting and the resume", () => {
+    expect(prompt).toContain(
+      "Every reason must trace back to something in the job posting or the resume.",
+    );
+    expect(prompt).toContain("Never invent company facts");
+    expect(prompt).toContain("Never invent personal stories");
+  });
+
+  it("stays distinct from the cover letter", () => {
+    expect(prompt).toContain(
+      "repeating the cover letter's opening or sentences",
+    );
   });
 });

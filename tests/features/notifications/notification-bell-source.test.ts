@@ -62,4 +62,24 @@ describe("optimistic updates", () => {
     expect(source.match(/catch \{/g)!.length).toBeGreaterThanOrEqual(2);
     expect(source).toContain("if (!result.ok)");
   });
+
+  it("wraps long unbroken titles and bodies inside the panel", () => {
+    const body = source.slice(
+      source.indexOf("function NotificationBody"),
+      source.indexOf("formatRelativeTime(item.createdAt)"),
+    );
+
+    expect(body.match(/wrap-break-word/g)).toHaveLength(2);
+  });
+});
+
+describe("impersonation banner", () => {
+  it("breaks a long email address instead of overflowing", () => {
+    const banner = readFileSync(
+      "features/admin/components/impersonation-banner.tsx",
+      "utf8",
+    );
+
+    expect(banner).toMatch(/break-all[^>]*>\{targetEmail\}/);
+  });
 });

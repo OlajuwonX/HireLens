@@ -9,7 +9,7 @@ describe("global search wiring", () => {
 
   it("mounts the provider and trigger in the dashboard layout only", () => {
     expect(dashboardLayout).toContain("<SearchProvider");
-    expect(dashboardLayout).toContain('<SearchTrigger variant="header" />');
+    expect(dashboardLayout).toContain("<SearchTrigger />");
     expect(adminLayout).not.toContain("SearchProvider");
   });
 
@@ -24,16 +24,12 @@ describe("global search wiring", () => {
   });
 
   it("places the trigger beside the notification bell", () => {
-    expect(dashboardLayout).toMatch(/<SearchTrigger variant="header" \/>\s*<NotificationBell/);
+    expect(dashboardLayout).toMatch(/<SearchTrigger \/>\s*<NotificationBell/);
   });
 
-  it("adds a search row to the mobile drawer only", () => {
-    const sidebar = read("components/layout/dashboard-sidebar.tsx");
-    const matches = sidebar.match(/<SearchTrigger variant="row" \/>/g) ?? [];
-
-    expect(matches).toHaveLength(1);
-    expect(sidebar.indexOf('variant="row"')).toBeGreaterThan(
-      sidebar.indexOf("Main navigation"),
+  it("keeps search out of the sidebar so phones show only the header search", () => {
+    expect(read("components/layout/dashboard-sidebar.tsx")).not.toContain(
+      "SearchTrigger",
     );
   });
 

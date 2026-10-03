@@ -53,7 +53,7 @@ export function ApplicationDrawer({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface shadow-2xl sm:max-h-[88vh] sm:max-w-3xl sm:rounded-card"
+        className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface shadow-2xl sm:max-h-[88dvh] sm:max-w-3xl sm:rounded-card"
       >
         <header className="flex items-start justify-between gap-3 border-b border-border p-4 sm:p-5">
           <div className="min-w-0">
@@ -93,14 +93,21 @@ export function ApplicationDrawer({
                   title={disabled ? (documentsDisabledReason ?? undefined) : undefined}
                   onClick={() => setTab(name)}
                   className={cn(
-                    "h-9 flex-1 shrink-0 whitespace-nowrap rounded-control px-3 text-meta font-semibold transition-colors",
+                    "h-9 min-w-0 flex-auto truncate whitespace-nowrap rounded-control px-2 text-meta font-semibold transition-colors sm:px-3",
                     "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-text-secondary",
                     tab === name
                       ? "bg-accent text-accent-text"
                       : "text-text-secondary hover:bg-surface-secondary hover:text-text-primary",
                   )}
                 >
-                  {name}
+                  {name === "AI Documents" ? (
+                    <>
+                      <span className="sm:hidden">Documents</span>
+                      <span className="hidden sm:inline">AI Documents</span>
+                    </>
+                  ) : (
+                    name
+                  )}
                 </button>
               );
             })}

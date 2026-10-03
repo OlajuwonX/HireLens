@@ -1,6 +1,7 @@
 "use client";
 
 import { Toaster as HotToaster, toast as hotToast } from "react-hot-toast";
+import { useIsMobile } from "@/app/hooks/use-mobile";
 import { AlertTriangle, Check, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,11 +65,13 @@ export const notify = {
 };
 
 export function Toaster() {
+  const isMobile = useIsMobile();
+
   return (
     <HotToaster
-      position="top-right"
+      position={isMobile ? "bottom-center" : "top-right"}
       gutter={10}
-      containerClassName="!inset-3 sm:!inset-5"
+      containerClassName="!inset-3 !bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:!inset-5"
       toastOptions={{ className: "!bg-transparent !p-0 !shadow-none" }}
     />
   );

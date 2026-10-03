@@ -88,6 +88,17 @@ describe("viewToPlainText", () => {
     }
   });
 
+  it("copies the reason exactly as written", async () => {
+    const result = storedApplicationIntelligenceSchema.parse({
+      ...(await mockResult()),
+      reasonToJoin: "I want to grow the platform team's release process.",
+    });
+
+    expect(viewToPlainText(result, "REASON_TO_JOIN")).toBe(
+      "I want to grow the platform team's release process.",
+    );
+  });
+
   it("puts the subject line above the email body", async () => {
     const result = storedApplicationIntelligenceSchema.parse(
       await mockResult(),
@@ -124,10 +135,12 @@ describe("viewIsPopulated", () => {
     const result = storedApplicationIntelligenceSchema.parse({
       ...(await mockResult()),
       coverLetter: "",
+      reasonToJoin: "",
       bulletRewrites: [],
     });
 
     expect(viewIsPopulated(result, "COVER_LETTER")).toBe(false);
+    expect(viewIsPopulated(result, "REASON_TO_JOIN")).toBe(false);
     expect(viewIsPopulated(result, "BULLET_REWRITE")).toBe(false);
   });
 });

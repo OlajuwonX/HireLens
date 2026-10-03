@@ -131,6 +131,7 @@ function intelligence(bullets: string[]) {
     bulletRewrites: [],
     professionalSummary: "Frontend engineer with 5+ years of React delivery.",
     coverLetter: "Dear hiring team,",
+    reasonToJoin: "I want to grow with this team.",
     applicationEmail: { subject: "Application", body: "Hello" },
     followUpMessage: "Following up on my application.",
     recommendations: [],
