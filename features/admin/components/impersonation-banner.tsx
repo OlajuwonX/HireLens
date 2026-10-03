@@ -16,8 +16,9 @@ export function ImpersonationBanner({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/30 bg-warning/12 px-4 py-2 text-meta text-warning sm:px-6">
-      <p>
-        Viewing as <span className="font-semibold">{targetEmail}</span> —
+      <p className="min-w-0">
+        Viewing as{" "}
+        <span className="font-semibold break-all">{targetEmail}</span> —
         ends automatically at{" "}
         {new Date(expiresAt).toLocaleTimeString(undefined, {
           hour: "numeric",
