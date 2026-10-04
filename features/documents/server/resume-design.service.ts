@@ -24,6 +24,10 @@ import {
   type DocumentRow,
 } from "./document.repository";
 import { improvedResumeFilename } from "../improved-resume-format";
+import {
+  findResumeDesignPreference,
+  updateResumeDesignPreference,
+} from "./resume-design-preference.repository";
 
 export type ResumeDesignSource = {
   row: DocumentRow;
@@ -51,13 +55,28 @@ export function documentDesignSelection(row: DocumentRow) {
   });
 }
 
+export async function findPreferredResumeDesign(
+  userId: string,
+): Promise<ResumeDesignSelection> {
+  return readResumeDesignSelection(await findResumeDesignPreference(userId));
+}
+
 export async function findResumeDesignSource(input: {
   userId: string;
   publicId: string;
 }): Promise<ResumeDesignSource | null> {
   const row = await findDocumentRowForUser(input);
 
-  if (!row || row.document.type !== "IMPROVED_RESUME") {
+  return row ? resolveResumeDesignSource({ userId: input.userId, row }) : null;
+}
+
+export async function resolveResumeDesignSource(input: {
+  userId: string;
+  row: DocumentRow;
+}): Promise<ResumeDesignSource | null> {
+  const { row } = input;
+
+  if (row.document.type !== "IMPROVED_RESUME") {
     return null;
   }
 
@@ -115,7 +134,16 @@ export async function saveResumeDesignSelection(input: {
     resumeSpacing: input.selection.spacing,
   });
 
-  return document ? { ok: true as const } : { ok: false as const };
+  if (!document) {
+    return { ok: false as const };
+  }
+
+  await updateResumeDesignPreference({
+    userId: input.userId,
+    selection: input.selection,
+  });
+
+  return { ok: true as const };
 }
 
 export async function saveEditedResume(input: {

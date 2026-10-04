@@ -33,6 +33,17 @@ function sameSelection(a: ResumeDesignSelection, b: ResumeDesignSelection) {
   );
 }
 
+function toFormData(publicId: string, selection: ResumeDesignSelection) {
+  const formData = new FormData();
+
+  formData.set("publicId", publicId);
+  formData.set("template", selection.template);
+  formData.set("typography", selection.typography);
+  formData.set("spacing", selection.spacing);
+
+  return formData;
+}
+
 function toQuery(selection: ResumeDesignSelection) {
   return new URLSearchParams({
     template: selection.template,
@@ -119,16 +130,9 @@ export function ResumeDesignControls({
       return;
     }
 
-    const formData = new FormData();
-
-    formData.set("publicId", publicId);
-    formData.set("template", next.template);
-    formData.set("typography", next.typography);
-    formData.set("spacing", next.spacing);
-
     const result = await saveResumeDesignAction(
       { status: "idle", message: "" },
-      formData,
+      toFormData(publicId, next),
     );
 
     if (result.status === "error") {
@@ -138,6 +142,32 @@ export function ResumeDesignControls({
 
     savedRef.current = next;
   }, [publicId]);
+
+  const sendPending = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const next = pendingRef.current;
+
+    if (!next || sameSelection(next, savedRef.current)) {
+      return;
+    }
+
+    const sent = navigator.sendBeacon(
+      `/dashboard/documents/${publicId}/design`,
+      toFormData(publicId, next),
+    );
+
+    if (sent) {
+      pendingRef.current = null;
+      savedRef.current = next;
+      return;
+    }
+
+    void flush();
+  }, [publicId, flush]);
 
   const scheduleSave = useCallback(
     (next: ResumeDesignSelection) => {
@@ -226,23 +256,14 @@ export function ResumeDesignControls({
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    },
-    [],
-  );
-
   useEffect(() => {
-    function onLeave() {
-      void flush();
-    }
+    window.addEventListener("pagehide", sendPending);
 
-    window.addEventListener("pagehide", onLeave);
-    return () => window.removeEventListener("pagehide", onLeave);
-  }, [flush]);
+    return () => {
+      window.removeEventListener("pagehide", sendPending);
+      sendPending();
+    };
+  }, [sendPending]);
 
   useEffect(() => {
     if (!previewOpen) {
