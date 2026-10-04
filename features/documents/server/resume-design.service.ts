@@ -67,7 +67,16 @@ export async function findResumeDesignSource(input: {
 }): Promise<ResumeDesignSource | null> {
   const row = await findDocumentRowForUser(input);
 
-  if (!row || row.document.type !== "IMPROVED_RESUME") {
+  return row ? resolveResumeDesignSource({ userId: input.userId, row }) : null;
+}
+
+export async function resolveResumeDesignSource(input: {
+  userId: string;
+  row: DocumentRow;
+}): Promise<ResumeDesignSource | null> {
+  const { row } = input;
+
+  if (row.document.type !== "IMPROVED_RESUME") {
     return null;
   }
 

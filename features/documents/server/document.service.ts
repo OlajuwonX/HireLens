@@ -32,9 +32,8 @@ import {
 import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
 import type { ResumeDesignSelection } from "@/lib/resume-design";
 import {
-  documentDesignSelection,
   findPreferredResumeDesign,
-  readEditedResume,
+  resolveResumeDesignSource,
 } from "./resume-design.service";
 import {
   createGeneratedDocument,
@@ -254,17 +253,17 @@ export async function addImprovedResumeToLibrary(input: {
       ).id;
 
     const label = improvedResumeVersionLabel(row.jobTitle, row.jobCompany);
-    const edited = readEditedResume(row.document.editedResumeJson);
-    const version = edited
+    const source = await resolveResumeDesignSource({
+      userId: input.userId,
+      row,
+    });
+    const version = source
       ? await createResumeVersionFromBytes({
           userId: input.userId,
-          bytes: await renderImprovedResumePdf(
-            edited,
-            documentDesignSelection(row),
-          ),
+          bytes: await renderImprovedResumePdf(source.resume, source.selection),
           filename: improvedResumeFilename(
-            edited.header.name,
-            row.jobTitle ?? edited.header.headline,
+            source.resume.header.name,
+            row.jobTitle ?? source.resume.header.headline,
           ),
           resumeId,
           label,
