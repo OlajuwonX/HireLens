@@ -24,6 +24,10 @@ import {
   type DocumentRow,
 } from "./document.repository";
 import { improvedResumeFilename } from "../improved-resume-format";
+import {
+  findResumeDesignPreference,
+  updateResumeDesignPreference,
+} from "./resume-design-preference.repository";
 
 export type ResumeDesignSource = {
   row: DocumentRow;
@@ -49,6 +53,12 @@ export function documentDesignSelection(row: DocumentRow) {
     typography: row.document.resumeTypography,
     spacing: row.document.resumeSpacing,
   });
+}
+
+export async function findPreferredResumeDesign(
+  userId: string,
+): Promise<ResumeDesignSelection> {
+  return readResumeDesignSelection(await findResumeDesignPreference(userId));
 }
 
 export async function findResumeDesignSource(input: {
@@ -115,7 +125,16 @@ export async function saveResumeDesignSelection(input: {
     resumeSpacing: input.selection.spacing,
   });
 
-  return document ? { ok: true as const } : { ok: false as const };
+  if (!document) {
+    return { ok: false as const };
+  }
+
+  await updateResumeDesignPreference({
+    userId: input.userId,
+    selection: input.selection,
+  });
+
+  return { ok: true as const };
 }
 
 export async function saveEditedResume(input: {

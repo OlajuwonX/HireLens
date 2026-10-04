@@ -30,8 +30,10 @@ import {
   removeImprovedResumeFile,
 } from "./improved-resume.service";
 import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
+import type { ResumeDesignSelection } from "@/lib/resume-design";
 import {
   documentDesignSelection,
+  findPreferredResumeDesign,
   readEditedResume,
 } from "./resume-design.service";
 import {
@@ -104,13 +106,17 @@ export async function saveAnalysisView(input: {
   }
 
   let fileAssetId: string | null = null;
+  let design: ResumeDesignSelection | null = null;
 
   if (input.view === "IMPROVED_RESUME") {
+    design = await findPreferredResumeDesign(input.userId);
+
     try {
       fileAssetId = await buildImprovedResumePdf({
         userId: input.userId,
         resume: result.improvedResume,
         jobTitle: input.jobTitle,
+        selection: design,
       });
     } catch (error) {
       console.error("Improved resume PDF failed", {
@@ -136,6 +142,13 @@ export async function saveAnalysisView(input: {
     promptVersion: analysis.promptVersion,
     originalContent: content,
     editedContent: content,
+    ...(design
+      ? {
+          resumeTemplate: design.template,
+          resumeTypography: design.typography,
+          resumeSpacing: design.spacing,
+        }
+      : {}),
   });
 
   await recordDocumentActivity({

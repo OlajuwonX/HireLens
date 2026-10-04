@@ -2,6 +2,7 @@ import "server-only";
 
 import type { ImprovedResume } from "@/lib/ai/schemas/improved-resume.schema";
 import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
+import type { ResumeDesignSelection } from "@/lib/resume-design";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { StorageProvider } from "@/lib/storage";
 import {
@@ -42,9 +43,10 @@ export async function buildImprovedResumePdf(input: {
   userId: string;
   resume: ImprovedResume;
   jobTitle: string | null;
+  selection?: ResumeDesignSelection;
   storageProvider?: StorageProvider;
 }) {
-  const bytes = await renderImprovedResumePdf(input.resume);
+  const bytes = await renderImprovedResumePdf(input.resume, input.selection);
   const { stored } = await storeImprovedResumePdf({
     userId: input.userId,
     bytes,

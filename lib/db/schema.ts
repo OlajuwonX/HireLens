@@ -158,6 +158,9 @@ export const users = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     purgeAfter: timestamp("purge_after", { withTimezone: true }),
     purgeWarnedAt: timestamp("purge_warned_at", { withTimezone: true }),
+    preferredResumeTemplate: text("preferred_resume_template"),
+    preferredResumeTypography: text("preferred_resume_typography"),
+    preferredResumeSpacing: text("preferred_resume_spacing"),
     ...timestamps,
   },
   (table) => [
