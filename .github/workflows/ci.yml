@@ -11,8 +11,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tamper-check:
+    name: Tamper check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Runs before anything is installed, using git and the shell only.
+      - name: Check for injected malware
+        run: bash scripts/security/check-tamper.sh
+
   verify:
     name: Lint, typecheck, test, build
+    needs: tamper-check
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
