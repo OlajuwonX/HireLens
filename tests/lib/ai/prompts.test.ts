@@ -71,9 +71,9 @@ describe("createApplicationIntelligencePrompt", () => {
     );
   });
 
-  it("is versioned for the reason section", () => {
+  it("is versioned for scoring the improved resume", () => {
     expect(APPLICATION_INTELLIGENCE_PROMPT_VERSION).toBe(
-      "application-intelligence-v3",
+      "application-intelligence-v4",
     );
   });
 

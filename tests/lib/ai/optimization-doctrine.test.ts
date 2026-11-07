@@ -227,6 +227,15 @@ describe("the professional summary is built from real evidence", () => {
 });
 
 describe("scoring follows the evidence", () => {
+  it("scores the improved resume the candidate will submit", () => {
+    expect(SCORING_PROMPT).toContain(
+      "Score the improvedResume you produced above, not the original resume",
+    );
+    expect(SCORING_PROMPT).toContain(
+      "A QUALIFICATION_GAP stays missing",
+    );
+  });
+
   it("gives transferable evidence partial credit only", () => {
     expect(SCORING_PROMPT).toContain(
       "A related but different technology earns partial credit, never full credit",
