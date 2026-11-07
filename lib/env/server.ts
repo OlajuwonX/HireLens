@@ -96,8 +96,8 @@ const serverEnvSchema = z.object({
   AI_ALLOW_DATA_COLLECTION: optionalBooleanWithDefault(false),
   AI_MAX_RETRIES: optionalIntWithDefault(1),
 
-  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: optionalIntWithDefault(4),
-  AI_DAILY_REGENERATE_LIMIT: optionalIntWithDefault(1),
+  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: optionalIntWithDefault(15),
+  AI_DAILY_REGENERATE_LIMIT: optionalIntWithDefault(3),
   AI_DAILY_JOB_EXTRACTION_LIMIT: optionalIntWithDefault(3),
   AI_GLOBAL_DAILY_SAFETY_LIMIT: optionalIntWithDefault(40),
 

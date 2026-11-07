@@ -36,11 +36,18 @@ describe("usage actions", () => {
 });
 
 describe("daily allowances", () => {
-  it("defaults to four analyses and one regenerate a day", () => {
-    expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(4);
-    expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(1);
+  it("defaults to fifteen analyses and three regenerates a day", () => {
+    expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(15);
+    expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(3);
     expect(getDailyAllowance("JOB_EXTRACTION")).toBe(3);
     expect(getDailyAllowance("INTERVIEW_POOL_GENERATION")).toBe(2);
+  });
+
+  it("reads env overrides even when the value is quoted", () => {
+    process.env.AI_DAILY_APPLICATION_ANALYSIS_LIMIT = '"12"';
+    process.env.AI_DAILY_REGENERATE_LIMIT = " 2 ";
+    expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(12);
+    expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(2);
   });
 
   it("keeps the shared cap inside the free provider allowance", () => {
