@@ -1,6 +1,11 @@
 export const SCORING_PROMPT = `SCORING:
 
-Score from the requirement and keyword evidence you produced, not from an overall impression.
+Score the improvedResume you produced above, not the original resume. The improved resume is the one the candidate will submit, so every score must describe how well that version matches the job.
+
+Read the improved resume against the job posting and the requirement and keyword evidence you produced, not an overall impression.
+A WORDING_ONLY gap that the improved resume now closes counts as covered.
+A QUALIFICATION_GAP stays missing, because rewording cannot create real experience.
+Give no credit for anything the improved resume states that the original resume does not support.
 
 Weigh:
 

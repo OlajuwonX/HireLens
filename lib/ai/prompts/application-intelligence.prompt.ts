@@ -13,7 +13,7 @@ import { REQUIREMENT_COVERAGE_PROMPT } from "./requirement-coverage.prompt";
 import { SCORING_PROMPT } from "./scoring.prompt";
 
 export const APPLICATION_INTELLIGENCE_PROMPT_VERSION =
-  "application-intelligence-v3";
+  "application-intelligence-v4";
 
 const sections = [
   REQUIREMENT_COVERAGE_PROMPT,

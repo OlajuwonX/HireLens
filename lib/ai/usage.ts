@@ -19,8 +19,8 @@ export const usageActionLabels: Record<AiUsageAction, string> = {
 };
 
 export const AI_USAGE_DEFAULTS = {
-  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 4,
-  AI_DAILY_REGENERATE_LIMIT: 1,
+  AI_DAILY_APPLICATION_ANALYSIS_LIMIT: 15,
+  AI_DAILY_REGENERATE_LIMIT: 3,
   AI_DAILY_JOB_EXTRACTION_LIMIT: 3,
   AI_DAILY_INTERVIEW_POOL_LIMIT: 2,
   AI_INTERVIEW_POOL_GLOBAL_DAILY_LIMIT: 8,
@@ -28,7 +28,8 @@ export const AI_USAGE_DEFAULTS = {
 } as const;
 
 function readLimit(key: keyof typeof AI_USAGE_DEFAULTS) {
-  const parsed = Number.parseInt(process.env[key] ?? "", 10);
+  const raw = (process.env[key] ?? "").trim().replace(/^["']|["']$/g, "");
+  const parsed = Number.parseInt(raw, 10);
 
   return Number.isFinite(parsed) && parsed > 0
     ? parsed
