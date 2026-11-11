@@ -107,6 +107,7 @@ export const usageAction = pgEnum("usage_action", [
   "BULLET_REWRITE",
   "FOLLOW_UP_MESSAGE",
   "INTERVIEW_POOL_GENERATION",
+  "RESUME_REVIEW",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -967,6 +968,34 @@ export const candidateAnswers = pgTable(
   ],
 );
 
+export const resumeReviews = pgTable(
+  "resume_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => applicationAnalyses.id, { onDelete: "cascade" }),
+    inputHash: text("input_hash").notNull(),
+    verdict: text("verdict").notNull(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    promptVersion: text("prompt_version").notNull(),
+    resultJson: jsonb("result_json").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("resume_reviews_user_input_hash_idx").on(
+      table.userId,
+      table.inputHash,
+    ),
+    index("resume_reviews_analysis_created_idx").on(
+      table.analysisId,
+      table.createdAt.desc(),
+    ),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1160,3 +1189,4 @@ export type NewCandidateProfile = typeof candidateProfiles.$inferInsert;
 export type CandidateAnswer = typeof candidateAnswers.$inferSelect;
 export type NewCandidateAnswer = typeof candidateAnswers.$inferInsert;
 export type WorkArrangement = (typeof workArrangement.enumValues)[number];
+export type ResumeReviewRow = typeof resumeReviews.$inferSelect;

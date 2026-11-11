@@ -4,8 +4,6 @@ import {
   APPLICATION_INTELLIGENCE_PROMPT_VERSION,
   applicationIntelligenceSchema,
   AiProviderChainError,
-  collectResumeEntities,
-  compareOptimizationPasses,
   describeAiFailure,
   hashAnalysisInput,
   normalizeJsonModelOutput,
@@ -16,7 +14,10 @@ import type {
   AIProviderResult,
   ApplicationIntelligenceProvider,
 } from "@/lib/ai/types";
-import type { ApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
+import {
+  extractSourceEvidence,
+  formatSourceEvidence,
+} from "@/lib/ai/source-evidence";
 import { readResumeText } from "@/lib/pdf/extract-text";
 import { getStorageProvider } from "@/lib/storage/provider";
 import type { StorageProvider } from "@/lib/storage";
@@ -27,16 +28,18 @@ import {
   reserveUsage,
 } from "@/features/usage/server/ai-usage.service";
 import type { UsageDenialReason } from "@/features/usage/limit-notice";
-import {
-  employmentTypeLabels,
-  workArrangementLabels,
-} from "@/features/jobs/constants";
 import type { Job, ResumeVersion } from "@/lib/db/schema";
 import {
   improvedResumeToText,
   mergeCorrections,
   readStoredIntelligence,
 } from "./analysis.mapper";
+import { toJobPostingInput } from "./job-input";
+import {
+  decideOptimization,
+  type GateDecision,
+  type OptimizationOutcome,
+} from "./optimization-gate";
 import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
 import {
   createPendingAnalysis,
@@ -49,7 +52,13 @@ import {
 } from "./analysis.repository";
 
 export type AnalysisOutcome =
-  | { ok: true; analysisId: string; analysisPublicId: string; reused: boolean }
+  | {
+      ok: true;
+      analysisId: string;
+      analysisPublicId: string;
+      reused: boolean;
+      optimization: OptimizationOutcome;
+    }
   | { ok: false; error: "FILE_MISSING" | "FAILED"; message: string }
   | {
       ok: false;
@@ -140,6 +149,7 @@ export async function analyzeApplication(input: {
       analysisId: existing.id,
       analysisPublicId: existing.publicId,
       reused: true,
+      optimization: "FIRST_PASS",
     };
   }
 
@@ -241,9 +251,14 @@ export async function analyzeApplication(input: {
 
   const resumeText =
     input.version.extractedText?.trim() || (await readResumeText(pdfBytes));
+  const evidence = extractSourceEvidence(resumeText);
+  const supplementText = corrections
+    .map((correction) => [correction.evidence, correction.notes].filter(Boolean).join(" "))
+    .join("\n");
 
   let providerResult: AIProviderResult;
-  let result: ApplicationIntelligence;
+  let result: GateDecision["result"];
+  let optimization: OptimizationOutcome = "FIRST_PASS";
 
   try {
     const provider = input.provider ?? getApplicationIntelligenceProvider();
@@ -254,18 +269,8 @@ export async function analyzeApplication(input: {
         filename: fileAsset.originalFilename ?? "resume.pdf",
         text: resumeText,
       },
-      job: {
-        title: input.job.title,
-        company: input.job.company,
-        location: input.job.location,
-        workArrangement: workArrangementLabels[input.job.workArrangement],
-        employmentType: employmentTypeLabels[input.job.employmentType],
-        deadline: input.job.deadlineAt?.toISOString().slice(0, 10) ?? null,
-        source: input.job.source,
-        sourceUrl: input.job.sourceUrl,
-        description: input.job.description,
-        requirements: input.job.requirements,
-      },
+      sourceEvidence: formatSourceEvidence(evidence),
+      job: toJobPostingInput(input.job),
       priorCorrections: corrections.map((correction) => ({
         requirement: correction.requirement,
         markedIncorrect: correction.markedIncorrect,
@@ -275,36 +280,27 @@ export async function analyzeApplication(input: {
       previousPass: describePreviousPass(previousResult),
     });
 
-    result = normalizeJsonModelOutput(
-      providerResult.rawResponse,
-      applicationIntelligenceSchema,
-    );
-
-    const regression = compareOptimizationPasses({
-      sourceText: resumeText,
-      previousResumeText: previousResult
-        ? improvedResumeToText(previousResult.improvedResume)
-        : null,
-      nextResumeText: improvedResumeToText(result.improvedResume),
-      previousEntities: previousResult
-        ? collectResumeEntities(previousResult.improvedResume)
-        : [],
-      nextEntities: collectResumeEntities(result.improvedResume),
+    const decision = decideOptimization({
+      sourceText: resumeText ?? "",
+      supplementText,
+      evidence,
+      previous: previousResult,
+      next: normalizeJsonModelOutput(
+        providerResult.rawResponse,
+        applicationIntelligenceSchema,
+      ),
     });
 
-    if (regression.keepPrevious && previousResult) {
+    result = decision.result;
+    optimization = decision.outcome;
+
+    if (decision.outcome === "KEPT_PREVIOUS") {
       console.warn("Optimized resume rejected as a regression", {
         stage: "REGRESSION_GUARD",
         jobId: input.job.id,
         resumeVersionId: input.version.id,
-        reason: regression.reason,
-        previousPreserved: regression.previous?.preserved.length ?? null,
-        nextPreserved: regression.next?.preserved.length ?? null,
-        previousNamed: regression.previous?.preservedEntities.length ?? null,
-        nextNamed: regression.next?.preservedEntities.length ?? null,
+        reason: decision.reason,
       });
-
-      result = { ...result, improvedResume: previousResult.improvedResume };
     }
   } catch (error) {
     const failureReason = describeAiFailure(error);
@@ -382,6 +378,7 @@ export async function analyzeApplication(input: {
       analysisId: analysis.id,
       analysisPublicId: analysis.publicId,
       reused: false,
+      optimization,
     };
   } catch (error) {
     const failureReason = `DatabaseFailure ${describeAiFailure(error)}`;

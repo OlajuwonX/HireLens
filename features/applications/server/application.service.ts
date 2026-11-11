@@ -1,4 +1,5 @@
 import "server-only";
+import type { OptimizationOutcome } from "@/features/analyses/server/optimization-gate";
 
 import { attachAnalysisApplication } from "@/features/analyses/server/analysis.repository";
 import { analyzeApplication } from "@/features/analyses/server/analysis.service";
@@ -246,7 +247,9 @@ export async function changeApplicationStatus(input: {
 export async function analyzeOwnedApplication(input: {
   userId: string;
   publicId: string;
-}): Promise<ApplicationResult<{ publicId: string }>> {
+}): Promise<
+  ApplicationResult<{ publicId: string; optimization: OptimizationOutcome }>
+> {
   const row = await findApplicationRowForUser(input);
 
   if (!row) {
@@ -315,7 +318,13 @@ export async function analyzeOwnedApplication(input: {
     analysisId: analysis.analysisId,
   });
 
-  return { ok: true, value: { publicId: row.application.publicId } };
+  return {
+    ok: true,
+    value: {
+      publicId: row.application.publicId,
+      optimization: analysis.optimization,
+    },
+  };
 }
 
 export async function updateOwnedApplication(input: {

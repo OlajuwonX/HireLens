@@ -140,6 +140,8 @@ function analysisWithResponsibilities(
       certifications: [],
       additionalSections: [],
     },
+    traceability: [],
+    validation: null,
     bulletRewrites: [],
     professionalSummary: "",
     coverLetter: "",

@@ -25,6 +25,7 @@ describe("usage actions", () => {
       "APPLICATION_REGENERATE",
       "JOB_EXTRACTION",
       "INTERVIEW_POOL_GENERATION",
+      "RESUME_REVIEW",
     ]);
   });
 
@@ -36,6 +37,10 @@ describe("usage actions", () => {
 });
 
 describe("daily allowances", () => {
+  it("allows five independent reviews a day by default", () => {
+    expect(getDailyAllowance("RESUME_REVIEW")).toBe(5);
+  });
+
   it("defaults to fifteen analyses and three regenerates a day", () => {
     expect(getDailyAllowance("APPLICATION_ANALYSIS")).toBe(15);
     expect(getDailyAllowance("APPLICATION_REGENERATE")).toBe(3);

@@ -179,6 +179,7 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
           certifications: [],
           additionalSections: [],
         },
+        traceability: [],
         bulletRewrites: [
           {
             original: "Managed projects.",
@@ -194,6 +195,27 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
           body: "Mock application email body. Configure GEMINI_API_KEY for real output.",
         },
         followUpMessage: `Mock follow-up message about the ${title} application.`,
+      }),
+    };
+  }
+
+  async reviewResume(): Promise<AIProviderResult> {
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        verdict: "APPROVED",
+        scores: {
+          factualAccuracy: 100,
+          requirementCoverage: 70,
+          keywordRelevance: 70,
+          bulletQuality: 70,
+          readability: 80,
+          atsStructure: 80,
+        },
+        issues: [],
+        summary: "Mock review. Configure GEMINI_API_KEY for a real independent review.",
       }),
     };
   }

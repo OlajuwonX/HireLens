@@ -13,6 +13,7 @@ function provider(
     analyzeApplication,
     extractJobPosting: vi.fn(),
     generateInterviewPool: vi.fn(),
+    reviewResume: vi.fn(),
   };
 }
 
@@ -439,6 +440,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         analyzeApplication: vi.fn(),
         extractJobPosting: vi.fn(),
         generateInterviewPool,
+        reviewResume: vi.fn(),
       };
     }
 

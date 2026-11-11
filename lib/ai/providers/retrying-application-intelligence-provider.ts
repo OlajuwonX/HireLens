@@ -33,6 +33,7 @@ export type RetryingProviderConfig = {
   validateAnalysis?: ResponseValidator;
   validateExtraction?: ResponseValidator;
   validateInterviewPool?: ResponseValidator;
+  validateReview?: ResponseValidator;
 };
 
 function delay(ms: number) {
@@ -121,6 +122,14 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
         budgetMs: this.config.interviewBudgetMs ?? this.totalBudgetMs,
         reserveAcrossProviders: false,
       },
+    );
+  }
+
+  async reviewResume(input: { content: string }): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.reviewResume(input),
+      this.config.validateReview,
+      { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
     );
   }
 

@@ -211,6 +211,13 @@
       "when": 1794432042188,
       "tag": "0029_candidate_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794434589464,
+      "tag": "0030_resume_reviews",
+      "breakpoints": true
     }
   ]
 }

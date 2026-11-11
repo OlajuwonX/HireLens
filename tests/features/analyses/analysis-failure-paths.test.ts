@@ -84,6 +84,7 @@ const VALID_RESULT = {
     certifications: [],
     additionalSections: [],
   },
+  traceability: [],
   bulletRewrites: [],
   professionalSummary: "Backend engineer.",
   coverLetter: "Dear hiring team,",
@@ -125,6 +126,7 @@ function provider(analyze: () => Promise<unknown>) {
   return {
     analyzeApplication: analyze,
     extractJobPosting: vi.fn(),
+    reviewResume: vi.fn(),
   } as never;
 }
 

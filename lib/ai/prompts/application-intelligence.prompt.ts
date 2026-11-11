@@ -1,3 +1,4 @@
+import { ACHIEVEMENT_WRITING_PROMPT } from "./achievement-writing.prompt";
 import { APPLICATION_EMAIL_PROMPT } from "./application-email.prompt";
 import { BULLET_REWRITER_PROMPT } from "./bullet-rewriter.prompt";
 import { COVER_LETTER_PROMPT } from "./cover-letter.prompt";
@@ -11,15 +12,18 @@ import { RECOMMENDATIONS_PROMPT } from "./recommendations.prompt";
 import { REFINEMENT_PASS_PROMPT } from "./refinement-pass.prompt";
 import { REQUIREMENT_COVERAGE_PROMPT } from "./requirement-coverage.prompt";
 import { SCORING_PROMPT } from "./scoring.prompt";
+import { TRACEABILITY_PROMPT } from "./traceability.prompt";
 
 export const APPLICATION_INTELLIGENCE_PROMPT_VERSION =
-  "application-intelligence-v4";
+  "application-intelligence-v5";
 
 const sections = [
   REQUIREMENT_COVERAGE_PROMPT,
   KEYWORD_ANALYSIS_PROMPT,
   OPTIMIZATION_PLAN_PROMPT,
   IMPROVED_RESUME_PROMPT,
+  ACHIEVEMENT_WRITING_PROMPT,
+  TRACEABILITY_PROMPT,
   BULLET_REWRITER_PROMPT,
   PROFESSIONAL_SUMMARY_PROMPT,
   COVER_LETTER_PROMPT,

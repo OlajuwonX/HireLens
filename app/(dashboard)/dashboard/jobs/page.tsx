@@ -18,6 +18,11 @@ import { readUsageDenialReason } from "@/features/usage/limit-notice";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { UrlFlagToast } from "@/components/ui/url-flag-toast";
+import {
+  OPTIMIZATION_FLAG,
+  optimizationNotice,
+} from "@/features/applications/optimization-notice";
 
 export const maxDuration = 60;
 
@@ -70,6 +75,7 @@ export default async function SavedJobsPage({
   const openId = typeof raw.open === "string" ? raw.open : null;
   const justSaved = raw.saved === "1" && raw.analysis !== "failed";
   const analysisFailed = raw.analysis === "failed";
+  const rewriteNotice = optimizationNotice(raw[OPTIMIZATION_FLAG]);
   const analysisLimitReason = analysisFailed
     ? readUsageDenialReason(raw.reason)
     : null;
@@ -122,6 +128,10 @@ export default async function SavedJobsPage({
       ) : null}
 
       {justSaved ? <JobSavedToast /> : null}
+
+      {rewriteNotice ? (
+        <UrlFlagToast message={rewriteNotice} flags={[OPTIMIZATION_FLAG]} />
+      ) : null}
 
       {openId ? (
         <SavedJobDrawer

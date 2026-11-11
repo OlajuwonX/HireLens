@@ -5,12 +5,15 @@ import {
   BASE_SYSTEM_PROMPT,
   INTERVIEW_POOL_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
+  RESUME_REVIEW_PROMPT,
   createApplicationIntelligencePrompt,
   createInterviewPoolPrompt,
   formatPreviousOptimization,
 } from "../prompts";
+import { describeJob } from "../prompts/job-posting";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import { generatedInterviewPoolSchema } from "../schemas/interview-pool.schema";
+import { resumeReviewSchema } from "../schemas/resume-review.schema";
 import { AiProviderError } from "../provider-errors";
 import type {
   AIProviderResult,
@@ -54,30 +57,6 @@ function describeEmptyResponse(response: {
     `thinkingTokens=${thoughts},`,
     `outputTokens=${output})`,
   ].join(" ");
-}
-
-function describeJob(job: ApplicationIntelligenceInput["job"]) {
-  const lines = [
-    "<job_posting>",
-    `Title: ${job.title}`,
-    `Company: ${job.company}`,
-    `Location: ${job.location ?? "Not stated"}`,
-    `Work arrangement: ${job.workArrangement}`,
-    `Employment type: ${job.employmentType}`,
-    `Deadline: ${job.deadline ?? "Not stated"}`,
-    `Source: ${job.source ?? "Not stated"}`,
-    `Posting URL: ${job.sourceUrl ?? "Not stated"}`,
-    "Description:",
-    job.description,
-  ];
-
-  if (job.requirements) {
-    lines.push("Stated requirements:", job.requirements);
-  }
-
-  lines.push("</job_posting>");
-
-  return lines.join("\n");
 }
 
 export type GeminiProviderConfig = {
@@ -179,6 +158,7 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
                 data: Buffer.from(input.resume.pdfBytes).toString("base64"),
               },
             },
+            ...(input.sourceEvidence ? [{ text: input.sourceEvidence }] : []),
             { text: describeJob(input.job) },
             ...(previousPass ? [{ text: previousPass }] : []),
           ],
@@ -245,6 +225,33 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
       model: this.config.model,
       rawResponse: text,
       durationMs,
+    };
+  }
+
+  async reviewResume(input: { content: string }): Promise<AIProviderResult> {
+    const startedAt = performance.now();
+
+    const response = await this.send({
+      model: this.config.model,
+      contents: [{ role: "user", parts: [{ text: input.content }] }],
+      config: {
+        systemInstruction: RESUME_REVIEW_PROMPT,
+        responseMimeType: "application/json",
+        responseJsonSchema: toGeminiResponseSchema(resumeReviewSchema),
+      },
+    });
+
+    const text = response.text;
+
+    if (!text) {
+      throw this.emptyResponse(response);
+    }
+
+    return {
+      provider: "gemini",
+      model: this.config.model,
+      rawResponse: text,
+      durationMs: Math.round(performance.now() - startedAt),
     };
   }
 }

@@ -128,6 +128,7 @@ function intelligence(bullets: string[]) {
       droppedEvidence: [],
     },
     improvedResume: resumeWith(bullets),
+    traceability: [],
     bulletRewrites: [],
     professionalSummary: "Frontend engineer with 5+ years of React delivery.",
     coverLetter: "Dear hiring team,",
@@ -189,6 +190,7 @@ function run(options: {
     provider: {
       analyzeApplication: analyze,
       extractJobPosting: vi.fn(),
+      reviewResume: vi.fn(),
     } as never,
     storageProvider: {
       readFile: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
