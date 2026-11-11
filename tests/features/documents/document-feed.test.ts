@@ -14,6 +14,8 @@ const action = readFileSync(
   "features/documents/actions/document-feed-actions.ts",
   "utf8",
 );
+const sentinel = readFileSync("lib/query/use-sentinel.ts", "utf8");
+const status = readFileSync("components/ui/feed-status.tsx", "utf8");
 
 describe("the documents list scrolls instead of paginating", () => {
   it("has no load-more button on the page", () => {
@@ -26,13 +28,14 @@ describe("the documents list scrolls instead of paginating", () => {
   });
 
   it("loads on intersection rather than on click", () => {
-    expect(feed).toContain("IntersectionObserver");
-    expect(feed).toContain("isIntersecting");
+    expect(feed).toContain("useFeed(");
+    expect(sentinel).toContain("IntersectionObserver");
+    expect(sentinel).toContain("isIntersecting");
   });
 
   it("starts fetching before the sentinel is on screen", () => {
-    expect(feed).toContain("rootMargin");
-    expect(feed).toContain('PREFETCH_MARGIN = "600px"');
+    expect(sentinel).toContain("rootMargin");
+    expect(sentinel).toContain('PREFETCH_MARGIN = "600px"');
   });
 
   it("shows skeleton cards inside the same grid while loading", () => {
@@ -45,30 +48,22 @@ describe("the documents list scrolls instead of paginating", () => {
   });
 });
 
-describe("the feed appends rather than replaces", () => {
-  it("keeps existing rows when a page arrives", () => {
-    expect(feed).toContain("...current,");
+describe("the feed is wired to the shared feed engine", () => {
+  it("is keyed by its filters", () => {
+    expect(feed).toContain("queryKeys.documents(filters)");
   });
 
-  it("deduplicates by publicId", () => {
-    expect(feed).toContain("seen.has(row.publicId)");
-  });
-
-  it("guards against overlapping requests", () => {
-    expect(feed).toContain("inFlight.current");
-  });
-
-  it("stops observing once there is no cursor", () => {
-    expect(feed).toContain("if (!sentinel || !cursor || failed)");
+  it("follows the server cursor", () => {
+    expect(feed).toContain("next: page.nextCursor");
   });
 
   it("offers a retry when a page fails", () => {
-    expect(feed).toContain("Try again");
-    expect(feed).toContain("setFailed(true)");
+    expect(feed).toContain("<FeedStatus");
+    expect(status).toContain("Try again");
   });
 
   it("announces loading to screen readers", () => {
-    expect(feed).toContain('aria-live="polite"');
+    expect(status).toContain('aria-live="polite"');
     expect(feed).toContain("aria-busy={loading}");
   });
 

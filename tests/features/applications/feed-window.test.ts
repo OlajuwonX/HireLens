@@ -1,5 +1,8 @@
 import { APPLICATION_PAGE_SIZE } from "@/features/applications/constants";
-import { shiftOffset } from "@/features/applications/feed-window";
+import {
+  createOffsetFetcher,
+  shiftOffset,
+} from "@/features/applications/feed-window";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -23,7 +26,7 @@ describe("shiftOffset", () => {
   });
 });
 
-function simulate({
+async function simulate({
   total,
   compensate,
 }: {
@@ -31,31 +34,42 @@ function simulate({
   compensate: boolean;
 }) {
   const server = Array.from({ length: total }, (_, index) => `job-${index}`);
+  let shift = 0;
 
-  const firstPage = server.slice(0, APPLICATION_PAGE_SIZE);
-  let offset: number | null =
-    server.length > APPLICATION_PAGE_SIZE ? APPLICATION_PAGE_SIZE : null;
-  const loaded = [...firstPage];
+  const fetchPage = createOffsetFetcher({
+    pageSize: APPLICATION_PAGE_SIZE,
+    readShift: () => shift,
+    load: async (offset) => {
+      const fetched = server.slice(offset, offset + APPLICATION_PAGE_SIZE + 1);
 
-  const removedId = firstPage[5];
+      return {
+        rows: fetched.slice(0, APPLICATION_PAGE_SIZE),
+        nextOffset:
+          fetched.length > APPLICATION_PAGE_SIZE
+            ? offset + APPLICATION_PAGE_SIZE
+            : null,
+      };
+    },
+  });
+
+  const first = await fetchPage(0);
+  const loaded = [...first.rows];
+  let next = first.next;
+
+  const removedId = first.rows[5];
   server.splice(server.indexOf(removedId), 1);
   loaded.splice(loaded.indexOf(removedId), 1);
 
   if (compensate) {
-    offset = shiftOffset(offset, -1);
+    shift -= 1;
   }
 
-  while (offset !== null) {
-    const fetched = server.slice(offset, offset + APPLICATION_PAGE_SIZE + 1);
-    const pageRows = fetched.slice(0, APPLICATION_PAGE_SIZE);
+  while (next !== null) {
+    const page = await fetchPage(next);
     const seen = new Set(loaded);
 
-    loaded.push(...pageRows.filter((id) => !seen.has(id)));
-
-    offset =
-      fetched.length > APPLICATION_PAGE_SIZE
-        ? offset + APPLICATION_PAGE_SIZE
-        : null;
+    loaded.push(...page.rows.filter((id) => !seen.has(id)));
+    next = page.next;
   }
 
   return {
@@ -65,22 +79,22 @@ function simulate({
 }
 
 describe("the offset compensation prevents the skip", () => {
-  it("skips a row without compensation", () => {
-    const { missing } = simulate({ total: 30, compensate: false });
+  it("skips a row without compensation", async () => {
+    const { missing } = await simulate({ total: 30, compensate: false });
 
     expect(missing).toEqual(["job-24"]);
   });
 
-  it("loses nothing with compensation", () => {
-    const { missing, duplicates } = simulate({ total: 30, compensate: true });
+  it("loses nothing with compensation", async () => {
+    const { missing, duplicates } = await simulate({ total: 30, compensate: true });
 
     expect(missing).toEqual([]);
     expect(duplicates).toBe(0);
   });
 
-  it("holds across a range of list sizes", () => {
+  it("holds across a range of list sizes", async () => {
     for (const total of [25, 30, 40, 48, 49, 60]) {
-      const { missing, duplicates } = simulate({ total, compensate: true });
+      const { missing, duplicates } = await simulate({ total, compensate: true });
 
       expect({ total, missing, duplicates }).toEqual({
         total,
@@ -90,8 +104,8 @@ describe("the offset compensation prevents the skip", () => {
     }
   });
 
-  it("is a no-op when there is no next page", () => {
-    const { missing, duplicates } = simulate({ total: 20, compensate: true });
+  it("is a no-op when there is no next page", async () => {
+    const { missing, duplicates } = await simulate({ total: 20, compensate: true });
 
     expect(missing).toEqual([]);
     expect(duplicates).toBe(0);
@@ -126,6 +140,7 @@ describe("the card reports leaving and returning", () => {
   it("is wired to the feed window", () => {
     expect(feed).toContain("onLeave={() => shiftWindow(-1)}");
     expect(feed).toContain("onReturn={() => shiftWindow(1)}");
-    expect(feed).toContain("shiftOffset(current, delta)");
+    expect(feed).toContain("readShift: () => shift.current");
+    expect(feed).toContain("shift.current += delta");
   });
 });

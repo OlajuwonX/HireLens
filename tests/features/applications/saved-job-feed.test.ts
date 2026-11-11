@@ -11,6 +11,8 @@ const action = readFileSync(
   "features/applications/actions/application-feed-actions.ts",
   "utf8",
 );
+const sentinel = readFileSync("lib/query/use-sentinel.ts", "utf8");
+const status = readFileSync("components/ui/feed-status.tsx", "utf8");
 
 describe("saved jobs scroll instead of paginating", () => {
   it("has no load-more button and no page param", () => {
@@ -20,9 +22,10 @@ describe("saved jobs scroll instead of paginating", () => {
   });
 
   it("loads on intersection, ahead of the viewport", () => {
-    expect(feed).toContain("IntersectionObserver");
-    expect(feed).toContain('PREFETCH_MARGIN = "600px"');
-    expect(feed).toContain("rootMargin");
+    expect(feed).toContain("useFeed(");
+    expect(sentinel).toContain("IntersectionObserver");
+    expect(sentinel).toContain('PREFETCH_MARGIN = "600px"');
+    expect(sentinel).toContain("rootMargin");
   });
 
   it("puts the skeletons inside the same grid", () => {
@@ -34,14 +37,8 @@ describe("saved jobs scroll instead of paginating", () => {
     expect(skeletonIndex).toBeLessThan(listCloseIndex);
   });
 
-  it("appends and deduplicates rather than replacing", () => {
-    expect(feed).toContain("...current,");
-    expect(feed).toContain("seen.has(row.publicId)");
-  });
-
-  it("guards overlapping requests and stops at the end", () => {
-    expect(feed).toContain("inFlight.current");
-    expect(feed).toContain("offset === null");
+  it("is keyed by its filters", () => {
+    expect(feed).toContain("queryKeys.savedJobs(filters)");
   });
 
   it("keeps the optimistic card behaviour", () => {
@@ -54,12 +51,13 @@ describe("saved jobs scroll instead of paginating", () => {
   });
 
   it("announces loading to screen readers", () => {
-    expect(feed).toContain('aria-live="polite"');
+    expect(status).toContain('aria-live="polite"');
     expect(feed).toContain("aria-busy={loading}");
   });
 
   it("offers a retry when a page fails", () => {
-    expect(feed).toContain("Try again");
+    expect(feed).toContain("<FeedStatus");
+    expect(status).toContain("Try again");
   });
 });
 
