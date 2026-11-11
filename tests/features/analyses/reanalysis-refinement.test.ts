@@ -173,7 +173,7 @@ function run(options: {
   returns: ReturnType<typeof intelligence>;
 }) {
   const analyze = vi.fn(async (input: ApplicationIntelligenceInput) => ({
-    provider: "openrouter" as const,
+    provider: "gemini" as const,
     model: "primary",
     rawResponse: JSON.stringify(options.returns),
     durationMs: 12,

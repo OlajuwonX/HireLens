@@ -7,10 +7,16 @@ import {
   useMemo,
   useState,
 } from "react";
+import dynamic from "next/dynamic";
+import { useOnceTrue } from "@/lib/lazy/use-once-true";
 import { isPaletteShortcut } from "../palette-state";
 import { createResultCache } from "../result-cache";
 import type { Command, SearchResponse } from "../types";
-import { SearchPalette } from "./search-palette";
+
+const SearchPalette = dynamic(
+  () => import("./search-palette").then((module) => module.SearchPalette),
+  { ssr: false },
+);
 
 const RESULT_TTL_MS = 60_000;
 const RESULT_MAX_ENTRIES = 30;
@@ -35,6 +41,7 @@ export function SearchProvider({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const paletteRequested = useOnceTrue(open);
   const cache = useMemo(
     () =>
       createResultCache<SearchResponse>({
@@ -66,13 +73,15 @@ export function SearchProvider({
   return (
     <SearchContext.Provider value={value}>
       {children}
-      <SearchPalette
-        open={open}
-        onOpenChange={setOpen}
-        commands={commands}
-        recentsUserId={recentsUserId}
-        cache={cache}
-      />
+      {paletteRequested ? (
+        <SearchPalette
+          open={open}
+          onOpenChange={setOpen}
+          commands={commands}
+          recentsUserId={recentsUserId}
+          cache={cache}
+        />
+      ) : null}
     </SearchContext.Provider>
   );
 }

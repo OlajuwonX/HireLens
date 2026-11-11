@@ -18,7 +18,7 @@ function provider(
 
 function success(model: string, rawResponse = "{}") {
   return {
-    provider: "openrouter" as const,
+    provider: "gemini" as const,
     model,
     rawResponse,
     durationMs: 10,
@@ -52,7 +52,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       .fn()
       .mockRejectedValueOnce(
         new AiProviderError("upstream unavailable", {
-          provider: "openrouter",
+          provider: "gemini",
           model: "primary",
           status: 503,
         }),
@@ -63,7 +63,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(analyze),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
       ],
@@ -81,7 +81,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
   it("falls back to the next configured provider after retries are exhausted", async () => {
     const failing = vi.fn().mockRejectedValue(
       new AiProviderError("upstream unavailable", {
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         status: 503,
       }),
@@ -92,7 +92,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(failing),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
         {
@@ -116,7 +116,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
   it("does not retry permanent provider errors", async () => {
     const analyze = vi.fn().mockRejectedValue(
       new AiProviderError("no such model", {
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         status: 404,
       }),
@@ -126,7 +126,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(analyze),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
       ],
@@ -151,7 +151,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(badOutput),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
         {
@@ -176,34 +176,22 @@ describe("RetryingApplicationIntelligenceProvider", () => {
     expect(badOutput).toHaveBeenCalledTimes(1);
   });
 
-  it("stops using a provider that reports a rate limit and moves to the next one", async () => {
+  it("stops using a model that reports a rate limit and moves to the next model", async () => {
     const limited = vi.fn().mockRejectedValue(
       new AiProviderError("daily quota reached", {
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         status: 429,
       }),
     );
-    const secondOpenRouterModel = vi.fn().mockResolvedValue(success("second"));
-    const gemini = vi.fn().mockResolvedValue(success("gemini-model"));
+    const fallback = vi.fn().mockResolvedValue(success("fallback"));
+    const last = vi.fn().mockResolvedValue(success("last"));
 
     const retrying = new RetryingApplicationIntelligenceProvider({
       providers: [
-        {
-          provider: provider(limited),
-          providerName: "openrouter",
-          model: "primary",
-        },
-        {
-          provider: provider(secondOpenRouterModel),
-          providerName: "openrouter",
-          model: "second",
-        },
-        {
-          provider: provider(gemini),
-          providerName: "gemini",
-          model: "gemini-model",
-        },
+        { provider: provider(limited), providerName: "gemini", model: "primary" },
+        { provider: provider(fallback), providerName: "gemini", model: "fallback" },
+        { provider: provider(last), providerName: "gemini", model: "last" },
       ],
       maxRetries: 2,
       timeoutMs: 1_000,
@@ -211,11 +199,38 @@ describe("RetryingApplicationIntelligenceProvider", () => {
     });
 
     await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
-      model: "gemini-model",
+      model: "fallback",
     });
     expect(limited).toHaveBeenCalledTimes(1);
-    expect(secondOpenRouterModel).not.toHaveBeenCalled();
-    expect(gemini).toHaveBeenCalledTimes(1);
+    expect(fallback).toHaveBeenCalledTimes(1);
+    expect(last).not.toHaveBeenCalled();
+  });
+
+  it("skips a rate-limited model when it appears again in the chain", async () => {
+    const limited = vi.fn().mockRejectedValue(
+      new AiProviderError("daily quota reached", {
+        provider: "gemini",
+        model: "primary",
+        status: 429,
+      }),
+    );
+    const fallback = vi.fn().mockResolvedValue(success("fallback"));
+
+    const retrying = new RetryingApplicationIntelligenceProvider({
+      providers: [
+        { provider: provider(limited), providerName: "gemini", model: "primary" },
+        { provider: provider(limited), providerName: "gemini", model: "primary" },
+        { provider: provider(fallback), providerName: "gemini", model: "fallback" },
+      ],
+      maxRetries: 2,
+      timeoutMs: 1_000,
+      baseDelayMs: 1,
+    });
+
+    await expect(retrying.analyzeApplication(input)).resolves.toMatchObject({
+      model: "fallback",
+    });
+    expect(limited).toHaveBeenCalledTimes(1);
   });
 
   it("always leaves the last provider a chance, even when earlier ones stall", async () => {
@@ -231,12 +246,12 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(slow),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
         {
           provider: provider(slow),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "second",
         },
         {
@@ -270,7 +285,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
             () =>
               reject(
                 new AiProviderError("upstream unavailable", {
-                  provider: "openrouter",
+                  provider: "gemini",
                   model: "a",
                   status: 503,
                 }),
@@ -291,10 +306,10 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(rejectsSlowly),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "a",
         },
-        { provider: provider(middle), providerName: "openrouter", model: "b" },
+        { provider: provider(middle), providerName: "gemini", model: "b" },
         { provider: provider(last), providerName: "gemini", model: "last" },
       ],
       maxRetries: 2,
@@ -322,9 +337,9 @@ describe("RetryingApplicationIntelligenceProvider", () => {
 
     const retrying = new RetryingApplicationIntelligenceProvider({
       providers: [
-        { provider: provider(stall()), providerName: "openrouter", model: "a" },
-        { provider: provider(stall()), providerName: "openrouter", model: "b" },
-        { provider: provider(stall()), providerName: "openrouter", model: "c" },
+        { provider: provider(stall()), providerName: "gemini", model: "a" },
+        { provider: provider(stall()), providerName: "gemini", model: "b" },
+        { provider: provider(stall()), providerName: "gemini", model: "c" },
         {
           provider: provider(rescue),
           providerName: "gemini",
@@ -355,7 +370,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(slow),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
       ],
@@ -373,7 +388,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
   it("reports every attempt so a failure can be diagnosed", async () => {
     const analyze = vi.fn().mockRejectedValue(
       new AiProviderError("upstream unavailable", {
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         status: 503,
         code: "upstream",
@@ -384,7 +399,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
       providers: [
         {
           provider: provider(analyze),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "primary",
         },
       ],
@@ -399,7 +414,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
 
     expect(error.attempts).toHaveLength(2);
     expect(error.attempts[0]).toMatchObject({
-      provider: "openrouter",
+      provider: "gemini",
       model: "primary",
       status: 503,
       failureClass: "TRANSIENT",
@@ -436,7 +451,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
     const failFast = () =>
       vi.fn().mockRejectedValue(
         new AiProviderError("permanently unavailable", {
-          provider: "openrouter",
+          provider: "gemini",
           model: "dead",
           status: 404,
           failureClass: "PERMANENT",
@@ -452,12 +467,12 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         },
         {
           provider: poolProvider(failFast()),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "fallback-a",
         },
         {
           provider: poolProvider(failFast()),
-          providerName: "openrouter",
+          providerName: "gemini",
           model: "fallback-b",
         },
       ],

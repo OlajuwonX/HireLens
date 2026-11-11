@@ -32,7 +32,7 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
             `Option D for question ${index}`,
           ],
           correctOption: index % 4,
-          explanation: `Mock explanation ${index}: option ${index % 4} is correct here. Set GEMINI_API_KEY or OPENROUTER_API_KEY for real content.`,
+          explanation: `Mock explanation ${index}: option ${index % 4} is correct here. Set GEMINI_API_KEY for real content.`,
           difficulty,
           topic: input.topics[index % Math.max(1, input.topics.length)] ?? focus,
         });

@@ -5,7 +5,6 @@ import {
 } from "@/lib/ai/schemas/application-intelligence.schema";
 import { improvedResumeSchema } from "@/lib/ai/schemas/improved-resume.schema";
 import { toGeminiResponseSchema } from "@/lib/ai/gemini-json-schema";
-import { toStrictJsonSchema } from "@/lib/ai/json-schema";
 
 const legacyImprovedResume = {
   header: {
@@ -136,22 +135,6 @@ describe("the generation schema still reaches both providers intact", () => {
     expect(schema.required).toContain("optimizationPlan");
     expect(schema.properties.improvedResume.required).toEqual(
       expect.arrayContaining(["certifications", "additionalSections"]),
-    );
-  });
-
-  it("keeps the OpenRouter strict schema derivable", () => {
-    const schema = toStrictJsonSchema(applicationIntelligenceSchema) as {
-      required: string[];
-    };
-
-    expect(schema.required).toEqual(
-      expect.arrayContaining([
-        "requirementMatches",
-        "keywordAnalysis",
-        "optimizationPlan",
-        "improvedResume",
-        "scoring",
-      ]),
     );
   });
 

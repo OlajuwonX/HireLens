@@ -155,7 +155,9 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     for (let index = 0; index < candidates.length; index++) {
       const candidate = candidates[index];
 
-      if (exhausted.has(candidate.providerName)) {
+      const quotaKey = `${candidate.providerName}:${candidate.model}`;
+
+      if (exhausted.has(quotaKey)) {
         continue;
       }
 
@@ -204,7 +206,7 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
           this.logAttempt(failure, candidate);
 
           if (failure.failureClass === "RATE_LIMIT") {
-            exhausted.add(candidate.providerName);
+            exhausted.add(quotaKey);
             break;
           }
 

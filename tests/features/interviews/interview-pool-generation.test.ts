@@ -49,7 +49,7 @@ function completion() {
       difficulty: "easy" as const,
       topic: "t",
     })),
-    provider: "openrouter",
+    provider: "gemini",
     model: "some-model",
     durationMs: 1234,
   };
@@ -75,7 +75,7 @@ describe("generatePoolForClaim", () => {
     });
     expect(markPoolReady).toHaveBeenCalledWith({
       poolId: "pool-1",
-      provider: "openrouter",
+      provider: "gemini",
       model: "some-model",
       questionCount: 30,
       generationDurationMs: 1234,

@@ -8,7 +8,7 @@ HireLens 2.0 plans live in [.claude/docs/v2/](.claude/docs/v2/README.md). Read t
 
 - Follow [engineering-standards.md](.claude/docs/v2/engineering-standards.md) and the roles in [agents.md](.claude/docs/v2/agents.md).
 - No comments in code. Short, reusable files.
-- Work one roadmap step at a time from [roadmap.md](.claude/docs/v2/roadmap.md). After each step, verify, report, and stop. The user commits and pushes, then types `continue`.
+- Work one roadmap phase at a time from [roadmap.md](.claude/docs/v2/roadmap.md). Finish the whole phase, verify, report, and stop. The user commits and pushes, then types `continue`.
 - Never commit, push or deploy.
 - Everything must stay free to run.
 
