@@ -907,6 +907,66 @@ export const interviewAttempts = pgTable(
   ],
 );
 
+export const candidateProfiles = pgTable(
+  "candidate_profiles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    headline: text("headline"),
+    seniority: text("seniority"),
+    yearsExperience: integer("years_experience"),
+    currentLocation: text("current_location"),
+    targetRoles: text("target_roles").array().notNull().default(sql`'{}'::text[]`),
+    targetLocations: text("target_locations")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    workArrangements: workArrangement("work_arrangements")
+      .array()
+      .notNull()
+      .default(sql`'{}'::work_arrangement[]`),
+    authorizedCountries: text("authorized_countries")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    requiresSponsorship: boolean("requires_sponsorship"),
+    willingToRelocate: boolean("willing_to_relocate"),
+    salaryMin: integer("salary_min"),
+    salaryCurrency: text("salary_currency"),
+    noticePeriodWeeks: integer("notice_period_weeks"),
+    phone: text("phone"),
+    linkedinUrl: text("linkedin_url"),
+    githubUrl: text("github_url"),
+    portfolioUrl: text("portfolio_url"),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("candidate_profiles_user_idx").on(table.userId)],
+);
+
+export const candidateAnswers = pgTable(
+  "candidate_answers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    questionKey: text("question_key").notNull(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("candidate_answers_public_id_idx").on(table.publicId),
+    uniqueIndex("candidate_answers_user_question_idx").on(
+      table.userId,
+      table.questionKey,
+    ),
+    index("candidate_answers_user_updated_idx").on(
+      table.userId,
+      table.updatedAt.desc(),
+    ),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1095,3 +1155,8 @@ export type InterviewQuestionBucket =
   (typeof interviewQuestionBucket.enumValues)[number];
 export type InterviewPoolStatus =
   (typeof interviewPoolStatus.enumValues)[number];
+export type CandidateProfile = typeof candidateProfiles.$inferSelect;
+export type NewCandidateProfile = typeof candidateProfiles.$inferInsert;
+export type CandidateAnswer = typeof candidateAnswers.$inferSelect;
+export type NewCandidateAnswer = typeof candidateAnswers.$inferInsert;
+export type WorkArrangement = (typeof workArrangement.enumValues)[number];

@@ -50,6 +50,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-career-profile",
+    label: "Career profile",
+    description: "Work authorization, preferences and saved answers",
+    keywords: ["career", "answers", "sponsorship", "visa", "salary", "location", "preferences"],
+    href: "/settings/profile",
+    group: "pages",
+  },
+  {
     id: "page-settings",
     label: "Account settings",
     description: "Password, email and account",

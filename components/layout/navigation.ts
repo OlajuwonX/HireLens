@@ -7,6 +7,7 @@ import {
   Bug,
   FileText,
   HeartPulse,
+  IdCard,
   LayoutDashboard,
   Mic,
   ScrollText,
@@ -63,6 +64,7 @@ const allNavigation: NavItem[] = [
 export const primaryNavigation = allNavigation.filter((item) => item.ready);
 
 export const utilityRoutes: NavItem[] = [
+  { label: "Career profile", href: "/settings/profile", Icon: IdCard, ready: true },
   { label: "Settings", href: "/settings/account", Icon: Settings, ready: true },
 ];
 

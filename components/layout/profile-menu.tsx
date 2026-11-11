@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
-import { CircleHelp, LogOut, Settings } from "lucide-react";
+import { CircleHelp, IdCard, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -99,6 +99,19 @@ export function ProfileMenu({
               </p>
             ) : null}
           </div>
+
+          <Link
+            href="/settings/profile"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              closeMobileNav();
+            }}
+            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
+          >
+            <IdCard aria-hidden="true" className="size-4" />
+            Career profile
+          </Link>
 
           <Link
             href="/settings/account"
