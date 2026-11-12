@@ -13,6 +13,7 @@ export const RATE_LIMIT_RULES = {
   signInEmail: { tokens: 8, window: "15 m" },
   signUpIp: { tokens: 5, window: "1 h" },
   passwordResetIp: { tokens: 5, window: "15 m" },
+  workerToken: { tokens: 120, window: "15 m" },
 } as const satisfies Record<string, { tokens: number; window: Window }>;
 
 export type RateLimitRule = keyof typeof RATE_LIMIT_RULES;

@@ -116,20 +116,25 @@ export async function transitionTask(input: {
   });
 }
 
-export async function countCommittedToday(userId: string) {
+export async function countSubmittedToday(userId: string) {
   const startOfDay = new Date();
   startOfDay.setUTCHours(0, 0, 0, 0);
 
-  const [submitted] = await db
+  const [row] = await db
     .select({ value: count() })
     .from(applicationTasks)
     .where(and(eq(applicationTasks.userId, userId), gte(applicationTasks.submittedAt, startOfDay)));
+
+  return row?.value ?? 0;
+}
+
+export async function countCommittedToday(userId: string) {
   const [pending] = await db
     .select({ value: count() })
     .from(applicationTasks)
     .where(and(eq(applicationTasks.userId, userId), inArray(applicationTasks.state, ["APPROVED", "SUBMITTING"])));
 
-  return (submitted?.value ?? 0) + (pending?.value ?? 0);
+  return (await countSubmittedToday(userId)) + (pending?.value ?? 0);
 }
 
 export async function findCommittedRole(input: { userId: string; roleKey: string }) {

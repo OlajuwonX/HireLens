@@ -239,6 +239,13 @@
       "when": 1794471434581,
       "tag": "0033_application_tasks",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794508828014,
+      "tag": "0034_worker_tokens",
+      "breakpoints": true
     }
   ]
 }

@@ -23,7 +23,7 @@ export function toSaveValues(posting: PostingDetail, resumeVersionPublicId: stri
     salaryMax: posting.salaryMax ?? "",
     currency: posting.currency ?? "",
     source: sourceLabels[posting.source as DiscoverySource] ?? posting.source,
-    sourceUrl: posting.url,
+    sourceUrl: posting.applyUrl ?? posting.url,
     description: posting.description || `See the full posting at ${posting.url}`,
   });
 }
@@ -38,7 +38,7 @@ export async function savePostingToJobs(input: {
     return { ok: false, message: "That job is no longer available." };
   }
 
-  if (await hasSavedJobWithUrl({ userId: input.userId, url: posting.url })) {
+  if (await hasSavedJobWithUrl({ userId: input.userId, url: posting.applyUrl ?? posting.url })) {
     return { ok: true, alreadySaved: true };
   }
 

@@ -10,7 +10,7 @@ import {
 import { asArray, asRecord, httpUrl, id, isPosting, text } from "../read";
 import type { BoardAdapter, DiscoveredPosting } from "../types";
 
-function toPosting(raw: unknown, company: string): DiscoveredPosting | null {
+function toPosting(raw: unknown, company: string, token: string): DiscoveredPosting | null {
   const job = asRecord(raw);
   const location = text(asRecord(job.location).name);
   const description = htmlToText(text(job.content), true);
@@ -36,7 +36,7 @@ function toPosting(raw: unknown, company: string): DiscoveredPosting | null {
     currency: salary?.currency ?? null,
     description,
     url,
-    applyUrl: url,
+    applyUrl: `https://boards.greenhouse.io/${encodeURIComponent(token)}/jobs/${encodeURIComponent(sourceId)}`,
     postedAt: dateFrom(text(job.first_published) ?? text(job.updated_at)),
   };
 }
@@ -53,7 +53,7 @@ export const greenhouse: BoardAdapter = {
       companyName: company,
       postings: jobs
         .slice(0, MAX_POSTINGS_PER_BOARD)
-        .map((job) => toPosting(job, company))
+        .map((job) => toPosting(job, company, token))
         .filter(isPosting),
     };
   },

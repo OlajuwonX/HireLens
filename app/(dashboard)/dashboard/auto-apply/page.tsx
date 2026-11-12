@@ -7,7 +7,9 @@ import { QUEUE_ORDER, queueLabels } from "@/features/auto-apply/constants";
 import { countCommittedToday, listRecentEvents, listTasksForUser } from "@/features/auto-apply/server/task.repository";
 import { groupTasks } from "@/features/auto-apply/task-view";
 import { dailySubmissionLimit, submissionsRemaining } from "@/lib/auto-apply/policy";
+import { WORKER_SETTINGS_PATH } from "@/features/worker/constants";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Auto Apply",
@@ -32,8 +34,11 @@ export default async function AutoApplyPage() {
       />
 
       <Alert tone="info">
-        Nothing is submitted without your approval. Approved applications are sent by the local
-        worker on your computer, which is coming next. Until then, apply with the job link and
+        Nothing is submitted without your approval. Approved applications are filled in by the{" "}
+        <Link href={WORKER_SETTINGS_PATH} className="underline">
+          local worker
+        </Link>{" "}
+        on your computer, and you press submit yourself. Without it, apply with the job link and
         mark it applied.
       </Alert>
 

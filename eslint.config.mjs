@@ -14,6 +14,7 @@ const config = [
       "drizzle/**",
       "next-env.d.ts",
       "public/**",
+      "local-worker/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

@@ -1154,6 +1154,25 @@ export const applicationTaskEvents = pgTable(
   (table) => [index("application_task_events_task_created_idx").on(table.taskId, table.createdAt)],
 );
 
+export const workerTokens = pgTable(
+  "worker_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("worker_tokens_public_id_idx").on(table.publicId),
+    uniqueIndex("worker_tokens_hash_idx").on(table.tokenHash),
+    index("worker_tokens_user_idx").on(table.userId),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1355,3 +1374,4 @@ export type JobMatch = typeof jobMatches.$inferSelect;
 export type NewJobMatch = typeof jobMatches.$inferInsert;
 export type ApplicationTask = typeof applicationTasks.$inferSelect;
 export type ApplicationTaskEvent = typeof applicationTaskEvents.$inferSelect;
+export type WorkerToken = typeof workerTokens.$inferSelect;

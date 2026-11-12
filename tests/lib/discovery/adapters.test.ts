@@ -51,6 +51,10 @@ describe("greenhouse adapter", () => {
     expect(intern.postings[0].employmentType).toBe("INTERNSHIP");
   });
 
+  it("records the canonical Greenhouse apply link so the worker recognises it", () => {
+    expect(job.applyUrl).toBe("https://boards.greenhouse.io/acme/jobs/101");
+  });
+
   it("drops postings with unsafe links or no title", () => {
     expect(snapshot.postings.map((posting) => posting.sourceId)).toEqual(["101"]);
   });

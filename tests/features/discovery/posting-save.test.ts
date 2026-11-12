@@ -63,6 +63,15 @@ describe("savePostingToJobs", () => {
     expect(values.description).toContain(posting.url);
   });
 
+  it("prefers the apply link so Auto Apply can recognise the site", async () => {
+    mocks.findPostingForUser.mockResolvedValue({ ...posting, url: "https://stripe.com/jobs?gh_jid=1", applyUrl: "https://boards.greenhouse.io/stripe/jobs/1" });
+
+    await run();
+
+    expect(mocks.saveJobOnly.mock.calls[0][0].values.sourceUrl).toBe("https://boards.greenhouse.io/stripe/jobs/1");
+    expect(mocks.hasSavedJobWithUrl).toHaveBeenCalledWith({ userId: "user-1", url: "https://boards.greenhouse.io/stripe/jobs/1" });
+  });
+
   it("does not save the same posting twice", async () => {
     mocks.hasSavedJobWithUrl.mockResolvedValue(true);
 
