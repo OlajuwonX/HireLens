@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/purge-accounts",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/discover-jobs",
+      "schedule": "0 6 * * *"
     }
   ]
 }

@@ -996,6 +996,89 @@ export const resumeReviews = pgTable(
   ],
 );
 
+export const jobBoards = pgTable(
+  "job_boards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    source: text("source").notNull(),
+    token: text("token").notNull(),
+    companyName: text("company_name").notNull(),
+    postingCount: integer("posting_count").notNull().default(0),
+    lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_boards_public_id_idx").on(table.publicId),
+    uniqueIndex("job_boards_source_token_idx").on(table.source, table.token),
+    index("job_boards_last_fetched_idx").on(table.lastFetchedAt),
+  ],
+);
+
+export const jobBoardFollows = pgTable(
+  "job_board_follows",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    boardId: uuid("board_id")
+      .notNull()
+      .references(() => jobBoards.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_board_follows_user_board_idx").on(table.userId, table.boardId),
+    index("job_board_follows_board_idx").on(table.boardId),
+  ],
+);
+
+export const jobPostings = pgTable(
+  "job_postings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    boardId: uuid("board_id")
+      .notNull()
+      .references(() => jobBoards.id, { onDelete: "cascade" }),
+    sourceId: text("source_id").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    duplicateOfId: uuid("duplicate_of_id"),
+    title: text("title").notNull(),
+    company: text("company").notNull(),
+    location: text("location"),
+    workArrangement: workArrangement("work_arrangement")
+      .notNull()
+      .default("NOT_SPECIFIED"),
+    employmentType: employmentType("employment_type")
+      .notNull()
+      .default("NOT_SPECIFIED"),
+    salaryMin: integer("salary_min"),
+    salaryMax: integer("salary_max"),
+    currency: text("currency"),
+    description: text("description").notNull(),
+    url: text("url").notNull(),
+    applyUrl: text("apply_url"),
+    postedAt: timestamp("posted_at", { withTimezone: true }),
+    sortAt: timestamp("sort_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    expiredAt: timestamp("expired_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_postings_public_id_idx").on(table.publicId),
+    uniqueIndex("job_postings_board_source_idx").on(table.boardId, table.sourceId),
+    index("job_postings_dedupe_idx").on(table.dedupeKey),
+    index("job_postings_board_feed_idx").on(
+      table.boardId,
+      table.expiredAt,
+      table.sortAt.desc(),
+    ),
+    index("job_postings_expired_idx").on(table.expiredAt),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1190,3 +1273,6 @@ export type CandidateAnswer = typeof candidateAnswers.$inferSelect;
 export type NewCandidateAnswer = typeof candidateAnswers.$inferInsert;
 export type WorkArrangement = (typeof workArrangement.enumValues)[number];
 export type ResumeReviewRow = typeof resumeReviews.$inferSelect;
+export type JobBoard = typeof jobBoards.$inferSelect;
+export type JobPosting = typeof jobPostings.$inferSelect;
+export type NewJobPosting = typeof jobPostings.$inferInsert;

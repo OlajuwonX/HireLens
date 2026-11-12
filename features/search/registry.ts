@@ -50,6 +50,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-discover",
+    label: "Discover jobs",
+    description: "Open roles from company boards you follow",
+    keywords: ["discover", "find jobs", "greenhouse", "lever", "ashby", "job boards"],
+    href: "/dashboard/discover",
+    group: "pages",
+  },
+  {
     id: "page-career-profile",
     label: "Career profile",
     description: "Work authorization, preferences and saved answers",

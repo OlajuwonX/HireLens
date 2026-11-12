@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Briefcase,
   Bug,
+  Compass,
   FileText,
   HeartPulse,
   IdCard,
@@ -44,6 +45,12 @@ const allNavigation: NavItem[] = [
     label: "Saved Jobs",
     href: "/dashboard/jobs",
     Icon: Briefcase,
+    ready: true,
+  },
+  {
+    label: "Discover",
+    href: "/dashboard/discover",
+    Icon: Compass,
     ready: true,
   },
   {

@@ -3,6 +3,9 @@ export const queryKeys = {
     ["saved-jobs", filters] as const,
   documents: (filters: Record<string, string>) =>
     ["documents", filters] as const,
+  discovery: (filters: Record<string, string>) =>
+    ["discovery", filters] as const,
+  posting: (publicId: string) => ["posting", publicId] as const,
   resumeReview: (applicationPublicId: string) =>
     ["resume-review", applicationPublicId] as const,
 };
