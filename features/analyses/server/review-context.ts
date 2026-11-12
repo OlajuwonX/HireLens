@@ -1,36 +1,13 @@
 import "server-only";
 
 import { findApplicationRowForUser } from "@/features/applications/server/application.repository";
-import { findFileAssetById } from "@/features/files/server/file-asset.repository";
+import { readResumeVersionText } from "@/features/resumes/server/resume-text";
 import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
-import { readResumeText } from "@/lib/pdf/extract-text";
-import { getStorageProvider } from "@/lib/storage/provider";
 import type { StorageProvider } from "@/lib/storage";
-import type { ResumeVersion } from "@/lib/db/schema";
 import { readStoredIntelligence } from "./analysis.mapper";
 import { findAnalysisForApplication, listCorrectionsForAnalysis } from "./analysis.repository";
 
 export type ReviewContextFailure = "NOT_FOUND" | "NO_RESUME" | "NO_TEXT";
-
-async function readSourceText(input: {
-  userId: string;
-  version: ResumeVersion;
-  storage: StorageProvider;
-}) {
-  const stored = input.version.extractedText?.trim();
-
-  if (stored) {
-    return stored;
-  }
-
-  const asset = await findFileAssetById({ userId: input.userId, id: input.version.fileAssetId });
-
-  if (!asset || asset.deletedAt) {
-    return null;
-  }
-
-  return (await readResumeText(await input.storage.readFile(asset.storageKey)))?.trim() || null;
-}
 
 export async function findOwnedAnalysis(input: { userId: string; publicId: string }) {
   const row = await findApplicationRowForUser(input);
@@ -73,11 +50,7 @@ export async function loadReviewContext(input: {
     versionPublicId: row.versionPublicId,
   });
   const sourceText = version
-    ? await readSourceText({
-        userId: input.userId,
-        version,
-        storage: input.storage ?? getStorageProvider(),
-      })
+    ? await readResumeVersionText({ userId: input.userId, version, storage: input.storage })
     : null;
 
   if (!sourceText) {

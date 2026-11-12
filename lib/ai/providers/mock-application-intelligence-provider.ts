@@ -219,4 +219,24 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
       }),
     };
   }
+
+  async matchJobs(input: { content: string }): Promise<AIProviderResult> {
+    const refs = [...input.content.matchAll(/<job ref="([^"]+)">/g)].map((match) => match[1]);
+
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        matches: refs.map((ref) => ({
+          ref,
+          score: 60,
+          fit: "STRETCH",
+          strengths: ["Mock strength"],
+          gaps: ["Configure GEMINI_API_KEY for real matching"],
+          summary: "Mock match without a real AI provider.",
+        })),
+      }),
+    };
+  }
 }

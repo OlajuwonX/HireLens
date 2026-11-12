@@ -9,6 +9,7 @@ import {
   generatedInterviewPoolSchema,
 } from "./schemas/interview-pool.schema";
 import { extractedJobResponseSchema } from "./schemas/job-extraction.schema";
+import { jobMatchingSchema } from "./schemas/job-matching.schema";
 import { resumeReviewSchema } from "./schemas/resume-review.schema";
 import { GeminiApplicationIntelligenceProvider } from "./providers/gemini-application-intelligence-provider";
 import { MockApplicationIntelligenceProvider } from "./providers/mock-application-intelligence-provider";
@@ -75,6 +76,9 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           },
           validateReview: (raw) => {
             normalizeJsonModelOutput(raw, resumeReviewSchema);
+          },
+          validateMatching: (raw) => {
+            normalizeJsonModelOutput(raw, jobMatchingSchema);
           },
           validateInterviewPool: (raw) => {
             const pool = normalizeJsonModelOutput(

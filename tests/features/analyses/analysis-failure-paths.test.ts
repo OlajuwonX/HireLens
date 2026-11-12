@@ -127,6 +127,7 @@ function provider(analyze: () => Promise<unknown>) {
     analyzeApplication: analyze,
     extractJobPosting: vi.fn(),
     reviewResume: vi.fn(),
+    matchJobs: vi.fn(),
   } as never;
 }
 

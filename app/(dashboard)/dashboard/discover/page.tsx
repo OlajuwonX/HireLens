@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { DiscoverTabs } from "@/features/discovery/components/discover-tabs";
 import { DiscoveryFilters } from "@/features/discovery/components/discovery-filters";
 import { FollowBoardForm } from "@/features/discovery/components/follow-board-form";
 import { FollowedBoards } from "@/features/discovery/components/followed-boards";
@@ -37,6 +38,8 @@ export default async function DiscoverPage({
         title="Discover jobs"
         description="Open roles from the company job boards you follow, checked every day."
       />
+
+      <DiscoverTabs />
 
       <Card>
         <CardHeader>

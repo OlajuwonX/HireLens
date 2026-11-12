@@ -33,6 +33,7 @@ const provider = {
   extractJobPosting: vi.fn(),
   generateInterviewPool: vi.fn(),
   reviewResume: mocks.reviewResume,
+  matchJobs: vi.fn(),
 };
 
 const job = {

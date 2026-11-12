@@ -35,3 +35,7 @@ export {
   RESUME_REVIEW_PROMPT_VERSION,
 } from "./resume-review.prompt";
 export { TRACEABILITY_PROMPT } from "./traceability.prompt";
+export {
+  JOB_MATCHING_PROMPT,
+  JOB_MATCHING_PROMPT_VERSION,
+} from "./job-matching.prompt";

@@ -34,6 +34,7 @@ export type RetryingProviderConfig = {
   validateExtraction?: ResponseValidator;
   validateInterviewPool?: ResponseValidator;
   validateReview?: ResponseValidator;
+  validateMatching?: ResponseValidator;
 };
 
 function delay(ms: number) {
@@ -129,6 +130,14 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     return this.run(
       (provider) => provider.reviewResume(input),
       this.config.validateReview,
+      { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
+    );
+  }
+
+  async matchJobs(input: { content: string }): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.matchJobs(input),
+      this.config.validateMatching,
       { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
     );
   }

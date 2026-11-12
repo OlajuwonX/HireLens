@@ -14,6 +14,7 @@ function provider(
     extractJobPosting: vi.fn(),
     generateInterviewPool: vi.fn(),
     reviewResume: vi.fn(),
+    matchJobs: vi.fn(),
   };
 }
 
@@ -348,8 +349,8 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         },
       ],
       maxRetries: 0,
-      timeoutMs: 50,
-      totalBudgetMs: 120,
+      timeoutMs: 200,
+      totalBudgetMs: 480,
       baseDelayMs: 1,
     });
 
@@ -441,6 +442,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         extractJobPosting: vi.fn(),
         generateInterviewPool,
         reviewResume: vi.fn(),
+        matchJobs: vi.fn(),
       };
     }
 

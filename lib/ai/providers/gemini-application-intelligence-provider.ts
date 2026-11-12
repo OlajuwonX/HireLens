@@ -5,6 +5,7 @@ import {
   BASE_SYSTEM_PROMPT,
   INTERVIEW_POOL_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
+  JOB_MATCHING_PROMPT,
   RESUME_REVIEW_PROMPT,
   createApplicationIntelligencePrompt,
   createInterviewPoolPrompt,
@@ -13,6 +14,7 @@ import {
 import { describeJob } from "../prompts/job-posting";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import { generatedInterviewPoolSchema } from "../schemas/interview-pool.schema";
+import { jobMatchingSchema } from "../schemas/job-matching.schema";
 import { resumeReviewSchema } from "../schemas/resume-review.schema";
 import { AiProviderError } from "../provider-errors";
 import type {
@@ -228,16 +230,20 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
     };
   }
 
-  async reviewResume(input: { content: string }): Promise<AIProviderResult> {
+  private async completeJson(
+    systemInstruction: string,
+    content: string,
+    schema: Parameters<typeof toGeminiResponseSchema>[0],
+  ): Promise<AIProviderResult> {
     const startedAt = performance.now();
 
     const response = await this.send({
       model: this.config.model,
-      contents: [{ role: "user", parts: [{ text: input.content }] }],
+      contents: [{ role: "user", parts: [{ text: content }] }],
       config: {
-        systemInstruction: RESUME_REVIEW_PROMPT,
+        systemInstruction,
         responseMimeType: "application/json",
-        responseJsonSchema: toGeminiResponseSchema(resumeReviewSchema),
+        responseJsonSchema: toGeminiResponseSchema(schema),
       },
     });
 
@@ -253,5 +259,13 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
       rawResponse: text,
       durationMs: Math.round(performance.now() - startedAt),
     };
+  }
+
+  async reviewResume(input: { content: string }): Promise<AIProviderResult> {
+    return this.completeJson(RESUME_REVIEW_PROMPT, input.content, resumeReviewSchema);
+  }
+
+  async matchJobs(input: { content: string }): Promise<AIProviderResult> {
+    return this.completeJson(JOB_MATCHING_PROMPT, input.content, jobMatchingSchema);
   }
 }

@@ -26,6 +26,7 @@ describe("usage actions", () => {
       "JOB_EXTRACTION",
       "INTERVIEW_POOL_GENERATION",
       "RESUME_REVIEW",
+      "JOB_MATCHING",
     ]);
   });
 
@@ -37,6 +38,10 @@ describe("usage actions", () => {
 });
 
 describe("daily allowances", () => {
+  it("allows three matching batches a day by default", () => {
+    expect(getDailyAllowance("JOB_MATCHING")).toBe(3);
+  });
+
   it("allows five independent reviews a day by default", () => {
     expect(getDailyAllowance("RESUME_REVIEW")).toBe(5);
   });

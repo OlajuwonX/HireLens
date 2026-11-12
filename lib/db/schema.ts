@@ -108,6 +108,7 @@ export const usageAction = pgEnum("usage_action", [
   "FOLLOW_UP_MESSAGE",
   "INTERVIEW_POOL_GENERATION",
   "RESUME_REVIEW",
+  "JOB_MATCHING",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -1079,6 +1080,34 @@ export const jobPostings = pgTable(
   ],
 );
 
+export const jobMatches = pgTable(
+  "job_matches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    postingId: uuid("posting_id")
+      .notNull()
+      .references(() => jobPostings.id, { onDelete: "cascade" }),
+    inputHash: text("input_hash").notNull(),
+    verdict: text("verdict").notNull(),
+    reasons: jsonb("reasons").notNull().default(sql`'[]'::jsonb`),
+    score: integer("score"),
+    rank: integer("rank"),
+    fit: text("fit"),
+    insight: jsonb("insight"),
+    scoredAt: timestamp("scored_at", { withTimezone: true }),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_matches_public_id_idx").on(table.publicId),
+    uniqueIndex("job_matches_user_posting_idx").on(table.userId, table.postingId),
+    index("job_matches_user_rank_idx").on(table.userId, table.rank.desc()),
+    index("job_matches_posting_idx").on(table.postingId),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1276,3 +1305,5 @@ export type ResumeReviewRow = typeof resumeReviews.$inferSelect;
 export type JobBoard = typeof jobBoards.$inferSelect;
 export type JobPosting = typeof jobPostings.$inferSelect;
 export type NewJobPosting = typeof jobPostings.$inferInsert;
+export type JobMatch = typeof jobMatches.$inferSelect;
+export type NewJobMatch = typeof jobMatches.$inferInsert;
