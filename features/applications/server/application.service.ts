@@ -19,6 +19,7 @@ import {
   deleteApplicationForUser,
   findApplicationForUser,
   findApplicationRowForUser,
+  promoteSavedApplication,
   listActivitiesForApplication,
   listApplicationsForUser,
   updateApplicationWithActivity,
@@ -325,6 +326,60 @@ export async function analyzeOwnedApplication(input: {
       optimization: analysis.optimization,
     },
   };
+}
+
+export type EnsureAnalysisResult =
+  | { ok: true; created: boolean }
+  | { ok: false; limited: boolean; message: string };
+
+export async function ensureApplicationAnalysis(input: {
+  userId: string;
+  publicId: string;
+}): Promise<EnsureAnalysisResult> {
+  const row = await findApplicationRowForUser(input);
+
+  if (!row) {
+    return { ok: false, limited: false, message: "That application could not be found." };
+  }
+
+  if (row.application.analysisId && row.analysisPublicId) {
+    return { ok: true, created: false };
+  }
+
+  const version = row.versionPublicId
+    ? await getOwnedResumeVersion({ userId: input.userId, versionPublicId: row.versionPublicId })
+    : null;
+
+  if (!version) {
+    return { ok: false, limited: false, message: "Attach a resume version before preparing this application." };
+  }
+
+  const analysis = await analyzeApplication({
+    userId: input.userId,
+    job: row.job,
+    version,
+    applicationId: row.application.id,
+  });
+
+  if (!analysis.ok) {
+    return { ok: false, limited: analysis.error === "LIMIT_REACHED", message: analysis.message };
+  }
+
+  await Promise.all([
+    attachAnalysisToApplication({
+      userId: input.userId,
+      applicationId: row.application.id,
+      analysisId: analysis.analysisId,
+    }),
+    attachAnalysisApplication({
+      userId: input.userId,
+      analysisId: analysis.analysisId,
+      applicationId: row.application.id,
+    }),
+    promoteSavedApplication({ userId: input.userId, applicationId: row.application.id }),
+  ]);
+
+  return { ok: true, created: true };
 }
 
 export async function updateOwnedApplication(input: {

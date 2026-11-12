@@ -1108,6 +1108,52 @@ export const jobMatches = pgTable(
   ],
 );
 
+export const applicationTasks = pgTable(
+  "application_tasks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    applicationId: uuid("application_id")
+      .notNull()
+      .references(() => applications.id, { onDelete: "cascade" }),
+    state: text("state").notNull().default("QUALIFIED"),
+    stateReason: text("state_reason"),
+    needs: jsonb("needs").notNull().default(sql`'[]'::jsonb`),
+    platform: text("platform"),
+    roleKey: text("role_key").notNull(),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    confirmation: jsonb("confirmation"),
+    leaseOwner: text("lease_owner"),
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("application_tasks_public_id_idx").on(table.publicId),
+    uniqueIndex("application_tasks_application_idx").on(table.applicationId),
+    index("application_tasks_user_state_idx").on(table.userId, table.state),
+    index("application_tasks_user_role_idx").on(table.userId, table.roleKey),
+    index("application_tasks_user_submitted_idx").on(table.userId, table.submittedAt),
+  ],
+);
+
+export const applicationTaskEvents = pgTable(
+  "application_task_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    taskId: uuid("task_id")
+      .notNull()
+      .references(() => applicationTasks.id, { onDelete: "cascade" }),
+    fromState: text("from_state"),
+    toState: text("to_state").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("application_task_events_task_created_idx").on(table.taskId, table.createdAt)],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1307,3 +1353,5 @@ export type JobPosting = typeof jobPostings.$inferSelect;
 export type NewJobPosting = typeof jobPostings.$inferInsert;
 export type JobMatch = typeof jobMatches.$inferSelect;
 export type NewJobMatch = typeof jobMatches.$inferInsert;
+export type ApplicationTask = typeof applicationTasks.$inferSelect;
+export type ApplicationTaskEvent = typeof applicationTaskEvents.$inferSelect;

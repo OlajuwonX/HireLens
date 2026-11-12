@@ -9,6 +9,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  ListChecks,
   LayoutDashboard,
   Mic,
   ScrollText,
@@ -51,6 +52,12 @@ const allNavigation: NavItem[] = [
     label: "Discover",
     href: "/dashboard/discover",
     Icon: Compass,
+    ready: true,
+  },
+  {
+    label: "Auto Apply",
+    href: "/dashboard/auto-apply",
+    Icon: ListChecks,
     ready: true,
   },
   {

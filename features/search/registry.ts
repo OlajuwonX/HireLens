@@ -58,6 +58,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-auto-apply",
+    label: "Auto Apply",
+    description: "Prepare, approve and track applications",
+    keywords: ["auto apply", "apply", "queue", "approve", "needs you", "submitted"],
+    href: "/dashboard/auto-apply",
+    group: "pages",
+  },
+  {
     id: "page-career-profile",
     label: "Career profile",
     description: "Work authorization, preferences and saved answers",

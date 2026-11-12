@@ -29,6 +29,7 @@ import Link from "next/link";
 import { SAVE_ONLY_REASON } from "../analysis-state";
 import { ApplicationDrawer } from "./application-drawer";
 import { ApplicationStatusBadge } from "./application-status-badge";
+import { AddToAutoApplyButton } from "@/features/auto-apply/components/add-to-auto-apply-button";
 import { ReanalyzeButton } from "./reanalyze-button";
 import { StatusSelectForm } from "./status-select-form";
 
@@ -95,16 +96,19 @@ export async function SavedJobDrawer({
           />
         </div>
 
-        {saveOnly ? (
-          <span className="border border-border bg-surface-secondary px-2 py-1 text-label font-semibold text-text-secondary">
-            Saved without analysis
-          </span>
-        ) : (
-          <ReanalyzeButton
-            publicId={row.application.publicId}
-            hasAnalysis={Boolean(result)}
-          />
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {saveOnly ? (
+            <span className="border border-border bg-surface-secondary px-2 py-1 text-label font-semibold text-text-secondary">
+              Saved without analysis
+            </span>
+          ) : (
+            <ReanalyzeButton
+              publicId={row.application.publicId}
+              hasAnalysis={Boolean(result)}
+            />
+          )}
+          <AddToAutoApplyButton applicationPublicId={row.application.publicId} />
+        </div>
       </div>
 
       <dl>

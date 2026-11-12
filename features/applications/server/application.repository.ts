@@ -333,6 +333,21 @@ export async function attachAnalysisToApplication(input: {
   });
 }
 
+export async function promoteSavedApplication(input: {
+  userId: string;
+  applicationId: string;
+}) {
+  await db
+    .update(applications)
+    .set({ saveOnly: false, updatedAt: new Date() })
+    .where(
+      and(
+        eq(applications.userId, input.userId),
+        eq(applications.id, input.applicationId),
+      ),
+    );
+}
+
 export async function listActivitiesForApplication(input: {
   userId: string;
   applicationId: string;

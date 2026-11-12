@@ -15,6 +15,10 @@ const HOSTS: [RegExp, DiscoverySource][] = [
   [/(?:^|\.)ashbyhq\.com$/i, "ASHBY"],
 ];
 
+export function sourceFromHost(hostname: string): DiscoverySource | null {
+  return HOSTS.find(([pattern]) => pattern.test(hostname))?.[1] ?? null;
+}
+
 const TOKEN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
 const SKIP_SEGMENTS = new Set(["v1", "boards", "embed", "job_board", "posting-api", "job-board", "v0", "postings"]);
 
@@ -29,7 +33,7 @@ function fromUrl(value: string): BoardRef | null {
     return null;
   }
 
-  const source = HOSTS.find(([pattern]) => pattern.test(url.hostname))?.[1];
+  const source = sourceFromHost(url.hostname);
   const queryToken = url.searchParams.get("for");
   const token =
     queryToken ?? url.pathname.split("/").find((part) => part && !SKIP_SEGMENTS.has(part));
