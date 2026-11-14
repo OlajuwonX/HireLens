@@ -5,7 +5,6 @@ import path from "node:path";
 import fontkit from "@pdf-lib/fontkit";
 import { StandardFonts, type PDFDocument, type PDFFont } from "pdf-lib";
 import {
-  RESUME_FONT_DIRECTORY,
   resumeFontFamilies,
   type ResumeFontRole,
   type ResumeTypography,
@@ -46,7 +45,7 @@ function loadFontFile(filename: string) {
   }
 
   const pending = readFile(
-    path.join(process.cwd(), RESUME_FONT_DIRECTORY, filename),
+    path.join(process.cwd(), "public", "fonts", filename),
   )
     .then((buffer) => new Uint8Array(buffer))
     .catch(() => {
