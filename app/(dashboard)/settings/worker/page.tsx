@@ -17,6 +17,7 @@ const steps = [
   "Copy .env.example to .env and paste your token and HireLens address.",
   "Run: pnpm start. A browser opens for each approved application and fills it in.",
   "Check every filled form and press submit yourself. The worker records the confirmation.",
+  "Optional: follow the Gmail section of local-worker/README.md, then run pnpm gmail:connect so employer replies appear in Responses.",
 ];
 
 export default async function WorkerSettingsPage() {

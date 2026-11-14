@@ -19,8 +19,8 @@ const migration = read("drizzle/0034_worker_tokens.sql");
 describe("worker API routes", () => {
   const files = routes("app/api/worker");
 
-  it("exist for ping, claim, heartbeat, result and resume", () => {
-    expect(files).toHaveLength(5);
+  it("exist for ping, claim, heartbeat, result, resume, email watch and emails", () => {
+    expect(files).toHaveLength(7);
   });
 
   it("all authenticate through the worker route wrapper", () => {

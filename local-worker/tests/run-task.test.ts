@@ -99,6 +99,8 @@ function fakeApi(): HireLensApi {
     heartbeat: vi.fn(async () => true),
     report: vi.fn(async () => true),
     downloadResume: vi.fn(async () => new Uint8Array([37, 80, 68, 70])),
+    emailWatch: vi.fn(async () => ({ terms: [], domains: [] })),
+    sendEmails: vi.fn(async () => undefined),
   };
 }
 

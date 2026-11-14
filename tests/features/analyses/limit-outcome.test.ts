@@ -75,6 +75,7 @@ function run(regenerate?: boolean) {
       extractJobPosting: vi.fn(),
       reviewResume: vi.fn(),
       matchJobs: vi.fn(),
+      prepareInterview: vi.fn(),
     } as never,
     storageProvider: {
       readFile: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),

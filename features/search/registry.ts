@@ -66,6 +66,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-responses",
+    label: "Responses",
+    description: "Employer replies and interview preparation",
+    keywords: ["responses", "emails", "inbox", "interview invitation", "offer", "rejection", "gmail"],
+    href: "/dashboard/responses",
+    group: "pages",
+  },
+  {
     id: "page-career-profile",
     label: "Career profile",
     description: "Work authorization, preferences and saved answers",

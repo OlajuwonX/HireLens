@@ -239,4 +239,21 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
       }),
     };
   }
+
+  async prepareInterview(): Promise<AIProviderResult> {
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        summary: "Mock interview preparation. Configure GEMINI_API_KEY for a real brief.",
+        focusAreas: [{ topic: "Role fundamentals", why: "Mock focus area." }],
+        questions: [{ question: "Walk me through a recent project.", type: "BEHAVIOURAL", answerOutline: "Situation, action, result.", evidence: "Your most recent role." }],
+        gapsToPrepare: [],
+        revisionPlan: [{ day: 1, tasks: ["Review the job description."] }],
+        questionsToAsk: ["What does success look like in the first 90 days?"],
+        replyDraft: "Thank you for the invitation. I am available [your availability].",
+      }),
+    };
+  }
 }

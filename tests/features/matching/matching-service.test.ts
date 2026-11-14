@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   completeUsage: vi.fn(),
   failUsage: vi.fn(),
   matchJobs: vi.fn(),
+  prepareInterview: vi.fn(),
 }));
 
 vi.mock("@/features/matching/server/candidate-context", () => ({ loadCandidate: mocks.loadCandidate }));
@@ -29,6 +30,7 @@ const provider = {
   generateInterviewPool: vi.fn(),
   reviewResume: vi.fn(),
   matchJobs: mocks.matchJobs,
+  prepareInterview: vi.fn(),
 };
 
 const candidate = {

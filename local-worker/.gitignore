@@ -2,3 +2,5 @@ node_modules
 .env
 .browser-profile
 .downloads
+.gmail-token.json
+.gmail-state.json

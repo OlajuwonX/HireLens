@@ -5,6 +5,7 @@ import {
   BASE_SYSTEM_PROMPT,
   INTERVIEW_POOL_SYSTEM_PROMPT,
   JOB_EXTRACTION_PROMPT,
+  INTERVIEW_PREP_PROMPT,
   JOB_MATCHING_PROMPT,
   RESUME_REVIEW_PROMPT,
   createApplicationIntelligencePrompt,
@@ -14,6 +15,7 @@ import {
 import { describeJob } from "../prompts/job-posting";
 import { extractedJobSchema } from "../schemas/job-extraction.schema";
 import { generatedInterviewPoolSchema } from "../schemas/interview-pool.schema";
+import { interviewPrepSchema } from "../schemas/interview-prep.schema";
 import { jobMatchingSchema } from "../schemas/job-matching.schema";
 import { resumeReviewSchema } from "../schemas/resume-review.schema";
 import { AiProviderError } from "../provider-errors";
@@ -267,5 +269,9 @@ export class GeminiApplicationIntelligenceProvider implements ApplicationIntelli
 
   async matchJobs(input: { content: string }): Promise<AIProviderResult> {
     return this.completeJson(JOB_MATCHING_PROMPT, input.content, jobMatchingSchema);
+  }
+
+  async prepareInterview(input: { content: string }): Promise<AIProviderResult> {
+    return this.completeJson(INTERVIEW_PREP_PROMPT, input.content, interviewPrepSchema);
   }
 }

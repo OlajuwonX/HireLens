@@ -34,6 +34,7 @@ const provider = {
   generateInterviewPool: vi.fn(),
   reviewResume: mocks.reviewResume,
   matchJobs: vi.fn(),
+  prepareInterview: vi.fn(),
 };
 
 const job = {

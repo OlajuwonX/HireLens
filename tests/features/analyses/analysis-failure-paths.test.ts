@@ -128,6 +128,7 @@ function provider(analyze: () => Promise<unknown>) {
     extractJobPosting: vi.fn(),
     reviewResume: vi.fn(),
     matchJobs: vi.fn(),
+    prepareInterview: vi.fn(),
   } as never;
 }
 

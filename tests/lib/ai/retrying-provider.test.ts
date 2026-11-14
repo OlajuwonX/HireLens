@@ -15,6 +15,7 @@ function provider(
     generateInterviewPool: vi.fn(),
     reviewResume: vi.fn(),
     matchJobs: vi.fn(),
+    prepareInterview: vi.fn(),
   };
 }
 
@@ -443,6 +444,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         generateInterviewPool,
         reviewResume: vi.fn(),
         matchJobs: vi.fn(),
+        prepareInterview: vi.fn(),
       };
     }
 

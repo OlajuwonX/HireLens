@@ -5,6 +5,9 @@ import { createClaudeWriter } from "./claude/writer";
 import { createApi } from "./communication/api";
 import { readConfig } from "./config";
 import { processTask } from "./execution/process-task";
+import { createGmailApi } from "./gmail/client";
+import { loadRefreshToken, refreshAccessToken } from "./gmail/oauth";
+import { pollEmails } from "./gmail/poll";
 
 try {
   process.loadEnvFile();
@@ -21,7 +24,17 @@ if (!(await api.ping())) {
 }
 
 const browser = await launchBrowser(config.BROWSER_CHANNEL);
+const refreshToken = config.GMAIL_CLIENT_ID ? await loadRefreshToken() : null;
+const gmail =
+  refreshToken && config.GMAIL_CLIENT_ID
+    ? createGmailApi(() =>
+        refreshAccessToken({ clientId: config.GMAIL_CLIENT_ID!, clientSecret: config.GMAIL_CLIENT_SECRET, refreshToken }),
+      )
+    : null;
+let nextEmailCheck = 0;
 let running = true;
+
+console.log(gmail ? "Gmail connected: checking for employer replies." : "Gmail not connected: run pnpm gmail:connect to track replies.");
 
 process.on("SIGINT", () => {
   running = false;
@@ -31,6 +44,13 @@ process.on("SIGINT", () => {
 console.log(`Connected to ${config.HIRELENS_URL}. Waiting for approved applications.`);
 
 while (running) {
+  if (gmail && Date.now() >= nextEmailCheck) {
+    nextEmailCheck = Date.now() + config.EMAIL_POLL_MINUTES * 60_000;
+    await pollEmails({ gmail, api })
+      .then(({ sent }) => sent > 0 && console.log(`Sent ${sent} employer replies to HireLens.`))
+      .catch((error: Error) => console.error(`Email check failed: ${error.message}`));
+  }
+
   const { task, reason } = await api.claim().catch((error: Error) => {
     console.error(error.message);
     return { task: null, reason: "ERROR" };

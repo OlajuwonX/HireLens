@@ -37,6 +37,18 @@ It never answers questions about gender, ethnicity, veteran or disability status
 
 If it stops after a form was submitted but before a confirmation appeared, HireLens marks the application unconfirmed instead of retrying it.
 
+## Employer replies from Gmail (optional)
+
+The worker can read your Gmail, read-only, to spot interview invitations, assessments, offers and rejections. Only emails from companies you applied to, or from job-board mail services, are sent to HireLens. Everything else stays on your computer. HireLens never sends email.
+
+1. Open [Google Cloud Console](https://console.cloud.google.com), create a project (free) and enable the **Gmail API**.
+2. Under **OAuth consent screen**, choose **External**, keep it in **Testing**, and add your own Gmail address as a test user.
+3. Under **Credentials**, create an **OAuth client ID** of type **Desktop app**. Put its ID and secret in `.env` as `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET`.
+4. Run `pnpm gmail:connect`, open the link it prints and allow access.
+5. Start the worker as usual. It checks for replies every `EMAIL_POLL_MINUTES` (15 by default).
+
+Google expires the connection after 7 days while the app is in Testing, so run `pnpm gmail:connect` again when the worker says the email check failed. Publishing your own app to production should remove the weekly expiry; Google then shows an "unverified app" warning that you can accept because the app is yours.
+
 ## Tests
 
 ```bash

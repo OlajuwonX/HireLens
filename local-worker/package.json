@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/main.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gmail:connect": "tsx src/gmail/connect.ts"
   },
   "dependencies": {
     "playwright-core": "^1.65.0",

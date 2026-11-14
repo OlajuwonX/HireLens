@@ -9,6 +9,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  Inbox,
   ListChecks,
   LayoutDashboard,
   Mic,
@@ -58,6 +59,12 @@ const allNavigation: NavItem[] = [
     label: "Auto Apply",
     href: "/dashboard/auto-apply",
     Icon: ListChecks,
+    ready: true,
+  },
+  {
+    label: "Responses",
+    href: "/dashboard/responses",
+    Icon: Inbox,
     ready: true,
   },
   {

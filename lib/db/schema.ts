@@ -109,6 +109,7 @@ export const usageAction = pgEnum("usage_action", [
   "INTERVIEW_POOL_GENERATION",
   "RESUME_REVIEW",
   "JOB_MATCHING",
+  "INTERVIEW_PREP",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -1173,6 +1174,55 @@ export const workerTokens = pgTable(
   ],
 );
 
+export const emailEvents = pgTable(
+  "email_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    messageId: text("message_id").notNull(),
+    threadId: text("thread_id"),
+    fromAddress: text("from_address").notNull(),
+    subject: text("subject").notNull(),
+    snippet: text("snippet").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull(),
+    kind: text("kind").notNull(),
+    confidence: integer("confidence").notNull(),
+    status: text("status").notNull(),
+    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
+    matchScore: integer("match_score"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("email_events_public_id_idx").on(table.publicId),
+    uniqueIndex("email_events_user_message_idx").on(table.userId, table.messageId),
+    index("email_events_user_received_idx").on(table.userId, table.receivedAt.desc()),
+    index("email_events_user_status_idx").on(table.userId, table.status),
+  ],
+);
+
+export const interviewPreps = pgTable(
+  "interview_preps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    applicationId: uuid("application_id")
+      .notNull()
+      .references(() => applications.id, { onDelete: "cascade" }),
+    emailEventId: uuid("email_event_id").references(() => emailEvents.id, { onDelete: "set null" }),
+    status: text("status").notNull().default("PENDING"),
+    resultJson: jsonb("result_json"),
+    failureReason: text("failure_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("interview_preps_public_id_idx").on(table.publicId),
+    uniqueIndex("interview_preps_application_idx").on(table.applicationId),
+    index("interview_preps_user_idx").on(table.userId, table.updatedAt.desc()),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1375,3 +1425,5 @@ export type NewJobMatch = typeof jobMatches.$inferInsert;
 export type ApplicationTask = typeof applicationTasks.$inferSelect;
 export type ApplicationTaskEvent = typeof applicationTaskEvents.$inferSelect;
 export type WorkerToken = typeof workerTokens.$inferSelect;
+export type EmailEvent = typeof emailEvents.$inferSelect;
+export type InterviewPrep = typeof interviewPreps.$inferSelect;

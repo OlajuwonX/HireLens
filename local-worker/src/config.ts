@@ -13,6 +13,9 @@ const configSchema = z.object({
   USE_CLAUDE: flag,
   CONFIRM_TIMEOUT_MINUTES: z.coerce.number().int().min(1).max(60).default(15),
   POLL_SECONDS: z.coerce.number().int().min(15).max(3600).default(60),
+  GMAIL_CLIENT_ID: z.string().optional(),
+  GMAIL_CLIENT_SECRET: z.string().optional(),
+  EMAIL_POLL_MINUTES: z.coerce.number().int().min(5).max(1440).default(15),
 });
 
 export type WorkerConfig = z.infer<typeof configSchema>;

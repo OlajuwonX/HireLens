@@ -27,6 +27,7 @@ describe("usage actions", () => {
       "INTERVIEW_POOL_GENERATION",
       "RESUME_REVIEW",
       "JOB_MATCHING",
+      "INTERVIEW_PREP",
     ]);
   });
 

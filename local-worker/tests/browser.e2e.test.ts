@@ -50,6 +50,8 @@ describe.skipIf(!browser)("filling a Greenhouse-style form in a real browser", (
     heartbeat: vi.fn(async () => true),
     report: vi.fn(async () => true),
     downloadResume: vi.fn(async () => new TextEncoder().encode("%PDF-1.4 test resume")),
+    emailWatch: vi.fn(async () => ({ terms: [], domains: [] })),
+    sendEmails: vi.fn(async () => undefined),
   });
 
   const run = (autoSubmit: boolean) =>
