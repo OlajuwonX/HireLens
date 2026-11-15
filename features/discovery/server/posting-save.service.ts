@@ -6,7 +6,7 @@ import { listOwnedVersionOptions } from "@/features/resumes/server/resume-versio
 import type { DiscoverySource } from "@/lib/discovery/types";
 import { sourceLabels } from "../constants";
 import { loadAudience } from "./audience";
-import { dedupeKey } from "@/lib/discovery/normalize";
+import { cleanDescription, dedupeKey } from "@/lib/discovery/normalize";
 import {
   findPostingForUser,
   hasSavedJobWithUrl,
@@ -31,7 +31,7 @@ export function toSaveValues(posting: PostingDetail, resumeVersionPublicId: stri
     currency: posting.currency ?? "",
     source: sourceLabels[posting.source as DiscoverySource] ?? posting.source,
     sourceUrl: posting.applyUrl ?? posting.url,
-    description: posting.description || `See the full posting at ${posting.url}`,
+    description: cleanDescription(posting.description) || `See the full posting at ${posting.url}`,
   });
 }
 

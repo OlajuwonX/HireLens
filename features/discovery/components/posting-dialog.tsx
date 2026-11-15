@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
+import { FormattedText } from "@/components/data-display/formatted-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,9 +51,7 @@ export function PostingDialog({ publicId, onClose }: { publicId: string; onClose
             ))}
           </div>
         ) : data ? (
-          <p className="mt-4 whitespace-pre-line text-meta leading-relaxed text-text-primary">
-            {data.description}
-          </p>
+          <FormattedText text={data.description} className="mt-4" />
         ) : (
           <p className="mt-4 text-meta text-text-secondary">This job is no longer available.</p>
         )}

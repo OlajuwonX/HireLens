@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { cleanDescription } from "@/lib/discovery/normalize";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { DISCOVERY_PATH } from "../constants";
 import {
@@ -88,7 +89,7 @@ export async function getPostingAction(publicId: string) {
         title: posting.title,
         company: posting.company,
         location: posting.location,
-        description: posting.description,
+        description: cleanDescription(posting.description),
         url: posting.url,
         applyUrl: posting.applyUrl,
       }

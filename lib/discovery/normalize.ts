@@ -5,15 +5,30 @@ import type { Arrangement, Employment } from "./types";
 export const MAX_DESCRIPTION_LENGTH = 20_000;
 export const MAX_POSTINGS_PER_BOARD = 500;
 
+const HTML_TAG = /<\/?[a-z][a-z0-9]*(\s[^>]*)?\/?>/i;
+const MAX_PASSES = 3;
+
+export function containsHtml(value: string) {
+  return HTML_TAG.test(value);
+}
+
 export function htmlToText(html: string | null | undefined, escaped = false) {
   if (!html) {
     return "";
   }
 
-  const once = clipboardHtmlToText(html);
-  const text = escaped ? clipboardHtmlToText(once) : once;
+  let text = clipboardHtmlToText(html);
+
+  for (let pass = 1; pass < MAX_PASSES && (escaped || containsHtml(text)); pass += 1) {
+    text = clipboardHtmlToText(text);
+    escaped = false;
+  }
 
   return tidy(text);
+}
+
+export function cleanDescription(value: string) {
+  return containsHtml(value) || /&(lt|gt|amp|nbsp|quot);/i.test(value) ? htmlToText(value) : value;
 }
 
 export function tidy(text: string | null | undefined) {
