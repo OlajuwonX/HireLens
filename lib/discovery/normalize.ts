@@ -58,8 +58,29 @@ export function normalizeKeyPart(value: string | null | undefined) {
     .trim();
 }
 
-export function dedupeKey(input: { company: string; title: string; location: string | null }) {
-  return [input.company, input.title, input.location].map(normalizeKeyPart).join("|");
+const COMPANY_SUFFIX = /\b(inc|llc|ltd|limited|corp|corporation|co|gmbh|plc|sa|ag|bv|group|holdings|technologies|technology|labs)\b/g;
+
+const TITLE_SYNONYMS: [RegExp, string][] = [
+  [/\b(developer|programmer)\b/g, "engineer"],
+  [/\bsr\b/g, "senior"],
+  [/\bjr\b/g, "junior"],
+  [/\bfront end\b/g, "frontend"],
+  [/\bback end\b/g, "backend"],
+  [/\bfull stack\b/g, "fullstack"],
+];
+
+export function companyKey(company: string) {
+  return normalizeKeyPart(company).replace(COMPANY_SUFFIX, "").replace(/\s+/g, " ").trim();
+}
+
+export function titleKey(title: string) {
+  return TITLE_SYNONYMS.reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), normalizeKeyPart(title))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function dedupeKey(input: { company: string; title: string }) {
+  return `${companyKey(input.company)}|${titleKey(input.title)}`;
 }
 
 export function companyFromToken(token: string) {

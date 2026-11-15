@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { candidateProfiles, type NewCandidateProfile } from "@/lib/db/schema";
 
@@ -27,4 +27,12 @@ export async function upsertProfile(
     .returning();
 
   return profile;
+}
+
+export async function listAllTargetRoles(limit = 500) {
+  const rows = await db.execute<{ role: string }>(
+    sql`select distinct unnest(${candidateProfiles.targetRoles}) as role from ${candidateProfiles} limit ${limit}`,
+  );
+
+  return rows.rows.map((row) => row.role).filter(Boolean);
 }

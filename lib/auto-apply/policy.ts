@@ -1,3 +1,5 @@
+import { dedupeKey } from "@/lib/discovery/normalize";
+
 export const DEFAULT_DAILY_SUBMISSIONS = 30;
 
 export function dailySubmissionLimit(raw = process.env.AUTO_APPLY_DAILY_LIMIT) {
@@ -11,7 +13,5 @@ export function submissionsRemaining(usedToday: number, limit = dailySubmissionL
 }
 
 export function normalizeRole(company: string, title: string) {
-  return [company, title]
-    .map((part) => part.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim())
-    .join("|");
+  return dedupeKey({ company, title });
 }

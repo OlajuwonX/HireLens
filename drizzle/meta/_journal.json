@@ -253,6 +253,13 @@
       "when": 1794511618004,
       "tag": "0035_response_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794699547715,
+      "tag": "0036_automatic_discovery",
+      "breakpoints": true
     }
   ]
 }

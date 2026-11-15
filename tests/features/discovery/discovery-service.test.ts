@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   storeSnapshot: vi.fn(),
   syncBoard: vi.fn(),
   purgeExpiredPostings: vi.fn(),
+  seedSystemBoards: vi.fn(),
+  listAllTargetRoles: vi.fn(),
 }));
 
 vi.mock("@/features/discovery/server/board.repository", () => ({
@@ -18,6 +20,7 @@ vi.mock("@/features/discovery/server/board.repository", () => ({
   followBoard: mocks.followBoard,
   listDueBoards: mocks.listDueBoards,
   upsertBoard: mocks.upsertBoard,
+  seedSystemBoards: mocks.seedSystemBoards,
 }));
 vi.mock("@/features/discovery/server/board-sync", () => ({
   fetchSnapshot: mocks.fetchSnapshot,
@@ -27,8 +30,11 @@ vi.mock("@/features/discovery/server/board-sync", () => ({
 vi.mock("@/features/discovery/server/posting.repository", () => ({
   purgeExpiredPostings: mocks.purgeExpiredPostings,
 }));
+vi.mock("@/features/candidate-profile/server/profile.repository", () => ({
+  listAllTargetRoles: mocks.listAllTargetRoles,
+}));
 
-const { followJobBoard, runDailyDiscovery } = await import(
+const { followJobBoard, refreshDiscovery, runDailyDiscovery } = await import(
   "@/features/discovery/server/discovery.service"
 );
 const { BoardFetchError } = await import("@/lib/discovery/http");
@@ -43,6 +49,7 @@ beforeEach(() => {
   mocks.upsertBoard.mockResolvedValue({ id: "board-1", companyName: "Acme" });
   mocks.storeSnapshot.mockResolvedValue(7);
   mocks.purgeExpiredPostings.mockResolvedValue(0);
+  mocks.listAllTargetRoles.mockResolvedValue(["Frontend Engineer"]);
 });
 
 describe("followJobBoard", () => {
@@ -96,14 +103,51 @@ describe("runDailyDiscovery", () => {
   });
 
   it("stops starting new boards once the time budget is spent", async () => {
-    mocks.listDueBoards.mockResolvedValue([{ id: "a" }, { id: "b" }, { id: "c" }]);
-    mocks.syncBoard.mockResolvedValue({ ok: true, active: 1 });
-    const clock = [0, 0, 50_000, 50_000];
-    const now = () => clock.shift() ?? 60_000;
+    let clock = 0;
+    mocks.listDueBoards.mockResolvedValue(Array.from({ length: 10 }, (_, index) => ({ id: `b${index}` })));
+    mocks.syncBoard.mockImplementation(async () => {
+      clock += 250_000;
+      return { ok: true, active: 1 };
+    });
 
-    const report = await runDailyDiscovery({ now });
+    const report = await runDailyDiscovery({ now: () => clock });
 
     expect(report.synced).toBe(1);
-    expect(report.skipped).toBe(2);
+    expect(report.skipped).toBe(9);
+  });
+
+  it("seeds the built-in catalog before syncing", async () => {
+    mocks.listDueBoards.mockResolvedValue([]);
+
+    await runDailyDiscovery();
+
+    expect(mocks.seedSystemBoards).toHaveBeenCalledWith(expect.arrayContaining([
+      { source: "REMOTIVE", token: "all" },
+      { source: "GREENHOUSE", token: "stripe" },
+    ]));
+  });
+
+  it("filters only built-in boards nobody follows by everyone's target roles", async () => {
+    mocks.listDueBoards.mockResolvedValue([
+      { id: "system", system: true, followed: false },
+      { id: "followed-system", system: true, followed: true },
+      { id: "user", system: false, followed: true },
+    ]);
+    mocks.syncBoard.mockResolvedValue({ ok: true, active: 1 });
+
+    await runDailyDiscovery();
+
+    const matchers = Object.fromEntries(mocks.syncBoard.mock.calls.map(([board, , matcher]) => [board.id, matcher]));
+    expect(matchers.system).toEqual([[["frontend", "front end"], ["engineer", "developer", "programmer"]]]);
+    expect(matchers["followed-system"]).toBeNull();
+    expect(matchers.user).toBeNull();
+  });
+
+  it("only re-checks sources that have not been checked recently when refreshing", async () => {
+    mocks.listDueBoards.mockResolvedValue([]);
+
+    await refreshDiscovery({ now: () => Date.parse("2026-11-15T12:00:00Z") });
+
+    expect(mocks.listDueBoards).toHaveBeenCalledWith({ limit: 12, staleBefore: new Date("2026-11-15T06:00:00Z") });
   });
 });

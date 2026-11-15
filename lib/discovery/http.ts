@@ -16,12 +16,12 @@ export class BoardFetchError extends Error {
   }
 }
 
-export const fetchJson: FetchJson = async (url) => {
+export const fetchJson: FetchJson = async (url, as = "json") => {
   let response: Response;
 
   try {
     response = await fetch(url, {
-      headers: { Accept: "application/json", "User-Agent": "HireLens job discovery" },
+      headers: { Accept: as === "json" ? "application/json" : "application/rss+xml, text/xml", "User-Agent": "HireLens job discovery" },
       signal: AbortSignal.timeout(BOARD_TIMEOUT_MS),
       cache: "no-store",
     });
@@ -34,7 +34,7 @@ export const fetchJson: FetchJson = async (url) => {
   }
 
   try {
-    return await response.json();
+    return as === "json" ? await response.json() : await response.text();
   } catch {
     throw new BoardFetchError("The job board returned unreadable data", response.status);
   }

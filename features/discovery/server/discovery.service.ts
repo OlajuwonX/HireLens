@@ -4,7 +4,17 @@ import { BoardFetchError } from "@/lib/discovery/http";
 import { parseBoardInput } from "@/lib/discovery/sources";
 import type { DiscoverySource } from "@/lib/discovery/types";
 import { DISCOVERY_LIMITS, sourceLabels } from "../constants";
-import { countFollows, findBoard, followBoard, listDueBoards, upsertBoard } from "./board.repository";
+import { listAllTargetRoles } from "@/features/candidate-profile/server/profile.repository";
+import { SYSTEM_BOARDS } from "@/lib/discovery/catalog";
+import { buildRoleMatcher } from "@/lib/discovery/role-match";
+import {
+  countFollows,
+  findBoard,
+  followBoard,
+  listDueBoards,
+  seedSystemBoards,
+  upsertBoard,
+} from "./board.repository";
 import { fetchSnapshot, storeSnapshot, syncBoard } from "./board-sync";
 import { purgeExpiredPostings } from "./posting.repository";
 
@@ -57,24 +67,65 @@ export async function followJobBoard(input: {
   }
 }
 
-export async function runDailyDiscovery(input: { now?: () => number } = {}) {
-  const now = input.now ?? Date.now;
+type RunOptions = {
+  limit: number;
+  budgetMs: number;
+  staleBefore?: Date;
+  now?: () => number;
+};
+
+async function syncDueBoards(options: RunOptions) {
+  const now = options.now ?? Date.now;
   const startedAt = now();
-  const boards = await listDueBoards(DISCOVERY_LIMITS.boardsPerRun);
+
+  await seedSystemBoards(SYSTEM_BOARDS);
+
+  const [boards, roles] = await Promise.all([
+    listDueBoards({ limit: options.limit, staleBefore: options.staleBefore }),
+    listAllTargetRoles(),
+  ]);
+  const matcher = buildRoleMatcher(roles);
   const report = { boards: boards.length, synced: 0, failed: 0, skipped: 0, purged: 0 };
+  const queue = [...boards];
 
-  for (const board of boards) {
-    if (now() - startedAt > DISCOVERY_LIMITS.runBudgetMs) {
-      report.skipped += 1;
-      continue;
+  const work = async () => {
+    for (let board = queue.shift(); board; board = queue.shift()) {
+      if (now() - startedAt > options.budgetMs) {
+        report.skipped += 1;
+        continue;
+      }
+
+      const result = await syncBoard(board, undefined, board.system && !board.followed ? matcher : null);
+      report[result.ok ? "synced" : "failed"] += 1;
     }
+  };
 
-    const result = await syncBoard(board);
-    report[result.ok ? "synced" : "failed"] += 1;
-  }
+  await Promise.all(Array.from({ length: DISCOVERY_LIMITS.concurrency }, work));
 
+  return { report, startedAt };
+}
+
+export async function runDailyDiscovery(input: { now?: () => number } = {}) {
+  const { report, startedAt } = await syncDueBoards({
+    limit: DISCOVERY_LIMITS.boardsPerRun,
+    budgetMs: DISCOVERY_LIMITS.runBudgetMs,
+    now: input.now,
+  });
   const retentionMs = DISCOVERY_LIMITS.expiredRetentionDays * 24 * 60 * 60 * 1000;
+
   report.purged = await purgeExpiredPostings(new Date(startedAt - retentionMs));
+
+  return report;
+}
+
+export async function refreshDiscovery(input: { now?: () => number } = {}) {
+  const staleMs = DISCOVERY_LIMITS.refreshStaleHours * 60 * 60 * 1000;
+  const { report } = await syncDueBoards({
+    limit: DISCOVERY_LIMITS.refreshBoards,
+    budgetMs: DISCOVERY_LIMITS.refreshBudgetMs,
+    staleBefore: new Date((input.now ?? Date.now)() - staleMs),
+    now: input.now,
+  });
 
   return report;
 }

@@ -1,17 +1,27 @@
-import type { DiscoverySource } from "@/lib/discovery/types";
+import type { CatalogSource, DiscoverySource } from "@/lib/discovery/types";
 
 export const DISCOVERY_PATH = "/dashboard/discover";
 
 export const DISCOVERY_LIMITS = {
   followsPerUser: 30,
   pageSize: 24,
-  boardsPerRun: 25,
-  runBudgetMs: 45_000,
+  boardsPerRun: 120,
+  runBudgetMs: 240_000,
+  refreshBoards: 12,
+  refreshBudgetMs: 45_000,
+  refreshStaleHours: 6,
+  concurrency: 6,
+  freshDays: 30,
   expiredRetentionDays: 30,
   upsertChunk: 100,
 } as const;
 
-export const sourceLabels: Record<DiscoverySource, string> = {
+export const sourceLabels: Record<CatalogSource, string> = {
+  REMOTIVE: "Remotive",
+  JOBICY: "Jobicy",
+  ARBEITNOW: "Arbeitnow",
+  HIMALAYAS: "Himalayas",
+  WEWORKREMOTELY: "We Work Remotely",
   GREENHOUSE: "Greenhouse",
   LEVER: "Lever",
   ASHBY: "Ashby",

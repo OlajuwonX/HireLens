@@ -1,6 +1,8 @@
 import { memo } from "react";
 import { workArrangementLabels } from "@/features/jobs/constants";
 import type { WorkArrangement } from "@/lib/db/schema";
+import type { CatalogSource } from "@/lib/discovery/types";
+import { sourceLabels } from "../constants";
 import type { PostingListRow } from "../server/feed.repository";
 
 function postedLabel(date: Date | null) {
@@ -44,7 +46,7 @@ export const PostingCard = memo(function PostingCard({
         <span className="truncate text-label text-text-secondary">{row.company}</span>
         <span className="line-clamp-2 text-label text-text-muted">{details.join(" · ")}</span>
         <span className="mt-auto font-mono text-system text-text-muted">
-          Posted {postedLabel(row.postedAt)}
+          Posted {postedLabel(row.postedAt)} · via {sourceLabels[row.source as CatalogSource] ?? row.source}
         </span>
       </button>
     </li>

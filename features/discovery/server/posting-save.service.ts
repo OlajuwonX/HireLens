@@ -5,7 +5,14 @@ import { saveJobOnly } from "@/features/applications/server/application.service"
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
 import type { DiscoverySource } from "@/lib/discovery/types";
 import { sourceLabels } from "../constants";
-import { findPostingForUser, hasSavedJobWithUrl, type PostingDetail } from "./feed.repository";
+import { loadAudience } from "./audience";
+import { dedupeKey } from "@/lib/discovery/normalize";
+import {
+  findPostingForUser,
+  hasSavedJobWithUrl,
+  listSavedRoleKeys,
+  type PostingDetail,
+} from "./feed.repository";
 
 export type SavePostingResult =
   | { ok: true; alreadySaved: boolean }
@@ -32,13 +39,21 @@ export async function savePostingToJobs(input: {
   userId: string;
   publicId: string;
 }): Promise<SavePostingResult> {
-  const posting = await findPostingForUser(input);
+  const posting = await findPostingForUser({
+    audience: await loadAudience(input.userId),
+    publicId: input.publicId,
+  });
 
   if (!posting) {
     return { ok: false, message: "That job is no longer available." };
   }
 
-  if (await hasSavedJobWithUrl({ userId: input.userId, url: posting.applyUrl ?? posting.url })) {
+  const [savedUrl, savedRoles] = await Promise.all([
+    hasSavedJobWithUrl({ userId: input.userId, url: posting.applyUrl ?? posting.url }),
+    listSavedRoleKeys(input.userId),
+  ]);
+
+  if (savedUrl || savedRoles.has(dedupeKey(posting))) {
     return { ok: true, alreadySaved: true };
   }
 

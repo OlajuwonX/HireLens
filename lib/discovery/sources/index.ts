@@ -1,12 +1,22 @@
-import type { BoardAdapter, DiscoverySource } from "../types";
+import type { BoardAdapter, CatalogSource, DiscoverySource } from "../types";
+import { arbeitnow } from "./arbeitnow";
 import { ashby } from "./ashby";
 import { greenhouse } from "./greenhouse";
+import { himalayas } from "./himalayas";
+import { jobicy } from "./jobicy";
 import { lever } from "./lever";
+import { remotive } from "./remotive";
+import { weworkremotely } from "./weworkremotely";
 
-export const adapters: Record<DiscoverySource, BoardAdapter> = {
+export const adapters: Record<CatalogSource, BoardAdapter> = {
   GREENHOUSE: greenhouse,
   LEVER: lever,
   ASHBY: ashby,
+  REMOTIVE: remotive,
+  JOBICY: jobicy,
+  ARBEITNOW: arbeitnow,
+  HIMALAYAS: himalayas,
+  WEWORKREMOTELY: weworkremotely,
 };
 
 const HOSTS: [RegExp, DiscoverySource][] = [

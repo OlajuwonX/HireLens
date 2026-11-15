@@ -1,11 +1,14 @@
 import "server-only";
 
-import { and, desc, eq, ilike, isNull, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, lt, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { jobBoardFollows, jobBoards, jobPostings, jobs } from "@/lib/db/schema";
+import { dedupeKey } from "@/lib/discovery/normalize";
 import { likePattern } from "@/lib/search/query";
 import type { FeedCursor } from "../feed-cursor";
+import { DISCOVERY_LIMITS } from "../constants";
 import type { FeedFilters } from "../schemas/discovery.schema";
+import { audienceConditions, followedBy, visibleTo, type Audience } from "./visibility";
 
 const listShape = {
   publicId: jobPostings.publicId,
@@ -37,39 +40,20 @@ export type PostingListRow = {
   source: string;
 };
 
-function followedBy(userId: string) {
-  return db
-    .select()
-    .from(jobPostings)
-    .innerJoin(
-      jobBoardFollows,
-      and(eq(jobBoardFollows.boardId, jobPostings.boardId), eq(jobBoardFollows.userId, userId)),
-    )
-    .innerJoin(jobBoards, eq(jobBoards.id, jobPostings.boardId));
-}
-
-function hiddenDuplicate(userId: string) {
-  return sql`exists (
-    select 1 from ${jobPostings} canonical
-    join ${jobBoardFollows} follow on follow.board_id = canonical.board_id
-    where canonical.id = ${jobPostings.duplicateOfId} and follow.user_id = ${userId}
-  )`;
-}
-
 export async function listFeed(input: {
-  userId: string;
+  audience: Audience;
   filters: FeedFilters;
   cursor: FeedCursor | null;
   limit: number;
 }): Promise<PostingListRow[]> {
-  const conditions: SQL[] = [
+  const conditions: (SQL | undefined)[] = [
     isNull(jobPostings.expiredAt),
-    sql`not ${hiddenDuplicate(input.userId)}`,
+    audienceConditions(input.audience, DISCOVERY_LIMITS.freshDays),
   ];
 
   if (input.filters.q) {
     const pattern = likePattern(input.filters.q);
-    conditions.push(or(ilike(jobPostings.title, pattern), ilike(jobPostings.company, pattern))!);
+    conditions.push(or(ilike(jobPostings.title, pattern), ilike(jobPostings.company, pattern)));
   }
 
   if (input.filters.arrangement) {
@@ -81,29 +65,30 @@ export async function listFeed(input: {
       or(
         lt(jobPostings.sortAt, input.cursor.sortAt),
         and(eq(jobPostings.sortAt, input.cursor.sortAt), lt(jobPostings.publicId, input.cursor.publicId)),
-      )!,
+      ),
     );
   }
 
   return db
     .select(listShape)
     .from(jobPostings)
-    .innerJoin(
-      jobBoardFollows,
-      and(eq(jobBoardFollows.boardId, jobPostings.boardId), eq(jobBoardFollows.userId, input.userId)),
-    )
     .innerJoin(jobBoards, eq(jobBoards.id, jobPostings.boardId))
+    .leftJoin(jobBoardFollows, followedBy(input.audience.userId))
     .where(and(...conditions))
     .orderBy(desc(jobPostings.sortAt), desc(jobPostings.publicId))
     .limit(input.limit);
 }
 
-export async function findPostingForUser(input: { userId: string; publicId: string }) {
-  const [row] = await followedBy(input.userId)
-    .where(eq(jobPostings.publicId, input.publicId))
+export async function findPostingForUser(input: { audience: Audience; publicId: string }) {
+  const [row] = await db
+    .select({ posting: jobPostings, source: jobBoards.source })
+    .from(jobPostings)
+    .innerJoin(jobBoards, eq(jobBoards.id, jobPostings.boardId))
+    .leftJoin(jobBoardFollows, followedBy(input.audience.userId))
+    .where(and(eq(jobPostings.publicId, input.publicId), visibleTo(input.audience)))
     .limit(1);
 
-  return row ? { ...row.job_postings, source: row.job_boards.source } : null;
+  return row ? { ...row.posting, source: row.source } : null;
 }
 
 export type PostingDetail = NonNullable<Awaited<ReturnType<typeof findPostingForUser>>>;
@@ -116,4 +101,14 @@ export async function hasSavedJobWithUrl(input: { userId: string; url: string })
     .limit(1);
 
   return Boolean(row);
+}
+
+export async function listSavedRoleKeys(userId: string) {
+  const rows = await db
+    .select({ company: jobs.company, title: jobs.title })
+    .from(jobs)
+    .where(eq(jobs.userId, userId))
+    .limit(2_000);
+
+  return new Set(rows.map((row) => dedupeKey(row)));
 }

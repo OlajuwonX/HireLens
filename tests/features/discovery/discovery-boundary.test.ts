@@ -22,9 +22,24 @@ describe("discovery actions", () => {
   });
 });
 
-describe("the feed is scoped to followed boards", () => {
-  it("joins the user's follows in every read", () => {
-    expect(feed.match(/eq\(jobBoardFollows\.userId, (input\.)?userId\)/g)?.length).toBeGreaterThanOrEqual(2);
+describe("the feed is scoped to what each user may see", () => {
+  const visibility = read("features/discovery/server/visibility.ts");
+  const matching = read("features/matching/server/match.repository.ts");
+
+  it("joins only the current user's follows", () => {
+    expect(visibility).toContain("eq(jobBoardFollows.userId, userId)");
+  });
+
+  it("shows followed boards, or built-in boards whose titles match the user's roles", () => {
+    expect(visibility).toContain("isNotNull(jobBoardFollows.id)");
+    expect(visibility).toContain("eq(jobBoards.system, true)");
+    expect(visibility).toContain("titleMatchesSql(audience.matcher, jobPostings.title)");
+  });
+
+  it("uses the same visibility for the feed, job details and matching", () => {
+    expect(feed.match(/followedBy\(input\.audience\.userId\)/g)?.length).toBe(2);
+    expect(feed).toContain("visibleTo(input.audience)");
+    expect(matching).toContain("audienceConditions(input.audience");
   });
 });
 

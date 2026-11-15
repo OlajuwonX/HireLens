@@ -4,6 +4,7 @@ import { DISCOVERY_LIMITS } from "../constants";
 import { decodeCursor, encodeCursor } from "../feed-cursor";
 import type { FeedFilters } from "../schemas/discovery.schema";
 import { listFeed, type PostingListRow } from "./feed.repository";
+import type { Audience } from "./visibility";
 
 export type PostingFeedPage = {
   rows: PostingListRow[];
@@ -11,12 +12,12 @@ export type PostingFeedPage = {
 };
 
 export async function getPostingFeed(input: {
-  userId: string;
+  audience: Audience;
   filters: FeedFilters;
   cursor?: string;
 }): Promise<PostingFeedPage> {
   const rows = await listFeed({
-    userId: input.userId,
+    audience: input.audience,
     filters: input.filters,
     cursor: decodeCursor(input.cursor),
     limit: DISCOVERY_LIMITS.pageSize + 1,

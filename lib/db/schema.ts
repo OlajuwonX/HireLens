@@ -1006,6 +1006,7 @@ export const jobBoards = pgTable(
     source: text("source").notNull(),
     token: text("token").notNull(),
     companyName: text("company_name").notNull(),
+    system: boolean("system").notNull().default(false),
     postingCount: integer("posting_count").notNull().default(0),
     lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
     lastError: text("last_error"),

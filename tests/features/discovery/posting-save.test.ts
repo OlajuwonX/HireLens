@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   findPostingForUser: vi.fn(),
   hasSavedJobWithUrl: vi.fn(),
+  listSavedRoleKeys: vi.fn(),
+  loadAudience: vi.fn(),
   listOwnedVersionOptions: vi.fn(),
   saveJobOnly: vi.fn(),
 }));
@@ -10,7 +12,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/features/discovery/server/feed.repository", () => ({
   findPostingForUser: mocks.findPostingForUser,
   hasSavedJobWithUrl: mocks.hasSavedJobWithUrl,
+  listSavedRoleKeys: mocks.listSavedRoleKeys,
 }));
+vi.mock("@/features/discovery/server/audience", () => ({ loadAudience: mocks.loadAudience }));
 vi.mock("@/features/resumes/server/resume-version.service", () => ({
   listOwnedVersionOptions: mocks.listOwnedVersionOptions,
 }));
@@ -43,6 +47,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.findPostingForUser.mockResolvedValue(posting);
   mocks.hasSavedJobWithUrl.mockResolvedValue(false);
+  mocks.listSavedRoleKeys.mockResolvedValue(new Set());
+  mocks.loadAudience.mockResolvedValue({ userId: "user-1", roles: [], matcher: [] });
   mocks.listOwnedVersionOptions.mockResolvedValue([{ publicId: versionId }]);
   mocks.saveJobOnly.mockResolvedValue({ ok: true, value: { applicationPublicId: "a" } });
 });
@@ -85,7 +91,24 @@ describe("savePostingToJobs", () => {
     expect(await run()).toEqual({ ok: false, message: "Upload a resume before saving jobs." });
   });
 
-  it("refuses a posting from a board the user does not follow", async () => {
+  it("treats the same role from another source as already saved", async () => {
+    mocks.listSavedRoleKeys.mockResolvedValue(new Set(["acme|frontend engineer"]));
+    mocks.findPostingForUser.mockResolvedValue({ ...posting, company: "Acme, Inc.", title: "Frontend Developer" });
+
+    expect(await run()).toEqual({ ok: true, alreadySaved: true });
+    expect(mocks.saveJobOnly).not.toHaveBeenCalled();
+  });
+
+  it("only looks up postings the user is allowed to see", async () => {
+    await run();
+
+    expect(mocks.findPostingForUser).toHaveBeenCalledWith({
+      audience: { userId: "user-1", roles: [], matcher: [] },
+      publicId: "p-1",
+    });
+  });
+
+  it("refuses a posting the user cannot see", async () => {
     mocks.findPostingForUser.mockResolvedValue(null);
 
     expect((await run()).ok).toBe(false);

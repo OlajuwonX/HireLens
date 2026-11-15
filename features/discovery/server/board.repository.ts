@@ -1,9 +1,10 @@
 import "server-only";
 
-import { and, asc, count, eq, exists, sql } from "drizzle-orm";
+import { and, asc, count, eq, exists, getTableColumns, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { jobBoardFollows, jobBoards } from "@/lib/db/schema";
-import type { DiscoverySource } from "@/lib/discovery/types";
+import { companyFromToken } from "@/lib/discovery/normalize";
+import type { CatalogSource, DiscoverySource } from "@/lib/discovery/types";
 
 export async function findBoard(input: { source: DiscoverySource; token: string }) {
   const [board] = await db
@@ -99,18 +100,38 @@ export async function listFollowedBoards(userId: string) {
 
 export type FollowedBoard = Awaited<ReturnType<typeof listFollowedBoards>>[number];
 
-export async function listDueBoards(limit: number) {
+export async function listDueBoards(input: { limit: number; staleBefore?: Date }) {
+  const followed = exists(
+    db.select({ one: sql`1` }).from(jobBoardFollows).where(eq(jobBoardFollows.boardId, jobBoards.id)),
+  );
+  const stale = input.staleBefore
+    ? or(isNull(jobBoards.lastFetchedAt), lt(jobBoards.lastFetchedAt, input.staleBefore))
+    : undefined;
+
   return db
-    .select()
+    .select({ ...getTableColumns(jobBoards), followed: sql<boolean>`${followed}` })
     .from(jobBoards)
-    .where(
-      exists(
-        db
-          .select({ one: sql`1` })
-          .from(jobBoardFollows)
-          .where(eq(jobBoardFollows.boardId, jobBoards.id)),
-      ),
-    )
+    .where(and(or(eq(jobBoards.system, true), followed), stale))
     .orderBy(sql`${jobBoards.lastFetchedAt} asc nulls first`)
-    .limit(limit);
+    .limit(input.limit);
+}
+
+export async function seedSystemBoards(boards: { source: CatalogSource; token: string }[]) {
+  if (boards.length === 0) {
+    return;
+  }
+
+  await db
+    .insert(jobBoards)
+    .values(boards.map((board) => ({ ...board, companyName: companyFromToken(board.token), system: true })))
+    .onConflictDoUpdate({
+      target: [jobBoards.source, jobBoards.token],
+      set: { system: true },
+    });
+}
+
+export async function countSystemBoards() {
+  const [row] = await db.select({ value: count() }).from(jobBoards).where(eq(jobBoards.system, true));
+
+  return row?.value ?? 0;
 }

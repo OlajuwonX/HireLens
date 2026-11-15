@@ -39,10 +39,16 @@ describe("parseBoardInput", () => {
 });
 
 describe("normalize helpers", () => {
-  it("builds a dedupe key that ignores case and punctuation", () => {
-    expect(dedupeKey({ company: "Acme, Inc.", title: "Sr. Engineer", location: "Remote" })).toBe(
-      dedupeKey({ company: "acme inc", title: "SR ENGINEER", location: "remote" }),
+  it("builds one dedupe key for the same role across sources", () => {
+    expect(dedupeKey({ company: "Acme, Inc.", title: "Sr. Front-End Developer" })).toBe(
+      dedupeKey({ company: "acme", title: "Senior Frontend Engineer" }),
     );
+    expect(dedupeKey({ company: "Stripe", title: "Full Stack Engineer" })).toBe("stripe|fullstack engineer");
+  });
+
+  it("keeps different roles and companies apart", () => {
+    expect(dedupeKey({ company: "Acme", title: "Senior Engineer" })).not.toBe(dedupeKey({ company: "Acme", title: "Engineer" }));
+    expect(dedupeKey({ company: "Acme", title: "Engineer" })).not.toBe(dedupeKey({ company: "Acme Pay", title: "Engineer" }));
   });
 
   it("prefers the source's explicit arrangement", () => {

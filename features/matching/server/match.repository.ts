@@ -2,12 +2,16 @@ import "server-only";
 
 import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { jobBoardFollows, jobMatches, jobPostings, type NewJobMatch } from "@/lib/db/schema";
+import { DISCOVERY_LIMITS } from "@/features/discovery/constants";
+import { audienceConditions, followedBy, type Audience } from "@/features/discovery/server/visibility";
+import { jobBoardFollows, jobBoards, jobMatches, jobPostings, type NewJobMatch } from "@/lib/db/schema";
 import { MATCHING_LIMITS } from "../constants";
 
 const excluded = (column: string) => sql.raw(`excluded."${column}"`);
 
-export async function listPostingsToMatch(input: { userId: string; inputHash: string }) {
+export async function listPostingsToMatch(input: { audience: Audience; inputHash: string }) {
+  const userId = input.audience.userId;
+
   return db
     .select({
       id: jobPostings.id,
@@ -18,18 +22,13 @@ export async function listPostingsToMatch(input: { userId: string; inputHash: st
       description: sql<string>`left(${jobPostings.description}, ${MATCHING_LIMITS.scanDescriptionChars})`,
     })
     .from(jobPostings)
-    .innerJoin(
-      jobBoardFollows,
-      and(eq(jobBoardFollows.boardId, jobPostings.boardId), eq(jobBoardFollows.userId, input.userId)),
-    )
-    .leftJoin(
-      jobMatches,
-      and(eq(jobMatches.postingId, jobPostings.id), eq(jobMatches.userId, input.userId)),
-    )
+    .innerJoin(jobBoards, eq(jobBoards.id, jobPostings.boardId))
+    .leftJoin(jobBoardFollows, followedBy(userId))
+    .leftJoin(jobMatches, and(eq(jobMatches.postingId, jobPostings.id), eq(jobMatches.userId, userId)))
     .where(
       and(
         isNull(jobPostings.expiredAt),
-        isNull(jobPostings.duplicateOfId),
+        audienceConditions(input.audience, DISCOVERY_LIMITS.freshDays),
         isNull(jobMatches.dismissedAt),
         or(
           isNull(jobMatches.id),

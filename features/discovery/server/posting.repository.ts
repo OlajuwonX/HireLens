@@ -1,30 +1,42 @@
 import "server-only";
 
-import { and, count, eq, inArray, isNull, lt, ne, sql } from "drizzle-orm";
+import { and, count, eq, isNull, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { jobPostings, type NewJobPosting } from "@/lib/db/schema";
+import { jobBoards, jobPostings, type NewJobPosting } from "@/lib/db/schema";
+import { DISCOVERY_SOURCES } from "@/lib/discovery/types";
 import { DISCOVERY_LIMITS } from "../constants";
 
 const excluded = (column: string) => sql.raw(`excluded."${column}"`);
 
-export async function findCanonicalIds(input: { boardId: string; keys: string[] }) {
-  if (input.keys.length === 0) {
-    return new Map<string, string>();
+export async function recanonicalize(keys: string[]) {
+  if (keys.length === 0) {
+    return;
   }
 
-  const rows = await db
-    .select({ id: jobPostings.id, dedupeKey: jobPostings.dedupeKey })
-    .from(jobPostings)
-    .where(
-      and(
-        inArray(jobPostings.dedupeKey, input.keys),
-        ne(jobPostings.boardId, input.boardId),
-        isNull(jobPostings.expiredAt),
-        isNull(jobPostings.duplicateOfId),
-      ),
-    );
-
-  return new Map(rows.map((row) => [row.dedupeKey, row.id]));
+  await db.execute(sql`
+    with ranked as (
+      select
+        p.id,
+        p.board_id,
+        first_value(p.id) over grouped as canonical_id,
+        first_value(p.board_id) over grouped as canonical_board
+      from ${jobPostings} p
+      join ${jobBoards} b on b.id = p.board_id
+      where p.expired_at is null and p.dedupe_key in ${keys}
+      window grouped as (
+        partition by p.dedupe_key
+        order by case when b.source in ${[...DISCOVERY_SOURCES]} then 0 else 1 end, p.created_at, p.id
+      )
+    ),
+    target as (
+      select id, case when board_id = canonical_board then null else canonical_id end as duplicate_of
+      from ranked
+    )
+    update ${jobPostings} p
+    set duplicate_of_id = target.duplicate_of
+    from target
+    where p.id = target.id and p.duplicate_of_id is distinct from target.duplicate_of
+  `);
 }
 
 export async function upsertPostings(values: NewJobPosting[]) {
@@ -57,7 +69,7 @@ export async function upsertPostings(values: NewJobPosting[]) {
 }
 
 export async function expireMissing(input: { boardId: string; seenAt: Date }) {
-  await db
+  const expired = await db
     .update(jobPostings)
     .set({ expiredAt: input.seenAt, updatedAt: input.seenAt })
     .where(
@@ -66,7 +78,10 @@ export async function expireMissing(input: { boardId: string; seenAt: Date }) {
         isNull(jobPostings.expiredAt),
         lt(jobPostings.lastSeenAt, input.seenAt),
       ),
-    );
+    )
+    .returning({ dedupeKey: jobPostings.dedupeKey });
+
+  return expired.map((row) => row.dedupeKey);
 }
 
 export async function countActivePostings(boardId: string) {

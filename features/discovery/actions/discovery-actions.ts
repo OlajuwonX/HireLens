@@ -10,8 +10,9 @@ import {
   followBoardSchema,
   postingRefSchema,
 } from "../schemas/discovery.schema";
+import { loadAudience } from "../server/audience";
 import { unfollowBoard } from "../server/board.repository";
-import { followJobBoard } from "../server/discovery.service";
+import { followJobBoard, refreshDiscovery } from "../server/discovery.service";
 import { findPostingForUser } from "../server/feed.repository";
 import { getPostingFeed, type PostingFeedPage } from "../server/feed.service";
 import { savePostingToJobs, type SavePostingResult } from "../server/posting-save.service";
@@ -66,7 +67,7 @@ export async function loadPostingsAction(input: unknown): Promise<PostingFeedPag
 
   const { cursor, ...filters } = parsed.data;
 
-  return getPostingFeed({ userId: user.id, filters, cursor });
+  return getPostingFeed({ audience: await loadAudience(user.id), filters, cursor });
 }
 
 export async function getPostingAction(publicId: string) {
@@ -77,7 +78,10 @@ export async function getPostingAction(publicId: string) {
     return null;
   }
 
-  const posting = await findPostingForUser({ userId: user.id, publicId: parsed.data.publicId });
+  const posting = await findPostingForUser({
+    audience: await loadAudience(user.id),
+    publicId: parsed.data.publicId,
+  });
 
   return posting
     ? {
@@ -106,4 +110,13 @@ export async function savePostingAction(publicId: string): Promise<SavePostingRe
   }
 
   return result;
+}
+
+export async function refreshDiscoveryAction() {
+  await requireDatabaseUser();
+  const report = await refreshDiscovery();
+
+  revalidatePath(DISCOVERY_PATH);
+
+  return { synced: report.synced, failed: report.failed };
 }

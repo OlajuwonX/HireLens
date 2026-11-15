@@ -10,6 +10,7 @@ import {
 import { hashAnalysisInput } from "@/lib/ai/hash";
 import { JOB_MATCHING_PROMPT_VERSION } from "@/lib/ai/prompts/job-matching.prompt";
 import type { CandidateProfile } from "@/lib/db/schema";
+import { buildRoleMatcher } from "@/lib/discovery/role-match";
 import type { EligibilityProfile } from "@/lib/matching/eligibility";
 
 function toEligibility(profile: CandidateProfile | null): EligibilityProfile | null {
@@ -60,6 +61,7 @@ export async function loadCandidate(userId: string) {
   });
 
   return {
+    matcher: buildRoleMatcher(profile?.targetRoles ?? []),
     resumeText,
     eligibility,
     profileLines,

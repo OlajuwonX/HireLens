@@ -2,6 +2,14 @@ export const DISCOVERY_SOURCES = ["GREENHOUSE", "LEVER", "ASHBY"] as const;
 
 export type DiscoverySource = (typeof DISCOVERY_SOURCES)[number];
 
+export const FEED_SOURCES = ["REMOTIVE", "JOBICY", "ARBEITNOW", "HIMALAYAS", "WEWORKREMOTELY"] as const;
+
+export type FeedSource = (typeof FEED_SOURCES)[number];
+
+export type CatalogSource = DiscoverySource | FeedSource;
+
+export const FEED_TOKEN = "all";
+
 export type Arrangement = "REMOTE" | "HYBRID" | "ON_SITE" | "NOT_SPECIFIED";
 
 export type Employment =
@@ -34,10 +42,10 @@ export type BoardSnapshot = {
   postings: DiscoveredPosting[];
 };
 
-export type FetchJson = (url: string) => Promise<unknown>;
+export type FetchJson = (url: string, as?: "json" | "text") => Promise<unknown>;
 
 export type BoardAdapter = {
-  source: DiscoverySource;
+  source: CatalogSource;
   boardUrl: (token: string) => string;
   fetchBoard: (token: string, fetchJson: FetchJson) => Promise<BoardSnapshot>;
 };
