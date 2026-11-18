@@ -82,6 +82,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-local-worker",
+    label: "Local worker",
+    description: "Worker tokens for filling applications and reading Gmail",
+    keywords: ["worker", "token", "local", "gmail", "auto apply", "browser"],
+    href: "/settings/worker",
+    group: "pages",
+  },
+  {
     id: "page-settings",
     label: "Account settings",
     description: "Password, email and account",

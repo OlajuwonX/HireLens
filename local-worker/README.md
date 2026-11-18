@@ -9,7 +9,7 @@ Fills in the applications you approved in HireLens, in Chrome or Edge on your ow
 3. In this folder:
 
 ```bash
-pnpm install --ignore-workspace
+pnpm install
 cp .env.example .env
 ```
 

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const steps = [
   "Install Node.js 20 or newer and Google Chrome or Microsoft Edge.",
-  "In the HireLens folder, run: cd local-worker && pnpm install --ignore-workspace",
+  "In the HireLens folder, run: cd local-worker && pnpm install",
   "Copy .env.example to .env and paste your token and HireLens address.",
   "Run: pnpm start. A browser opens for each approved application and fills it in.",
   "Check every filled form and press submit yourself. The worker records the confirmation.",

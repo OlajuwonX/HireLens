@@ -23,24 +23,26 @@ export function TaskCard({ task }: { task: TaskView }) {
   return (
     <li className="space-y-3 rounded-card border border-border bg-surface p-3 sm:p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-meta font-semibold text-text-primary">{task.title}</p>
           <p className="truncate text-label text-text-secondary">{task.company}</p>
         </div>
-        <Badge tone="neutral">{stateLabels[task.state]}</Badge>
+        <Badge tone="neutral" className="shrink-0">
+          {stateLabels[task.state]}
+        </Badge>
       </div>
 
-      {task.stateReason ? <p className="text-meta text-text-primary">{task.stateReason}</p> : null}
+      {task.stateReason ? <p className="break-words text-meta text-text-primary">{task.stateReason}</p> : null}
 
       {task.needs.length > 0 ? (
-        <p className="text-meta text-text-secondary">
+        <p className="break-words text-meta text-text-secondary">
           <span className="font-medium text-text-primary">Needed: </span>
           {task.needs.join(", ")}
         </p>
       ) : null}
 
       {task.history.length > 0 ? (
-        <ol className="space-y-0.5 border-l border-border pl-3 text-label text-text-muted">
+        <ol className="space-y-0.5 break-words border-l border-border pl-3 text-label text-text-muted">
           {task.history.map((event, index) => (
             <li key={index}>{event}</li>
           ))}

@@ -16,7 +16,7 @@ function Points({ label, items }: { label: string; items: string[] }) {
   return items.length === 0 ? null : (
     <div className="space-y-0.5">
       <p className="font-mono text-system uppercase text-text-muted">{label}</p>
-      <ul className="list-disc space-y-0.5 pl-4 text-label text-text-secondary">
+      <ul className="list-disc space-y-0.5 break-words pl-4 text-label text-text-secondary">
         {items.map((item) => (
           <li key={item}>{item}</li>
         ))}
@@ -31,7 +31,7 @@ export function MatchCard({ match }: { match: MatchView }) {
   return (
     <li className="flex flex-col gap-3 rounded-card border border-border bg-surface p-3 sm:p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-meta font-semibold text-text-primary">{match.title}</p>
           <p className="truncate text-label text-text-secondary">
             {[match.company, match.location].filter(Boolean).join(" · ")}

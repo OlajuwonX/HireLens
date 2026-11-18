@@ -35,7 +35,7 @@ export default async function MatchesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Your matches"
-          description={`The best fits from the boards you follow, up to ${SHORTLIST_SIZE} at a time. Scores are HireLens estimates.`}
+          description={`The best fits from your discovered jobs, up to ${SHORTLIST_SIZE} at a time. Scores are HireLens estimates.`}
         />
         <MatchRunner />
       </div>
@@ -55,7 +55,7 @@ export default async function MatchesPage() {
       {shortlist.length === 0 ? (
         <EmptyState
           title="No matches yet"
-          description="Follow a few company boards, then select Find matches to score the newest roles against your resume."
+          description="Select Find matches to score the newest discovered jobs against your resume. If Discover is empty, select Check for new jobs there first."
         />
       ) : (
         <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">

@@ -2,8 +2,7 @@ import "server-only";
 
 import { and, desc, eq, ilike, isNull, lt, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { jobBoardFollows, jobBoards, jobPostings, jobs } from "@/lib/db/schema";
-import { dedupeKey } from "@/lib/discovery/normalize";
+import { applications, jobBoardFollows, jobBoards, jobPostings, jobs } from "@/lib/db/schema";
 import { likePattern } from "@/lib/search/query";
 import type { FeedCursor } from "../feed-cursor";
 import { DISCOVERY_LIMITS } from "../constants";
@@ -93,22 +92,23 @@ export async function findPostingForUser(input: { audience: Audience; publicId: 
 
 export type PostingDetail = NonNullable<Awaited<ReturnType<typeof findPostingForUser>>>;
 
-export async function hasSavedJobWithUrl(input: { userId: string; url: string }) {
-  const [row] = await db
-    .select({ id: jobs.id })
-    .from(jobs)
-    .where(and(eq(jobs.userId, input.userId), eq(jobs.sourceUrl, input.url)))
-    .limit(1);
+export type SavedJobRef = {
+  applicationPublicId: string;
+  sourceUrl: string | null;
+  company: string;
+  title: string;
+};
 
-  return Boolean(row);
-}
-
-export async function listSavedRoleKeys(userId: string) {
-  const rows = await db
-    .select({ company: jobs.company, title: jobs.title })
+export async function listSavedJobRefs(userId: string): Promise<SavedJobRef[]> {
+  return db
+    .select({
+      applicationPublicId: applications.publicId,
+      sourceUrl: jobs.sourceUrl,
+      company: jobs.company,
+      title: jobs.title,
+    })
     .from(jobs)
+    .innerJoin(applications, eq(applications.jobId, jobs.id))
     .where(eq(jobs.userId, userId))
     .limit(2_000);
-
-  return new Set(rows.map((row) => dedupeKey(row)));
 }

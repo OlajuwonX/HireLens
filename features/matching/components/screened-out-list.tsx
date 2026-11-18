@@ -13,7 +13,7 @@ export function ScreenedOutList({ matches }: { matches: MatchView[] }) {
       <ul className="mt-3 divide-y divide-border">
         {matches.map((match) => (
           <li key={match.publicId} className="space-y-0.5 py-2">
-            <p className="text-meta text-text-primary">
+            <p className="break-words text-meta text-text-primary">
               {match.title} <span className="text-text-muted">· {match.company}</span>
             </p>
             <p className="text-label text-text-secondary">

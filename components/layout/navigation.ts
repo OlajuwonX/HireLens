@@ -9,6 +9,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  LaptopMinimal,
   Inbox,
   ListChecks,
   LayoutDashboard,
@@ -87,6 +88,7 @@ export const primaryNavigation = allNavigation.filter((item) => item.ready);
 export const utilityRoutes: NavItem[] = [
   { label: "Career profile", href: "/settings/profile", Icon: IdCard, ready: true },
   { label: "Settings", href: "/settings/account", Icon: Settings, ready: true },
+  { label: "Local worker", href: "/settings/worker", Icon: LaptopMinimal, ready: true },
 ];
 
 export const adminEntry: NavItem = {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { DebouncedSearch } from "@/components/ui/debounced-search";
 import { Dropdown } from "@/components/ui/dropdown";
 import { DISCOVERY_PATH } from "../constants";
+import { useDiscoveryRefresh } from "./refresh-context";
 
 const arrangements = [
   { value: "ALL", label: "Any arrangement" },
@@ -13,7 +14,7 @@ const arrangements = [
 ];
 
 export function DiscoveryFilters({ q, arrangement }: { q: string; arrangement: string }) {
-  const router = useRouter();
+  const { replace } = useDiscoveryRefresh();
   const params = useSearchParams();
 
   const update = (key: string, value: string) => {
@@ -25,7 +26,7 @@ export function DiscoveryFilters({ q, arrangement }: { q: string; arrangement: s
       search.delete(key);
     }
 
-    router.replace(`${DISCOVERY_PATH}?${search.toString()}`);
+    replace(`${DISCOVERY_PATH}?${search.toString()}`);
   };
 
   return (

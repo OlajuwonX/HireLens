@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   findPostingForUser: vi.fn(),
-  hasSavedJobWithUrl: vi.fn(),
-  listSavedRoleKeys: vi.fn(),
+  listSavedJobRefs: vi.fn(),
   loadAudience: vi.fn(),
   listOwnedVersionOptions: vi.fn(),
   saveJobOnly: vi.fn(),
@@ -11,8 +10,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/features/discovery/server/feed.repository", () => ({
   findPostingForUser: mocks.findPostingForUser,
-  hasSavedJobWithUrl: mocks.hasSavedJobWithUrl,
-  listSavedRoleKeys: mocks.listSavedRoleKeys,
+  listSavedJobRefs: mocks.listSavedJobRefs,
 }));
 vi.mock("@/features/discovery/server/audience", () => ({ loadAudience: mocks.loadAudience }));
 vi.mock("@/features/resumes/server/resume-version.service", () => ({
@@ -46,8 +44,7 @@ const run = () => savePostingToJobs({ userId: "user-1", publicId: "p-1" });
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.findPostingForUser.mockResolvedValue(posting);
-  mocks.hasSavedJobWithUrl.mockResolvedValue(false);
-  mocks.listSavedRoleKeys.mockResolvedValue(new Set());
+  mocks.listSavedJobRefs.mockResolvedValue([]);
   mocks.loadAudience.mockResolvedValue({ userId: "user-1", roles: [], matcher: [] });
   mocks.listOwnedVersionOptions.mockResolvedValue([{ publicId: versionId }]);
   mocks.saveJobOnly.mockResolvedValue({ ok: true, value: { applicationPublicId: "a" } });
@@ -55,7 +52,7 @@ beforeEach(() => {
 
 describe("savePostingToJobs", () => {
   it("saves through the normal saved-jobs flow with the default resume", async () => {
-    expect(await run()).toEqual({ ok: true, alreadySaved: false });
+    expect(await run()).toEqual({ ok: true, alreadySaved: false, applicationPublicId: "a" });
 
     const values = mocks.saveJobOnly.mock.calls[0][0].values;
 
@@ -75,13 +72,14 @@ describe("savePostingToJobs", () => {
     await run();
 
     expect(mocks.saveJobOnly.mock.calls[0][0].values.sourceUrl).toBe("https://boards.greenhouse.io/stripe/jobs/1");
-    expect(mocks.hasSavedJobWithUrl).toHaveBeenCalledWith({ userId: "user-1", url: "https://boards.greenhouse.io/stripe/jobs/1" });
   });
 
-  it("does not save the same posting twice", async () => {
-    mocks.hasSavedJobWithUrl.mockResolvedValue(true);
+  it("does not save the same posting twice and returns the saved application", async () => {
+    mocks.listSavedJobRefs.mockResolvedValue([
+      { applicationPublicId: "saved", sourceUrl: posting.url, company: "Other", title: "Other" },
+    ]);
 
-    expect(await run()).toEqual({ ok: true, alreadySaved: true });
+    expect(await run()).toEqual({ ok: true, alreadySaved: true, applicationPublicId: "saved" });
     expect(mocks.saveJobOnly).not.toHaveBeenCalled();
   });
 
@@ -92,10 +90,12 @@ describe("savePostingToJobs", () => {
   });
 
   it("treats the same role from another source as already saved", async () => {
-    mocks.listSavedRoleKeys.mockResolvedValue(new Set(["acme|frontend engineer"]));
+    mocks.listSavedJobRefs.mockResolvedValue([
+      { applicationPublicId: "saved", sourceUrl: "https://jobicy.com/1", company: "Acme", title: "Frontend Engineer" },
+    ]);
     mocks.findPostingForUser.mockResolvedValue({ ...posting, company: "Acme, Inc.", title: "Frontend Developer" });
 
-    expect(await run()).toEqual({ ok: true, alreadySaved: true });
+    expect(await run()).toEqual({ ok: true, alreadySaved: true, applicationPublicId: "saved" });
     expect(mocks.saveJobOnly).not.toHaveBeenCalled();
   });
 

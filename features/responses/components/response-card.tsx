@@ -21,7 +21,7 @@ export function ResponseCard({
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={kindTones[kind]}>{kindLabels[kind]}</Badge>
         {row.company ? (
-          <span className="text-meta font-medium text-text-primary">
+          <span className="min-w-0 break-words text-meta font-medium text-text-primary">
             {row.company} · {row.title}
           </span>
         ) : (
@@ -30,9 +30,9 @@ export function ResponseCard({
         <span className="ml-auto font-mono text-system text-text-muted">{row.receivedAt.toLocaleDateString()}</span>
       </div>
 
-      <p className="text-meta font-medium text-text-primary">{row.subject}</p>
-      <p className="line-clamp-2 text-label text-text-secondary">{row.snippet}</p>
-      <p className="font-mono text-system text-text-muted">From {row.fromAddress}</p>
+      <p className="break-words text-meta font-medium text-text-primary">{row.subject}</p>
+      <p className="line-clamp-2 break-words text-label text-text-secondary">{row.snippet}</p>
+      <p className="break-all font-mono text-system text-text-muted">From {row.fromAddress}</p>
 
       {row.status === "NEEDS_REVIEW" ? (
         <ReviewForm publicId={row.publicId} kind={kind} applications={applications} />

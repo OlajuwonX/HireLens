@@ -21,16 +21,18 @@ export function PostingFeed({
   initialRows,
   initialCursor,
   filters,
+  version,
 }: {
   initialRows: PostingListRow[];
   initialCursor: string | null;
   filters: { q: string; arrangement: string };
+  version: string;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = useCallback((publicId: string) => setOpenId(publicId), []);
 
   const { rows, sentinelRef, loadMore, loading, failed, hasMore } = useFeed({
-    queryKey: queryKeys.discovery(filters),
+    queryKey: queryKeys.discovery({ ...filters, version }),
     firstParam: "",
     initialPage: { rows: initialRows, next: initialCursor },
     fetchPage: async (cursor: string) => {

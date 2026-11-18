@@ -29,8 +29,11 @@ export function WorkerTokenForm() {
 
   return (
     <div className="space-y-4">
+      <p className="text-meta text-text-secondary">
+        Create one token for each computer that runs the worker. Name it so you can tell them apart.
+      </p>
       <form action={action} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-        <FormField id="worker-name" label="Computer name" hint="So you can tell your tokens apart.">
+        <FormField id="worker-name" label="Computer name">
           <Input id="worker-name" name="name" maxLength={60} placeholder="My laptop" required />
         </FormField>
         <CreateButton />

@@ -36,22 +36,23 @@ export function FollowBoardForm() {
   useActionToast(state, () => setFormKey((key) => key + 1));
 
   return (
-    <form key={formKey} action={action} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
-      <FormField
-        id="follow-board"
-        label="Company job board"
-        hint={`Paste a link such as ${sourceHints.GREENHOUSE}, ${sourceHints.LEVER} or ${sourceHints.ASHBY}.`}
-      >
-        <Input id="follow-board" name="board" placeholder="https://boards.greenhouse.io/company" required />
-      </FormField>
-      <Dropdown
-        name="source"
-        label="Board source"
-        value={source}
-        onChange={setSource}
-        options={sources}
-      />
-      <FollowButton />
-    </form>
+    <div className="space-y-2">
+      <form key={formKey} action={action} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+        <FormField id="follow-board" label="Company job board">
+          <Input id="follow-board" name="board" placeholder="https://boards.greenhouse.io/company" required />
+        </FormField>
+        <Dropdown
+          name="source"
+          label="Board source"
+          value={source}
+          onChange={setSource}
+          options={sources}
+        />
+        <FollowButton />
+      </form>
+      <p className="break-words text-label text-text-muted">
+        Paste a link such as {sourceHints.GREENHOUSE}, {sourceHints.LEVER} or {sourceHints.ASHBY}.
+      </p>
+    </div>
   );
 }

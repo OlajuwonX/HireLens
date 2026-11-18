@@ -16,6 +16,11 @@ import { unfollowBoard } from "../server/board.repository";
 import { followJobBoard, refreshDiscovery } from "../server/discovery.service";
 import { findPostingForUser } from "../server/feed.repository";
 import { getPostingFeed, type PostingFeedPage } from "../server/feed.service";
+import {
+  continueWithPosting,
+  type PostingStep,
+  type PostingStepResult,
+} from "../server/posting-next-step.service";
 import { savePostingToJobs, type SavePostingResult } from "../server/posting-save.service";
 
 export type FollowFormState = { status: "idle" | "error" | "saved"; message: string };
@@ -107,6 +112,26 @@ export async function savePostingAction(publicId: string): Promise<SavePostingRe
   const result = await savePostingToJobs({ userId: user.id, publicId: parsed.data.publicId });
 
   if (result.ok && !result.alreadySaved) {
+    revalidatePath("/dashboard/jobs");
+  }
+
+  return result;
+}
+
+export async function continueWithPostingAction(
+  publicId: string,
+  step: PostingStep,
+): Promise<PostingStepResult> {
+  const user = await requireDatabaseUser();
+  const parsed = postingRefSchema.safeParse({ publicId });
+
+  if (!parsed.success || (step !== "analyze" && step !== "auto-apply")) {
+    return { ok: false, message: "That job could not be found.", saved: false };
+  }
+
+  const result = await continueWithPosting({ userId: user.id, publicId: parsed.data.publicId, step });
+
+  if (result.ok || result.saved) {
     revalidatePath("/dashboard/jobs");
   }
 

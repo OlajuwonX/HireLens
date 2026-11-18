@@ -9,14 +9,21 @@ import { loadAudience } from "./audience";
 import { cleanDescription, dedupeKey } from "@/lib/discovery/normalize";
 import {
   findPostingForUser,
-  hasSavedJobWithUrl,
-  listSavedRoleKeys,
+  listSavedJobRefs,
   type PostingDetail,
+  type SavedJobRef,
 } from "./feed.repository";
 
 export type SavePostingResult =
-  | { ok: true; alreadySaved: boolean }
+  | { ok: true; alreadySaved: boolean; applicationPublicId: string }
   | { ok: false; message: string };
+
+export function findSavedMatch(saved: SavedJobRef[], posting: PostingDetail) {
+  const url = posting.applyUrl ?? posting.url;
+  const key = dedupeKey(posting);
+
+  return saved.find((ref) => ref.sourceUrl === url || dedupeKey(ref) === key) ?? null;
+}
 
 export function toSaveValues(posting: PostingDetail, resumeVersionPublicId: string) {
   return saveAndAnalyzeSchema.safeParse({
@@ -48,13 +55,10 @@ export async function savePostingToJobs(input: {
     return { ok: false, message: "That job is no longer available." };
   }
 
-  const [savedUrl, savedRoles] = await Promise.all([
-    hasSavedJobWithUrl({ userId: input.userId, url: posting.applyUrl ?? posting.url }),
-    listSavedRoleKeys(input.userId),
-  ]);
+  const existing = findSavedMatch(await listSavedJobRefs(input.userId), posting);
 
-  if (savedUrl || savedRoles.has(dedupeKey(posting))) {
-    return { ok: true, alreadySaved: true };
+  if (existing) {
+    return { ok: true, alreadySaved: true, applicationPublicId: existing.applicationPublicId };
   }
 
   const [version] = await listOwnedVersionOptions(input.userId);
@@ -71,5 +75,7 @@ export async function savePostingToJobs(input: {
 
   const saved = await saveJobOnly({ userId: input.userId, values: values.data });
 
-  return saved.ok ? { ok: true, alreadySaved: false } : { ok: false, message: saved.message };
+  return saved.ok
+    ? { ok: true, alreadySaved: false, applicationPublicId: saved.value.applicationPublicId }
+    : { ok: false, message: saved.message };
 }
