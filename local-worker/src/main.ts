@@ -3,6 +3,7 @@ import { launchBrowser } from "./browser/launch";
 import { createPageSession } from "./browser/page-session";
 import { createClaudeWriter } from "./claude/writer";
 import { createApi } from "./communication/api";
+import { connectionProblem } from "./communication/connection";
 import { readConfig } from "./config";
 import { processTask } from "./execution/process-task";
 import { createGmailApi } from "./gmail/client";
@@ -18,8 +19,10 @@ try {
 const config = readConfig();
 const api = createApi({ baseUrl: config.HIRELENS_URL, token: config.HIRELENS_WORKER_TOKEN });
 
-if (!(await api.ping())) {
-  console.error("HireLens rejected the worker token. Create a new one in Settings > Local worker.");
+const problem = connectionProblem(await api.ping(), config.HIRELENS_URL);
+
+if (problem) {
+  console.error(problem);
   process.exit(1);
 }
 

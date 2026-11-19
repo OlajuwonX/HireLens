@@ -3,7 +3,7 @@ import type { WatchList } from "../gmail/filter";
 import type { ParsedEmail } from "../gmail/parse";
 
 export type HireLensApi = {
-  ping: () => Promise<boolean>;
+  ping: () => Promise<number>;
   claim: () => Promise<{ task: TaskPayload | null; reason?: string }>;
   heartbeat: (taskId: string) => Promise<boolean>;
   report: (result: WorkerResult) => Promise<boolean>;
@@ -31,7 +31,7 @@ export function createApi(input: {
   const post = (path: string, body: unknown) => send(path, { method: "POST", body: JSON.stringify(body) });
 
   return {
-    ping: async () => (await send("/api/worker/ping")).ok,
+    ping: async () => (await send("/api/worker/ping").catch(() => null))?.status ?? 0,
     claim: async () => {
       const response = await post("/api/worker/claim", {});
 
