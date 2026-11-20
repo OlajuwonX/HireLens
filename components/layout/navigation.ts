@@ -5,8 +5,13 @@ import {
   ArrowLeft,
   Briefcase,
   Bug,
+  Compass,
   FileText,
   HeartPulse,
+  IdCard,
+  LaptopMinimal,
+  Inbox,
+  ListChecks,
   LayoutDashboard,
   Mic,
   ScrollText,
@@ -46,6 +51,24 @@ const allNavigation: NavItem[] = [
     ready: true,
   },
   {
+    label: "Discover",
+    href: "/dashboard/discover",
+    Icon: Compass,
+    ready: true,
+  },
+  {
+    label: "Auto Apply",
+    href: "/dashboard/auto-apply",
+    Icon: ListChecks,
+    ready: true,
+  },
+  {
+    label: "Responses",
+    href: "/dashboard/responses",
+    Icon: Inbox,
+    ready: true,
+  },
+  {
     label: "AI Documents",
     href: "/dashboard/documents",
     Icon: Sparkles,
@@ -63,7 +86,9 @@ const allNavigation: NavItem[] = [
 export const primaryNavigation = allNavigation.filter((item) => item.ready);
 
 export const utilityRoutes: NavItem[] = [
+  { label: "Career profile", href: "/settings/profile", Icon: IdCard, ready: true },
   { label: "Settings", href: "/settings/account", Icon: Settings, ready: true },
+  { label: "Local worker", href: "/settings/worker", Icon: LaptopMinimal, ready: true },
 ];
 
 export const adminEntry: NavItem = {

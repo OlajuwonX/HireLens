@@ -84,6 +84,7 @@ const VALID_RESULT = {
     certifications: [],
     additionalSections: [],
   },
+  traceability: [],
   bulletRewrites: [],
   professionalSummary: "Backend engineer.",
   coverLetter: "Dear hiring team,",
@@ -125,6 +126,9 @@ function provider(analyze: () => Promise<unknown>) {
   return {
     analyzeApplication: analyze,
     extractJobPosting: vi.fn(),
+    reviewResume: vi.fn(),
+    matchJobs: vi.fn(),
+    prepareInterview: vi.fn(),
   } as never;
 }
 
@@ -177,7 +181,7 @@ describe("a successful analysis", () => {
   it("consumes exactly one usage, after the analysis is persisted", async () => {
     const result = await run({
       analyze: async () => ({
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         rawResponse: JSON.stringify(VALID_RESULT),
         durationMs: 12,
@@ -201,7 +205,7 @@ describe("when every provider fails", () => {
       analyze: async () => {
         throw new AiProviderChainError("All configured AI providers failed", [
           {
-            provider: "openrouter",
+            provider: "gemini",
             model: "primary",
             attempt: 1,
             status: 503,
@@ -227,7 +231,7 @@ describe("when every provider fails", () => {
     await run({
       analyze: async () => {
         throw new AiProviderError("daily quota reached", {
-          provider: "openrouter",
+          provider: "gemini",
           model: "primary",
           status: 429,
         });
@@ -235,7 +239,7 @@ describe("when every provider fails", () => {
     });
 
     expect(markAnalysisFailed.mock.calls[0][0].failureReason).toContain(
-      "provider=openrouter",
+      "provider=gemini",
     );
   });
 });
@@ -246,7 +250,7 @@ describe("when the database fails after a good model response", () => {
 
     const result = await run({
       analyze: async () => ({
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         rawResponse: JSON.stringify(VALID_RESULT),
         durationMs: 12,
@@ -269,7 +273,7 @@ describe("when the model returns something the schema rejects", () => {
   it("fails the analysis instead of storing a broken result", async () => {
     const result = await run({
       analyze: async () => ({
-        provider: "openrouter",
+        provider: "gemini",
         model: "primary",
         rawResponse: JSON.stringify({ scoring: { overallScore: 10 } }),
         durationMs: 12,
@@ -294,7 +298,7 @@ describe("resume text", () => {
     });
 
     const analyze = vi.fn().mockResolvedValue({
-      provider: "openrouter",
+      provider: "gemini",
       model: "primary",
       rawResponse: JSON.stringify(VALID_RESULT),
       durationMs: 12,

@@ -5,9 +5,16 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
-import { CircleHelp, LogOut, Settings } from "lucide-react";
+import { CircleHelp, IdCard, LaptopMinimal, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+
+const menuLinks = [
+  { href: "/settings/profile", label: "Career profile", Icon: IdCard },
+  { href: "/settings/account", label: "Settings", Icon: Settings },
+  { href: "/settings/worker", label: "Local worker", Icon: LaptopMinimal },
+  { href: "/dashboard/help", label: "Help & report a problem", Icon: CircleHelp },
+];
 
 function initialsFrom(name: string | null, email: string | null) {
   const source = name?.trim() || email?.trim() || "";
@@ -100,31 +107,21 @@ export function ProfileMenu({
             ) : null}
           </div>
 
-          <Link
-            href="/settings/account"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              closeMobileNav();
-            }}
-            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
-          >
-            <Settings aria-hidden="true" className="size-4" />
-            Settings
-          </Link>
-
-          <Link
-            href="/dashboard/help"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              closeMobileNav();
-            }}
-            className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
-          >
-            <CircleHelp aria-hidden="true" className="size-4" />
-            Help &amp; report a problem
-          </Link>
+          {menuLinks.map(({ href, label, Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                closeMobileNav();
+              }}
+              className="flex items-center gap-2.5 rounded-control px-3 py-2 text-meta text-text-secondary hover:bg-surface-secondary hover:text-text-primary border-b border-border"
+            >
+              <Icon aria-hidden="true" className="size-4" />
+              {label}
+            </Link>
+          ))}
 
           <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2.5">
             <p className="text-meta font-medium text-text-secondary">Themes</p>

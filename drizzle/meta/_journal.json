@@ -204,6 +204,62 @@
       "when": 1791094817713,
       "tag": "0028_brave_toad",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794432042188,
+      "tag": "0029_candidate_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794434589464,
+      "tag": "0030_resume_reviews",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794437198497,
+      "tag": "0031_job_discovery",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794448049070,
+      "tag": "0032_job_matching",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794471434581,
+      "tag": "0033_application_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794508828014,
+      "tag": "0034_worker_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1794511618004,
+      "tag": "0035_response_intelligence",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794699547715,
+      "tag": "0036_automatic_discovery",
+      "breakpoints": true
     }
   ]
 }

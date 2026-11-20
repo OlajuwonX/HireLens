@@ -21,10 +21,13 @@ const sourceFiles = roots.flatMap((root) => walk(root));
 
 const ALLOWED_CALLERS = [
   "features/analyses/server/analysis.service.ts",
+  "features/analyses/server/review.service.ts",
   "features/applications/server/job-extraction.service.ts",
+  "features/matching/server/matching.service.ts",
+  "features/responses/server/prep.service.ts",
 ];
 
-describe("only the analysis and extraction services may reach the AI provider", () => {
+describe("only the analysis, review, matching and extraction services may reach the AI provider", () => {
   const callers = sourceFiles.filter((file) => {
     if (file.replaceAll("\\", "/").startsWith("lib/ai/")) {
       return false;

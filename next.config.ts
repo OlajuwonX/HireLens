@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingIncludes: {
     "/dashboard/documents/**": ["./public/fonts/**"],
+    "/api/worker/**": ["./public/fonts/**"],
   },
   outputFileTracingExcludes: {
     "**": [
@@ -35,6 +36,7 @@ const nextConfig: NextConfig = {
       "./.next/cache/**",
       "./tests/**",
       "./.claude/**",
+      "./local-worker/**",
     ],
   },
   eslint: {

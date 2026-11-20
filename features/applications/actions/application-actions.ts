@@ -21,6 +21,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { z } from "zod";
 import type { ApplicationFormState } from "./application-form-state";
+import type { OptimizationOutcome } from "@/features/analyses/server/optimization-gate";
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -219,7 +220,15 @@ export async function analyzeApplicationAction(formData: FormData) {
 
   revalidatePath("/dashboard/jobs");
   revalidatePath("/dashboard");
-  redirect(`/dashboard/jobs?open=${result.value.publicId}`);
+  redirect(
+    `/dashboard/jobs?open=${result.value.publicId}${optimizationFlag(result.value.optimization)}`,
+  );
+}
+
+function optimizationFlag(outcome: OptimizationOutcome) {
+  return outcome === "ALREADY_OPTIMIZED" || outcome === "KEPT_PREVIOUS"
+    ? `&rev=${outcome.toLowerCase()}`
+    : "";
 }
 
 export async function analyzeApplicationFormAction(

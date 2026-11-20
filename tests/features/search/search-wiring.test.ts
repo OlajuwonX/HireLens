@@ -136,3 +136,17 @@ describe("search route", () => {
     expect(repository.match(/userId, input\.userId/g)?.length).toBe(3);
   });
 });
+
+describe("the palette is lazy-loaded", () => {
+  const provider = read("features/search/components/search-provider.tsx");
+
+  it("imports the palette through next/dynamic, not statically", () => {
+    expect(provider).toContain('import("./search-palette")');
+    expect(provider).not.toContain('from "./search-palette"');
+  });
+
+  it("only mounts it after the first open, then keeps it for the close animation", () => {
+    expect(provider).toContain("useOnceTrue(open)");
+    expect(provider).toContain("{paletteRequested ? (");
+  });
+});

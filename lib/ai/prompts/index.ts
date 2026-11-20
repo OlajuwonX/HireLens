@@ -29,3 +29,14 @@ export { REASON_TO_JOIN_PROMPT } from "./reason-to-join.prompt";
 export { REFINEMENT_PASS_PROMPT } from "./refinement-pass.prompt";
 export { REQUIREMENT_COVERAGE_PROMPT } from "./requirement-coverage.prompt";
 export { SCORING_PROMPT } from "./scoring.prompt";
+export { ACHIEVEMENT_WRITING_PROMPT } from "./achievement-writing.prompt";
+export {
+  RESUME_REVIEW_PROMPT,
+  RESUME_REVIEW_PROMPT_VERSION,
+} from "./resume-review.prompt";
+export { TRACEABILITY_PROMPT } from "./traceability.prompt";
+export {
+  JOB_MATCHING_PROMPT,
+  JOB_MATCHING_PROMPT_VERSION,
+} from "./job-matching.prompt";
+export { INTERVIEW_PREP_PROMPT } from "./interview-prep.prompt";

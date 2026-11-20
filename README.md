@@ -45,3 +45,7 @@ pnpm start
 - Gemini is called only from server code.
 
 Detailed implementation and interview notes live in `.claude/`.
+
+## HireLens 2.0
+
+The plan for job discovery, the REV resume engine, application automation and response monitoring lives in [.claude/docs/v2](.claude/docs/v2/README.md).

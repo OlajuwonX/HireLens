@@ -1,4 +1,4 @@
-export type AIProviderName = "gemini" | "openrouter" | "mock";
+export type AIProviderName = "gemini" | "mock";
 
 export type AIProviderResult = {
   provider: AIProviderName;
@@ -43,6 +43,7 @@ export type ApplicationIntelligenceInput = {
     notes: string | null;
   }[];
   previousPass?: PreviousOptimizationInput | null;
+  sourceEvidence?: string | null;
 };
 
 export type InterviewPoolInput = {
@@ -63,4 +64,7 @@ export interface ApplicationIntelligenceProvider {
   generateInterviewPool(
     input: InterviewPoolInput,
   ): Promise<AIProviderResult>;
+  reviewResume(input: { content: string }): Promise<AIProviderResult>;
+  matchJobs(input: { content: string }): Promise<AIProviderResult>;
+  prepareInterview(input: { content: string }): Promise<AIProviderResult>;
 }

@@ -9,13 +9,16 @@ import {
 } from "./optimization-plan.schema";
 import { recommendationSchema } from "./recommendations.schema";
 import { requirementMatchSchema } from "./requirements.schema";
+import { resumeValidationSchema } from "./resume-validation.schema";
 import { scoringSchema } from "./scoring.schema";
+import { traceEntrySchema } from "./traceability.schema";
 
 export const applicationIntelligenceSchema = z.object({
   requirementMatches: z.array(requirementMatchSchema),
   keywordAnalysis: keywordAnalysisSchema,
   optimizationPlan: optimizationPlanSchema,
   improvedResume: improvedResumeSchema,
+  traceability: z.array(traceEntrySchema),
   bulletRewrites: z.array(bulletRewriteSchema),
   professionalSummary: z.string().min(1),
   coverLetter: z.string().min(1),
@@ -62,6 +65,8 @@ export const storedApplicationIntelligenceSchema = z.object({
   requirementMatches: z.array(requirementMatchSchema).catch([]),
   optimizationPlan: optimizationPlanSchema.catch(emptyOptimizationPlan),
   improvedResume: improvedResumeSchema.catch(emptyImprovedResume),
+  traceability: z.array(traceEntrySchema).catch([]),
+  validation: resumeValidationSchema.nullable().catch(null),
   bulletRewrites: z.array(bulletRewriteSchema).catch([]),
   professionalSummary: z.string().catch(""),
   coverLetter: z.string().catch(""),

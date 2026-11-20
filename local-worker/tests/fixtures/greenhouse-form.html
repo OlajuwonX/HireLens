@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head><title>Frontend Engineer - Acme</title></head>
+  <body>
+    <h1>Frontend Engineer</h1>
+    <form id="application_form" method="post" action="/acme/jobs/1/submit">
+      <label for="first_name">First Name *</label>
+      <input id="first_name" name="first_name" type="text" required />
+
+      <label for="last_name">Last Name *</label>
+      <input id="last_name" name="last_name" type="text" required />
+
+      <label for="email">Email *</label>
+      <input id="email" name="email" type="email" required />
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="tel" />
+
+      <label for="resume">Resume/CV *</label>
+      <input id="resume" name="resume" type="file" required />
+
+      <label for="linkedin">LinkedIn Profile</label>
+      <input id="linkedin" name="linkedin" type="text" />
+
+      <label for="authorized">Are you legally authorized to work in Nigeria? *</label>
+      <select id="authorized" name="authorized" required>
+        <option value="">Select...</option>
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+      </select>
+
+      <fieldset>
+        <legend>Will you now or in the future require visa sponsorship? *</legend>
+        <input type="radio" id="sponsor_yes" name="sponsorship" value="yes" required />
+        <label for="sponsor_yes">Yes</label>
+        <input type="radio" id="sponsor_no" name="sponsorship" value="no" />
+        <label for="sponsor_no">No</label>
+      </fieldset>
+
+      <label for="why">Why do you want to work at Acme? *</label>
+      <textarea id="why" name="why" required></textarea>
+
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender">
+        <option value="">Decline to answer</option>
+        <option value="f">Female</option>
+        <option value="m">Male</option>
+      </select>
+
+      <button type="submit">Submit application</button>
+    </form>
+  </body>
+</html>

@@ -177,10 +177,6 @@ export default function PrivacyPage() {
             for analysis.
           </li>
           <li>
-            <strong>OpenRouter</strong> &mdash; a fallback route to AI models
-            when the primary provider is unavailable.
-          </li>
-          <li>
             <strong>Backblaze B2</strong> &mdash; storage for resume and
             document files.
           </li>

@@ -128,6 +128,7 @@ function intelligence(bullets: string[]) {
       droppedEvidence: [],
     },
     improvedResume: resumeWith(bullets),
+    traceability: [],
     bulletRewrites: [],
     professionalSummary: "Frontend engineer with 5+ years of React delivery.",
     coverLetter: "Dear hiring team,",
@@ -173,7 +174,7 @@ function run(options: {
   returns: ReturnType<typeof intelligence>;
 }) {
   const analyze = vi.fn(async (input: ApplicationIntelligenceInput) => ({
-    provider: "openrouter" as const,
+    provider: "gemini" as const,
     model: "primary",
     rawResponse: JSON.stringify(options.returns),
     durationMs: 12,
@@ -189,6 +190,9 @@ function run(options: {
     provider: {
       analyzeApplication: analyze,
       extractJobPosting: vi.fn(),
+      reviewResume: vi.fn(),
+      matchJobs: vi.fn(),
+      prepareInterview: vi.fn(),
     } as never,
     storageProvider: {
       readFile: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),

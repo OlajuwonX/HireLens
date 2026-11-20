@@ -16,6 +16,7 @@ import { getOnboardingProgress } from "@/features/onboarding/server/onboarding.s
 import { SearchProvider } from "@/features/search/components/search-provider";
 import { SearchTrigger } from "@/features/search/components/search-trigger";
 import { buildCommands } from "@/features/search/registry";
+import { QueryProvider } from "@/lib/query/query-provider";
 
 export default async function DashboardLayout({
   children,
@@ -35,31 +36,33 @@ export default async function DashboardLayout({
   const isAdmin = realRecord?.role === "ADMIN";
 
   return (
-    <SearchProvider
-      commands={buildCommands({ isAdmin })}
-      recentsUserId={impersonation ? null : realUser.id}
-    >
-      <AppShell
-        isAdmin={isAdmin}
-        impersonation={impersonation}
-        headerSlot={
-          <div className="flex items-center gap-1">
-            <SearchTrigger />
-            <NotificationBell unreadCount={unreadCount} />
-          </div>
-        }
-        sidebarFooter={
-          <ProfileMenu
-            name={user.name}
-            email={user.email}
-            lastLoginAt={account.lastLoginAt}
-            signOutSlot={<SignOutButton />}
-          />
-        }
+    <QueryProvider>
+      <SearchProvider
+        commands={buildCommands({ isAdmin })}
+        recentsUserId={impersonation ? null : realUser.id}
       >
-        <PageContainer>{children}</PageContainer>
-        {onboarding ? <OnboardingTour progress={onboarding} /> : null}
-      </AppShell>
-    </SearchProvider>
+        <AppShell
+          isAdmin={isAdmin}
+          impersonation={impersonation}
+          headerSlot={
+            <div className="flex items-center gap-1">
+              <SearchTrigger />
+              <NotificationBell unreadCount={unreadCount} />
+            </div>
+          }
+          sidebarFooter={
+            <ProfileMenu
+              name={user.name}
+              email={user.email}
+              lastLoginAt={account.lastLoginAt}
+              signOutSlot={<SignOutButton />}
+            />
+          }
+        >
+          <PageContainer>{children}</PageContainer>
+          {onboarding ? <OnboardingTour progress={onboarding} /> : null}
+        </AppShell>
+      </SearchProvider>
+    </QueryProvider>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "job_boards" ADD COLUMN "system" boolean DEFAULT false NOT NULL;

@@ -136,6 +136,22 @@ export async function findApplicationRowForUser(input: {
   return row ?? null;
 }
 
+export async function findApplicationRowByIdForUser(input: {
+  userId: string;
+  applicationId: string;
+}): Promise<ApplicationRow | null> {
+  const [row] = await baseQuery()
+    .where(
+      and(
+        eq(applications.userId, input.userId),
+        eq(applications.id, input.applicationId),
+      ),
+    )
+    .limit(1);
+
+  return row ?? null;
+}
+
 export async function listApplicationsForUser(input: {
   userId: string;
   filters: ApplicationFilters;
@@ -330,6 +346,42 @@ export async function attachAnalysisToApplication(input: {
       applicationId: input.applicationId,
       title: "Analysis completed",
     });
+  });
+}
+
+export async function promoteSavedApplication(input: {
+  userId: string;
+  applicationId: string;
+}) {
+  await db
+    .update(applications)
+    .set({ saveOnly: false, updatedAt: new Date() })
+    .where(
+      and(
+        eq(applications.userId, input.userId),
+        eq(applications.id, input.applicationId),
+      ),
+    );
+}
+
+export async function recordApplicationActivity(input: {
+  userId: string;
+  applicationId: string;
+  title: string;
+  description?: string | null;
+}) {
+  await db.transaction(async (tx) => {
+    await tx.insert(applicationActivities).values({
+      userId: input.userId,
+      applicationId: input.applicationId,
+      title: input.title,
+      description: input.description ?? null,
+    });
+
+    await tx
+      .update(applications)
+      .set({ lastActivityAt: new Date() })
+      .where(and(eq(applications.userId, input.userId), eq(applications.id, input.applicationId)));
   });
 }
 

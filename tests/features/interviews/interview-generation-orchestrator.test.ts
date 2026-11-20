@@ -142,7 +142,7 @@ describe("ensureInterviewPool", () => {
       ok: true,
       poolId: "pool-1",
       questionCount: 30,
-      provider: "openrouter",
+      provider: "gemini",
       model: "m",
     });
 
@@ -158,7 +158,7 @@ describe("ensureInterviewPool", () => {
         action: "INTERVIEW_POOL_GENERATION",
         reservationId: "res-1",
         inputHash: "fp-1",
-        provider: "openrouter",
+        provider: "gemini",
       }),
     );
     expect(failUsage).not.toHaveBeenCalled();

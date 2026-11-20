@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { FactCheckList } from "@/features/analyses/components/fact-check-list";
 import { KeywordGapPanel } from "@/features/analyses/components/keyword-gap-panel";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
+import { ResumeReviewPanel } from "@/features/analyses/components/resume-review-panel";
 import {
   AI_VIEWS,
   aiViewLabels,
@@ -16,6 +18,7 @@ import { ImprovedResumePanel } from "./improved-resume-panel";
 function panelFor(
   view: AiView,
   result: StoredApplicationIntelligence,
+  applicationPublicId: string,
 ): ReactNode {
   switch (view) {
     case "RECOMMENDATIONS":
@@ -23,7 +26,13 @@ function panelFor(
     case "KEYWORD_ANALYSIS":
       return <KeywordGapPanel analysis={result.keywordAnalysis} />;
     case "IMPROVED_RESUME":
-      return <ImprovedResumePanel resume={result.improvedResume} />;
+      return (
+        <div className="space-y-5">
+          <ImprovedResumePanel resume={result.improvedResume} />
+          <FactCheckList validation={result.validation} />
+          <ResumeReviewPanel applicationPublicId={applicationPublicId} />
+        </div>
+      );
     case "BULLET_REWRITE":
       return <BulletRewritePanel items={result.bulletRewrites} />;
     default:
@@ -52,7 +61,7 @@ function AiResultCard({
       view={view}
       savedDocumentId={savedDocumentId}
     >
-      {panelFor(view, result)}
+      {panelFor(view, result, applicationPublicId)}
     </AiDocumentModal>
   );
 }

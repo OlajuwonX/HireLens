@@ -1,20 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { FeedStatus } from "@/components/ui/feed-status";
 import { JobCardSkeleton } from "@/components/ui/skeletons";
+import { queryKeys } from "@/lib/query/query-keys";
+import { useFeed } from "@/lib/query/use-feed";
 import type { ApplicationListRow } from "../server/application.repository";
-import { shiftOffset } from "../feed-window";
-import {
-  loadMoreApplicationsAction,
-  type ApplicationFeedPage,
-} from "../actions/application-feed-actions";
+import { APPLICATION_PAGE_SIZE } from "../constants";
+import { createOffsetFetcher } from "../feed-window";
+import { loadMoreApplicationsAction } from "../actions/application-feed-actions";
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { JobScoreSlot } from "./job-score-slot";
 import { SavedJobCard } from "./saved-job-card";
 
-const PREFETCH_MARGIN = "600px";
 const SKELETON_COUNT = 4;
 
 function shortDate(value: Date | null) {
@@ -45,70 +44,22 @@ export function SavedJobFeed({
   filters: Record<string, string>;
   query: string;
 }) {
-  const [rows, setRows] = useState(initialRows);
-  const [offset, setOffset] = useState(initialNextOffset);
-  const [loading, setLoading] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const inFlight = useRef(false);
+  const shift = useRef(0);
 
   const shiftWindow = useCallback((delta: number) => {
-    setOffset((current) => shiftOffset(current, delta));
+    shift.current += delta;
   }, []);
 
-  const loadMore = useCallback(async () => {
-    if (inFlight.current || offset === null) {
-      return;
-    }
-
-    inFlight.current = true;
-    setLoading(true);
-    setFailed(false);
-
-    try {
-      const page: ApplicationFeedPage = await loadMoreApplicationsAction({
-        offset,
-        filters,
-      });
-
-      setRows((current) => {
-        const seen = new Set(current.map((row) => row.publicId));
-
-        return [
-          ...current,
-          ...page.rows.filter((row) => !seen.has(row.publicId)),
-        ];
-      });
-      setOffset(page.nextOffset);
-    } catch {
-      setFailed(true);
-    } finally {
-      inFlight.current = false;
-      setLoading(false);
-    }
-  }, [offset, filters]);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-
-    if (!sentinel || offset === null || failed) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          void loadMore();
-        }
-      },
-      { rootMargin: `${PREFETCH_MARGIN} 0px` },
-    );
-
-    observer.observe(sentinel);
-
-    return () => observer.disconnect();
-  }, [offset, failed, loadMore]);
+  const { rows, sentinelRef, loadMore, loading, failed, hasMore } = useFeed({
+    queryKey: queryKeys.savedJobs(filters),
+    firstParam: 0,
+    initialPage: { rows: initialRows, next: initialNextOffset },
+    fetchPage: createOffsetFetcher({
+      pageSize: APPLICATION_PAGE_SIZE,
+      readShift: () => shift.current,
+      load: (offset) => loadMoreApplicationsAction({ offset, filters }),
+    }),
+  });
 
   return (
     <div className="space-y-4">
@@ -169,28 +120,15 @@ export function SavedJobFeed({
           : null}
       </ul>
 
-      <div ref={sentinelRef} aria-hidden className="h-px" />
-
-      <p aria-live="polite" className="sr-only">
-        {loading ? "Loading more saved jobs" : ""}
-      </p>
-
-      {failed ? (
-        <div className="flex flex-col items-center gap-2 py-2">
-          <p className="text-meta text-text-secondary">
-            We could not load more saved jobs.
-          </p>
-          <Button type="button" variant="outline" onClick={() => loadMore()}>
-            Try again
-          </Button>
-        </div>
-      ) : null}
-
-      {offset === null && !loading && rows.length > 0 ? (
-        <p className="py-2 text-center font-mono text-system text-text-muted">
-          End of your saved jobs
-        </p>
-      ) : null}
+      <FeedStatus
+        sentinelRef={sentinelRef}
+        noun="saved jobs"
+        loading={loading}
+        failed={failed}
+        hasMore={hasMore}
+        isEmpty={rows.length === 0}
+        onRetry={loadMore}
+      />
     </div>
   );
 }

@@ -32,7 +32,7 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
             `Option D for question ${index}`,
           ],
           correctOption: index % 4,
-          explanation: `Mock explanation ${index}: option ${index % 4} is correct here. Set GEMINI_API_KEY or OPENROUTER_API_KEY for real content.`,
+          explanation: `Mock explanation ${index}: option ${index % 4} is correct here. Set GEMINI_API_KEY for real content.`,
           difficulty,
           topic: input.topics[index % Math.max(1, input.topics.length)] ?? focus,
         });
@@ -179,6 +179,7 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
           certifications: [],
           additionalSections: [],
         },
+        traceability: [],
         bulletRewrites: [
           {
             original: "Managed projects.",
@@ -194,6 +195,64 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
           body: "Mock application email body. Configure GEMINI_API_KEY for real output.",
         },
         followUpMessage: `Mock follow-up message about the ${title} application.`,
+      }),
+    };
+  }
+
+  async reviewResume(): Promise<AIProviderResult> {
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        verdict: "APPROVED",
+        scores: {
+          factualAccuracy: 100,
+          requirementCoverage: 70,
+          keywordRelevance: 70,
+          bulletQuality: 70,
+          readability: 80,
+          atsStructure: 80,
+        },
+        issues: [],
+        summary: "Mock review. Configure GEMINI_API_KEY for a real independent review.",
+      }),
+    };
+  }
+
+  async matchJobs(input: { content: string }): Promise<AIProviderResult> {
+    const refs = [...input.content.matchAll(/<job ref="([^"]+)">/g)].map((match) => match[1]);
+
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        matches: refs.map((ref) => ({
+          ref,
+          score: 60,
+          fit: "STRETCH",
+          strengths: ["Mock strength"],
+          gaps: ["Configure GEMINI_API_KEY for real matching"],
+          summary: "Mock match without a real AI provider.",
+        })),
+      }),
+    };
+  }
+
+  async prepareInterview(): Promise<AIProviderResult> {
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({
+        summary: "Mock interview preparation. Configure GEMINI_API_KEY for a real brief.",
+        focusAreas: [{ topic: "Role fundamentals", why: "Mock focus area." }],
+        questions: [{ question: "Walk me through a recent project.", type: "BEHAVIOURAL", answerOutline: "Situation, action, result.", evidence: "Your most recent role." }],
+        gapsToPrepare: [],
+        revisionPlan: [{ day: 1, tasks: ["Review the job description."] }],
+        questionsToAsk: ["What does success look like in the first 90 days?"],
+        replyDraft: "Thank you for the invitation. I am available [your availability].",
       }),
     };
   }

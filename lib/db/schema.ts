@@ -107,6 +107,9 @@ export const usageAction = pgEnum("usage_action", [
   "BULLET_REWRITE",
   "FOLLOW_UP_MESSAGE",
   "INTERVIEW_POOL_GENERATION",
+  "RESUME_REVIEW",
+  "JOB_MATCHING",
+  "INTERVIEW_PREP",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -907,6 +910,320 @@ export const interviewAttempts = pgTable(
   ],
 );
 
+export const candidateProfiles = pgTable(
+  "candidate_profiles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    headline: text("headline"),
+    seniority: text("seniority"),
+    yearsExperience: integer("years_experience"),
+    currentLocation: text("current_location"),
+    targetRoles: text("target_roles").array().notNull().default(sql`'{}'::text[]`),
+    targetLocations: text("target_locations")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    workArrangements: workArrangement("work_arrangements")
+      .array()
+      .notNull()
+      .default(sql`'{}'::work_arrangement[]`),
+    authorizedCountries: text("authorized_countries")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    requiresSponsorship: boolean("requires_sponsorship"),
+    willingToRelocate: boolean("willing_to_relocate"),
+    salaryMin: integer("salary_min"),
+    salaryCurrency: text("salary_currency"),
+    noticePeriodWeeks: integer("notice_period_weeks"),
+    phone: text("phone"),
+    linkedinUrl: text("linkedin_url"),
+    githubUrl: text("github_url"),
+    portfolioUrl: text("portfolio_url"),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("candidate_profiles_user_idx").on(table.userId)],
+);
+
+export const candidateAnswers = pgTable(
+  "candidate_answers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    questionKey: text("question_key").notNull(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("candidate_answers_public_id_idx").on(table.publicId),
+    uniqueIndex("candidate_answers_user_question_idx").on(
+      table.userId,
+      table.questionKey,
+    ),
+    index("candidate_answers_user_updated_idx").on(
+      table.userId,
+      table.updatedAt.desc(),
+    ),
+  ],
+);
+
+export const resumeReviews = pgTable(
+  "resume_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => applicationAnalyses.id, { onDelete: "cascade" }),
+    inputHash: text("input_hash").notNull(),
+    verdict: text("verdict").notNull(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    promptVersion: text("prompt_version").notNull(),
+    resultJson: jsonb("result_json").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("resume_reviews_user_input_hash_idx").on(
+      table.userId,
+      table.inputHash,
+    ),
+    index("resume_reviews_analysis_created_idx").on(
+      table.analysisId,
+      table.createdAt.desc(),
+    ),
+  ],
+);
+
+export const jobBoards = pgTable(
+  "job_boards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    source: text("source").notNull(),
+    token: text("token").notNull(),
+    companyName: text("company_name").notNull(),
+    system: boolean("system").notNull().default(false),
+    postingCount: integer("posting_count").notNull().default(0),
+    lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_boards_public_id_idx").on(table.publicId),
+    uniqueIndex("job_boards_source_token_idx").on(table.source, table.token),
+    index("job_boards_last_fetched_idx").on(table.lastFetchedAt),
+  ],
+);
+
+export const jobBoardFollows = pgTable(
+  "job_board_follows",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    boardId: uuid("board_id")
+      .notNull()
+      .references(() => jobBoards.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_board_follows_user_board_idx").on(table.userId, table.boardId),
+    index("job_board_follows_board_idx").on(table.boardId),
+  ],
+);
+
+export const jobPostings = pgTable(
+  "job_postings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    boardId: uuid("board_id")
+      .notNull()
+      .references(() => jobBoards.id, { onDelete: "cascade" }),
+    sourceId: text("source_id").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    duplicateOfId: uuid("duplicate_of_id"),
+    title: text("title").notNull(),
+    company: text("company").notNull(),
+    location: text("location"),
+    workArrangement: workArrangement("work_arrangement")
+      .notNull()
+      .default("NOT_SPECIFIED"),
+    employmentType: employmentType("employment_type")
+      .notNull()
+      .default("NOT_SPECIFIED"),
+    salaryMin: integer("salary_min"),
+    salaryMax: integer("salary_max"),
+    currency: text("currency"),
+    description: text("description").notNull(),
+    url: text("url").notNull(),
+    applyUrl: text("apply_url"),
+    postedAt: timestamp("posted_at", { withTimezone: true }),
+    sortAt: timestamp("sort_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    expiredAt: timestamp("expired_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_postings_public_id_idx").on(table.publicId),
+    uniqueIndex("job_postings_board_source_idx").on(table.boardId, table.sourceId),
+    index("job_postings_dedupe_idx").on(table.dedupeKey),
+    index("job_postings_board_feed_idx").on(
+      table.boardId,
+      table.expiredAt,
+      table.sortAt.desc(),
+    ),
+    index("job_postings_expired_idx").on(table.expiredAt),
+  ],
+);
+
+export const jobMatches = pgTable(
+  "job_matches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    postingId: uuid("posting_id")
+      .notNull()
+      .references(() => jobPostings.id, { onDelete: "cascade" }),
+    inputHash: text("input_hash").notNull(),
+    verdict: text("verdict").notNull(),
+    reasons: jsonb("reasons").notNull().default(sql`'[]'::jsonb`),
+    score: integer("score"),
+    rank: integer("rank"),
+    fit: text("fit"),
+    insight: jsonb("insight"),
+    scoredAt: timestamp("scored_at", { withTimezone: true }),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("job_matches_public_id_idx").on(table.publicId),
+    uniqueIndex("job_matches_user_posting_idx").on(table.userId, table.postingId),
+    index("job_matches_user_rank_idx").on(table.userId, table.rank.desc()),
+    index("job_matches_posting_idx").on(table.postingId),
+  ],
+);
+
+export const applicationTasks = pgTable(
+  "application_tasks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    applicationId: uuid("application_id")
+      .notNull()
+      .references(() => applications.id, { onDelete: "cascade" }),
+    state: text("state").notNull().default("QUALIFIED"),
+    stateReason: text("state_reason"),
+    needs: jsonb("needs").notNull().default(sql`'[]'::jsonb`),
+    platform: text("platform"),
+    roleKey: text("role_key").notNull(),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    confirmation: jsonb("confirmation"),
+    leaseOwner: text("lease_owner"),
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("application_tasks_public_id_idx").on(table.publicId),
+    uniqueIndex("application_tasks_application_idx").on(table.applicationId),
+    index("application_tasks_user_state_idx").on(table.userId, table.state),
+    index("application_tasks_user_role_idx").on(table.userId, table.roleKey),
+    index("application_tasks_user_submitted_idx").on(table.userId, table.submittedAt),
+  ],
+);
+
+export const applicationTaskEvents = pgTable(
+  "application_task_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    taskId: uuid("task_id")
+      .notNull()
+      .references(() => applicationTasks.id, { onDelete: "cascade" }),
+    fromState: text("from_state"),
+    toState: text("to_state").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("application_task_events_task_created_idx").on(table.taskId, table.createdAt)],
+);
+
+export const workerTokens = pgTable(
+  "worker_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("worker_tokens_public_id_idx").on(table.publicId),
+    uniqueIndex("worker_tokens_hash_idx").on(table.tokenHash),
+    index("worker_tokens_user_idx").on(table.userId),
+  ],
+);
+
+export const emailEvents = pgTable(
+  "email_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    messageId: text("message_id").notNull(),
+    threadId: text("thread_id"),
+    fromAddress: text("from_address").notNull(),
+    subject: text("subject").notNull(),
+    snippet: text("snippet").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull(),
+    kind: text("kind").notNull(),
+    confidence: integer("confidence").notNull(),
+    status: text("status").notNull(),
+    applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
+    matchScore: integer("match_score"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("email_events_public_id_idx").on(table.publicId),
+    uniqueIndex("email_events_user_message_idx").on(table.userId, table.messageId),
+    index("email_events_user_received_idx").on(table.userId, table.receivedAt.desc()),
+    index("email_events_user_status_idx").on(table.userId, table.status),
+  ],
+);
+
+export const interviewPreps = pgTable(
+  "interview_preps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    publicId: uuid("public_id").notNull().defaultRandom(),
+    ...userOwned,
+    applicationId: uuid("application_id")
+      .notNull()
+      .references(() => applications.id, { onDelete: "cascade" }),
+    emailEventId: uuid("email_event_id").references(() => emailEvents.id, { onDelete: "set null" }),
+    status: text("status").notNull().default("PENDING"),
+    resultJson: jsonb("result_json"),
+    failureReason: text("failure_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("interview_preps_public_id_idx").on(table.publicId),
+    uniqueIndex("interview_preps_application_idx").on(table.applicationId),
+    index("interview_preps_user_idx").on(table.userId, table.updatedAt.desc()),
+  ],
+);
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
   resumes: many(resumes),
@@ -1095,3 +1412,19 @@ export type InterviewQuestionBucket =
   (typeof interviewQuestionBucket.enumValues)[number];
 export type InterviewPoolStatus =
   (typeof interviewPoolStatus.enumValues)[number];
+export type CandidateProfile = typeof candidateProfiles.$inferSelect;
+export type NewCandidateProfile = typeof candidateProfiles.$inferInsert;
+export type CandidateAnswer = typeof candidateAnswers.$inferSelect;
+export type NewCandidateAnswer = typeof candidateAnswers.$inferInsert;
+export type WorkArrangement = (typeof workArrangement.enumValues)[number];
+export type ResumeReviewRow = typeof resumeReviews.$inferSelect;
+export type JobBoard = typeof jobBoards.$inferSelect;
+export type JobPosting = typeof jobPostings.$inferSelect;
+export type NewJobPosting = typeof jobPostings.$inferInsert;
+export type JobMatch = typeof jobMatches.$inferSelect;
+export type NewJobMatch = typeof jobMatches.$inferInsert;
+export type ApplicationTask = typeof applicationTasks.$inferSelect;
+export type ApplicationTaskEvent = typeof applicationTaskEvents.$inferSelect;
+export type WorkerToken = typeof workerTokens.$inferSelect;
+export type EmailEvent = typeof emailEvents.$inferSelect;
+export type InterviewPrep = typeof interviewPreps.$inferSelect;

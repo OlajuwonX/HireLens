@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { toGeminiResponseSchema } from "@/lib/ai/gemini-json-schema";
-import { toStrictJsonSchema } from "@/lib/ai/json-schema";
 import {
   assertValidInterviewPool,
   generatedInterviewPoolSchema,
@@ -49,13 +48,11 @@ describe("generatedInterviewPoolSchema", () => {
     expect(generatedInterviewPoolSchema.safeParse(pool).success).toBe(false);
   });
 
-  it("carries no array-length keywords into either provider's JSON schema", () => {
-    for (const build of [toStrictJsonSchema, toGeminiResponseSchema]) {
-      const json = JSON.stringify(build(generatedInterviewPoolSchema));
+  it("carries no array-length keywords into the Gemini JSON schema", () => {
+    const json = JSON.stringify(toGeminiResponseSchema(generatedInterviewPoolSchema));
 
-      expect(json).not.toContain("minItems");
-      expect(json).not.toContain("maxItems");
-    }
+    expect(json).not.toContain("minItems");
+    expect(json).not.toContain("maxItems");
   });
 });
 

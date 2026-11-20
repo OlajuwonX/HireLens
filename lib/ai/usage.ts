@@ -7,6 +7,9 @@ export const AI_USAGE_ACTIONS = [
   "APPLICATION_REGENERATE",
   "JOB_EXTRACTION",
   "INTERVIEW_POOL_GENERATION",
+  "RESUME_REVIEW",
+  "JOB_MATCHING",
+  "INTERVIEW_PREP",
 ] as const;
 
 export type AiUsageAction = (typeof AI_USAGE_ACTIONS)[number];
@@ -16,6 +19,9 @@ export const usageActionLabels: Record<AiUsageAction, string> = {
   APPLICATION_REGENERATE: "Regenerated analyses",
   JOB_EXTRACTION: "Job posting imports",
   INTERVIEW_POOL_GENERATION: "Interview question pools",
+  RESUME_REVIEW: "Independent resume reviews",
+  JOB_MATCHING: "Job matching batches",
+  INTERVIEW_PREP: "Interview preparation briefs",
 };
 
 export const AI_USAGE_DEFAULTS = {
@@ -23,6 +29,9 @@ export const AI_USAGE_DEFAULTS = {
   AI_DAILY_REGENERATE_LIMIT: 3,
   AI_DAILY_JOB_EXTRACTION_LIMIT: 3,
   AI_DAILY_INTERVIEW_POOL_LIMIT: 2,
+  AI_DAILY_RESUME_REVIEW_LIMIT: 5,
+  AI_DAILY_JOB_MATCHING_LIMIT: 3,
+  AI_DAILY_INTERVIEW_PREP_LIMIT: 2,
   AI_INTERVIEW_POOL_GLOBAL_DAILY_LIMIT: 8,
   AI_GLOBAL_DAILY_SAFETY_LIMIT: 40,
 } as const;
@@ -43,6 +52,18 @@ export function getDailyAllowance(action: AiUsageAction) {
 
   if (action === "JOB_EXTRACTION") {
     return readLimit("AI_DAILY_JOB_EXTRACTION_LIMIT");
+  }
+
+  if (action === "INTERVIEW_PREP") {
+    return readLimit("AI_DAILY_INTERVIEW_PREP_LIMIT");
+  }
+
+  if (action === "JOB_MATCHING") {
+    return readLimit("AI_DAILY_JOB_MATCHING_LIMIT");
+  }
+
+  if (action === "RESUME_REVIEW") {
+    return readLimit("AI_DAILY_RESUME_REVIEW_LIMIT");
   }
 
   if (action === "INTERVIEW_POOL_GENERATION") {

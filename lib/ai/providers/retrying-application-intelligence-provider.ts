@@ -33,6 +33,9 @@ export type RetryingProviderConfig = {
   validateAnalysis?: ResponseValidator;
   validateExtraction?: ResponseValidator;
   validateInterviewPool?: ResponseValidator;
+  validateReview?: ResponseValidator;
+  validateMatching?: ResponseValidator;
+  validatePrep?: ResponseValidator;
 };
 
 function delay(ms: number) {
@@ -124,6 +127,30 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     );
   }
 
+  async reviewResume(input: { content: string }): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.reviewResume(input),
+      this.config.validateReview,
+      { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
+    );
+  }
+
+  async matchJobs(input: { content: string }): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.matchJobs(input),
+      this.config.validateMatching,
+      { timeoutMs: this.config.timeoutMs, budgetMs: this.totalBudgetMs },
+    );
+  }
+
+  async prepareInterview(input: { content: string }): Promise<AIProviderResult> {
+    return this.run(
+      (provider) => provider.prepareInterview(input),
+      this.config.validatePrep,
+      { timeoutMs: this.config.interviewTimeoutMs ?? this.config.timeoutMs, budgetMs: this.config.interviewBudgetMs ?? this.totalBudgetMs },
+    );
+  }
+
   private async run(
     call: (
       provider: ApplicationIntelligenceProvider,
@@ -155,7 +182,9 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
     for (let index = 0; index < candidates.length; index++) {
       const candidate = candidates[index];
 
-      if (exhausted.has(candidate.providerName)) {
+      const quotaKey = `${candidate.providerName}:${candidate.model}`;
+
+      if (exhausted.has(quotaKey)) {
         continue;
       }
 
@@ -204,7 +233,7 @@ export class RetryingApplicationIntelligenceProvider implements ApplicationIntel
           this.logAttempt(failure, candidate);
 
           if (failure.failureClass === "RATE_LIMIT") {
-            exhausted.add(candidate.providerName);
+            exhausted.add(quotaKey);
             break;
           }
 
