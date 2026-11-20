@@ -1,9 +1,10 @@
 import { claimResponseSchema, type TaskPayload, type WorkerResult } from "../contract";
 import type { WatchList } from "../gmail/filter";
 import type { ParsedEmail } from "../gmail/parse";
+import { toPingResult, type PingResult } from "./connection";
 
 export type HireLensApi = {
-  ping: () => Promise<number>;
+  ping: () => Promise<PingResult>;
   claim: () => Promise<{ task: TaskPayload | null; reason?: string }>;
   heartbeat: (taskId: string) => Promise<boolean>;
   report: (result: WorkerResult) => Promise<boolean>;
@@ -15,6 +16,7 @@ export type HireLensApi = {
 export function createApi(input: {
   baseUrl: string;
   token: string;
+  bypassSecret?: string;
   fetchImpl?: typeof fetch;
 }): HireLensApi {
   const send = (path: string, init: RequestInit = {}) =>
@@ -23,6 +25,7 @@ export function createApi(input: {
       headers: {
         Authorization: `Bearer ${input.token}`,
         "Content-Type": "application/json",
+        ...(input.bypassSecret ? { "x-vercel-protection-bypass": input.bypassSecret } : {}),
         ...init.headers,
       },
       signal: AbortSignal.timeout(30_000),
@@ -31,7 +34,7 @@ export function createApi(input: {
   const post = (path: string, body: unknown) => send(path, { method: "POST", body: JSON.stringify(body) });
 
   return {
-    ping: async () => (await send("/api/worker/ping").catch(() => null))?.status ?? 0,
+    ping: async () => toPingResult(await send("/api/worker/ping", { redirect: "manual" }).catch(() => null)),
     claim: async () => {
       const response = await post("/api/worker/claim", {});
 

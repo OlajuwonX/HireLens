@@ -94,7 +94,7 @@ describe("runTask", () => {
 
 function fakeApi(): HireLensApi {
   return {
-    ping: vi.fn(async () => 200),
+    ping: vi.fn(async () => ({ status: 200, vercelProtected: false })),
     claim: vi.fn(),
     heartbeat: vi.fn(async () => true),
     report: vi.fn(async () => true),

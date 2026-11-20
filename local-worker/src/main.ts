@@ -17,7 +17,11 @@ try {
 }
 
 const config = readConfig();
-const api = createApi({ baseUrl: config.HIRELENS_URL, token: config.HIRELENS_WORKER_TOKEN });
+const api = createApi({
+  baseUrl: config.HIRELENS_URL,
+  token: config.HIRELENS_WORKER_TOKEN,
+  bypassSecret: config.VERCEL_PROTECTION_BYPASS || undefined,
+});
 
 const problem = connectionProblem(await api.ping(), config.HIRELENS_URL);
 

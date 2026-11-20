@@ -8,6 +8,7 @@ const flag = z
 const configSchema = z.object({
   HIRELENS_URL: z.url(),
   HIRELENS_WORKER_TOKEN: z.string().startsWith("hlw_", "Paste the token from HireLens Settings > Local worker"),
+  VERCEL_PROTECTION_BYPASS: z.string().optional(),
   BROWSER_CHANNEL: z.enum(["chrome", "msedge"]).default("chrome"),
   AUTO_SUBMIT: flag,
   USE_CLAUDE: flag,
