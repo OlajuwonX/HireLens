@@ -3,17 +3,23 @@ import { chromium, type BrowserContext } from "playwright-core";
 
 const CHANNELS = ["chrome", "msedge"] as const;
 
+export const NAME_HELPER = "globalThis.__name = globalThis.__name || ((target) => target);";
+
 export async function launchBrowser(preferred: (typeof CHANNELS)[number], headless = false): Promise<BrowserContext> {
   const order = [preferred, ...CHANNELS.filter((channel) => channel !== preferred)];
   const errors: string[] = [];
 
   for (const channel of order) {
     try {
-      return await chromium.launchPersistentContext(join(process.cwd(), ".browser-profile"), {
+      const context = await chromium.launchPersistentContext(join(process.cwd(), ".browser-profile"), {
         channel,
         headless,
         viewport: null,
       });
+
+      await context.addInitScript({ content: NAME_HELPER });
+
+      return context;
     } catch (error) {
       errors.push(`${channel}: ${error instanceof Error ? error.message.split("\n")[0] : "failed"}`);
     }
