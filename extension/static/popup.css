@@ -97,10 +97,40 @@ button.link {
   color: var(--warning);
 }
 
-#missing {
+#missing,
+#notes,
+#gaps {
   margin: 0;
   padding-left: 18px;
   color: var(--warning);
+}
+
+#gaps {
+  color: var(--muted);
+}
+
+#match {
+  margin: 0;
+  font-weight: 600;
+}
+
+fieldset {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+label.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-weight: 400;
+}
+
+label.toggle input {
+  margin: 2px 0 0;
 }
 
 #application p {

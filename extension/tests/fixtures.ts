@@ -1,5 +1,7 @@
 export const APPLY_URL = "https://jobs.example.test/acme/123/apply";
 
+export const PROJECT_ANSWER = "I rebuilt Acme's checkout in React, cutting load time by 40%.";
+
 export const fillData = {
   application: { publicId: "app-1", title: "Frontend Engineer", company: "Acme" },
   candidate: {
@@ -21,7 +23,9 @@ export const fillData = {
     yearsExperience: 6,
   },
   answers: [{ question: "Why do you want to work at Acme?", answer: "I want to build tools engineers love." }],
-  coverLetter: null,
+  coverLetter: "Dear Acme",
+  coverLetterPath: "/api/extension/cover-letter?application=app-1",
+  match: { score: 92, analyzed: true },
   resume: { path: "/api/extension/resume?application=app-1", tailored: true },
 };
 
@@ -42,7 +46,9 @@ export const applicationForm = `<!doctype html>
     <input type="radio" id="rel-no" name="relocate" value="no"><label for="rel-no">No</label>
   </fieldset>
   <label for="why">Why do you want to work at Acme? *</label><textarea id="why" name="why" required></textarea>
+  <label for="project">Tell us about a project you are proud of</label><textarea id="project" name="project"></textarea>
   <label for="resume">Resume/CV *</label><input type="file" id="resume" name="resume" required>
+  <label for="letter">Cover letter</label><input type="file" id="letter" name="letter">
   <label for="gender">Gender</label>
   <select id="gender" name="gender"><option value="">Decline</option><option>Female</option><option>Male</option></select>
   <label for="color">Favourite colour *</label><input id="color" name="color" required>
@@ -64,4 +70,12 @@ export const applicationForm = `<!doctype html>
     }, 200);
   });
 </script>
+</body></html>`;
+
+export const postingPage = `<!doctype html>
+<html><head><title>Platform Engineer at Globex</title></head><body>
+<h1>Platform Engineer</h1>
+<p>${"Globex is hiring a platform engineer to run Kubernetes, Terraform and Go services at scale. ".repeat(8)}</p>
+<label for="name">Full name *</label><input id="name" name="name" required>
+<label for="motivation">Why Globex? *</label><textarea id="motivation" name="motivation" required></textarea>
 </body></html>`;

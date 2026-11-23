@@ -1,7 +1,7 @@
 import { readConnection, saveConnection } from "../shared/connection";
 import { fail, ok } from "../shared/messages";
 import type { Connection, Reply, Request } from "../shared/types";
-import { checkConnection, fetchFillData, fetchResume, reportApplied } from "./api";
+import { boostResume, checkConnection, fetchFillData, fetchPdf, importJob, reportApplied, writeAnswers } from "./api";
 
 async function withConnection<T>(run: (connection: Connection) => Promise<T>): Promise<Reply<T>> {
   const connection = await readConnection();
@@ -37,10 +37,16 @@ async function handle(request: Request, sender: chrome.runtime.MessageSender): P
   switch (request.type) {
     case "fill-data":
       return withConnection((connection) => fetchFillData(connection, request.url));
-    case "resume":
-      return withConnection((connection) => fetchResume(connection, request.path));
+    case "pdf":
+      return withConnection((connection) => fetchPdf(connection, request.path));
     case "applied":
       return withConnection((connection) => reportApplied(connection, request.applicationPublicId));
+    case "boost":
+      return withConnection((connection) => boostResume(connection, request.applicationPublicId));
+    case "import":
+      return withConnection((connection) => importJob(connection, request.page));
+    case "answers":
+      return withConnection((connection) => writeAnswers(connection, request.body));
     case "save-connection":
       return acceptConnection(request.connection, sender);
     default:

@@ -21,7 +21,14 @@
 
     <section id="fill-view" hidden>
       <button id="fill" type="button">Fill this page</button>
+      <fieldset id="settings">
+        <label class="toggle"><input id="improve-resume" type="checkbox" /> Improve my resume when it matches below 85%</label>
+        <label class="toggle"><input id="write-answers" type="checkbox" /> Write answers and cover letters with AI</label>
+      </fieldset>
       <p id="result" class="muted" role="status"></p>
+      <p id="match" hidden></p>
+      <ul id="gaps" hidden></ul>
+      <ul id="notes"></ul>
       <ul id="missing"></ul>
       <div id="application" hidden>
         <p id="application-name"></p>

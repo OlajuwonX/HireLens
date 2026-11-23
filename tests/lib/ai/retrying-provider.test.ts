@@ -16,6 +16,7 @@ function provider(
     reviewResume: vi.fn(),
     matchJobs: vi.fn(),
     prepareInterview: vi.fn(),
+    answerForm: vi.fn(),
   };
 }
 
@@ -445,6 +446,7 @@ describe("RetryingApplicationIntelligenceProvider", () => {
         reviewResume: vi.fn(),
         matchJobs: vi.fn(),
         prepareInterview: vi.fn(),
+        answerForm: vi.fn(),
       };
     }
 

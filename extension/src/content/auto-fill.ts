@@ -1,4 +1,4 @@
-import { showBadge, describeSummary } from "./badge";
+import { describeSummary, hideBadge, showBadge } from "./badge";
 import { fillPage, unseenFields } from "./fill-page";
 
 const AUTO_KEY = "hirelens-auto-fill";
@@ -14,9 +14,12 @@ async function fillNewFields() {
   running = true;
 
   try {
-    const summary = await fillPage("new");
+    const summary = await fillPage("new", (text) => showBadge(text, true));
 
-    if (summary.filled > 0 || summary.missing.length > 0) showBadge(describeSummary(summary));
+    const worthShowing = summary.filled > 0 || summary.written > 0 || summary.missing.length > 0 || summary.notes.length > 0;
+
+    if (worthShowing) showBadge(describeSummary(summary));
+    else hideBadge();
   } catch {
     stopAutoFill();
   } finally {

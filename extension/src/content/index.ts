@@ -11,7 +11,7 @@ declare global {
 }
 
 async function fillNow() {
-  const summary = await fillPage("all");
+  const summary = await fillPage("all", (text) => showBadge(text, true));
 
   startAutoFill();
   showBadge(describeSummary(summary));
@@ -34,7 +34,10 @@ if (!window.hirelensContentLoaded) {
 
     fillNow()
       .then((summary) => respond(ok(summary)))
-      .catch((error: Error) => respond(fail(error.message)));
+      .catch((error: Error) => {
+        showBadge(error.message);
+        respond(fail(error.message));
+      });
 
     return true;
   });

@@ -1,7 +1,9 @@
 import { clearConnection, readConnection } from "../shared/connection";
 import { ask } from "../shared/messages";
 import type { FillSummary } from "../shared/types";
+import { readSettings, saveSettings } from "../shared/settings";
 import { lastOrigin, startConnect } from "./connect";
+import { renderSummary } from "./summary";
 import { fillActiveTab } from "./tab";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -11,6 +13,7 @@ const result = $("result");
 const missing = $<HTMLUListElement>("missing");
 const application = $("application");
 let matched: FillSummary["application"] = null;
+const toggles = { improveResume: $<HTMLInputElement>("improve-resume"), writeAnswers: $<HTMLInputElement>("write-answers") };
 
 async function busy<T>(button: HTMLButtonElement, label: string, run: () => Promise<T>) {
   const original = button.textContent;
@@ -27,12 +30,7 @@ async function busy<T>(button: HTMLButtonElement, label: string, run: () => Prom
 }
 
 function showSummary(summary: FillSummary) {
-  const resume = summary.resumeAttached ? (summary.tailored ? " Tailored resume attached." : " Resume attached.") : "";
-
-  result.textContent = `Filled ${summary.filled} of ${summary.fields} fields.${resume} New pages fill automatically when you select Next.`;
-  missing.replaceChildren(
-    ...summary.missing.map((label) => Object.assign(document.createElement("li"), { textContent: `Needs you: ${label}` })),
-  );
+  renderSummary(summary, { result, match: $("match"), gaps: $("gaps"), notes: $("notes"), missing });
   matched = summary.application;
   application.hidden = !matched;
   $("application-name").textContent = matched ? `${matched.title} at ${matched.company}` : "";
@@ -46,6 +44,17 @@ async function render() {
   $("status").textContent = connection ? new URL(connection.origin).host : "Not connected";
   $<HTMLAnchorElement>("open").href = connection?.origin ?? "#";
   $<HTMLInputElement>("origin").value ||= await lastOrigin();
+
+  const settings = await readSettings();
+
+  toggles.improveResume.checked = settings.improveResume;
+  toggles.writeAnswers.checked = settings.writeAnswers;
+}
+
+for (const toggle of Object.values(toggles)) {
+  toggle.addEventListener("change", () =>
+    void saveSettings({ improveResume: toggles.improveResume.checked, writeAnswers: toggles.writeAnswers.checked }),
+  );
 }
 
 $<HTMLButtonElement>("connect").addEventListener("click", (event) =>
@@ -55,7 +64,7 @@ $<HTMLButtonElement>("connect").addEventListener("click", (event) =>
 );
 
 $<HTMLButtonElement>("fill").addEventListener("click", (event) =>
-  busy(event.currentTarget as HTMLButtonElement, "Filling...", fillActiveTab)
+  busy(event.currentTarget as HTMLButtonElement, "Working... this can take a minute", fillActiveTab)
     .then(showSummary)
     .catch((error: Error) => (result.textContent = error.message)),
 );

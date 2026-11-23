@@ -1,4 +1,7 @@
-import type { Connection, FillData } from "../shared/types";
+import type { AnswersBody, AnswersReply, BoostReply, Connection, FillData, ImportReply, PageJob } from "../shared/types";
+
+const QUICK_MS = 60_000;
+const AI_MS = 90_000;
 
 function headers(connection: Connection): Record<string, string> {
   return {
@@ -8,11 +11,11 @@ function headers(connection: Connection): Record<string, string> {
   };
 }
 
-async function call(connection: Connection, path: string, init: RequestInit = {}) {
+async function call(connection: Connection, path: string, init: RequestInit = {}, timeoutMs = QUICK_MS) {
   const response = await fetch(`${connection.origin}${path}`, {
     ...init,
     headers: headers(connection),
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (response.status === 401) {
@@ -26,22 +29,37 @@ async function call(connection: Connection, path: string, init: RequestInit = {}
   return response;
 }
 
+const post = (connection: Connection, path: string, body: unknown, timeoutMs = QUICK_MS) =>
+  call(connection, path, { method: "POST", body: JSON.stringify(body) }, timeoutMs);
+
 export async function checkConnection(connection: Connection) {
   await call(connection, "/api/worker/ping");
 }
 
 export async function fetchFillData(connection: Connection, url: string): Promise<FillData> {
-  return (await call(connection, "/api/extension/fill", { method: "POST", body: JSON.stringify({ url }) })).json();
+  return (await post(connection, "/api/extension/fill", { url })).json();
 }
 
-export async function fetchResume(connection: Connection, path: string) {
+export async function fetchPdf(connection: Connection, path: string) {
   const bytes = new Uint8Array(await (await call(connection, path)).arrayBuffer());
 
   return toBase64(bytes);
 }
 
 export async function reportApplied(connection: Connection, applicationPublicId: string) {
-  await call(connection, "/api/extension/applied", { method: "POST", body: JSON.stringify({ applicationPublicId }) });
+  await post(connection, "/api/extension/applied", { applicationPublicId });
+}
+
+export async function boostResume(connection: Connection, applicationPublicId: string): Promise<BoostReply> {
+  return (await post(connection, "/api/extension/boost", { applicationPublicId }, AI_MS)).json();
+}
+
+export async function importJob(connection: Connection, page: PageJob): Promise<ImportReply> {
+  return (await post(connection, "/api/extension/import", page)).json();
+}
+
+export async function writeAnswers(connection: Connection, body: AnswersBody): Promise<AnswersReply> {
+  return (await post(connection, "/api/extension/answers", body, AI_MS)).json();
 }
 
 export function toBase64(bytes: Uint8Array) {

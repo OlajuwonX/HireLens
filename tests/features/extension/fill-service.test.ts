@@ -24,7 +24,11 @@ const { buildFillData, loadExtensionResume } = await import("@/features/extensio
 
 const worker = { userId: "user-1", workerId: "w-1" };
 const appId = "22222222-2222-4222-8222-222222222222";
-const row = { application: { id: "a-1", publicId: appId }, job: { title: "Frontend Engineer", company: "Acme" } };
+const row = {
+  application: { id: "a-1", publicId: appId, analysisId: "an-1" },
+  job: { title: "Frontend Engineer", company: "Acme" },
+  matchScore: 78,
+};
 const facts = { candidate: { firstName: "Ada" }, answers: [{ question: "Why us?", answer: "Because." }] };
 
 beforeEach(() => {
@@ -46,6 +50,8 @@ describe("buildFillData", () => {
       candidate: facts.candidate,
       answers: facts.answers,
       coverLetter: "Dear Acme",
+      coverLetterPath: `/api/extension/cover-letter?application=${appId}`,
+      match: { score: 78, analyzed: true },
       resume: { path: `/api/extension/resume?application=${appId}`, tailored: true },
     });
     expect(mocks.findApplicationRowForUser).toHaveBeenCalledWith({ userId: "user-1", publicId: appId });
@@ -56,6 +62,8 @@ describe("buildFillData", () => {
 
     expect(data.application).toBeNull();
     expect(data.coverLetter).toBeNull();
+    expect(data.coverLetterPath).toBeNull();
+    expect(data.match).toEqual({ score: null, analyzed: false });
     expect(data.resume).toEqual({ path: "/api/extension/resume", tailored: false });
     expect(mocks.loadIntelligence).not.toHaveBeenCalled();
   });

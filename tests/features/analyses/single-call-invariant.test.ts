@@ -25,6 +25,7 @@ const ALLOWED_CALLERS = [
   "features/applications/server/job-extraction.service.ts",
   "features/matching/server/matching.service.ts",
   "features/responses/server/prep.service.ts",
+  "features/extension/server/answers.service.ts",
 ];
 
 describe("only the analysis, review, matching and extraction services may reach the AI provider", () => {

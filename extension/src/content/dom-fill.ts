@@ -109,3 +109,28 @@ export function highlight(field: FormField) {
     { once: true },
   );
 }
+
+export function maxLengthOf(field: FormField) {
+  const element = first(field) as HTMLInputElement | null;
+
+  return element && element.maxLength > 0 ? element.maxLength : null;
+}
+
+export function markWritten(field: FormField) {
+  const element = first(field);
+
+  if (!element) return;
+
+  element.dataset.hirelensAi = "true";
+  element.style.outline = "2px solid #3b82f6";
+  element.style.outlineOffset = "2px";
+  element.title = "Written by HireLens AI. Review it before you submit.";
+  element.addEventListener(
+    "input",
+    () => {
+      element.style.outline = "";
+      delete element.dataset.hirelensAi;
+    },
+    { once: true },
+  );
+}

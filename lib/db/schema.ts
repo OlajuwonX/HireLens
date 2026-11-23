@@ -110,6 +110,7 @@ export const usageAction = pgEnum("usage_action", [
   "RESUME_REVIEW",
   "JOB_MATCHING",
   "INTERVIEW_PREP",
+  "FORM_ANSWERS",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);

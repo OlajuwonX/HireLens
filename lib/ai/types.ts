@@ -67,4 +67,5 @@ export interface ApplicationIntelligenceProvider {
   reviewResume(input: { content: string }): Promise<AIProviderResult>;
   matchJobs(input: { content: string }): Promise<AIProviderResult>;
   prepareInterview(input: { content: string }): Promise<AIProviderResult>;
+  answerForm(input: { content: string }): Promise<AIProviderResult>;
 }

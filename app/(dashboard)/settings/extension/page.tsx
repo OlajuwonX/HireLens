@@ -20,8 +20,10 @@ const installSteps = [
 const useSteps = [
   "Open a job's application page. Apply with HireLens in Discover opens it for you.",
   "Open the HireLens extension and select Fill this page. Your details, saved answers and resume are filled in.",
+  "If your resume matches the job below 85%, it is improved first, aiming for 90% without adding anything untrue.",
+  "Open questions and cover letters are written by AI and outlined in blue. Read and edit them.",
   "On forms with several pages, select Next yourself: each new page fills in automatically.",
-  "Check every field, finish anything highlighted, and submit yourself. Then select I submitted in the extension.",
+  "Check every field, finish anything outlined in orange, and submit yourself. Then select I submitted in the extension.",
 ];
 
 function Steps({ steps }: { steps: string[] }) {

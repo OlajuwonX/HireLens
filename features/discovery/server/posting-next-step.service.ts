@@ -1,6 +1,6 @@
 import "server-only";
 
-import { analyzeOwnedApplication } from "@/features/applications/server/application.service";
+import { ensureApplicationAnalysis } from "@/features/applications/server/application.service";
 import { AUTO_APPLY_PATH } from "@/features/auto-apply/constants";
 import { queueApplication } from "@/features/auto-apply/server/task.service";
 import { savePostingToJobs } from "./posting-save.service";
@@ -18,10 +18,10 @@ async function runStep(step: PostingStep, userId: string, applicationPublicId: s
     return queued.ok ? { ok: true as const, href: AUTO_APPLY_PATH } : queued;
   }
 
-  const analyzed = await analyzeOwnedApplication({ userId, publicId: applicationPublicId });
+  const analyzed = await ensureApplicationAnalysis({ userId, publicId: applicationPublicId });
 
   return analyzed.ok
-    ? { ok: true as const, href: `/dashboard/jobs?open=${analyzed.value.publicId}` }
+    ? { ok: true as const, href: `/dashboard/jobs?open=${applicationPublicId}` }
     : { ok: false as const, message: analyzed.message };
 }
 
