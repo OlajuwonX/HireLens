@@ -82,6 +82,14 @@ const BASE_COMMANDS: Command[] = [
     group: "pages",
   },
   {
+    id: "page-browser-extension",
+    label: "Browser extension",
+    description: "Fill job applications in Brave, Chrome or Edge",
+    keywords: ["extension", "brave", "chrome", "edge", "autofill", "fill", "apply"],
+    href: "/settings/extension",
+    group: "pages",
+  },
+  {
     id: "page-local-worker",
     label: "Local worker",
     description: "Worker tokens for filling applications and reading Gmail",

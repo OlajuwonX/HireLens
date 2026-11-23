@@ -17,11 +17,13 @@ describe("serverless functions stay small", () => {
     }
   });
 
-  it("keeps the local worker out of every function bundle", () => {
+  it("keeps the local worker and the browser extension out of every function bundle", () => {
     expect(config).toContain('"./local-worker/**"');
+    expect(config).toContain('"./extension/**"');
   });
 
   it("ships the fonts with the worker resume route", () => {
     expect(config).toContain('"/api/worker/**": ["./public/fonts/**"]');
+    expect(config).toContain('"/api/extension/**": ["./public/fonts/**"]');
   });
 });
