@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TaskState } from "@/lib/auto-apply/states";
 import {
@@ -46,7 +45,6 @@ export function TaskActions({
       {sourceUrl && state !== "SUBMITTED" ? (
         <Button asChild size="compact" variant="outline">
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="size-4" aria-hidden />
             Job page
           </a>
         </Button>

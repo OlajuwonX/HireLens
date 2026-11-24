@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, ExternalLink, ListChecks, Puzzle, Sparkles } from "lucide-react";
+import { ListChecks, Puzzle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Popover } from "@/components/ui/popover";
@@ -78,7 +78,6 @@ export function PostingActions({ publicId, href }: { publicId: string; href: str
     <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
       <Button asChild variant="outline">
         <a href={href} target="_blank" rel="noopener noreferrer">
-          <ExternalLink className="size-4" aria-hidden />
           Open original posting
         </a>
       </Button>
@@ -92,7 +91,6 @@ export function PostingActions({ publicId, href }: { publicId: string; href: str
         trigger={(props) => (
           <Button type="button" disabled={busy} className="w-full sm:w-auto" {...props}>
             {running ? running.pending : "Options"}
-            <ChevronDown className="size-4" aria-hidden />
           </Button>
         )}
       >

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toast";
@@ -43,7 +42,6 @@ export function MatchRunner() {
   return (
     <div className="flex flex-col gap-1.5 sm:items-end">
       <Button type="button" disabled={run.isPending} onClick={() => run.mutate()}>
-        <Sparkles className="size-4" aria-hidden />
         {run.isPending ? "Matching..." : "Find matches"}
       </Button>
       <p className="text-label text-text-muted">Scores up to 10 jobs. Uses one daily match.</p>

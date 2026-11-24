@@ -1,4 +1,3 @@
-import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -66,7 +65,6 @@ export function ResumeVersionList({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Eye className="size-4" aria-hidden />
                   View
                 </a>
               </Button>

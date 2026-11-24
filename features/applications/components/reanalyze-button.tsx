@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +19,6 @@ function ConfirmButton() {
 
   return (
     <Button type="submit" disabled={pending}>
-      <RefreshCw className="size-4" aria-hidden />
       {pending ? "Reanalyzing..." : "Reanalyze"}
     </Button>
   );
@@ -59,7 +57,6 @@ export function ReanalyzeButton({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="compact">
-          <RefreshCw className="size-4" aria-hidden />
           {hasAnalysis ? "Reanalyze" : "Analyze"}
         </Button>
       </DialogTrigger>

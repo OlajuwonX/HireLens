@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ListChecks } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toast";
@@ -25,7 +24,6 @@ export function AddToAutoApplyButton({ applicationPublicId }: { applicationPubli
 
   return (
     <Button type="button" variant="outline" size="compact" disabled={queue.isPending} onClick={() => queue.mutate()}>
-      <ListChecks className="size-4" aria-hidden />
       {queue.isPending ? "Adding..." : "Auto Apply"}
     </Button>
   );

@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { notify } from "@/components/ui/toast";
 import type { ExtractedJob } from "@/lib/ai/schemas/job-extraction.schema";
-import { ClipboardPaste } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { extractJobPostingAction } from "../actions/job-extraction-actions";
@@ -134,7 +133,6 @@ export function JobPasteDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline">
-          <ClipboardPaste className="size-4" aria-hidden />
           Paste job posting
         </Button>
       </DialogTrigger>
@@ -160,7 +158,6 @@ export function JobPasteDialog({
             onClick={pasteFromClipboard}
             className="w-full sm:w-auto"
           >
-            <ClipboardPaste className="size-4" aria-hidden />
             Paste from clipboard
           </Button>
 
