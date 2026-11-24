@@ -45,7 +45,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.findPostingForUser.mockResolvedValue(posting);
   mocks.listSavedJobRefs.mockResolvedValue([]);
-  mocks.loadAudience.mockResolvedValue({ userId: "user-1", roles: [], matcher: [] });
+  mocks.loadAudience.mockResolvedValue({ userId: "user-1", roles: [], matcher: [], regions: [] });
   mocks.listOwnedVersionOptions.mockResolvedValue([{ publicId: versionId }]);
   mocks.saveJobOnly.mockResolvedValue({ ok: true, value: { applicationPublicId: "a" } });
 });
@@ -103,7 +103,7 @@ describe("savePostingToJobs", () => {
     await run();
 
     expect(mocks.findPostingForUser).toHaveBeenCalledWith({
-      audience: { userId: "user-1", roles: [], matcher: [] },
+      audience: { userId: "user-1", roles: [], matcher: [], regions: [] },
       publicId: "p-1",
     });
   });

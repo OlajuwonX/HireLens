@@ -2,7 +2,7 @@ import type { CandidateProfile } from "@/lib/db/schema";
 
 export type ProfileFields = Omit<
   CandidateProfile,
-  "id" | "userId" | "createdAt" | "updatedAt"
+  "id" | "userId" | "createdAt" | "updatedAt" | "jobRegions"
 >;
 
 type Field = keyof ProfileFields;

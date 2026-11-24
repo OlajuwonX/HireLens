@@ -2,7 +2,15 @@ export const DISCOVERY_SOURCES = ["GREENHOUSE", "LEVER", "ASHBY"] as const;
 
 export type DiscoverySource = (typeof DISCOVERY_SOURCES)[number];
 
-export const FEED_SOURCES = ["REMOTIVE", "JOBICY", "ARBEITNOW", "HIMALAYAS", "WEWORKREMOTELY"] as const;
+export const FEED_SOURCES = [
+  "REMOTIVE",
+  "JOBICY",
+  "ARBEITNOW",
+  "HIMALAYAS",
+  "WEWORKREMOTELY",
+  "MYJOBMAG",
+  "HOTNIGERIANJOBS",
+] as const;
 
 export type FeedSource = (typeof FEED_SOURCES)[number];
 

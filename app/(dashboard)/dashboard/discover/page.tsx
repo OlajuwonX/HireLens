@@ -10,6 +10,8 @@ import { FollowBoardForm } from "@/features/discovery/components/follow-board-fo
 import { FollowedBoards } from "@/features/discovery/components/followed-boards";
 import { PostingFeed } from "@/features/discovery/components/posting-feed";
 import { RefreshButton } from "@/features/discovery/components/refresh-button";
+import { RegionToggle } from "@/features/discovery/components/region-toggle";
+import { SuggestedBoards } from "@/features/discovery/components/suggested-boards";
 import { DiscoveryRefreshProvider } from "@/features/discovery/components/refresh-context";
 import { RefreshingResults } from "@/features/discovery/components/refreshing-results";
 import { DISCOVERY_LIMITS } from "@/features/discovery/constants";
@@ -18,6 +20,7 @@ import { loadAudience } from "@/features/discovery/server/audience";
 import { countSystemBoards, listFollowedBoards } from "@/features/discovery/server/board.repository";
 import { feedVersion } from "@/features/discovery/feed-version";
 import { getPostingFeed } from "@/features/discovery/server/feed.service";
+import { listSuggestedBoards } from "@/features/discovery/server/suggestion.repository";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -38,10 +41,11 @@ export default async function DiscoverPage({
   const view = { q: filters.q ?? "", arrangement: filters.arrangement ?? "" };
   const audience = await loadAudience(user.id);
 
-  const [boards, sources, feed] = await Promise.all([
+  const [boards, sources, feed, suggestions] = await Promise.all([
     listFollowedBoards(user.id),
     countSystemBoards(),
     getPostingFeed({ audience, filters }),
+    listSuggestedBoards({ audience, limit: DISCOVERY_LIMITS.suggestions }),
   ]);
 
   const version = feedVersion(feed.rows);
@@ -76,6 +80,8 @@ export default async function DiscoverPage({
           </Alert>
         )}
 
+        <RegionToggle region="NG" enabled={audience.regions.includes("NG")} />
+
         <DiscoveryFilters q={view.q} arrangement={view.arrangement} />
 
         <RefreshingResults>
@@ -94,6 +100,8 @@ export default async function DiscoverPage({
             />
           )}
         </RefreshingResults>
+
+        <SuggestedBoards boards={suggestions} />
 
         <details className="rounded-card border border-border bg-surface p-4">
           <summary className="cursor-pointer text-meta font-medium text-text-primary">

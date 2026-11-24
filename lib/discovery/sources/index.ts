@@ -5,6 +5,7 @@ import { greenhouse } from "./greenhouse";
 import { himalayas } from "./himalayas";
 import { jobicy } from "./jobicy";
 import { lever } from "./lever";
+import { hotnigerianjobs, myjobmag } from "./nigeria";
 import { remotive } from "./remotive";
 import { weworkremotely } from "./weworkremotely";
 
@@ -17,6 +18,8 @@ export const adapters: Record<CatalogSource, BoardAdapter> = {
   ARBEITNOW: arbeitnow,
   HIMALAYAS: himalayas,
   WEWORKREMOTELY: weworkremotely,
+  MYJOBMAG: myjobmag,
+  HOTNIGERIANJOBS: hotnigerianjobs,
 };
 
 const HOSTS: [RegExp, DiscoverySource][] = [

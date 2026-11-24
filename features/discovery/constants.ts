@@ -14,6 +14,7 @@ export const DISCOVERY_LIMITS = {
   freshDays: 30,
   expiredRetentionDays: 30,
   upsertChunk: 100,
+  suggestions: 6,
 } as const;
 
 export const sourceLabels: Record<CatalogSource, string> = {
@@ -22,6 +23,8 @@ export const sourceLabels: Record<CatalogSource, string> = {
   ARBEITNOW: "Arbeitnow",
   HIMALAYAS: "Himalayas",
   WEWORKREMOTELY: "We Work Remotely",
+  MYJOBMAG: "MyJobMag",
+  HOTNIGERIANJOBS: "HotNigerianJobs",
   GREENHOUSE: "Greenhouse",
   LEVER: "Lever",
   ASHBY: "Ashby",
