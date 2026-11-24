@@ -48,7 +48,8 @@ label {
   font-weight: 600;
 }
 
-input {
+input,
+select {
   padding: 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -150,4 +151,8 @@ footer a {
 
 [hidden] {
   display: none !important;
+}
+
+select {
+  background: var(--surface);
 }

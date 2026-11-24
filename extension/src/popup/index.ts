@@ -3,6 +3,7 @@ import { ask } from "../shared/messages";
 import type { FillSummary } from "../shared/types";
 import { readSettings, saveSettings } from "../shared/settings";
 import { lastOrigin, startConnect } from "./connect";
+import { showHelperStatus } from "./helper-status";
 import { renderSummary } from "./summary";
 import { fillActiveTab } from "./tab";
 
@@ -14,6 +15,7 @@ const missing = $<HTMLUListElement>("missing");
 const application = $("application");
 let matched: FillSummary["application"] = null;
 const toggles = { improveResume: $<HTMLInputElement>("improve-resume"), writeAnswers: $<HTMLInputElement>("write-answers") };
+const writer = $<HTMLSelectElement>("writer");
 
 async function busy<T>(button: HTMLButtonElement, label: string, run: () => Promise<T>) {
   const original = button.textContent;
@@ -49,11 +51,17 @@ async function render() {
 
   toggles.improveResume.checked = settings.improveResume;
   toggles.writeAnswers.checked = settings.writeAnswers;
+  writer.value = settings.writer;
+  void showHelperStatus($("helper-status"), settings.writer);
 }
 
-for (const toggle of Object.values(toggles)) {
-  toggle.addEventListener("change", () =>
-    void saveSettings({ improveResume: toggles.improveResume.checked, writeAnswers: toggles.writeAnswers.checked }),
+for (const input of [toggles.improveResume, toggles.writeAnswers, writer]) {
+  input.addEventListener("change", () =>
+    void saveSettings({
+      improveResume: toggles.improveResume.checked,
+      writeAnswers: toggles.writeAnswers.checked,
+      writer: writer.value === "claude" ? "claude" : "gemini",
+    }),
   );
 }
 

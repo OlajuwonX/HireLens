@@ -24,6 +24,12 @@
       <fieldset id="settings">
         <label class="toggle"><input id="improve-resume" type="checkbox" /> Improve my resume when it matches below 85%</label>
         <label class="toggle"><input id="write-answers" type="checkbox" /> Write answers and cover letters with AI</label>
+        <label for="writer">Written by</label>
+        <select id="writer">
+          <option value="gemini">HireLens AI (Gemini, daily allowance)</option>
+          <option value="claude">My Claude subscription (this computer)</option>
+        </select>
+        <p id="helper-status" class="muted" hidden></p>
       </fieldset>
       <p id="result" class="muted" role="status"></p>
       <p id="match" hidden></p>

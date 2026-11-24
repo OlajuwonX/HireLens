@@ -117,3 +117,24 @@ describe("writeFormAnswers", () => {
     expect(mocks.reserveUsage).not.toHaveBeenCalled();
   });
 });
+
+describe("buildFormAnswersPrompt", () => {
+  it("gives the extension the same prompt Gemini gets, asking for JSON, without spending the allowance", async () => {
+    const { buildFormAnswersPrompt } = await import("@/features/extension/server/answers.service");
+    const result = await buildFormAnswersPrompt(worker, request);
+
+    expect(result).toMatchObject({ ok: true });
+    expect(result.ok && result.system).toContain("Honesty rules");
+    expect(result.ok && result.system).toContain('{"answers":[{"id"');
+    expect(result.ok && result.prompt).toContain("- id: why");
+    expect(mocks.reserveUsage).not.toHaveBeenCalled();
+  });
+
+  it("needs a resume", async () => {
+    const { buildFormAnswersPrompt } = await import("@/features/extension/server/answers.service");
+
+    mocks.loadAnswersContext.mockResolvedValue(null);
+
+    expect(await buildFormAnswersPrompt(worker, request)).toMatchObject({ ok: false });
+  });
+});

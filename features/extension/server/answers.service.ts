@@ -5,6 +5,7 @@ import type { WorkerIdentity } from "@/features/worker/server/worker-auth";
 import { getApplicationIntelligenceProvider } from "@/lib/ai/client";
 import { aiFailureMessage, describeAiFailure } from "@/lib/ai/errors";
 import { normalizeJsonModelOutput } from "@/lib/ai/normalize";
+import { FORM_ANSWERS_JSON_REPLY, FORM_ANSWERS_PROMPT } from "@/lib/ai/prompts/form-answers.prompt";
 import { createFormAnswersContent, fitAnswer } from "@/lib/ai/prompts/form-answers-input";
 import { formAnswersSchema } from "@/lib/ai/schemas/form-answers.schema";
 import type { ApplicationIntelligenceProvider } from "@/lib/ai/types";
@@ -16,6 +17,26 @@ export type WrittenAnswer = { id: string; answer: string };
 export type AnswersResult =
   | { ok: true; answers: WrittenAnswer[] }
   | { ok: false; limited: boolean; message: string };
+
+const NO_RESUME = "Upload a resume to HireLens so answers can be written from it.";
+
+export type AnswersPrompt = { ok: true; system: string; prompt: string } | { ok: false; message: string };
+
+export async function buildFormAnswersPrompt(worker: WorkerIdentity, request: AnswersRequest): Promise<AnswersPrompt> {
+  const context = await loadAnswersContext({
+    userId: worker.userId,
+    applicationPublicId: request.applicationPublicId,
+    pageText: request.pageText,
+  });
+
+  return context
+    ? {
+        ok: true,
+        system: [FORM_ANSWERS_PROMPT, FORM_ANSWERS_JSON_REPLY].join("\n\n"),
+        prompt: createFormAnswersContent({ ...context, questions: request.questions }),
+      }
+    : { ok: false, message: NO_RESUME };
+}
 
 export async function writeFormAnswers(
   worker: WorkerIdentity,
@@ -30,7 +51,7 @@ export async function writeFormAnswers(
   });
 
   if (!context) {
-    return { ok: false, limited: false, message: "Upload a resume to HireLens so answers can be written from it." };
+    return { ok: false, limited: false, message: NO_RESUME };
   }
 
   const reservation = await reserveUsage({ userId, action: "FORM_ANSWERS" });

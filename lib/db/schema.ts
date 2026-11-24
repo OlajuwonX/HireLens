@@ -1203,6 +1203,24 @@ export const emailEvents = pgTable(
   ],
 );
 
+export const gmailConnectionStatus = pgEnum("gmail_connection_status", ["CONNECTED", "NEEDS_RECONNECT"]);
+
+export const gmailConnections = pgTable(
+  "gmail_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    refreshTokenCipher: text("refresh_token_cipher").notNull(),
+    status: gmailConnectionStatus("status").notNull().default("CONNECTED"),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("gmail_connections_user_idx").on(table.userId)],
+);
+
+export type GmailConnection = typeof gmailConnections.$inferSelect;
+
 export const interviewPreps = pgTable(
   "interview_preps",
   {

@@ -36,7 +36,7 @@ afterAll(async () => {
   await browser?.close();
 });
 
-function chromeStub(replies: Record<string, unknown>, settings?: Record<string, boolean>) {
+function chromeStub(replies: Record<string, unknown>, settings?: Record<string, unknown>) {
   return `window.hirelensRequests = [];
   const replies = ${JSON.stringify(replies)};
   const next = (type) => {
@@ -65,7 +65,7 @@ const baseReplies = {
   answers: answer([{ id: "#project", answer: PROJECT_ANSWER }]),
 };
 
-async function openPage(html: string, replies: Record<string, unknown>, settings?: Record<string, boolean>, url = APPLY_URL) {
+async function openPage(html: string, replies: Record<string, unknown>, settings?: Record<string, unknown>, url = APPLY_URL) {
   const page = await browser!.newPage();
 
   await page.route(`${new URL(url).origin}/**`, (route) => route.fulfill({ contentType: "text/html", body: html }));
@@ -272,4 +272,33 @@ describe.skipIf(!browser)("connecting from the HireLens settings page", () => {
 
 it.skipIf(Boolean(browser))("records that no browser was available for the extension tests", () => {
   expect(browser).toBeNull();
+});
+
+describe.skipIf(!browser)("writing answers with the Claude subscription", () => {
+  const claudeSettings = { improveResume: true, writeAnswers: true };
+
+  it("uses Claude through the helper and never touches the Gemini allowance", async () => {
+    const page = await openPage(
+      applicationForm,
+      { ...baseReplies, "claude-answers": answer([{ id: "#project", answer: "Written by Claude." }]) },
+      { ...claudeSettings, writer: "claude" },
+    );
+    const reply = await fill(page);
+
+    expect(await page.inputValue("#project")).toBe("Written by Claude.");
+    expect(await sent(page, "answers")).toHaveLength(0);
+    expect(reply.value.notes).toEqual([]);
+  });
+
+  it("falls back to Gemini when the helper is not installed", async () => {
+    const page = await openPage(
+      applicationForm,
+      { ...baseReplies, "claude-answers": { ok: false, message: "The Claude helper is not installed on this computer." } },
+      { ...claudeSettings, writer: "claude" },
+    );
+    const reply = await fill(page);
+
+    expect(await page.inputValue("#project")).toBe(PROJECT_ANSWER);
+    expect(reply.value.notes[0]).toContain("Claude was not available");
+  });
 });

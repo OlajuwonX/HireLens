@@ -1,6 +1,7 @@
 import { readConnection, saveConnection } from "../shared/connection";
 import { fail, ok } from "../shared/messages";
 import type { Connection, Reply, Request } from "../shared/types";
+import { answerWithClaude, helperStatus } from "./claude";
 import { boostResume, checkConnection, fetchFillData, fetchPdf, importJob, reportApplied, writeAnswers } from "./api";
 
 async function withConnection<T>(run: (connection: Connection) => Promise<T>): Promise<Reply<T>> {
@@ -47,6 +48,10 @@ async function handle(request: Request, sender: chrome.runtime.MessageSender): P
       return withConnection((connection) => importJob(connection, request.page));
     case "answers":
       return withConnection((connection) => writeAnswers(connection, request.body));
+    case "claude-answers":
+      return withConnection((connection) => answerWithClaude(connection, request.body));
+    case "claude-status":
+      return ok(await helperStatus());
     case "save-connection":
       return acceptConnection(request.connection, sender);
     default:

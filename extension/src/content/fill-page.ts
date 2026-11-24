@@ -79,7 +79,7 @@ export async function fillPage(scope: "all" | "new" = "all", progress: Progress 
   const fields = scope === "new" ? unseenFields() : visibleFields();
   const empty = fields.filter((field) => !hasValue(field));
   const known = await fillKnownFields(fill, empty);
-  const answers = settings.writeAnswers ? await writeOpenAnswers(fill, empty, progress) : { written: 0, notes: [] };
+  const answers = settings.writeAnswers ? await writeOpenAnswers(fill, empty, progress, settings.writer) : { written: 0, notes: [] };
   const missing = empty.filter((field) => field.required && !hasValue(field));
 
   missing.forEach(highlight);

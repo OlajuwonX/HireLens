@@ -1,6 +1,8 @@
-export type Settings = { improveResume: boolean; writeAnswers: boolean };
+export type Writer = "gemini" | "claude";
 
-export const DEFAULT_SETTINGS: Settings = { improveResume: true, writeAnswers: true };
+export type Settings = { improveResume: boolean; writeAnswers: boolean; writer: Writer };
+
+export const DEFAULT_SETTINGS: Settings = { improveResume: true, writeAnswers: true, writer: "gemini" };
 
 const KEY = "settings";
 

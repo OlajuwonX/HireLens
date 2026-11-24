@@ -5,7 +5,9 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node build.mjs && vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "helper:install": "node build.mjs && node helper-dist/install.mjs",
+    "helper:uninstall": "node helper-dist/install.mjs --uninstall"
   },
   "devDependencies": {
     "@types/chrome": "0.3.7",

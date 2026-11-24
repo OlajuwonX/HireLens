@@ -71,3 +71,9 @@ export function toBase64(bytes: Uint8Array) {
 
   return btoa(binary);
 }
+
+export type AnswersPrompt = { ok: true; system: string; prompt: string } | { ok: false; message: string };
+
+export async function fetchAnswersPrompt(connection: Connection, body: AnswersBody): Promise<AnswersPrompt> {
+  return (await post(connection, "/api/extension/answers/prompt", body)).json();
+}

@@ -24,4 +24,18 @@ await build({
 
 await cp("static", "dist", { recursive: true });
 
+await rm("helper-dist", { recursive: true, force: true });
+
+await build({
+  entryPoints: { host: "src/helper/host-main.ts", install: "src/helper/install.ts" },
+  outdir: "helper-dist",
+  outExtension: { ".js": ".mjs" },
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: "node20",
+  legalComments: "none",
+  logLevel: "warning",
+});
+
 console.log("Built the HireLens extension into extension/dist");

@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "HireLens",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqvPFSxLnClBx1QGQl9GnlsqfA6W69vFphiY/+9P9AaCZnTC5YOr1YWNCf2417IEGuY2C/Vrho+fmZssqRIYJ94oDezhfOf1GtznYIxx93dlBqxDaQh8SkgR5yINyaMkyhUTAQMk9WCG9AM8yuevcqKztg5MeseYIimflUb1Dc0DhYpLO6p8DCnrBKMgDNPQRp6o6AFEBLXeo0nmyzsEhCQa0yUYyoApOX/Of7LpVpl3xI0HWpBt14ZFHyN0Xmp7cWzafpR91yrN/KlNTVGXwK6DLf1b+oZEVhQbpvpJFq5MOiIphz7Tqx7KfvWjttnxh3idRbo3NzRfwwoyoEqIiAQIDAQAB",
   "description": "Fill job applications with your HireLens profile, saved answers and best resume.",
   "action": { "default_popup": "popup.html", "default_title": "HireLens" },
   "background": { "service_worker": "background.js" },
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "nativeMessaging"],
   "optional_host_permissions": ["https://*/*", "http://localhost/*"],
   "host_permissions": [
     "https://*.greenhouse.io/*",

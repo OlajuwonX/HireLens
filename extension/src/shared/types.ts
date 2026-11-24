@@ -62,6 +62,8 @@ export type Request =
   | { type: "boost"; applicationPublicId: string }
   | { type: "import"; page: PageJob }
   | { type: "answers"; body: AnswersBody }
+  | { type: "claude-answers"; body: AnswersBody }
+  | { type: "claude-status" }
   | { type: "save-connection"; connection: Connection }
   | { type: "fill" }
   | { type: "ping" };
