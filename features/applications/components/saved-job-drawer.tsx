@@ -194,7 +194,11 @@ export async function SavedJobDrawer({
     <Alert tone="info">{SAVE_ONLY_REASON}</Alert>
   ) : result ? (
     <div className="space-y-6">
-      <ScorePanel scoring={result.scoring} />
+      <ScorePanel
+        scoring={result.scoring}
+        context={[row.job.company, row.job.location].filter(Boolean).join(" · ")}
+        showEvidence={(report?.requirements.length ?? 0) > 0}
+      />
 
       <section className="space-y-3">
         <h3 className="text-section-title font-semibold text-text-primary">

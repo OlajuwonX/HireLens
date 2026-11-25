@@ -1,53 +1,58 @@
-import { ScoreBlock } from "@/components/ui/score-block";
-import { Card, CardContent } from "@/components/ui/card";
+import { MatchPanel, type MatchPart } from "@/components/data-display/match-panel";
 import type { StoredApplicationIntelligence } from "@/lib/ai/schemas/application-intelligence.schema";
 
-const labels: [keyof StoredApplicationIntelligence["scoring"], string][] = [
-  ["overallScore", "Overall"],
-  ["atsScore", "ATS"],
+type Scoring = StoredApplicationIntelligence["scoring"];
+
+const parts: [keyof Scoring, string][] = [
   ["requirementsScore", "Requirements"],
   ["skillsScore", "Skills"],
   ["experienceScore", "Experience"],
   ["keywordScore", "Keywords"],
+  ["atsScore", "ATS readability"],
 ];
+
+export const REQUIREMENTS_ANCHOR = "requirements";
+
+export function scoreParts(scoring: Scoring): MatchPart[] {
+  return parts
+    .map(([key, label]) => ({ label, score: scoring[key] }))
+    .filter((part): part is MatchPart => typeof part.score === "number");
+}
 
 export function ScorePanel({
   scoring,
+  context,
+  showEvidence = false,
 }: {
-  scoring: StoredApplicationIntelligence["scoring"];
+  scoring: Scoring;
+  context?: string;
+  showEvidence?: boolean;
 }) {
-  const entries = labels
-    .map(([key, label]) => ({ label, value: scoring[key] }))
-    .filter(
-      (entry): entry is { label: string; value: number } =>
-        typeof entry.value === "number",
-    );
+  const breakdown = scoreParts(scoring);
+  const total = typeof scoring.overallScore === "number" ? scoring.overallScore : null;
 
-  if (entries.length === 0) {
+  if (total === null && breakdown.length === 0) {
     return null;
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {entries.map((entry) => (
-          <ScoreBlock
-            key={entry.label}
-            label={entry.label}
-            score={entry.value}
-          />
-        ))}
+  const footer =
+    scoring.explanation || showEvidence ? (
+      <div className="space-y-2">
+        {scoring.explanation ? <p>{scoring.explanation}</p> : null}
+        {showEvidence ? (
+          <a href={`#${REQUIREMENTS_ANCHOR}`} className="inline-block text-ink-text underline underline-offset-4">
+            See the evidence for each requirement
+          </a>
+        ) : null}
       </div>
+    ) : null;
 
-      {scoring.explanation ? (
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-meta leading-relaxed text-text-secondary">
-              {scoring.explanation}
-            </p>
-          </CardContent>
-        </Card>
-      ) : null}
-    </div>
+  return (
+    <MatchPanel
+      context={context}
+      total={total ?? Math.round(breakdown.reduce((sum, part) => sum + part.score, 0) / breakdown.length)}
+      parts={breakdown}
+      footer={footer}
+    />
   );
 }

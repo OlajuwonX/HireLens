@@ -1,3 +1,4 @@
+import { ScoreChip } from "@/components/data-display/score-chip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { MatchFit } from "@/lib/ai/schemas/job-matching.schema";
@@ -38,7 +39,7 @@ export function MatchCard({ match }: { match: MatchView }) {
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="font-mono text-section-title text-text-primary">{match.rank}</span>
+          <ScoreChip score={match.rank} />
           {match.fit ? <Badge tone={fitTone[match.fit]}>{match.fit.toLowerCase()}</Badge> : null}
         </div>
       </div>

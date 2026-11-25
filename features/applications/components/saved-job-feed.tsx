@@ -89,18 +89,7 @@ export function SavedJobFeed({
                   {row.company}
                 </p>
               </Link>
-              <JobScoreSlot
-                saveOnly={row.saveOnly}
-                matchScore={row.matchScore}
-                size={44}
-                className="max-sm:hidden"
-              />
-              <JobScoreSlot
-                saveOnly={row.saveOnly}
-                matchScore={row.matchScore}
-                size={38}
-                className="sm:hidden"
-              />
+              <JobScoreSlot saveOnly={row.saveOnly} matchScore={row.matchScore} />
             </div>
 
             <dl className="grid grid-cols-2 gap-x-3 gap-y-2">

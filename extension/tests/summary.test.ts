@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describeMatch } from "../src/content/badge";
-import { describeMatchLine, describeResult } from "../src/popup/summary";
+import { describeMatchLine, describeResult, matchRows } from "../src/popup/summary";
 
 const summary = {
   fields: 10,
@@ -38,5 +38,20 @@ describe("describeResult", () => {
     expect(describeResult(summary)).toBe(
       "Filled 6 of 10 fields. AI wrote 2 answers, outlined in blue. Review them before you submit. Tailored resume attached. Cover letter attached. New pages fill automatically when you select Next.",
     );
+  });
+});
+
+describe("match bars", () => {
+  it("shows before and after when the resume improved", () => {
+    expect(matchRows({ before: 70, after: 91, gaps: [] })).toEqual([
+      { label: "Before", score: 70 },
+      { label: "Now", score: 91 },
+    ]);
+  });
+
+  it("shows one bar when nothing changed, and none without a score", () => {
+    expect(matchRows({ before: 88, after: 88, gaps: [] })).toEqual([{ label: "Now", score: 88 }]);
+    expect(matchRows({ before: null, after: null, gaps: [] })).toEqual([]);
+    expect(matchRows(null)).toEqual([]);
   });
 });

@@ -27,6 +27,11 @@
   --color-warning-text: var(--hl-warning-text);
   --color-info: var(--hl-info);
   --color-info-text: var(--hl-info-text);
+  --color-ink: var(--hl-ink);
+  --color-ink-text: var(--hl-ink-text);
+  --color-ink-muted: var(--hl-ink-muted);
+  --color-ink-line: var(--hl-ink-line);
+  --color-ink-caution: var(--hl-ink-caution);
 
   --text-display: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
   --text-display--line-height: 1.04;
@@ -87,6 +92,11 @@
   --hl-warning-text: #ffffff;
   --hl-info: #2c5fa8;
   --hl-info-text: #ffffff;
+  --hl-ink: #161a18;
+  --hl-ink-text: #f3f5f2;
+  --hl-ink-muted: #a7aea9;
+  --hl-ink-line: #3a403b;
+  --hl-ink-caution: #e8bd6d;
   color-scheme: light;
 }
 
@@ -112,6 +122,11 @@
   --hl-warning-text: #2b1d00;
   --hl-info: #9cc0f5;
   --hl-info-text: #0b1f3d;
+  --hl-ink: #0b0d0c;
+  --hl-ink-text: #f3f5f2;
+  --hl-ink-muted: #a7aea9;
+  --hl-ink-line: #2e332f;
+  --hl-ink-caution: #e8bd6d;
   color-scheme: dark;
 }
 
@@ -173,6 +188,15 @@
   &:active:not(:disabled) {
     transform: scale(0.97);
   }
+}
+
+@utility dither-track {
+  background-image: conic-gradient(currentColor 25%, transparent 0 50%, currentColor 0 75%, transparent 0);
+  background-size: 4px 4px;
+}
+
+@utility dither-fill {
+  background-image: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 4px);
 }
 
 @utility glass-bar {
