@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { THEME_STORAGE_KEY } from "./theme-script";
+import { DEFAULT_THEME, THEME_STORAGE_KEY } from "./theme-script";
 
 type ThemePreference = "light" | "dark" | "system";
 
@@ -28,14 +28,14 @@ export function ThemeToggle({
   className?: string;
   block?: boolean;
 }) {
-  const [preference, setPreference] = useState<ThemePreference>("system");
+  const [preference, setPreference] = useState<ThemePreference>(DEFAULT_THEME);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(
       THEME_STORAGE_KEY,
     ) as ThemePreference | null;
-    setPreference(stored ?? "system");
+    setPreference(stored ?? DEFAULT_THEME);
     setMounted(true);
   }, []);
 

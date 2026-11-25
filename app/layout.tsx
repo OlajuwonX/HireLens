@@ -11,18 +11,19 @@ import {
   getSiteUrl,
 } from "@/lib/seo/site";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
 import "./app.css";
 
-const geistSans = Geist({
+const sans = Schibsted_Grotesk({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-brand-sans",
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const mono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-brand-mono",
   display: "swap",
 });
 
@@ -97,7 +98,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${sans.variable} ${mono.variable} dark`}
     >
       <head>
         <ThemeScript />

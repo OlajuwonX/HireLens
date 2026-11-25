@@ -124,7 +124,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
             </CardContent>
           </Card>
 
-          <div className="lg:sticky lg:top-0 lg:flex lg:max-h-[calc(100dvh-8rem)] lg:flex-col">
+          <div className="lg:sticky lg:top-20 lg:flex lg:max-h-[calc(100dvh-8rem)] lg:flex-col">
             {sourceCard}
           </div>
         </div>

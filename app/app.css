@@ -3,8 +3,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-sans: var(--font-brand-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-brand-mono), ui-monospace, SFMono-Regular, monospace;
 
   --color-background: var(--hl-background);
   --color-surface: var(--hl-surface);
@@ -29,25 +29,26 @@
   --color-info-text: var(--hl-info-text);
 
   --text-display: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
-  --text-display--line-height: 1.08;
-  --text-display--letter-spacing: -0.02em;
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.03em;
   --text-page-title: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
-  --text-page-title--line-height: 1.2;
-  --text-page-title--letter-spacing: -0.01em;
+  --text-page-title--line-height: 1.15;
+  --text-page-title--letter-spacing: -0.02em;
   --text-section-title: 1.25rem;
   --text-section-title--line-height: 1.3;
+  --text-section-title--letter-spacing: -0.01em;
   --text-card-metric: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
-  --text-card-metric--line-height: 1.1;
-  --text-card-metric--letter-spacing: -0.01em;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.6;
+  --text-card-metric--line-height: 1.05;
+  --text-card-metric--letter-spacing: -0.025em;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
   --text-meta: 0.875rem;
   --text-meta--line-height: 1.55;
   --text-label: 0.8125rem;
   --text-label--line-height: 1.4;
   --text-system: 0.75rem;
   --text-system--line-height: 1.3;
-  --text-system--letter-spacing: 0.04em;
+  --text-system--letter-spacing: 0.06em;
 
   --radius-none: 0px;
   --radius-control: 2px;
@@ -58,6 +59,10 @@
   --container-page: 80rem;
   --container-reading: 45rem;
   --container-form: 26rem;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 :root {
@@ -124,7 +129,8 @@
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.6;
+    line-height: 1.55;
+    font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -136,6 +142,55 @@
   ::selection {
     background-color: var(--color-accent);
     color: var(--color-accent-text);
+  }
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  .tabular,
+  td,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@utility pressable {
+  transition-property: transform, background-color, border-color, color, opacity;
+  transition-duration: 140ms;
+  transition-timing-function: var(--ease-out);
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+@utility glass-bar {
+  background-color: color-mix(in oklab, var(--color-background) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-background);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  @media (prefers-contrast: more) {
+    background-color: var(--color-background);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: var(--color-border-strong);
   }
 }
 

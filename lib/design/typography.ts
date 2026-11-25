@@ -1,6 +1,6 @@
 export const fontFamily = {
-  sans: "var(--font-geist-sans)",
-  mono: "var(--font-geist-mono)",
+  sans: "var(--font-brand-sans)",
+  mono: "var(--font-brand-mono)",
 } as const;
 
 export type TypeStyle = {
@@ -25,34 +25,35 @@ export const typeScale: Record<TypeScaleName, TypeStyle> = {
   display: {
     size: "clamp(2rem, 1.4rem + 2.6vw, 3.5rem)",
     weight: 600,
-    lineHeight: "1.08",
+    lineHeight: "1.04",
     family: "sans",
-    tracking: "-0.02em",
+    tracking: "-0.03em",
   },
   pageTitle: {
     size: "clamp(1.5rem, 1.3rem + 0.8vw, 2rem)",
     weight: 600,
-    lineHeight: "1.2",
+    lineHeight: "1.15",
     family: "sans",
-    tracking: "-0.01em",
+    tracking: "-0.02em",
   },
   sectionTitle: {
     size: "1.25rem",
     weight: 600,
     lineHeight: "1.3",
     family: "sans",
+    tracking: "-0.01em",
   },
   cardMetric: {
     size: "clamp(1.75rem, 1.5rem + 1vw, 2.25rem)",
     weight: 600,
-    lineHeight: "1.1",
+    lineHeight: "1.05",
     family: "sans",
-    tracking: "-0.01em",
+    tracking: "-0.025em",
   },
   body: {
-    size: "0.9375rem",
+    size: "1rem",
     weight: 400,
-    lineHeight: "1.6",
+    lineHeight: "1.55",
     family: "sans",
   },
   secondary: {
@@ -72,7 +73,7 @@ export const typeScale: Record<TypeScaleName, TypeStyle> = {
     weight: 500,
     lineHeight: "1.3",
     family: "mono",
-    tracking: "0.04em",
+    tracking: "0.06em",
   },
 };
 

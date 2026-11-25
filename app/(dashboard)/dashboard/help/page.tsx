@@ -85,7 +85,7 @@ export default async function HelpPage() {
           </Card>
         </div>
 
-        <Card className="lg:sticky lg:top-0">
+        <Card className="lg:sticky lg:top-20">
           <CardHeader>
             <CardTitle>Report a problem</CardTitle>
           </CardHeader>

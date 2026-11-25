@@ -610,7 +610,7 @@ export function ResumeEditor({
         </Section>
       </div>
 
-      <div className="min-w-0 lg:sticky lg:top-4">
+      <div className="min-w-0 lg:sticky lg:top-20">
         <p className="mb-2 font-mono text-system font-medium uppercase text-text-muted">
           Live preview
         </p>
