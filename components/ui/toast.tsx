@@ -14,7 +14,9 @@ const toneStyles: Record<ToastTone, { icon: typeof Check; className: string }> =
     info: { icon: Info, className: "bg-action-dark text-action-dark-text" },
   };
 
-function show(tone: ToastTone, message: string) {
+type ToastAction = { label: string; run: () => void };
+
+function show(tone: ToastTone, message: string, action?: ToastAction) {
   const { icon: Icon, className } = toneStyles[tone];
 
   return hotToast.custom(
@@ -40,6 +42,18 @@ function show(tone: ToastTone, message: string) {
         <p className="min-w-0 flex-1 text-meta leading-snug text-text-primary">
           {message}
         </p>
+        {action ? (
+          <button
+            type="button"
+            onClick={() => {
+              hotToast.dismiss(instance.id);
+              action.run();
+            }}
+            className="pressable -my-1 shrink-0 rounded-control px-2 py-1 text-meta font-semibold text-text-primary underline underline-offset-4"
+          >
+            {action.label}
+          </button>
+        ) : null}
         <button
           type="button"
           aria-label="Dismiss notification"
@@ -50,7 +64,7 @@ function show(tone: ToastTone, message: string) {
         </button>
       </div>
     ),
-    { duration: tone === "error" ? 6000 : 4000 },
+    { duration: tone === "error" || action ? 6000 : 4000 },
   );
 }
 
@@ -61,6 +75,7 @@ export const notify = {
   copied: (label: string) => show("success", `${label} copied successfully.`),
   deleted: (label: string) => show("success", `${label} deleted successfully.`),
   saved: (label: string) => show("success", `${label} saved successfully.`),
+  undo: (message: string, run: () => void) => show("info", message, { label: "Undo", run }),
   dismiss: hotToast.dismiss,
 };
 

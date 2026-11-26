@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   findSuggestableBoard: vi.fn(),
+  findBoardByPublicId: vi.fn(),
   countFollows: vi.fn(),
   followBoard: vi.fn(),
   findProfileByUser: vi.fn(),
@@ -10,6 +11,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/features/discovery/server/suggestion.repository", () => ({
   findSuggestableBoard: mocks.findSuggestableBoard,
+  findBoardByPublicId: mocks.findBoardByPublicId,
 }));
 vi.mock("@/features/discovery/server/board.repository", () => ({
   countFollows: mocks.countFollows,
@@ -76,5 +78,16 @@ describe("job regions", () => {
     mocks.findProfileByUser.mockResolvedValue(null);
 
     await expect(setJobRegion({ userId, region: "NG", enabled: false })).resolves.toEqual([]);
+  });
+});
+
+describe("refollowBoard", () => {
+  it("refollows any board by id, so Undo works for boards outside the catalog", async () => {
+    const { refollowBoard } = await import("@/features/discovery/server/suggestion.service");
+    mocks.findBoardByPublicId.mockResolvedValue({ id: "board-9", companyName: "Acme" });
+
+    await expect(refollowBoard({ userId, publicId })).resolves.toEqual({ ok: true, companyName: "Acme" });
+    expect(mocks.findSuggestableBoard).not.toHaveBeenCalled();
+    expect(mocks.followBoard).toHaveBeenCalledWith({ userId, boardId: "board-9" });
   });
 });

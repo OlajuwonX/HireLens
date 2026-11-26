@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/format/when";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -54,7 +55,7 @@ export function ResumeVersionList({
               </div>
               <p className="font-mono text-system text-text-muted">
                 v{version.versionNumber} ·{" "}
-                {version.createdAt.toLocaleDateString()}
+                {formatDate(version.createdAt)}
               </p>
             </div>
 

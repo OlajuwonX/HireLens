@@ -1,8 +1,7 @@
 import { ScoreChip } from "@/components/data-display/score-chip";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { MatchFit } from "@/lib/ai/schemas/job-matching.schema";
-import { dismissMatchAction } from "../actions/matching-actions";
+import { HideMatchButton } from "./hide-match-button";
 import type { MatchView } from "../match-view";
 import { OpenPostingButton } from "./open-posting-button";
 
@@ -54,12 +53,7 @@ export function MatchCard({ match }: { match: MatchView }) {
 
       <div className="mt-auto flex flex-wrap gap-2 pt-1">
         <OpenPostingButton publicId={match.postingPublicId} />
-        <form action={dismissMatchAction}>
-          <input type="hidden" name="publicId" value={match.publicId} />
-          <Button type="submit" variant="outline" size="compact">
-            Not interested
-          </Button>
-        </form>
+        <HideMatchButton publicId={match.publicId} title={match.title} />
       </div>
     </li>
   );

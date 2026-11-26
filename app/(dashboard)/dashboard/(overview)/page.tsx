@@ -1,3 +1,4 @@
+import { DISPLAY_TIME_ZONE } from "@/lib/format/when";
 import { PageTitle } from "@/components/layout/page-title";
 import { Button } from "@/components/ui/button";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
@@ -31,7 +32,7 @@ export default async function TodayPage() {
   const items = buildTodayItems(signals, now);
   const name = firstName(user.name);
   const primary = summary.resumeGroupCount === 0 ? "resume" : items.length === 0 ? "discover" : null;
-  const dateLabel = now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const dateLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: DISPLAY_TIME_ZONE }).format(now);
 
   return (
     <div className="mx-auto max-w-reading space-y-10">

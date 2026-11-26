@@ -76,3 +76,13 @@ export async function dismissMatch(input: { userId: string; publicId: string }) 
 
   return updated.length > 0;
 }
+
+export async function restoreMatch(input: { userId: string; publicId: string }) {
+  const updated = await db
+    .update(jobMatches)
+    .set({ dismissedAt: null, updatedAt: new Date() })
+    .where(and(eq(jobMatches.userId, input.userId), eq(jobMatches.publicId, input.publicId)))
+    .returning({ id: jobMatches.id });
+
+  return updated.length > 0;
+}

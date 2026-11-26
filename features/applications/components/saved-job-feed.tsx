@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDate } from "@/lib/format/when";
 import { useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { FeedStatus } from "@/components/ui/feed-status";
@@ -20,7 +21,7 @@ const SKELETON_COUNT = 4;
 
 function shortDate(value: Date | null) {
   return value
-    ? value.toLocaleDateString(undefined, { day: "numeric", month: "short" })
+    ? formatDate(value)
     : "--";
 }
 

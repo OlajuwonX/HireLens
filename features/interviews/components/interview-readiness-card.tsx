@@ -1,3 +1,4 @@
+import { plural } from "@/lib/format/plural";
 import { Flame } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -131,7 +132,7 @@ function Active({
         <Link href={INTERVIEW_HREF}>
           {interview.completed
             ? "Review this week"
-            : `${interview.remaining} questions left`}
+            : `${plural(interview.remaining, "question", "questions")} left`}
         </Link>
       </Button>
     </div>

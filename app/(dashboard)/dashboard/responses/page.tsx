@@ -53,7 +53,14 @@ export default async function ResponsesPage({
       <GmailPanel state={gmail.state} checkedLabel={gmail.checkedLabel} />
 
       {rows.length === 0 ? (
-        <EmptyState title="No responses yet" description="When employers reply, their messages will be sorted here." />
+        <EmptyState
+          title="No replies yet"
+          description={
+            gmail.state === "connected"
+              ? "HireLens checks Gmail every day. Replies from companies you applied to appear here."
+              : "Connect Gmail above and replies from companies you applied to are sorted here."
+          }
+        />
       ) : (
         sections.map((section) => (
           <section key={section.key} className="space-y-3">

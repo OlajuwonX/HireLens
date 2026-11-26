@@ -2,25 +2,26 @@
 
 import { useSearchParams } from "next/navigation";
 import { DebouncedSearch } from "@/components/ui/debounced-search";
-import { Dropdown } from "@/components/ui/dropdown";
 import { DISCOVERY_PATH } from "../constants";
+import { ArrangementChips } from "./arrangement-chips";
 import { useDiscoveryRefresh } from "./refresh-context";
 
-const arrangements = [
-  { value: "ALL", label: "Any arrangement" },
-  { value: "REMOTE", label: "Remote" },
-  { value: "HYBRID", label: "Hybrid" },
-  { value: "ON_SITE", label: "On-site" },
-];
-
-export function DiscoveryFilters({ q, arrangement }: { q: string; arrangement: string }) {
+export function DiscoveryFilters({
+  q,
+  arrangement,
+  counts,
+}: {
+  q: string;
+  arrangement: string;
+  counts: Record<string, number>;
+}) {
   const { replace } = useDiscoveryRefresh();
   const params = useSearchParams();
 
   const update = (key: string, value: string) => {
     const search = new URLSearchParams(params.toString());
 
-    if (value && value !== "ALL") {
+    if (value) {
       search.set(key, value);
     } else {
       search.delete(key);
@@ -30,7 +31,7 @@ export function DiscoveryFilters({ q, arrangement }: { q: string; arrangement: s
   };
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <DebouncedSearch
         value={q}
         onSearch={(next) => update("q", next)}
@@ -38,12 +39,7 @@ export function DiscoveryFilters({ q, arrangement }: { q: string; arrangement: s
         placeholder="Search title or company"
         className="sm:max-w-sm"
       />
-      <Dropdown
-        label="Work arrangement"
-        value={arrangement || "ALL"}
-        onChange={(value) => update("arrangement", value)}
-        options={arrangements}
-      />
+      <ArrangementChips active={arrangement} counts={counts} onSelect={(value) => update("arrangement", value)} />
     </div>
   );
 }

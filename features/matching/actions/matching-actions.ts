@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { MATCHES_PATH } from "../constants";
-import { dismissMatch } from "../server/match.repository";
+import { dismissMatch, restoreMatch } from "../server/match.repository";
 import { runMatching, type MatchingOutcome } from "../server/matching.service";
 
 export async function runMatchingAction(): Promise<MatchingOutcome> {
@@ -16,14 +16,24 @@ export async function runMatchingAction(): Promise<MatchingOutcome> {
   return outcome;
 }
 
-export async function dismissMatchAction(formData: FormData) {
+async function withMatch(publicId: unknown, run: (input: { userId: string; publicId: string }) => Promise<unknown>) {
   const user = await requireDatabaseUser();
-  const parsed = z.object({ publicId: z.uuid() }).safeParse({
-    publicId: formData.get("publicId"),
-  });
+  const parsed = z.uuid().safeParse(publicId);
 
-  if (parsed.success) {
-    await dismissMatch({ userId: user.id, publicId: parsed.data.publicId });
-    revalidatePath(MATCHES_PATH);
+  if (!parsed.success) {
+    return false;
   }
+
+  await run({ userId: user.id, publicId: parsed.data });
+  revalidatePath(MATCHES_PATH);
+
+  return true;
+}
+
+export async function hideMatchAction(publicId: string) {
+  return withMatch(publicId, dismissMatch);
+}
+
+export async function restoreMatchAction(publicId: string) {
+  return withMatch(publicId, restoreMatch);
 }

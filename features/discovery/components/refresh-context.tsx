@@ -1,5 +1,6 @@
 "use client";
 
+import { plural } from "@/lib/format/plural";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useMemo, useTransition, type ReactNode } from "react";
@@ -30,7 +31,7 @@ export function DiscoveryRefreshProvider({ children }: { children: ReactNode }) 
     onSuccess: (report) => {
       notify.success(
         report.synced > 0
-          ? `Checked ${report.synced} sources for new jobs.`
+          ? `Checked ${plural(report.synced, "source", "sources")} for new jobs.`
           : "Everything was checked recently. You're up to date.",
       );
       startReload(() => router.refresh());

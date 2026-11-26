@@ -71,6 +71,7 @@ describe("helpers", () => {
 
   it("names the day of an interview", () => {
     expect(interviewWhen(new Date("2026-11-25T16:30:00Z"), now)).toBe("today at 16:30");
-    expect(interviewWhen(new Date("2026-11-28T10:00:00Z"), now)).toBe("Saturday 28 Nov at 10:00");
+    expect(interviewWhen(new Date("2026-11-28T10:00:00Z"), now)).toBe("Saturday at 10:00");
+    expect(interviewWhen(new Date("2026-12-09T10:00:00Z"), now)).toBe("9 Dec at 10:00");
   });
 });

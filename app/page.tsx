@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { MatchPanel } from "@/components/data-display/match-panel";
 import { Button } from "@/components/ui/button";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/seo/site";
 import { FAQ, buildStructuredData } from "@/lib/seo/structured-data";
@@ -56,45 +57,13 @@ const steps = [
   },
 ];
 
-const previewScores = [
-  { label: "ATS compatibility", value: 87 },
-  { label: "Required skills", value: 91 },
-  { label: "Experience alignment", value: 78 },
-  { label: "Preferred skills", value: 63 },
+const previewParts = [
+  { label: "Requirements", score: 88 },
+  { label: "Skills", score: 91 },
+  { label: "Experience", score: 78 },
+  { label: "Keywords", score: 57 },
+  { label: "ATS readability", score: 87 },
 ];
-
-function DashboardPreview() {
-  return (
-    <div className="rounded-card border border-border bg-surface p-6">
-      <p className="font-mono text-system font-medium uppercase text-text-muted">
-        Job fit
-      </p>
-      <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-card-metric font-semibold text-text-primary">
-          82
-        </span>
-        <span className="text-meta text-text-muted">/ 100</span>
-      </div>
-      <p className="mt-1 text-meta text-text-secondary">Strong match</p>
-      <div className="mt-4 h-1.5 w-full overflow-hidden bg-surface-elevated">
-        <div className="h-full w-[82%] bg-accent" />
-      </div>
-      <dl className="mt-6">
-        {previewScores.map((row) => (
-          <div
-            key={row.label}
-            className="flex items-center justify-between border-b border-border py-2.5 last:border-b-0"
-          >
-            <dt className="text-meta text-text-secondary">{row.label}</dt>
-            <dd className="font-mono text-meta font-medium tabular-nums text-text-primary">
-              {row.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
 
 export default function HomePage() {
   const structuredData = buildStructuredData();
@@ -131,7 +100,7 @@ export default function HomePage() {
               Free to use. No card required.
             </p>
           </div>
-          <DashboardPreview />
+          <MatchPanel context="Senior Frontend Engineer" total={82} parts={previewParts} />
         </section>
 
         <section

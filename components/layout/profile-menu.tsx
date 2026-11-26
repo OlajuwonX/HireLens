@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateTime } from "@/lib/format/when";
 import { useCloseMobileNav } from "./mobile-nav-context";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -39,10 +40,7 @@ function formatLastLogin(value: string | null) {
 
   return Number.isNaN(date.getTime())
     ? "Not recorded"
-    : date.toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+    : formatDateTime(date);
 }
 
 export function ProfileMenu({

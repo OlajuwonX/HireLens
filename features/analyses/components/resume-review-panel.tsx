@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDate } from "@/lib/format/when";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export function ResumeReviewPanel({ applicationPublicId }: { applicationPublicId
           Independent review
         </h4>
         {review ? (
-          <Badge tone="neutral">Reviewed {new Date(review.reviewedAt).toLocaleDateString()}</Badge>
+          <Badge tone="neutral">Reviewed {formatDate(new Date(review.reviewedAt))}</Badge>
         ) : null}
       </div>
 

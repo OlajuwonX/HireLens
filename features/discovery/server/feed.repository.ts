@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, ilike, isNull, lt, or, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, isNull, lt, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { applications, jobBoardFollows, jobBoards, jobPostings, jobs } from "@/lib/db/schema";
 import { likePattern } from "@/lib/search/query";
@@ -39,21 +39,39 @@ export type PostingListRow = {
   source: string;
 };
 
+function baseConditions(audience: Audience, q: string | undefined): (SQL | undefined)[] {
+  const conditions: (SQL | undefined)[] = [
+    isNull(jobPostings.expiredAt),
+    audienceConditions(audience, DISCOVERY_LIMITS.freshDays),
+  ];
+
+  if (q) {
+    const pattern = likePattern(q);
+    conditions.push(or(ilike(jobPostings.title, pattern), ilike(jobPostings.company, pattern)));
+  }
+
+  return conditions;
+}
+
+export async function countByArrangement(input: { audience: Audience; q?: string }) {
+  const rows = await db
+    .select({ arrangement: jobPostings.workArrangement, value: count() })
+    .from(jobPostings)
+    .innerJoin(jobBoards, eq(jobBoards.id, jobPostings.boardId))
+    .leftJoin(jobBoardFollows, followedBy(input.audience.userId))
+    .where(and(...baseConditions(input.audience, input.q)))
+    .groupBy(jobPostings.workArrangement);
+
+  return Object.fromEntries(rows.map((row) => [row.arrangement, row.value])) as Record<string, number>;
+}
+
 export async function listFeed(input: {
   audience: Audience;
   filters: FeedFilters;
   cursor: FeedCursor | null;
   limit: number;
 }): Promise<PostingListRow[]> {
-  const conditions: (SQL | undefined)[] = [
-    isNull(jobPostings.expiredAt),
-    audienceConditions(input.audience, DISCOVERY_LIMITS.freshDays),
-  ];
-
-  if (input.filters.q) {
-    const pattern = likePattern(input.filters.q);
-    conditions.push(or(ilike(jobPostings.title, pattern), ilike(jobPostings.company, pattern)));
-  }
+  const conditions = baseConditions(input.audience, input.filters.q);
 
   if (input.filters.arrangement) {
     conditions.push(eq(jobPostings.workArrangement, input.filters.arrangement));

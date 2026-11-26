@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/format/when";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
@@ -62,7 +63,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
         </p>
         <p>
           <span className="font-medium text-text-primary">Created: </span>
-          {document.createdAt.toLocaleDateString()}
+          {formatDate(document.createdAt)}
         </p>
 
         <div className="space-y-2 border-t border-border pt-3">

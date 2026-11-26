@@ -393,6 +393,7 @@ export function SearchPalette({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        instant
         aria-describedby="global-search-description"
         className="left-0 top-0 h-dvh max-h-none w-screen max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-0 p-0 sm:left-1/2 sm:top-[12vh] sm:h-auto sm:max-h-[70vh] sm:w-[calc(100%-2rem)] sm:max-w-xl sm:-translate-x-1/2 sm:translate-y-0 sm:rounded-card sm:border sm:border-border"
       >

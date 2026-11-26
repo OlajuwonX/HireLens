@@ -1,3 +1,4 @@
+import { formatDate, formatWhen } from "@/lib/format/when";
 import { Alert } from "@/components/ui/alert";
 import { RecommendationList } from "@/features/analyses/components/recommendation-list";
 import { RequirementMatrix } from "@/features/analyses/components/requirement-matrix";
@@ -130,12 +131,12 @@ export async function SavedJobDrawer({
         {row.job.deadlineAt ? (
           <Row
             label="Deadline"
-            value={row.job.deadlineAt.toLocaleDateString()}
+            value={formatDate(row.job.deadlineAt)}
           />
         ) : null}
         <Row
           label="Added"
-          value={row.application.createdAt.toLocaleDateString()}
+          value={formatDate(row.application.createdAt)}
         />
       </dl>
 
@@ -180,7 +181,7 @@ export async function SavedJobDrawer({
               <li key={activity.id} className="border-l-2 border-border pl-3">
                 <p className="text-meta text-text-primary">{activity.title}</p>
                 <time className="font-mono text-system text-text-muted">
-                  {activity.createdAt.toLocaleString()}
+                  {formatWhen(activity.createdAt)}
                 </time>
               </li>
             ))}
@@ -251,7 +252,7 @@ export async function SavedJobDrawer({
               {documentTypeLabels[document.type]}
             </Link>
             <p className="font-mono text-system text-text-muted">
-              {document.createdAt.toLocaleDateString()}
+              {formatDate(document.createdAt)}
             </p>
           </li>
         ))}

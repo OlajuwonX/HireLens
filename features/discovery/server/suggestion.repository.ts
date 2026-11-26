@@ -67,3 +67,13 @@ export async function findSuggestableBoard(publicId: string) {
 
   return board ?? null;
 }
+
+export async function findBoardByPublicId(publicId: string) {
+  const [board] = await db
+    .select({ id: jobBoards.id, companyName: jobBoards.companyName })
+    .from(jobBoards)
+    .where(eq(jobBoards.publicId, publicId))
+    .limit(1);
+
+  return board ?? null;
+}

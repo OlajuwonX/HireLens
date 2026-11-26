@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Dropdown } from "@/components/ui/dropdown";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { DISCOVERY_SOURCES } from "@/lib/discovery/types";
-import { useActionToast } from "@/lib/forms/use-action-toast";
+import { notify } from "@/components/ui/toast";
 import { followBoardAction, type FollowFormState } from "../actions/discovery-actions";
 import { sourceHints, sourceLabels } from "../constants";
 
@@ -31,15 +31,38 @@ function FollowButton() {
 export function FollowBoardForm() {
   const [state, action] = useActionState(followBoardAction, initial);
   const [source, setSource] = useState("");
-  const [formKey, setFormKey] = useState(0);
+  const [board, setBoard] = useState("");
+  const announced = useRef(state);
+  const error = state.status === "error" ? state.message : "";
 
-  useActionToast(state, () => setFormKey((key) => key + 1));
+  useEffect(() => {
+    if (state === announced.current) {
+      return;
+    }
+
+    announced.current = state;
+
+    if (state.status === "saved") {
+      notify.success(state.message);
+      setBoard("");
+      setSource("");
+    }
+  }, [state]);
 
   return (
     <div className="space-y-2">
-      <form key={formKey} action={action} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
-        <FormField id="follow-board" label="Company job board">
-          <Input id="follow-board" name="board" placeholder="https://boards.greenhouse.io/company" required />
+      <form action={action} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+        <FormField id="follow-board" label="Company job board" error={error || undefined}>
+          <Input
+            id="follow-board"
+            name="board"
+            value={board}
+            onChange={(event) => setBoard(event.target.value)}
+            placeholder="https://boards.greenhouse.io/company"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "follow-board-error" : undefined}
+            required
+          />
         </FormField>
         <Dropdown
           name="source"

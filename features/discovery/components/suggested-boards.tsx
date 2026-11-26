@@ -1,12 +1,9 @@
+import { plural } from "@/lib/format/plural";
 import { regionDetails, readRegions } from "@/lib/discovery/regions";
 import type { CatalogSource } from "@/lib/discovery/types";
 import { sourceLabels } from "../constants";
 import type { SuggestedBoard } from "../server/suggestion.repository";
 import { FollowSuggestionButton } from "./follow-suggestion-button";
-
-function roleCount(count: number) {
-  return count === 1 ? "1 matching role" : `${count} matching roles`;
-}
 
 export function SuggestedBoards({ boards }: { boards: SuggestedBoard[] }) {
   if (boards.length === 0) {
@@ -35,7 +32,7 @@ export function SuggestedBoards({ boards }: { boards: SuggestedBoard[] }) {
               <div className="min-w-0">
                 <p className="truncate text-meta font-medium text-text-primary">{board.companyName}</p>
                 <p className="font-mono text-system text-text-muted">
-                  {roleCount(board.openRoles)} · {sourceLabels[board.source as CatalogSource] ?? board.source}
+                  {plural(board.openRoles, "matching role", "matching roles")} · {sourceLabels[board.source as CatalogSource] ?? board.source}
                   {region ? ` · ${regionDetails[region].label}` : ""}
                 </p>
               </div>

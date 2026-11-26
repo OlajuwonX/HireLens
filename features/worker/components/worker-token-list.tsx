@@ -1,3 +1,4 @@
+import { formatWhen } from "@/lib/format/when";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import { revokeWorkerTokenAction } from "../actions/token-actions";
 
@@ -15,7 +16,7 @@ export function WorkerTokenList({ tokens }: { tokens: Token[] }) {
           <div className="min-w-0">
             <p className="truncate text-meta font-medium text-text-primary">{token.name}</p>
             <p className="font-mono text-system text-text-muted">
-              {token.lastUsedAt ? `Last used ${token.lastUsedAt.toLocaleString()}` : "Never used"}
+              {token.lastUsedAt ? `Last used ${formatWhen(token.lastUsedAt)}` : "Never used"}
             </p>
           </div>
           <DeleteConfirmButton

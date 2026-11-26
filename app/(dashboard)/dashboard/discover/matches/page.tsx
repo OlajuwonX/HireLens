@@ -13,6 +13,8 @@ import { ScreenedOutList } from "@/features/matching/components/screened-out-lis
 import { toMatchView } from "@/features/matching/match-view";
 import { listScreenedOut, listShortlist } from "@/features/matching/server/shortlist.repository";
 import { SHORTLIST_SIZE } from "@/lib/matching/rank";
+import { Button } from "@/components/ui/button";
+import { DISCOVERY_PATH } from "@/features/discovery/constants";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -55,7 +57,12 @@ export default async function MatchesPage() {
       {shortlist.length === 0 ? (
         <EmptyState
           title="No matches yet"
-          description="Select Find matches to score the newest discovered jobs against your resume. If Discover is empty, select Check for new jobs there first."
+          description="Select Find matches to score the newest discovered jobs against your resume. If Discover is empty, check for new jobs there first."
+          action={
+            <Button asChild variant="outline">
+              <Link href={DISCOVERY_PATH}>Open Discover</Link>
+            </Button>
+          }
         />
       ) : (
         <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">

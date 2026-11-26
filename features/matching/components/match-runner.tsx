@@ -1,5 +1,6 @@
 "use client";
 
+import { plural } from "@/lib/format/plural";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { notify } from "@/components/ui/toast";
 import { runMatchingAction } from "../actions/matching-actions";
 
 function describe(outcome: { scored: number; screenedOut: number; waiting: number }) {
-  const parts = [`Scored ${outcome.scored} jobs`];
+  const parts = [`Scored ${plural(outcome.scored, "job", "jobs")}`];
 
   if (outcome.screenedOut > 0) {
     parts.push(`${outcome.screenedOut} screened out by your profile`);

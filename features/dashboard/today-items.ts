@@ -1,4 +1,6 @@
 import { stageHref } from "@/features/applications/stages";
+import { formatDay, formatTime } from "@/lib/format/when";
+import { plural } from "@/lib/format/plural";
 
 export type TodaySignals = {
   toApprove: number;
@@ -19,24 +21,10 @@ export type TodayItem = {
   urgent: boolean;
 };
 
-const rules = new Intl.PluralRules("en");
-
-export function plural(count: number, one: string, other: string) {
-  return `${count} ${rules.select(count) === "one" ? one : other}`;
-}
+export { plural };
 
 export function interviewWhen(at: Date, now: Date) {
-  const days = Math.round((startOfDay(at).getTime() - startOfDay(now).getTime()) / 86_400_000);
-  const time = at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
-
-  if (days === 0) return `today at ${time}`;
-  if (days === 1) return `tomorrow at ${time}`;
-
-  return `${at.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" })} at ${time}`;
-}
-
-function startOfDay(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return `${formatDay(at, now)} at ${formatTime(at)}`;
 }
 
 export function buildTodayItems(signals: TodaySignals, now = new Date()): TodayItem[] {

@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/format/when";
 import { BackButton } from "@/components/layout/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
@@ -38,7 +39,7 @@ export default async function AccountSettingsPage() {
           <p>
             Last sign-in:{" "}
             {user.lastLoginAt
-              ? user.lastLoginAt.toLocaleString()
+              ? formatDateTime(user.lastLoginAt)
               : "Not recorded"}
           </p>
         </CardContent>

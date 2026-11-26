@@ -1,5 +1,6 @@
 import "server-only";
 import type { OptimizationOutcome } from "@/features/analyses/server/optimization-gate";
+import { formatDate } from "@/lib/format/when";
 
 import { attachAnalysisApplication } from "@/features/analyses/server/analysis.repository";
 import { analyzeApplication } from "@/features/analyses/server/analysis.service";
@@ -418,7 +419,7 @@ export async function updateOwnedApplication(input: {
     current.followUpAt?.getTime() !== input.values.followUpAt.getTime()
   ) {
     activities.push({
-      title: `Follow-up set for ${input.values.followUpAt.toLocaleDateString()}`,
+      title: `Follow-up set for ${formatDate(input.values.followUpAt)}`,
     });
   }
 

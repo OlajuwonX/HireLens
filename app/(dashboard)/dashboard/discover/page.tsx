@@ -19,6 +19,7 @@ import { feedFiltersSchema } from "@/features/discovery/schemas/discovery.schema
 import { loadAudience } from "@/features/discovery/server/audience";
 import { countSystemBoards, listFollowedBoards } from "@/features/discovery/server/board.repository";
 import { feedVersion } from "@/features/discovery/feed-version";
+import { countByArrangement } from "@/features/discovery/server/feed.repository";
 import { getPostingFeed } from "@/features/discovery/server/feed.service";
 import { listSuggestedBoards } from "@/features/discovery/server/suggestion.repository";
 import type { Metadata } from "next";
@@ -41,11 +42,12 @@ export default async function DiscoverPage({
   const view = { q: filters.q ?? "", arrangement: filters.arrangement ?? "" };
   const audience = await loadAudience(user.id);
 
-  const [boards, sources, feed, suggestions] = await Promise.all([
+  const [boards, sources, feed, suggestions, arrangementCounts] = await Promise.all([
     listFollowedBoards(user.id),
     countSystemBoards(),
     getPostingFeed({ audience, filters }),
     listSuggestedBoards({ audience, limit: DISCOVERY_LIMITS.suggestions }),
+    countByArrangement({ audience, q: filters.q }),
   ]);
 
   const version = feedVersion(feed.rows);
@@ -82,13 +84,14 @@ export default async function DiscoverPage({
 
         <RegionToggle region="NG" enabled={audience.regions.includes("NG")} />
 
-        <DiscoveryFilters q={view.q} arrangement={view.arrangement} />
+        <DiscoveryFilters q={view.q} arrangement={view.arrangement} counts={arrangementCounts} />
 
         <RefreshingResults>
           {feed.rows.length === 0 ? (
             <EmptyState
               title="No matching jobs yet"
-              description="New sources are checked daily. Select Check for new jobs to look now, or follow a specific company below."
+              description="New sources are checked daily. Check now, or follow a specific company below."
+              action={<RefreshButton />}
             />
           ) : (
             <PostingFeed
