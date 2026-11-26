@@ -12,7 +12,12 @@ import {
   getApplicationBoard,
   getStatusCounts,
 } from "@/features/applications/server/application.service";
-import { resolveJobsEmptyState } from "@/features/applications/toolbar";
+import { StageNav } from "@/features/applications/components/stage-nav";
+import { readStage, stageCounts, stageDetails, tasksForStage } from "@/features/applications/stages";
+import { resolveJobsEmptyState, totalSavedCount } from "@/features/applications/toolbar";
+import { TaskQueue } from "@/features/auto-apply/components/task-queue";
+import { countCommittedToday, listRecentEvents, listTasksForUser } from "@/features/auto-apply/server/task.repository";
+import { groupTasks } from "@/features/auto-apply/task-view";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { readUsageDenialReason } from "@/features/usage/limit-notice";
 import type { Metadata } from "next";
@@ -27,7 +32,7 @@ import {
 export const maxDuration = 60;
 
 export const metadata: Metadata = {
-  title: "Saved Jobs",
+  title: "Applications",
 };
 
 type SavedJobsPageProps = {
@@ -37,7 +42,7 @@ type SavedJobsPageProps = {
 function CreateApplicationButton() {
   return (
     <Button asChild className="w-full sm:w-auto">
-      <Link href="/dashboard/applications">Create application</Link>
+      <Link href="/dashboard/applications">Add a job</Link>
     </Button>
   );
 }
@@ -59,16 +64,28 @@ export default async function SavedJobsPage({
     ? parsed.data
     : applicationFiltersSchema.parse({});
 
-  const [rows, counts] = await Promise.all([
-    getApplicationBoard({
-      userId: user.id,
-      filters,
-      limit: APPLICATION_PAGE_SIZE + 1,
-    }),
+  const stage = readStage(raw.stage);
+  const tracking = stage === "tracking";
+
+  const [rows, counts, tasks, committedToday] = await Promise.all([
+    tracking
+      ? getApplicationBoard({
+          userId: user.id,
+          filters,
+          limit: APPLICATION_PAGE_SIZE + 1,
+        })
+      : Promise.resolve([]),
     getStatusCounts(user.id),
+    listTasksForUser(user.id),
+    tracking ? Promise.resolve(0) : countCommittedToday(user.id),
   ]);
+  const events = tracking
+    ? []
+    : await listRecentEvents({ userId: user.id, taskIds: tasks.map((task) => task.id) });
+  const groups = groupTasks(tasks, events);
 
   const query = new URLSearchParams();
+  if (!tracking) query.set("stage", stage);
   if (filters.tab !== "PENDING") query.set("tab", filters.tab);
   if (filters.sort !== "activity_desc") query.set("sort", filters.sort);
 
@@ -88,38 +105,44 @@ export default async function SavedJobsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Saved Jobs"
-        description="Everything you are tracking, from pending through to a decision."
+        title="Applications"
+        description="Every job you are working on, from saved to sent to a decision."
       />
 
-      <Suspense fallback={null}>
-        <ApplicationFilters
-          counts={counts}
-          action={<CreateApplicationButton />}
-        />
-      </Suspense>
+      <StageNav active={stage} counts={stageCounts(groups, totalSavedCount(counts))} />
 
-      {visible.length === 0 ? (
-        <EmptyState
-          title={
-            emptyKind === "none-saved"
-              ? "No applications yet"
-              : "Nothing matches those filters"
-          }
-          description={
-            emptyKind === "none-saved"
-              ? "Create an application to save the job and analyze your resume against it."
-              : "Try another status, sort order or date range."
-          }
-          action={emptyKind === "none-saved" ? <CreateApplicationButton /> : null}
-        />
+      {tracking ? (
+        <>
+          <Suspense fallback={null}>
+            <ApplicationFilters counts={counts} action={<CreateApplicationButton />} />
+          </Suspense>
+
+          {visible.length === 0 ? (
+            <EmptyState
+              title={emptyKind === "none-saved" ? "No applications yet" : "Nothing matches those filters"}
+              description={
+                emptyKind === "none-saved"
+                  ? "Add a job to save it and analyze your resume against it."
+                  : "Try another status, sort order or date range."
+              }
+              action={emptyKind === "none-saved" ? <CreateApplicationButton /> : null}
+            />
+          ) : (
+            <SavedJobFeed
+              key={JSON.stringify(filters)}
+              initialRows={visible}
+              initialNextOffset={nextOffset}
+              filters={filters}
+              query={query.toString()}
+            />
+          )}
+        </>
       ) : (
-        <SavedJobFeed
-          key={JSON.stringify(filters)}
-          initialRows={visible}
-          initialNextOffset={nextOffset}
-          filters={filters}
-          query={query.toString()}
+        <TaskQueue
+          title={stageDetails[stage].label}
+          empty={stageDetails[stage].empty}
+          tasks={tasksForStage(stage, groups)}
+          committedToday={committedToday}
         />
       )}
 

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { ensureApplicationAnalysis } from "@/features/applications/server/application.service";
-import { AUTO_APPLY_PATH } from "@/features/auto-apply/constants";
+import { stageHref } from "@/features/applications/stages";
 import { queueApplication } from "@/features/auto-apply/server/task.service";
 import { savePostingToJobs } from "./posting-save.service";
 
@@ -15,7 +15,7 @@ async function runStep(step: PostingStep, userId: string, applicationPublicId: s
   if (step === "auto-apply") {
     const queued = await queueApplication({ userId, applicationPublicId });
 
-    return queued.ok ? { ok: true as const, href: AUTO_APPLY_PATH } : queued;
+    return queued.ok ? { ok: true as const, href: stageHref("preparing") } : queued;
   }
 
   const analyzed = await ensureApplicationAnalysis({ userId, publicId: applicationPublicId });

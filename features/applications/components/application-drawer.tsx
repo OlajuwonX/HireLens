@@ -4,7 +4,9 @@ import { IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { hasOpenOverlay } from "../step-through";
 
 const TABS = ["Overview", "Analysis", "AI Documents"] as const;
 
@@ -16,6 +18,7 @@ export function ApplicationDrawer({
   analysis,
   documents,
   documentsDisabledReason = null,
+  navigable = false,
 }: {
   title: string;
   subtitle: string;
@@ -24,16 +27,21 @@ export function ApplicationDrawer({
   analysis: React.ReactNode;
   documents: React.ReactNode;
   documentsDisabledReason?: string | null;
+  navigable?: boolean;
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
+  const router = useRouter();
 
   useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented && !hasOpenOverlay()) {
+        router.push(closeHref, { scroll: false });
+      }
     };
-  }, []);
+
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [closeHref, router]);
 
   const panels = {
     Overview: overview,
@@ -42,18 +50,18 @@ export function ApplicationDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6 lg:pointer-events-none lg:items-stretch lg:justify-end lg:p-0">
       <Link
         href={closeHref}
+        scroll={false}
         aria-label="Close"
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 lg:hidden"
       />
 
       <div
         role="dialog"
-        aria-modal="true"
         aria-label={title}
-        className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface shadow-2xl sm:max-h-[88dvh] sm:max-w-3xl sm:rounded-card"
+        className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface shadow-2xl transition-[transform,opacity] duration-300 ease-[var(--ease-drawer)] starting:translate-y-6 starting:opacity-0 sm:max-h-[88dvh] sm:max-w-3xl sm:rounded-card lg:pointer-events-auto lg:h-full lg:max-h-none lg:max-w-[min(46rem,55vw)] lg:rounded-none lg:border-y-0 lg:border-r-0 lg:starting:translate-x-10 lg:starting:translate-y-0"
       >
         <header className="flex items-start justify-between gap-3 border-b border-border p-4 sm:p-5">
           <div className="min-w-0">
@@ -61,9 +69,14 @@ export function ApplicationDrawer({
               {title}
             </h2>
             <p className="truncate text-meta text-text-secondary">{subtitle}</p>
+            {navigable ? (
+              <p className="mt-1 hidden font-mono text-system uppercase text-text-muted lg:block">
+                ↑ ↓ next job · Esc close
+              </p>
+            ) : null}
           </div>
           <IconButton label="Close" asChild>
-            <Link href={closeHref}>
+            <Link href={closeHref} scroll={false}>
               <X aria-hidden="true" className="size-4" />
             </Link>
           </IconButton>

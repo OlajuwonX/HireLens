@@ -12,16 +12,16 @@ import {
   LaptopMinimal,
   Puzzle,
   Inbox,
-  ListChecks,
   LayoutDashboard,
   Mic,
   ScrollText,
-  Send,
   Settings,
   ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
+
+export type NavGroup = "today" | "find" | "apply" | "materials" | "hear-back";
 
 export type NavItem = {
   label: string;
@@ -29,62 +29,55 @@ export type NavItem = {
   Icon: typeof LayoutDashboard;
   ready: boolean;
   badge?: "NEW";
+  group?: NavGroup;
+  also?: string[];
+  tab?: boolean;
+};
+
+export const navGroupLabels: Record<NavGroup, string | null> = {
+  today: null,
+  find: "Find",
+  apply: "Apply",
+  materials: "Materials",
+  "hear-back": "Hear back",
 };
 
 const allNavigation: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    Icon: LayoutDashboard,
-    ready: true,
-  },
-  { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true },
+  { label: "Today", href: "/dashboard", Icon: LayoutDashboard, ready: true, group: "today", tab: true },
+  { label: "Discover", href: "/dashboard/discover", Icon: Compass, ready: true, group: "find", tab: true },
   {
     label: "Applications",
-    href: "/dashboard/applications",
-    Icon: Send,
-    ready: true,
-  },
-  {
-    label: "Saved Jobs",
     href: "/dashboard/jobs",
     Icon: Briefcase,
     ready: true,
+    group: "apply",
+    also: ["/dashboard/applications", "/dashboard/auto-apply"],
+    tab: true,
   },
+  { label: "Resumes", href: "/dashboard/resumes", Icon: FileText, ready: true, group: "materials" },
+  { label: "AI Documents", href: "/dashboard/documents", Icon: Sparkles, ready: true, group: "materials" },
+  { label: "Replies", href: "/dashboard/responses", Icon: Inbox, ready: true, group: "hear-back", tab: true },
   {
-    label: "Discover",
-    href: "/dashboard/discover",
-    Icon: Compass,
-    ready: true,
-  },
-  {
-    label: "Auto Apply",
-    href: "/dashboard/auto-apply",
-    Icon: ListChecks,
-    ready: true,
-  },
-  {
-    label: "Responses",
-    href: "/dashboard/responses",
-    Icon: Inbox,
-    ready: true,
-  },
-  {
-    label: "AI Documents",
-    href: "/dashboard/documents",
-    Icon: Sparkles,
-    ready: true,
-  },
-  {
-    label: "Interview",
+    label: "Interview prep",
     href: "/dashboard/interview",
     Icon: Mic,
     ready: true,
     badge: "NEW",
+    group: "hear-back",
   },
 ];
 
 export const primaryNavigation = allNavigation.filter((item) => item.ready);
+
+export const navigationGroups = (Object.keys(navGroupLabels) as NavGroup[])
+  .map((group) => ({
+    group,
+    label: navGroupLabels[group],
+    items: primaryNavigation.filter((item) => item.group === group),
+  }))
+  .filter((entry) => entry.items.length > 0);
+
+export const tabNavigation = primaryNavigation.filter((item) => item.tab);
 
 export const utilityRoutes: NavItem[] = [
   { label: "Career profile", href: "/settings/profile", Icon: IdCard, ready: true },
@@ -129,6 +122,10 @@ export function isActivePath(pathname: string, href: string) {
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function isActiveItem(pathname: string, item: Pick<NavItem, "href" | "also">) {
+  return [item.href, ...(item.also ?? [])].some((href) => isActivePath(pathname, href));
 }
 
 export function isAdminModePath(pathname: string) {

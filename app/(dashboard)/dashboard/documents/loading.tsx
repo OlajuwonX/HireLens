@@ -14,7 +14,7 @@ export default function Loading() {
         description="Everything you have saved from an analysis, ready to edit or download."
         action={
           <Button asChild>
-            <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
+            <Link href="/dashboard/jobs">Go to Applications</Link>
           </Button>
         }
       />

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toast";
 import { queueApplicationAction } from "../actions/task-actions";
-import { AUTO_APPLY_PATH } from "../constants";
+import { stageHref } from "@/features/applications/stages";
 
 export function AddToAutoApplyButton({ applicationPublicId }: { applicationPublicId: string }) {
   const router = useRouter();
@@ -17,7 +17,7 @@ export function AddToAutoApplyButton({ applicationPublicId }: { applicationPubli
         return;
       }
 
-      router.push(AUTO_APPLY_PATH);
+      router.push(stageHref("preparing"));
     },
     onError: () => notify.error("That job could not be added. Please try again."),
   });

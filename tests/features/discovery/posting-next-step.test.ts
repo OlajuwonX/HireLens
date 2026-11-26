@@ -31,7 +31,7 @@ describe("continueWithPosting", () => {
   });
 
   it("saves the job and adds it to Auto Apply", async () => {
-    expect(await run("auto-apply")).toEqual({ ok: true, href: "/dashboard/auto-apply" });
+    expect(await run("auto-apply")).toEqual({ ok: true, href: "/dashboard/jobs?stage=preparing" });
     expect(mocks.queueApplication).toHaveBeenCalledWith({ userId: "user-1", applicationPublicId: "app-1" });
     expect(mocks.ensureApplicationAnalysis).not.toHaveBeenCalled();
   });

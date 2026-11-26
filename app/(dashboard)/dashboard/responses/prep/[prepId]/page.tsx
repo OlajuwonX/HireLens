@@ -31,7 +31,7 @@ export default async function PrepPage({ params }: { params: Promise<{ prepId: s
 
   return (
     <div className="space-y-6">
-      <BackButton href={RESPONSES_PATH} label="Responses" />
+      <BackButton href={RESPONSES_PATH} label="Replies" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader title="Interview preparation" description="Built from the job, your submitted resume and the employer's message." />
         <GeneratePrepButton publicId={prep.publicId} label={parsed.success ? "Regenerate" : "Prepare now"} />

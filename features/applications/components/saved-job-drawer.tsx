@@ -271,6 +271,7 @@ export async function SavedJobDrawer({
       analysis={analysis}
       documents={documentsPanel}
       documentsDisabledReason={saveOnly ? SAVE_ONLY_REASON : null}
+      navigable
     />
   );
 }

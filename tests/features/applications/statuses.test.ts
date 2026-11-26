@@ -147,10 +147,10 @@ describe("database enum", () => {
 });
 
 describe("no status name is hard-coded elsewhere", () => {
-  it("the dashboard says Approved", () => {
+  it("the Today screen hard-codes no status name", () => {
     expect(
       readFileSync("app/(dashboard)/dashboard/(overview)/page.tsx", "utf8"),
-    ).toContain('label="Approved"');
+    ).not.toMatch(/"(Approved|Accepted|Rejected|Pending|Shortlisted)"/);
   });
 
   it("the status select and badge read every label from the map", () => {

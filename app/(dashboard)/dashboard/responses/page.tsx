@@ -12,7 +12,7 @@ import { loadGmailPanel } from "@/features/responses/server/gmail/gmail-panel-st
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Responses",
+  title: "Replies",
 };
 
 export const maxDuration = 60;
@@ -43,7 +43,7 @@ export default async function ResponsesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Responses"
+        title="Replies"
         description="Employer replies to your applications, read from your Gmail. HireLens never replies for you."
       />
 

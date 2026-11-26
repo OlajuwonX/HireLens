@@ -1,10 +1,10 @@
-import { MetricCard } from "@/components/data-display/metric-card";
 import { PageTitle } from "@/components/layout/page-title";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { TodayList } from "@/features/dashboard/components/today-list";
 import { getDashboardSummary } from "@/features/dashboard/server/dashboard.service";
-import { documentTypeLabels } from "@/features/documents/constants";
+import { readTodaySignals } from "@/features/dashboard/server/today.repository";
+import { buildTodayItems, plural } from "@/features/dashboard/today-items";
 import { DailyInterviewModal } from "@/features/interviews/components/daily-interview-modal";
 import { InterviewReadinessCard } from "@/features/interviews/components/interview-readiness-card";
 import { getDailyInterviewPrompt } from "@/features/interviews/server/interview-daily.service";
@@ -13,153 +13,98 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Overview",
+  title: "Today",
 };
 
-function greeting(name: string | null) {
-  const hour = new Date().getHours();
-  const part =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const first = name?.trim().split(/\s+/)[0];
-
-  return first ? `${part}, ${first}.` : `${part}.`;
+function firstName(name: string | null) {
+  return name?.trim().split(/\s+/)[0] ?? null;
 }
 
-export default async function DashboardPage() {
+export default async function TodayPage() {
   const user = await requireDatabaseUser();
-  const [summary, dailyPrompt] = await Promise.all([
+  const now = new Date();
+  const [summary, dailyPrompt, signals] = await Promise.all([
     getDashboardSummary(user.id),
     getDailyInterviewPrompt(user.id),
+    readTodaySignals(user.id, now),
   ]);
+  const items = buildTodayItems(signals, now);
+  const name = firstName(user.name);
+  const primary = summary.resumeGroupCount === 0 ? "resume" : items.length === 0 ? "discover" : null;
+  const dateLabel = now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-reading space-y-10">
       {dailyPrompt.due ? <DailyInterviewModal prompt={dailyPrompt} /> : null}
 
-      <PageTitle title="Overview" />
+      <PageTitle title="Today" />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-page-title font-semibold text-text-primary">
-            {greeting(user.name)}
+      <header className="space-y-2">
+        <p className="font-mono text-system uppercase text-text-muted">{dateLabel}</p>
+        <h2 className="text-page-title font-semibold text-text-primary">
+          {items.length === 0
+            ? `You are up to date${name ? `, ${name}` : ""}.`
+            : `${plural(items.length, "thing needs", "things need")} you${name ? `, ${name}` : ""}.`}
+        </h2>
+        {items.length === 0 ? (
+          <p className="text-body text-text-secondary">
+            Nothing is waiting on you. Find new roles, or add a job you already have in mind.
           </p>
-          <p className="mt-1 text-meta text-text-secondary">
-            Here&rsquo;s where your job search stands.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <span data-onboarding="add-resume" className="inline-flex">
-            <AddResumeDialog
-              options={summary.resumeTitles}
-              label="Add Resume"
-              variant="outline"
-              redirectTo="/dashboard/resumes"
-            />
-          </span>
-          <span data-onboarding="create-application" className="inline-flex">
-            <Button asChild>
-              <Link href="/dashboard/applications">Create Application</Link>
-            </Button>
-          </span>
-        </div>
-      </div>
+        ) : null}
+      </header>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricCard
-          label="Resumes"
-          value={summary.resumeGroupCount}
-          hint={`${summary.resumeVersionCount} versions`}
-        />
-        <MetricCard
-          label="Applications"
-          value={summary.applicationCount}
-          hint={`${summary.pendingCount} pending`}
-        />
-        <MetricCard
-          label="Approved"
-          value={summary.acceptedCount}
-          hint={`${summary.rejectedCount} rejected`}
-        />
-        <MetricCard
-          label="Avg Match"
-          value={summary.averageMatchScore ?? "—"}
-          hint={
-            summary.averageMatchScore === null
-              ? "Run an analysis"
-              : "Latest analysis"
-          }
-        />
+      {items.length > 0 ? <TodayList items={items} /> : null}
+
+      <div className="flex flex-wrap gap-2">
+        <span data-onboarding="add-resume" className="inline-flex">
+          <AddResumeDialog
+            options={summary.resumeTitles}
+            label="Add resume"
+            variant={primary === "resume" ? "primary" : "outline"}
+            redirectTo="/dashboard/resumes"
+          />
+        </span>
+        <span data-onboarding="create-application" className="inline-flex">
+          <Button asChild variant="outline">
+            <Link href="/dashboard/applications">Add a job</Link>
+          </Button>
+        </span>
+        <Button asChild variant={primary === "discover" ? "primary" : "outline"}>
+          <Link href="/dashboard/discover">Find jobs</Link>
+        </Button>
       </div>
 
       <InterviewReadinessCard interview={summary.interview} />
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {summary.recentApplications.length === 0 ? (
-              <p className="text-meta text-text-secondary">
-                No applications yet.
-              </p>
-            ) : (
-              summary.recentApplications.map((application) => (
+      {summary.recentApplications.length > 0 ? (
+        <section aria-labelledby="recent-heading" className="space-y-3">
+          <h2 id="recent-heading" className="font-mono text-system uppercase text-text-muted">
+            Recently active
+          </h2>
+          <ul className="space-y-2">
+            {summary.recentApplications.map((application) => (
+              <li key={application.publicId}>
                 <Link
-                  key={application.publicId}
                   href={`/dashboard/jobs?open=${application.publicId}`}
-                  className="block text-meta text-text-primary underline-offset-4 hover:underline"
+                  className="text-meta text-text-primary underline-offset-4 hover:underline"
                 >
-                  {application.title} at {application.company}
+                  {application.title} <span className="text-text-secondary">at {application.company}</span>
                 </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent AI Documents</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {summary.recentDocuments.length === 0 ? (
-              <p className="text-meta text-text-secondary">
-                No AI documents yet.
-              </p>
-            ) : (
-              summary.recentDocuments.map((document) => (
-                <Link
-                  key={document.publicId}
-                  href={`/dashboard/documents/${document.publicId}`}
-                  className="block text-meta text-text-primary underline-offset-4 hover:underline"
-                >
-                  {documentTypeLabels[document.type]}
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>AI Usage Today</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {summary.usage.slice(0, 4).map((item) => (
-              <div
-                key={item.action}
-                className="flex justify-between gap-3 text-meta"
-              >
-                <span className="text-text-secondary">{item.label}</span>
-                <span className="font-mono text-text-primary">
-                  {item.used} / {item.limit}
-                </span>
-              </div>
+              </li>
             ))}
-            <p className="pt-2 text-label text-text-muted">Resets tomorrow.</p>
-          </CardContent>
-        </Card>
-      </div>
+          </ul>
+        </section>
+      ) : null}
+
+      <p data-numeric className="border-t border-border pt-4 font-mono text-system uppercase text-text-muted">
+        {[
+          plural(summary.resumeGroupCount, "resume", "resumes"),
+          plural(summary.applicationCount, "application", "applications"),
+          summary.averageMatchScore === null ? null : `average match ${summary.averageMatchScore}`,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      </p>
     </div>
   );
 }

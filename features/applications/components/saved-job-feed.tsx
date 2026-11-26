@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { FeedStatus } from "@/components/ui/feed-status";
 import { JobCardSkeleton } from "@/components/ui/skeletons";
@@ -13,6 +13,8 @@ import { loadMoreApplicationsAction } from "../actions/application-feed-actions"
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { JobScoreSlot } from "./job-score-slot";
 import { SavedJobCard } from "./saved-job-card";
+import { useStepThrough } from "./use-step-through";
+import { openHref } from "../step-through";
 
 const SKELETON_COUNT = 4;
 
@@ -61,6 +63,10 @@ export function SavedJobFeed({
     }),
   });
 
+  const ids = useMemo(() => rows.map((row) => row.publicId), [rows]);
+
+  useStepThrough(ids, query);
+
   return (
     <div className="space-y-4">
       <ul
@@ -79,7 +85,7 @@ export function SavedJobFeed({
           >
             <div className="flex items-start justify-between gap-2">
               <Link
-                href={`/dashboard/jobs?${query ? `${query}&` : ""}open=${row.publicId}`}
+                href={openHref(query, row.publicId)}
                 className="min-w-0 flex-1 before:absolute before:inset-0 before:content-['']"
               >
                 <p className="truncate text-meta font-semibold text-text-primary">

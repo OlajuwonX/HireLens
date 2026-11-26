@@ -1,49 +1,55 @@
 import { describe, expect, it } from "vitest";
 import {
+  isActiveItem,
   isActivePath,
+  navigationGroups,
   primaryNavigation,
+  tabNavigation,
 } from "@/components/layout/navigation";
 
-describe("primary navigation", () => {
-  it("includes the Interview entry with a NEW badge", () => {
-    const interview = primaryNavigation.find(
-      (item) => item.href === "/dashboard/interview",
-    );
-
-    expect(interview).toBeDefined();
-    expect(interview?.label).toBe("Interview");
-    expect(interview?.badge).toBe("NEW");
+describe("grouped navigation", () => {
+  it("follows the job search in order", () => {
+    expect(navigationGroups.map((entry) => entry.label)).toEqual([null, "Find", "Apply", "Materials", "Hear back"]);
+    expect(navigationGroups.flatMap((entry) => entry.items.map((item) => item.label))).toEqual([
+      "Today",
+      "Discover",
+      "Applications",
+      "Resumes",
+      "AI Documents",
+      "Replies",
+      "Interview prep",
+    ]);
   });
 
-  it("keeps Interview after AI Documents in the list", () => {
-    const hrefs = primaryNavigation.map((item) => item.href);
+  it("puts every primary item in exactly one group", () => {
+    const grouped = navigationGroups.flatMap((entry) => entry.items);
 
-    expect(hrefs.indexOf("/dashboard/interview")).toBe(
-      hrefs.indexOf("/dashboard/documents") + 1,
-    );
+    expect(grouped).toHaveLength(primaryNavigation.length);
+    expect(new Set(grouped.map((item) => item.href)).size).toBe(grouped.length);
   });
 
-  it("only Interview carries a badge", () => {
-    const badged = primaryNavigation.filter((item) => item.badge);
+  it("keeps the phone tab bar to four sections plus More", () => {
+    expect(tabNavigation.map((item) => item.label)).toEqual(["Today", "Discover", "Applications", "Replies"]);
+  });
 
-    expect(badged.map((item) => item.href)).toEqual(["/dashboard/interview"]);
+  it("only Interview prep carries a badge", () => {
+    expect(primaryNavigation.filter((item) => item.badge).map((item) => item.href)).toEqual(["/dashboard/interview"]);
   });
 });
 
-describe("isActivePath for the interview route", () => {
-  it("matches the route and its subpaths", () => {
-    expect(isActivePath("/dashboard/interview", "/dashboard/interview")).toBe(
-      true,
-    );
-    expect(
-      isActivePath("/dashboard/interview/week-1", "/dashboard/interview"),
-    ).toBe(true);
+describe("active matching", () => {
+  const applications = primaryNavigation.find((item) => item.label === "Applications")!;
+
+  it("treats the add-a-job page and the old Auto Apply link as part of Applications", () => {
+    expect(isActiveItem("/dashboard/jobs", applications)).toBe(true);
+    expect(isActiveItem("/dashboard/applications", applications)).toBe(true);
+    expect(isActiveItem("/dashboard/auto-apply", applications)).toBe(true);
+    expect(isActiveItem("/dashboard/discover", applications)).toBe(false);
   });
 
-  it("does not treat the dashboard root as the interview route", () => {
-    expect(isActivePath("/dashboard", "/dashboard/interview")).toBe(false);
-    expect(isActivePath("/dashboard/interviewer", "/dashboard/interview")).toBe(
-      false,
-    );
+  it("matches a route and its subpaths but not look-alikes", () => {
+    expect(isActivePath("/dashboard/interview/week-1", "/dashboard/interview")).toBe(true);
+    expect(isActivePath("/dashboard/interviewer", "/dashboard/interview")).toBe(false);
+    expect(isActivePath("/dashboard/jobs", "/dashboard")).toBe(false);
   });
 });
