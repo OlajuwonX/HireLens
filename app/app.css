@@ -199,6 +199,18 @@
   background-image: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 4px);
 }
 
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+@utility rise-in {
+  animation: rise 640ms var(--ease-out) both;
+  animation-delay: calc(var(--rise, 0) * 90ms);
+}
+
 @utility glass-bar {
   background-color: color-mix(in oklab, var(--color-background) 78%, transparent);
   backdrop-filter: blur(16px) saturate(160%);

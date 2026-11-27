@@ -2,8 +2,8 @@ import { AUTHOR } from "@/lib/seo/site";
 import Link from "next/link";
 
 const product = [
-  { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#how-it-works" },
+  { label: "Built in public", href: "/#builder" },
   { label: "Questions", href: "/#faq" },
   { label: "Help", href: "/dashboard/help" },
 ];

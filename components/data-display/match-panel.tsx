@@ -34,7 +34,7 @@ export function MatchPanel({
       </div>
 
       <div className="flex items-baseline gap-3">
-        <span data-numeric className="text-display font-semibold">
+        <span data-numeric data-total className="text-display font-semibold">
           {value}
         </span>
         <span className={cn("font-mono text-system font-medium uppercase", toneText[tone])}>{label}</span>

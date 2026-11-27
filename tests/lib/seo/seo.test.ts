@@ -172,8 +172,14 @@ describe("the landing page is structured for search", () => {
   });
 
   it("exposes the anchors the footer links to", () => {
-    for (const id of ["features", "how-it-works", "faq"]) {
-      expect(page).toContain(`id="${id}"`);
+    const landing = [
+      page,
+      read("components/marketing/story/story-scroll.tsx"),
+      read("components/marketing/builder-section.tsx"),
+    ].join(" ");
+
+    for (const id of ["how-it-works", "builder", "faq"]) {
+      expect(landing).toContain(`id="${id}"`);
     }
   });
 });
@@ -186,6 +192,11 @@ describe("marketing copy has no stray dashes", () => {
     "components/marketing/site-footer.tsx",
     "components/marketing/site-header.tsx",
     "components/marketing/legal-layout.tsx",
+    "components/marketing/builder-section.tsx",
+    "components/marketing/story/scenes.ts",
+    "components/marketing/story/story-scroll.tsx",
+    "components/marketing/story/visuals/early.tsx",
+    "components/marketing/story/visuals/late.tsx",
     "lib/seo/site.ts",
     "lib/seo/structured-data.ts",
   ];
@@ -218,8 +229,8 @@ describe("the footer credits the author without impersonating the product", () =
 
   it("carries the product and legal groups", () => {
     for (const label of [
-      "Features",
       "How it works",
+      "Built in public",
       "Help",
       "Privacy",
       "Terms",
