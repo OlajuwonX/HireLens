@@ -14,7 +14,6 @@ import {
   retryResumeProcessingAction,
 } from "@/features/resumes/actions/resume-actions";
 import type { Resume } from "@/lib/db/schema";
-import { Archive, ArchiveRestore, RotateCcw, Settings2 } from "lucide-react";
 import { useCallback, useState, useTransition } from "react";
 import { RenameResumeForm } from "./rename-resume-form";
 
@@ -73,7 +72,6 @@ export function ManageResumeDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" className={triggerClassName}>
-          <Settings2 className="size-4" aria-hidden />
           Manage
         </Button>
       </DialogTrigger>
@@ -104,7 +102,6 @@ export function ManageResumeDialog({
                   disabled={pending}
                   onClick={retryProcessing}
                 >
-                  <RotateCcw className="size-4" aria-hidden />
                   Retry processing
                 </Button>
               ) : null}
@@ -115,11 +112,6 @@ export function ManageResumeDialog({
                 disabled={pending}
                 onClick={toggleArchive}
               >
-                {archived ? (
-                  <ArchiveRestore className="size-4" aria-hidden />
-                ) : (
-                  <Archive className="size-4" aria-hidden />
-                )}
                 {archived ? "Unarchive" : "Archive"}
               </Button>
             </div>

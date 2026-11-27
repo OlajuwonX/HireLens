@@ -21,8 +21,8 @@ export function Progress({
       {...props}
     >
       <div
-        className="h-full bg-accent transition-all"
-        style={{ width: `${safeValue}%` }}
+        className="h-full w-full origin-left bg-accent transition-transform duration-700 ease-out"
+        style={{ transform: `scaleX(${safeValue / 100})` }}
       />
     </div>
   );

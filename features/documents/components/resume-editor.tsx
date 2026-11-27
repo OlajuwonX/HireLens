@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Loader2, Plus, TriangleAlert, X } from "lucide-react";
+import { Check, Loader2, TriangleAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -97,7 +97,6 @@ function AddButton({
 }) {
   return (
     <Button type="button" variant="outline" size="compact" onClick={onClick}>
-      <Plus className="size-3.5" aria-hidden />
       {label}
     </Button>
   );
@@ -611,7 +610,7 @@ export function ResumeEditor({
         </Section>
       </div>
 
-      <div className="min-w-0 lg:sticky lg:top-4">
+      <div className="min-w-0 lg:sticky lg:top-20">
         <p className="mb-2 font-mono text-system font-medium uppercase text-text-muted">
           Live preview
         </p>

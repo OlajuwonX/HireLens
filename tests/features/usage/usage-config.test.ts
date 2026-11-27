@@ -28,6 +28,7 @@ describe("usage actions", () => {
       "RESUME_REVIEW",
       "JOB_MATCHING",
       "INTERVIEW_PREP",
+      "FORM_ANSWERS",
     ]);
   });
 

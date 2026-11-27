@@ -110,6 +110,7 @@ export const usageAction = pgEnum("usage_action", [
   "RESUME_REVIEW",
   "JOB_MATCHING",
   "INTERVIEW_PREP",
+  "FORM_ANSWERS",
 ]);
 
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -941,6 +942,7 @@ export const candidateProfiles = pgTable(
     linkedinUrl: text("linkedin_url"),
     githubUrl: text("github_url"),
     portfolioUrl: text("portfolio_url"),
+    jobRegions: text("job_regions").array().notNull().default(sql`'{}'::text[]`),
     ...timestamps,
   },
   (table) => [uniqueIndex("candidate_profiles_user_idx").on(table.userId)],
@@ -1007,6 +1009,7 @@ export const jobBoards = pgTable(
     token: text("token").notNull(),
     companyName: text("company_name").notNull(),
     system: boolean("system").notNull().default(false),
+    region: text("region"),
     postingCount: integer("posting_count").notNull().default(0),
     lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
     lastError: text("last_error"),
@@ -1201,6 +1204,24 @@ export const emailEvents = pgTable(
     index("email_events_user_status_idx").on(table.userId, table.status),
   ],
 );
+
+export const gmailConnectionStatus = pgEnum("gmail_connection_status", ["CONNECTED", "NEEDS_RECONNECT"]);
+
+export const gmailConnections = pgTable(
+  "gmail_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ...userOwned,
+    refreshTokenCipher: text("refresh_token_cipher").notNull(),
+    status: gmailConnectionStatus("status").notNull().default("CONNECTED"),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("gmail_connections_user_idx").on(table.userId)],
+);
+
+export type GmailConnection = typeof gmailConnections.$inferSelect;
 
 export const interviewPreps = pgTable(
   "interview_preps",

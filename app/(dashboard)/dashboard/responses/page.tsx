@@ -1,16 +1,18 @@
-import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
+import { UrlFlagToast } from "@/components/ui/url-flag-toast";
+import { GmailPanel } from "@/features/responses/components/gmail-panel";
 import { ResponseCard } from "@/features/responses/components/response-card";
+import { GMAIL_RESULT_MESSAGES, readGmailResult } from "@/features/responses/gmail";
 import { groupResponses } from "@/features/responses/group";
 import { listApplicationCandidates, listResponses } from "@/features/responses/server/email.repository";
-import { WORKER_SETTINGS_PATH } from "@/features/worker/constants";
+import { loadGmailPanel } from "@/features/responses/server/gmail/gmail-panel-state";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Responses",
+  title: "Replies",
 };
 
 export const maxDuration = 60;
@@ -21,29 +23,44 @@ const sections = [
   { key: "other", title: "Other updates", empty: "No other updates yet." },
 ] as const;
 
-export default async function ResponsesPage() {
+const GMAIL_FLAGS = ["gmail"] as const;
+
+export default async function ResponsesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await requireDatabaseUser();
-  const [rows, candidates] = await Promise.all([listResponses(user.id), listApplicationCandidates(user.id)]);
+  const gmailResult = readGmailResult((await searchParams).gmail);
+  const [rows, candidates, gmail] = await Promise.all([
+    listResponses(user.id),
+    listApplicationCandidates(user.id),
+    loadGmailPanel(user.id),
+  ]);
   const groups = groupResponses(rows);
   const applications = candidates.map((item) => ({ publicId: item.publicId, label: `${item.company} · ${item.title}` }));
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Responses"
-        description="Employer replies to your applications, read from Gmail by your local worker. HireLens never replies for you."
+        title="Replies"
+        description="Employer replies to your applications, read from your Gmail. HireLens never replies for you."
       />
 
-      <Alert tone="info">
-        Connect Gmail in your{" "}
-        <Link href={WORKER_SETTINGS_PATH} className="underline">
-          local worker
-        </Link>{" "}
-        to see replies here. Only emails from companies you applied to leave your computer.
-      </Alert>
+      {gmailResult === "connected" ? <UrlFlagToast message={GMAIL_RESULT_MESSAGES.connected} flags={GMAIL_FLAGS} /> : null}
+      {gmailResult && gmailResult !== "connected" ? <Alert tone="warning">{GMAIL_RESULT_MESSAGES[gmailResult]}</Alert> : null}
+
+      <GmailPanel state={gmail.state} checkedLabel={gmail.checkedLabel} />
 
       {rows.length === 0 ? (
-        <EmptyState title="No responses yet" description="When employers reply, their messages will be sorted here." />
+        <EmptyState
+          title="No replies yet"
+          description={
+            gmail.state === "connected"
+              ? "HireLens checks Gmail every day. Replies from companies you applied to appear here."
+              : "Connect Gmail above and replies from companies you applied to are sorted here."
+          }
+        />
       ) : (
         sections.map((section) => (
           <section key={section.key} className="space-y-3">

@@ -1,20 +1,15 @@
-import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { FiltersRowSkeleton, JobCardSkeleton } from "@/components/ui/skeletons";
 
 export default function Loading() {
   return (
     <div className="space-y-6" aria-busy="true">
       <PageHeader
-        title="Saved Jobs"
-        description="Everything you are tracking, from pending through to a decision."
-        action={
-          <Button asChild>
-            <Link href="/dashboard/applications">Create application</Link>
-          </Button>
-        }
+        title="Applications"
+        description="Every job you are working on, from saved to sent to a decision."
       />
+
+      <div aria-hidden className="h-11 border-b border-border" />
 
       <FiltersRowSkeleton trailing={3} />
 

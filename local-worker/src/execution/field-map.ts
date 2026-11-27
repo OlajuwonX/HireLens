@@ -63,6 +63,10 @@ function valueFor(field: FormField, data: FillData): Omit<Fill, "field"> | null 
   return answer ? { value: answer, source: "answer" } : null;
 }
 
+export function isProfileOrSensitive(label: string) {
+  return SENSITIVE.test(label) || RULES.some(([pattern]) => pattern.test(label));
+}
+
 export function planFields(fields: FormField[], data: FillData): FillPlan {
   const fills: Fill[] = [];
   const missing: string[] = [];

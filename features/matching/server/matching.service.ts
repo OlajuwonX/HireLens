@@ -32,7 +32,7 @@ export async function runMatching(input: {
 
   const base = { userId: input.userId, inputHash: candidate.inputHash, scoredAt: null };
   const postings = await listPostingsToMatch({
-    audience: { userId: input.userId, matcher: candidate.matcher },
+    audience: { userId: input.userId, matcher: candidate.matcher, regions: candidate.regions },
     inputHash: candidate.inputHash,
   });
   const { rejected, batch, waiting } = screenPostings<PostingToMatch>({

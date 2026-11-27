@@ -73,7 +73,7 @@ export function buildPaletteSections(input: {
   if (input.responseReady) {
     const groups: [string, string, PaletteItem["kind"], SearchResponse["jobs"]][] = [
       ["resumes", "Resumes", "resume", input.response.resumes],
-      ["jobs", "Saved jobs", "job", input.response.jobs],
+      ["jobs", "Applications", "job", input.response.jobs],
       ["documents", "Documents", "document", input.response.documents],
     ];
 

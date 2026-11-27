@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { blankToUndefined } from "@/lib/forms/blank-to-undefined";
+import { JOB_REGIONS } from "@/lib/discovery/regions";
 import { DISCOVERY_SOURCES } from "@/lib/discovery/types";
 
 export const followBoardSchema = z.object({
@@ -28,3 +29,8 @@ export const feedPageSchema = feedFiltersSchema.extend({
 });
 
 export type FeedFilters = z.infer<typeof feedFiltersSchema>;
+
+export const jobRegionSchema = z.object({
+  region: z.enum(JOB_REGIONS),
+  enabled: z.boolean(),
+});

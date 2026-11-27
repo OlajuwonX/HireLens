@@ -101,6 +101,9 @@ const serverEnvSchema = z.object({
   BREVO_SENDER_NAME: optionalStringWithDefault("HireLens"),
 
   CRON_SECRET: optionalString,
+  GMAIL_CLIENT_ID: optionalString,
+  GMAIL_CLIENT_SECRET: optionalString,
+  GMAIL_TOKEN_KEY: optionalString,
   PURGE_DRY_RUN: optionalBooleanWithDefault(true),
 
   SENTRY_WEBHOOK_SECRET: optionalString,

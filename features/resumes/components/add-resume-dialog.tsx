@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import type { JobTitleOption } from "./job-title-combobox";
@@ -42,7 +41,6 @@ export function AddResumeDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant={variant} className={triggerClassName}>
-          <Plus className="size-4" aria-hidden />
           {label}
         </Button>
       </DialogTrigger>

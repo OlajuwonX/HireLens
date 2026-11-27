@@ -29,3 +29,4 @@ export {
   type ControlHeightToken,
   type RadiusToken,
 } from "./size";
+export { duration, easing, pressScale, spring } from "./motion";

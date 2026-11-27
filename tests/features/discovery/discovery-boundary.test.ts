@@ -37,7 +37,8 @@ describe("the feed is scoped to what each user may see", () => {
   });
 
   it("uses the same visibility for the feed, job details and matching", () => {
-    expect(feed.match(/followedBy\(input\.audience\.userId\)/g)?.length).toBe(2);
+    expect(feed.match(/followedBy\(input\.audience\.userId\)/g)?.length).toBe(3);
+    expect(feed.match(/baseConditions\(input\.audience, /g)?.length).toBe(2);
     expect(feed).toContain("visibleTo(input.audience)");
     expect(matching).toContain("audienceConditions(input.audience");
   });

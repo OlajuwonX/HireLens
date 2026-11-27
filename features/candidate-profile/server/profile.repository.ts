@@ -36,3 +36,13 @@ export async function listAllTargetRoles(limit = 500) {
 
   return rows.rows.map((row) => row.role).filter(Boolean);
 }
+
+export async function saveJobRegions(input: { userId: string; jobRegions: string[] }) {
+  await db
+    .insert(candidateProfiles)
+    .values(input)
+    .onConflictDoUpdate({
+      target: candidateProfiles.userId,
+      set: { jobRegions: input.jobRegions, updatedAt: new Date() },
+    });
+}

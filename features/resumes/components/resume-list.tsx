@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDate } from "@/lib/format/when";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Dropdown } from "@/components/ui/dropdown";
@@ -79,7 +80,7 @@ export function ResumeList({
                   <p className="mt-0.5 font-mono text-system text-text-muted">
                     {resume.versionCount}{" "}
                     {resume.versionCount === 1 ? "resume" : "resumes"} ·{" "}
-                    {resume.createdAt.toLocaleDateString()}
+                    {formatDate(resume.createdAt)}
                   </p>
                 </Link>
 

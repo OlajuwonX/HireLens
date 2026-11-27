@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>HireLens</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <strong>HireLens</strong>
+      <span id="status" class="muted"></span>
+    </header>
+
+    <section id="connect-view" hidden>
+      <label for="origin">HireLens address</label>
+      <input id="origin" type="url" placeholder="https://your-hirelens.vercel.app" autocomplete="url" />
+      <button id="connect" type="button">Connect</button>
+      <p class="muted">Opens HireLens. If you are signed in, this browser is linked to your account.</p>
+      <p id="connect-error" class="warning" role="alert"></p>
+    </section>
+
+    <section id="fill-view" hidden>
+      <button id="fill" type="button">Fill this page</button>
+      <fieldset id="settings">
+        <label class="toggle"><input id="improve-resume" type="checkbox" /> Improve my resume when it matches below 85%</label>
+        <label class="toggle"><input id="write-answers" type="checkbox" /> Write answers and cover letters with AI</label>
+        <label for="writer">Written by</label>
+        <select id="writer">
+          <option value="gemini">HireLens AI (Gemini, daily allowance)</option>
+          <option value="claude">My Claude subscription (this computer)</option>
+        </select>
+        <p id="helper-status" class="muted" hidden></p>
+      </fieldset>
+      <p id="result" class="muted" role="status"></p>
+      <div id="match" class="panel" aria-live="polite" hidden></div>
+      <ul id="gaps" hidden></ul>
+      <ul id="notes"></ul>
+      <ul id="missing"></ul>
+      <div id="application" hidden>
+        <p id="application-name"></p>
+        <button id="applied" type="button" class="secondary">I submitted</button>
+      </div>
+      <footer>
+        <a id="open" href="#" target="_blank" rel="noopener">Open HireLens</a>
+        <button id="disconnect" type="button" class="link">Disconnect</button>
+      </footer>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

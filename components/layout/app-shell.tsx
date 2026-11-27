@@ -1,17 +1,16 @@
 "use client";
 
-import { IconButton } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
-import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ImpersonationBanner } from "@/features/admin/components/impersonation-banner";
+import { BottomTabs } from "./bottom-tabs";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { MobileNavProvider } from "./mobile-nav-context";
 import {
   adminEntry,
   adminNavigation,
-  isActivePath,
+  isActiveItem,
   primaryNavigation,
   utilityRoutes,
 } from "./navigation";
@@ -22,7 +21,7 @@ function titleFromPathname(pathname: string) {
     ...utilityRoutes,
     adminEntry,
     ...adminNavigation,
-  ].find((item) => isActivePath(pathname, item.href));
+  ].find((item) => isActiveItem(pathname, item));
 
   return match?.label ?? "";
 }
@@ -43,7 +42,7 @@ export function AppShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const pageTitle = useUiStore((state) => state.pageTitle);
-  const mainRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const closeMobileNav = useCallback(() => setMobileOpen(false), []);
 
@@ -53,7 +52,7 @@ export function AppShell({
 
   useEffect(() => {
     setMobileOpen(false);
-    mainRef.current?.scrollTo({ top: 0 });
+    scrollRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
   const title = pageTitle ?? titleFromPathname(pathname);
@@ -76,32 +75,25 @@ export function AppShell({
             />
           ) : null}
 
-          <header className="z-30 shrink-0 border-b border-border bg-background/95 backdrop-blur">
-            <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
-              <IconButton
-                label="Open navigation"
-                onClick={() => setMobileOpen(true)}
-                aria-expanded={mobileOpen}
-                className="shrink-0 md:hidden"
-              >
-                <Menu aria-hidden="true" className="size-5" />
-              </IconButton>
-
-              <h1 className="min-w-0 flex-1 truncate text-section-title font-semibold text-text-primary">
-                {title}
-              </h1>
-
-              {headerSlot}
-            </div>
-          </header>
-
-          <main
-            ref={mainRef}
-            className="hl-scroll min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8"
+          <div
+            ref={scrollRef}
+            className="hl-scroll min-h-0 flex-1 overflow-y-auto"
           >
-            {children}
-          </main>
+            <header className="glass-bar sticky top-0 z-30 border-b border-border/70">
+              <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
+                <h1 className="min-w-0 flex-1 truncate text-section-title font-semibold text-text-primary">
+                  {title}
+                </h1>
+
+                {headerSlot}
+              </div>
+            </header>
+
+            <main className="px-4 pb-28 pt-6 sm:px-6 sm:pt-8 md:pb-8">{children}</main>
+          </div>
         </div>
+
+        <BottomTabs onMore={() => setMobileOpen(true)} moreOpen={mobileOpen} />
       </div>
     </MobileNavProvider>
   );

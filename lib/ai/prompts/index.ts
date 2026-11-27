@@ -40,3 +40,4 @@ export {
   JOB_MATCHING_PROMPT_VERSION,
 } from "./job-matching.prompt";
 export { INTERVIEW_PREP_PROMPT } from "./interview-prep.prompt";
+export { FORM_ANSWERS_PROMPT } from "./form-answers.prompt";

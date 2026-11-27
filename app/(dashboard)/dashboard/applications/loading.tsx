@@ -5,7 +5,7 @@ import { FormFieldSkeleton } from "@/components/ui/skeletons";
 export default function Loading() {
   return (
     <div className="space-y-6" aria-busy="true">
-      <BackButton href="/dashboard/jobs" label="Saved Jobs" />
+      <BackButton href="/dashboard/jobs" label="Applications" />
 
       <PageHeader
         title="Applications"

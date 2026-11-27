@@ -27,7 +27,7 @@ const guides = [
     title: "Open your AI results",
     body: "Open a saved job and use the Analysis tab. Every result there came from the analysis already run, so opening one costs no AI usage.",
     href: "/dashboard/jobs",
-    action: "Go to Saved Jobs",
+    action: "Go to Applications",
   },
   {
     title: "Keep what you need",
@@ -85,7 +85,7 @@ export default async function HelpPage() {
           </Card>
         </div>
 
-        <Card className="lg:sticky lg:top-0">
+        <Card className="lg:sticky lg:top-20">
           <CardHeader>
             <CardTitle>Report a problem</CardTitle>
           </CardHeader>

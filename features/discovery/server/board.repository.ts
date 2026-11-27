@@ -4,7 +4,8 @@ import { and, asc, count, eq, exists, getTableColumns, isNull, lt, or, sql } fro
 import { db } from "@/lib/db/client";
 import { jobBoardFollows, jobBoards } from "@/lib/db/schema";
 import { companyFromToken } from "@/lib/discovery/normalize";
-import type { CatalogSource, DiscoverySource } from "@/lib/discovery/types";
+import type { CatalogBoard } from "@/lib/discovery/catalog";
+import type { DiscoverySource } from "@/lib/discovery/types";
 
 export async function findBoard(input: { source: DiscoverySource; token: string }) {
   const [board] = await db
@@ -116,17 +117,25 @@ export async function listDueBoards(input: { limit: number; staleBefore?: Date }
     .limit(input.limit);
 }
 
-export async function seedSystemBoards(boards: { source: CatalogSource; token: string }[]) {
+export async function seedSystemBoards(boards: CatalogBoard[]) {
   if (boards.length === 0) {
     return;
   }
 
   await db
     .insert(jobBoards)
-    .values(boards.map((board) => ({ ...board, companyName: companyFromToken(board.token), system: true })))
+    .values(
+      boards.map((board) => ({
+        source: board.source,
+        token: board.token,
+        region: board.region ?? null,
+        companyName: companyFromToken(board.token),
+        system: true,
+      })),
+    )
     .onConflictDoUpdate({
       target: [jobBoards.source, jobBoards.token],
-      set: { system: true },
+      set: { system: true, region: sql`excluded.region` },
     });
 }
 

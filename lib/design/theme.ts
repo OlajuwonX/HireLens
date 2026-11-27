@@ -21,7 +21,12 @@ export type ColorRole =
   | "warning"
   | "warningText"
   | "info"
-  | "infoText";
+  | "infoText"
+  | "ink"
+  | "inkText"
+  | "inkMuted"
+  | "inkLine"
+  | "inkCaution";
 
 export type Palette = Record<ColorRole, string>;
 
@@ -47,6 +52,11 @@ export const light: Palette = {
   warningText: "#FFFFFF",
   info: "#2C5FA8",
   infoText: "#FFFFFF",
+  ink: "#161A18",
+  inkText: "#F3F5F2",
+  inkMuted: "#A7AEA9",
+  inkLine: "#3A403B",
+  inkCaution: "#E8BD6D",
 };
 
 export const dark: Palette = {
@@ -71,6 +81,11 @@ export const dark: Palette = {
   warningText: "#2B1D00",
   info: "#9CC0F5",
   infoText: "#0B1F3D",
+  ink: "#0B0D0C",
+  inkText: "#F3F5F2",
+  inkMuted: "#A7AEA9",
+  inkLine: "#2E332F",
+  inkCaution: "#E8BD6D",
 };
 
 export const palettes: Record<ThemeMode, Palette> = { light, dark };

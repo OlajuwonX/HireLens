@@ -1,18 +1,17 @@
 "use server";
 
+import { plural } from "@/lib/format/plural";
 import { revalidatePath } from "next/cache";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
 import { cleanDescription } from "@/lib/discovery/normalize";
 import { firstIssueMessage } from "@/lib/forms/zod-error";
 import { DISCOVERY_PATH } from "../constants";
 import {
-  boardRefSchema,
   feedPageSchema,
   followBoardSchema,
   postingRefSchema,
 } from "../schemas/discovery.schema";
 import { loadAudience } from "../server/audience";
-import { unfollowBoard } from "../server/board.repository";
 import { followJobBoard, refreshDiscovery } from "../server/discovery.service";
 import { findPostingForUser } from "../server/feed.repository";
 import { getPostingFeed, type PostingFeedPage } from "../server/feed.service";
@@ -49,18 +48,8 @@ export async function followBoardAction(
 
   return {
     status: "saved",
-    message: `Following ${result.companyName}: ${result.active} open roles.`,
+    message: `Following ${result.companyName}: ${plural(result.active, "open role", "open roles")}.`,
   };
-}
-
-export async function unfollowBoardAction(formData: FormData) {
-  const user = await requireDatabaseUser();
-  const parsed = boardRefSchema.safeParse({ publicId: formData.get("publicId") });
-
-  if (parsed.success) {
-    await unfollowBoard({ userId: user.id, publicId: parsed.data.publicId });
-    revalidatePath(DISCOVERY_PATH);
-  }
 }
 
 export async function loadPostingsAction(input: unknown): Promise<PostingFeedPage> {

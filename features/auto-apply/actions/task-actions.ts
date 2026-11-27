@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireDatabaseUser } from "@/features/auth/server/require-database-user";
-import { AUTO_APPLY_PATH } from "../constants";
+import { APPLICATIONS_PATH } from "@/features/applications/stages";
 import { advancePreparation, type PrepareResult } from "../server/preparation.service";
 import {
   approveTask,
@@ -24,7 +24,7 @@ async function withTask<T>(publicId: unknown, run: (userId: string, publicId: st
   }
 
   const result = await run(user.id, parsed.data);
-  revalidatePath(AUTO_APPLY_PATH);
+  revalidatePath(APPLICATIONS_PATH);
 
   return result;
 }

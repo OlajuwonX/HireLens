@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const maxDuration = 60;
 
 export const metadata: Metadata = {
-  title: "Applications",
+  title: "Add a job",
 };
 
 export default async function ApplicationsPage() {
@@ -17,10 +17,10 @@ export default async function ApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/dashboard/jobs" label="Saved Jobs" />
+      <BackButton href="/dashboard/jobs" label="Applications" />
 
       <PageHeader
-        title="Applications"
+        title="Add a job"
         description="Enter the job you are preparing for. HireLens saves it and analyzes your resume against it in one step."
       />
       <SaveAndAnalyzeForm versions={versions} />

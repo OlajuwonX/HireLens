@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { formatDate } from "@/lib/format/when";
+import { useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { FeedStatus } from "@/components/ui/feed-status";
 import { JobCardSkeleton } from "@/components/ui/skeletons";
@@ -13,12 +14,14 @@ import { loadMoreApplicationsAction } from "../actions/application-feed-actions"
 import { ApplicationStatusBadge } from "./application-status-badge";
 import { JobScoreSlot } from "./job-score-slot";
 import { SavedJobCard } from "./saved-job-card";
+import { useStepThrough } from "./use-step-through";
+import { openHref } from "../step-through";
 
 const SKELETON_COUNT = 4;
 
 function shortDate(value: Date | null) {
   return value
-    ? value.toLocaleDateString(undefined, { day: "numeric", month: "short" })
+    ? formatDate(value)
     : "--";
 }
 
@@ -61,6 +64,10 @@ export function SavedJobFeed({
     }),
   });
 
+  const ids = useMemo(() => rows.map((row) => row.publicId), [rows]);
+
+  useStepThrough(ids, query);
+
   return (
     <div className="space-y-4">
       <ul
@@ -79,7 +86,7 @@ export function SavedJobFeed({
           >
             <div className="flex items-start justify-between gap-2">
               <Link
-                href={`/dashboard/jobs?${query ? `${query}&` : ""}open=${row.publicId}`}
+                href={openHref(query, row.publicId)}
                 className="min-w-0 flex-1 before:absolute before:inset-0 before:content-['']"
               >
                 <p className="truncate text-meta font-semibold text-text-primary">
@@ -89,18 +96,7 @@ export function SavedJobFeed({
                   {row.company}
                 </p>
               </Link>
-              <JobScoreSlot
-                saveOnly={row.saveOnly}
-                matchScore={row.matchScore}
-                size={44}
-                className="max-sm:hidden"
-              />
-              <JobScoreSlot
-                saveOnly={row.saveOnly}
-                matchScore={row.matchScore}
-                size={38}
-                className="sm:hidden"
-              />
+              <JobScoreSlot saveOnly={row.saveOnly} matchScore={row.matchScore} />
             </div>
 
             <dl className="grid grid-cols-2 gap-x-3 gap-y-2">

@@ -240,6 +240,17 @@ export class MockApplicationIntelligenceProvider implements ApplicationIntellige
     };
   }
 
+  async answerForm(input: { content: string }): Promise<AIProviderResult> {
+    const ids = [...input.content.matchAll(/^- id: (.+)$/gm)].map((match) => match[1]);
+
+    return {
+      provider: "mock",
+      model: "mock",
+      durationMs: 0,
+      rawResponse: JSON.stringify({ answers: ids.map((id) => ({ id, answer: "" })) }),
+    };
+  }
+
   async prepareInterview(): Promise<AIProviderResult> {
     return {
       provider: "mock",

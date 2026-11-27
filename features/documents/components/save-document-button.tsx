@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { Check, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AiView } from "@/features/analyses/server/analysis.mapper";
 
@@ -10,7 +9,6 @@ function SubmitButton() {
 
   return (
     <Button type="submit" size="compact" disabled={pending}>
-      <Save className="size-4" aria-hidden />
       {pending ? "Saving..." : "Save to AI Documents"}
     </Button>
   );
@@ -32,7 +30,6 @@ export function SaveDocumentButton({
   if (alreadySaved) {
     return (
       <Button type="button" size="compact" variant="outline" disabled>
-        <Check className="size-4" aria-hidden />
         Saved to AI Documents
       </Button>
     );

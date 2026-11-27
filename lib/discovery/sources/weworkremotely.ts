@@ -1,17 +1,7 @@
 import { dateFrom, htmlToText } from "../normalize";
 import { httpUrl, isPosting } from "../read";
 import type { BoardAdapter, DiscoveredPosting } from "../types";
-
-function tag(item: string, name: string) {
-  const match = item.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, "i"));
-  const value = match?.[1]?.trim() ?? "";
-
-  return value.replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/, "$1").trim();
-}
-
-export function parseRssItems(xml: string) {
-  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map((match) => match[1]);
-}
+import { parseRssItems, rssTag as tag } from "./rss";
 
 function toPosting(item: string): DiscoveredPosting | null {
   const heading = htmlToText(tag(item, "title"));
@@ -52,7 +42,7 @@ export const weworkremotely: BoardAdapter = {
 
     return {
       companyName: "We Work Remotely",
-      postings: parseRssItems(typeof xml === "string" ? xml : "").map(toPosting).filter(isPosting),
+      postings: parseRssItems(xml).map(toPosting).filter(isPosting),
     };
   },
 };

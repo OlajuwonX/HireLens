@@ -1,7 +1,7 @@
 "use client";
 
+import { formatDate } from "@/lib/format/when";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/components/ui/toast";
@@ -41,7 +41,7 @@ export function ResumeReviewPanel({ applicationPublicId }: { applicationPublicId
           Independent review
         </h4>
         {review ? (
-          <Badge tone="neutral">Reviewed {new Date(review.reviewedAt).toLocaleDateString()}</Badge>
+          <Badge tone="neutral">Reviewed {formatDate(new Date(review.reviewedAt))}</Badge>
         ) : null}
       </div>
 
@@ -61,7 +61,6 @@ export function ResumeReviewPanel({ applicationPublicId }: { applicationPublicId
           disabled={run.isPending || current.isLoading}
           onClick={() => run.mutate()}
         >
-          <ShieldCheck className="size-4" aria-hidden />
           {run.isPending ? "Reviewing..." : "Run independent review"}
         </Button>
       )}

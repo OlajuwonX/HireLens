@@ -15,6 +15,7 @@ const config = [
       "next-env.d.ts",
       "public/**",
       "local-worker/**",
+      "extension/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

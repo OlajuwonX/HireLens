@@ -1,18 +1,23 @@
 import "server-only";
 
-import { and, eq, gte, isNotNull, sql, type SQL } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, or, sql, type SQL } from "drizzle-orm";
 import { jobBoardFollows, jobBoards, jobPostings } from "@/lib/db/schema";
+import type { JobRegion } from "@/lib/discovery/regions";
 import type { RoleMatcher } from "@/lib/discovery/role-match";
 import { titleMatchesSql } from "./role-sql";
 
-export type Audience = { userId: string; matcher: RoleMatcher };
+export type Audience = { userId: string; matcher: RoleMatcher; regions: JobRegion[] };
 
 export function followedBy(userId: string) {
   return and(eq(jobBoardFollows.boardId, jobPostings.boardId), eq(jobBoardFollows.userId, userId));
 }
 
+export function inRegions(regions: JobRegion[]) {
+  return regions.length > 0 ? or(isNull(jobBoards.region), inArray(jobBoards.region, regions)) : isNull(jobBoards.region);
+}
+
 export function visibleTo(audience: Audience): SQL {
-  return sql`(${isNotNull(jobBoardFollows.id)} or (${eq(jobBoards.system, true)} and ${titleMatchesSql(audience.matcher, jobPostings.title)}))`;
+  return sql`(${isNotNull(jobBoardFollows.id)} or (${eq(jobBoards.system, true)} and ${inRegions(audience.regions)} and ${titleMatchesSql(audience.matcher, jobPostings.title)}))`;
 }
 
 export function notHiddenDuplicate(userId: string): SQL {

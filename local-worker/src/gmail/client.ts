@@ -4,7 +4,7 @@ const BASE = "https://gmail.googleapis.com/gmail/v1/users/me/messages";
 export const INBOX_QUERY = "newer_than:3d -category:promotions -category:social -in:chats";
 
 export type GmailApi = {
-  listIds: () => Promise<string[]>;
+  listIds: (query?: string) => Promise<string[]>;
   get: (id: string) => Promise<GmailMessage>;
 };
 
@@ -23,8 +23,8 @@ export function createGmailApi(accessToken: () => Promise<string>, fetchImpl: ty
   };
 
   return {
-    listIds: async () => {
-      const body = (await call(`${BASE}?maxResults=50&q=${encodeURIComponent(INBOX_QUERY)}`)) as {
+    listIds: async (query = INBOX_QUERY) => {
+      const body = (await call(`${BASE}?maxResults=50&q=${encodeURIComponent(query)}`)) as {
         messages?: { id: string }[];
       };
 

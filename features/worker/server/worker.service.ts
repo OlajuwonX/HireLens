@@ -1,15 +1,12 @@
 import "server-only";
 
 import { findApplicationRowForUser } from "@/features/applications/server/application.repository";
-import { findFileAssetById } from "@/features/files/server/file-asset.repository";
-import { getOwnedResumeVersion } from "@/features/resumes/server/resume-version.service";
 import { submissionsRemaining } from "@/lib/auto-apply/policy";
-import { renderImprovedResumePdf } from "@/lib/pdf/resume-document";
-import { getStorageProvider } from "@/lib/storage/provider";
 import { countSubmittedToday, findTaskForUser } from "@/features/auto-apply/server/task.repository";
 import { resultToState, type WorkerResult } from "../contract";
 import { claimApprovedTask, extendLease, finishLease, reconcileExpiredLeases } from "./lease.repository";
-import { buildTaskPayload, loadIntelligence } from "./task-payload";
+import { loadApplicationResume } from "./resume-file";
+import { buildTaskPayload } from "./task-payload";
 import type { WorkerIdentity } from "./worker-auth";
 
 export async function claimNextTask(worker: WorkerIdentity) {
@@ -51,16 +48,7 @@ export async function loadTaskResume(worker: WorkerIdentity, publicId: string) {
     return null;
   }
 
-  const intelligence = await loadIntelligence({ userId: worker.userId, applicationId: row.application.id });
+  const resume = await loadApplicationResume(worker.userId, row);
 
-  if (intelligence && intelligence.improvedResume.experience.length > 0) {
-    return renderImprovedResumePdf(intelligence.improvedResume);
-  }
-
-  const version = row.versionPublicId
-    ? await getOwnedResumeVersion({ userId: worker.userId, versionPublicId: row.versionPublicId })
-    : null;
-  const asset = version ? await findFileAssetById({ userId: worker.userId, id: version.fileAssetId }) : null;
-
-  return asset && !asset.deletedAt ? getStorageProvider().readFile(asset.storageKey) : null;
+  return resume?.bytes ?? null;
 }

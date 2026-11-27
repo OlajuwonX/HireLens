@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequirementCorrectionForm } from "./requirement-correction-form";
+import { REQUIREMENTS_ANCHOR } from "./score-panel";
 import type { RequirementMatch } from "@/lib/ai/schemas/requirements.schema";
 import type { UserEvidenceCorrection } from "@/lib/db/schema";
 
@@ -54,7 +55,7 @@ export function RequirementMatrix({
   const { required, met } = summarise(rows);
 
   return (
-    <Card>
+    <Card id={REQUIREMENTS_ANCHOR} className="scroll-mt-20">
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>Requirement matrix</CardTitle>
         <p className="font-mono text-system text-text-muted">

@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/format/when";
 import Link from "next/link";
 import { FileCheck2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +34,7 @@ export function DocumentCard({ row }: { row: DocumentListRow }) {
           {row.versionLabel ?? "No resume"}
         </span>
         <span className="shrink-0 font-mono text-system text-text-muted">
-          {row.createdAt.toLocaleDateString(undefined, {
-            day: "numeric",
-            month: "short",
-          })}
+          {formatDate(row.createdAt)}
         </span>
       </div>
     </Link>

@@ -43,3 +43,12 @@ export async function findActiveToken(tokenHash: string) {
 export async function touchWorkerToken(id: string) {
   await db.update(workerTokens).set({ lastUsedAt: new Date() }).where(eq(workerTokens.id, id));
 }
+
+export async function revokeWorkerTokensNamed(input: { userId: string; name: string }) {
+  await db
+    .update(workerTokens)
+    .set({ revokedAt: new Date(), updatedAt: new Date() })
+    .where(
+      and(eq(workerTokens.userId, input.userId), eq(workerTokens.name, input.name), isNull(workerTokens.revokedAt)),
+    );
+}

@@ -108,7 +108,7 @@ export function DashboardSidebar({
       <div
         aria-hidden={!mobileOpen}
         className={cn(
-          "fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden",
+          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden",
           mobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onMobileClose}
@@ -117,11 +117,13 @@ export function DashboardSidebar({
       <aside
         aria-label="Main navigation"
         aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(88vw,20rem)] flex-col border-r border-border bg-sidebar transition-transform md:hidden",
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-panel border-t border-border bg-sidebar pb-[env(safe-area-inset-bottom,0px)] transition-transform duration-300 ease-[var(--ease-drawer)] md:hidden",
+          mobileOpen ? "translate-y-0" : "translate-y-full",
         )}
       >
+        <span aria-hidden className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border-strong" />
         <div className="flex items-center justify-between gap-1 p-3">
           <Brand collapsed={false} />
           <IconButton

@@ -1,17 +1,19 @@
 "use client";
 
+import { formatDateTime } from "@/lib/format/when";
 import { useCloseMobileNav } from "./mobile-nav-context";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { cn } from "@/lib/utils";
-import { CircleHelp, IdCard, LaptopMinimal, LogOut, Settings } from "lucide-react";
+import { CircleHelp, IdCard, LaptopMinimal, LogOut, Puzzle, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
 const menuLinks = [
   { href: "/settings/profile", label: "Career profile", Icon: IdCard },
   { href: "/settings/account", label: "Settings", Icon: Settings },
+  { href: "/settings/extension", label: "Browser extension", Icon: Puzzle },
   { href: "/settings/worker", label: "Local worker", Icon: LaptopMinimal },
   { href: "/dashboard/help", label: "Help & report a problem", Icon: CircleHelp },
 ];
@@ -38,10 +40,7 @@ function formatLastLogin(value: string | null) {
 
   return Number.isNaN(date.getTime())
     ? "Not recorded"
-    : date.toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+    : formatDateTime(date);
 }
 
 export function ProfileMenu({

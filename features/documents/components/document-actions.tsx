@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/ui/delete-confirm-button";
 import { notify } from "@/components/ui/toast";
 import type { ResumeDesignSelection } from "@/lib/resume-design";
-import { Check, Copy, Download, Library } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
   addImprovedResumeToLibraryAction,
@@ -29,11 +28,6 @@ function CopyButton({ content, label }: { content: string; label: string }) {
         setTimeout(() => setCopied(false), 2000);
       }}
     >
-      {copied ? (
-        <Check className="size-4" aria-hidden />
-      ) : (
-        <Copy className="size-4" aria-hidden />
-      )}
       {copied ? "Copied" : "Copy"}
     </Button>
   );
@@ -94,7 +88,6 @@ export function DocumentActions({
       ) : hasFile ? (
         <Button asChild variant="outline">
           <a href={`/dashboard/documents/${publicId}/download`} download>
-            <Download className="size-4" aria-hidden />
             Download PDF
           </a>
         </Button>
@@ -103,14 +96,12 @@ export function DocumentActions({
       {type === "IMPROVED_RESUME" && hasFile ? (
         added ? (
           <Button type="button" variant="outline" disabled>
-            <Check className="size-4" aria-hidden />
             Added to resume library
           </Button>
         ) : (
           <form action={addToLibrary}>
             <input type="hidden" name="publicId" value={publicId} />
             <Button type="submit" variant="outline">
-              <Library className="size-4" aria-hidden />
               Add to resume library
             </Button>
           </form>

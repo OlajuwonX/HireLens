@@ -1,6 +1,15 @@
-import { FEED_SOURCES, FEED_TOKEN, type CatalogSource } from "./types";
+import type { JobRegion } from "./regions";
+import { FEED_SOURCES, FEED_TOKEN, type CatalogSource, type FeedSource } from "./types";
 
-export type CatalogBoard = { source: CatalogSource; token: string };
+export type CatalogBoard = { source: CatalogSource; token: string; region?: JobRegion };
+
+const NIGERIAN_FEEDS: FeedSource[] = ["MYJOBMAG", "HOTNIGERIANJOBS"];
+
+const NIGERIAN_BOARDS: CatalogBoard[] = [
+  { source: "GREENHOUSE", token: "moniepoint", region: "NG" },
+  { source: "ASHBY", token: "andela", region: "NG" },
+  { source: "ASHBY", token: "lemfi", region: "NG" },
+];
 
 const GREENHOUSE_BOARDS = [
   "adyen", "affirm", "airbnb", "airtable", "algolia", "anthropic", "asana", "betterment", "brex",
@@ -24,8 +33,11 @@ const ASHBY_BOARDS = [
 ];
 
 export const SYSTEM_BOARDS: CatalogBoard[] = [
-  ...FEED_SOURCES.map((source) => ({ source, token: FEED_TOKEN })),
+  ...FEED_SOURCES.map((source) =>
+    NIGERIAN_FEEDS.includes(source) ? { source, token: FEED_TOKEN, region: "NG" as const } : { source, token: FEED_TOKEN },
+  ),
   ...GREENHOUSE_BOARDS.map((token) => ({ source: "GREENHOUSE" as const, token })),
   ...LEVER_BOARDS.map((token) => ({ source: "LEVER" as const, token })),
   ...ASHBY_BOARDS.map((token) => ({ source: "ASHBY" as const, token })),
+  ...NIGERIAN_BOARDS,
 ];

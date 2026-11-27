@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,7 +27,6 @@ export function UpdateResumeDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className={triggerClassName}>
-          <Upload className="size-4" aria-hidden />
           Update resume
         </Button>
       </DialogTrigger>

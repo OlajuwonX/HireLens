@@ -9,6 +9,7 @@ import {
   generatedInterviewPoolSchema,
 } from "./schemas/interview-pool.schema";
 import { extractedJobResponseSchema } from "./schemas/job-extraction.schema";
+import { formAnswersSchema } from "./schemas/form-answers.schema";
 import { interviewPrepSchema } from "./schemas/interview-prep.schema";
 import { jobMatchingSchema } from "./schemas/job-matching.schema";
 import { resumeReviewSchema } from "./schemas/resume-review.schema";
@@ -83,6 +84,9 @@ export function getApplicationIntelligenceProvider(): ApplicationIntelligencePro
           },
           validatePrep: (raw) => {
             normalizeJsonModelOutput(raw, interviewPrepSchema);
+          },
+          validateAnswers: (raw) => {
+            normalizeJsonModelOutput(raw, formAnswersSchema);
           },
           validateInterviewPool: (raw) => {
             const pool = normalizeJsonModelOutput(

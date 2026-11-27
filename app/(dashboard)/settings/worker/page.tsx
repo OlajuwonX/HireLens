@@ -26,7 +26,7 @@ export default async function WorkerSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/dashboard/auto-apply" label="Auto Apply" />
+      <BackButton href="/dashboard/jobs?stage=ready" label="Applications" />
 
       <PageHeader
         title="Local worker"

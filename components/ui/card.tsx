@@ -7,7 +7,11 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("rounded-card border border-border bg-surface", className)}
+      data-surface=""
+      className={cn(
+        "rounded-card border border-border bg-surface [[data-surface]_&]:border-transparent [[data-surface]_&]:bg-transparent",
+        className,
+      )}
       {...props}
     />
   );

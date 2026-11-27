@@ -1,0 +1,254 @@
+:root {
+  color-scheme: dark;
+  --background: #111312;
+  --surface: #1b1e1c;
+  --text: #f3f5f2;
+  --muted: #a7aea9;
+  --faint: #747b76;
+  --border: #303530;
+  --border-strong: #404740;
+  --accent: #c5f85a;
+  --accent-hover: #b5e94a;
+  --accent-text: #11180a;
+  --ink: #0b0d0c;
+  --ink-line: #2e332f;
+  --caution: #e8bd6d;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+body {
+  width: 320px;
+  margin: 0;
+  padding: 16px;
+  font: 13px/1.5 "Schibsted Grotesk", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+section {
+  display: grid;
+  gap: 10px;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  padding: 9px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 140ms var(--ease-out),
+    background-color 140ms var(--ease-out);
+}
+
+button:hover {
+  background: var(--accent-hover);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+button.secondary {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+}
+
+.warning {
+  margin: 0;
+  color: var(--caution);
+}
+
+#missing,
+#notes,
+#gaps {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--caution);
+}
+
+#gaps {
+  color: var(--muted);
+}
+
+.panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 6px;
+  background: var(--ink);
+  font-family: var(--mono);
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel-note {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink-line);
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  color: var(--muted);
+}
+
+.meter {
+  display: grid;
+  gap: 5px;
+}
+
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.meter-head em {
+  font-style: normal;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  display: block;
+  height: 12px;
+  color: var(--ink-line);
+  background-image: conic-gradient(currentColor 25%, transparent 0 50%, currentColor 0 75%, transparent 0);
+  background-size: 4px 4px;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 4px);
+  clip-path: inset(0 var(--score-rest) 0 0);
+  transition: clip-path 700ms var(--ease-out);
+}
+
+@starting-style {
+  .fill {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+.fill.strong {
+  color: var(--accent);
+}
+
+.fill.fair {
+  color: var(--text);
+}
+
+.fill.gap {
+  color: var(--caution);
+}
+
+fieldset {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+label.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-weight: 400;
+}
+
+label.toggle input {
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+#application p {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+footer a {
+  color: var(--muted);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .fill {
+    transition: none;
+  }
+}

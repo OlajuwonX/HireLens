@@ -1,3 +1,4 @@
+import { formatWhen } from "@/lib/format/when";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ export function ResponseCard({
         ) : (
           <span className="text-meta text-text-muted">Not linked to an application</span>
         )}
-        <span className="ml-auto font-mono text-system text-text-muted">{row.receivedAt.toLocaleDateString()}</span>
+        <span suppressHydrationWarning className="ml-auto font-mono text-system text-text-muted">{formatWhen(row.receivedAt)}</span>
       </div>
 
       <p className="break-words text-meta font-medium text-text-primary">{row.subject}</p>

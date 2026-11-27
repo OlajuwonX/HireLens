@@ -7,9 +7,9 @@ import {
   adminEntry,
   adminNavigation,
   backToAppEntry,
-  isActivePath,
+  isActiveItem,
   isAdminModePath,
-  primaryNavigation,
+  navigationGroups,
   type NavItem,
 } from "./navigation";
 
@@ -23,7 +23,7 @@ function NavLink({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const active = isActivePath(pathname, item.href);
+  const active = isActiveItem(pathname, item);
   const { Icon } = item;
 
   return (
@@ -33,7 +33,7 @@ function NavLink({
       aria-current={active ? "page" : undefined}
       title={collapsed ? item.label : undefined}
       className={cn(
-        "relative flex h-10 items-center gap-3 rounded-control px-3 text-meta font-medium transition-colors",
+        "pressable relative flex h-11 items-center gap-3 rounded-control px-3 text-meta font-medium md:h-9",
         collapsed && "justify-center px-0",
         active
           ? "bg-surface-elevated text-text-primary"
@@ -102,22 +102,23 @@ export function SidebarNav({
 
   return (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-1">
-      {primaryNavigation.map((item) => (
-        <NavLink
-          key={item.href}
-          item={item}
-          collapsed={collapsed}
-          onNavigate={onNavigate}
-        />
+      {navigationGroups.map(({ group, label, items }, index) => (
+        <div key={group} role="group" aria-label={label ?? undefined} className="flex flex-col gap-1">
+          {label && !collapsed ? (
+            <p className="px-3 pb-1 pt-4 font-mono text-system uppercase text-text-muted">{label}</p>
+          ) : null}
+          {label && collapsed && index > 0 ? (
+            <div role="separator" className="mx-2 my-2 border-t border-border" />
+          ) : null}
+          {items.map((item) => (
+            <NavLink key={item.href} item={item} collapsed={collapsed} onNavigate={onNavigate} />
+          ))}
+        </div>
       ))}
       {isAdmin ? (
         <>
-          <div role="separator" className="my-1 border-t border-border" />
-          <NavLink
-            item={adminEntry}
-            collapsed={collapsed}
-            onNavigate={onNavigate}
-          />
+          <div role="separator" className="my-2 border-t border-border" />
+          <NavLink item={adminEntry} collapsed={collapsed} onNavigate={onNavigate} />
         </>
       ) : null}
     </nav>

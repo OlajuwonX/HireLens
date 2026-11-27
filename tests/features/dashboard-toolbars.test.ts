@@ -61,7 +61,7 @@ describe("the shared search components stay for admin", () => {
 });
 
 describe("filters take the search slot and the primary button sits beside them", () => {
-  it("jobs: Create application is passed into the toolbar, not the page header", () => {
+  it("jobs: Add a job is passed into the toolbar, not the page header", () => {
     const page = read(PAGES.jobs);
 
     expect(page).toMatch(/<ApplicationFilters[\s\S]*action=\{<CreateApplicationButton \/>\}/);
@@ -87,7 +87,7 @@ describe("filters take the search slot and the primary button sits beside them",
   });
 
   it("keeps the page titles that drive the header", () => {
-    expect(read(PAGES.jobs)).toContain('title="Saved Jobs"');
+    expect(read(PAGES.jobs)).toContain('title="Applications"');
     expect(read(PAGES.documents)).toContain('title="AI Documents"');
     expect(read(PAGES.resumes)).toContain('title="Resumes"');
   });

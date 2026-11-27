@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, ExternalLink, ListChecks, Sparkles } from "lucide-react";
+import { ListChecks, Puzzle, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Popover } from "@/components/ui/popover";
@@ -51,14 +51,33 @@ export function PostingActions({ publicId, href }: { publicId: string; href: str
     onError: () => notify.error("That did not finish. Please try again."),
   });
 
-  const busy = save.isPending || next.isPending;
+  const apply = useMutation({
+    mutationFn: async (tab: Window | null) => ({ tab, result: await savePostingAction(publicId) }),
+    onSuccess: ({ tab, result }) => {
+      if (!result.ok) {
+        tab?.close();
+        notify.error(result.message);
+        return;
+      }
+
+      if (tab) {
+        tab.location.href = href;
+      } else {
+        window.open(href, "_blank", "noopener");
+      }
+
+      notify.success("Saved. Use the HireLens extension on the application page to fill it in.");
+    },
+    onError: () => notify.error("The job could not be saved. Please try again."),
+  });
+
+  const busy = save.isPending || next.isPending || apply.isPending;
   const running = steps.find((item) => next.isPending && item.step === next.variables);
 
   return (
     <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
       <Button asChild variant="outline">
         <a href={href} target="_blank" rel="noopener noreferrer">
-          <ExternalLink className="size-4" aria-hidden />
           Open original posting
         </a>
       </Button>
@@ -72,12 +91,29 @@ export function PostingActions({ publicId, href }: { publicId: string; href: str
         trigger={(props) => (
           <Button type="button" disabled={busy} className="w-full sm:w-auto" {...props}>
             {running ? running.pending : "Options"}
-            <ChevronDown className="size-4" aria-hidden />
           </Button>
         )}
       >
         {(close) => (
           <ul className="space-y-1">
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  apply.mutate(window.open("about:blank", "_blank"));
+                }}
+                className="flex w-full items-start gap-2.5 rounded-control px-3 py-2 text-left hover:bg-surface-secondary"
+              >
+                <Puzzle className="mt-0.5 size-4 shrink-0 text-text-secondary" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-meta font-medium text-text-primary">Apply with HireLens</span>
+                  <span className="block text-label text-text-secondary">
+                    Save it and open the application page, ready for the extension to fill.
+                  </span>
+                </span>
+              </button>
+            </li>
             {steps.map(({ step, label, hint, Icon }) => (
               <li key={step}>
                 <button

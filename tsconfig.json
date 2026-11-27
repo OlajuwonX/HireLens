@@ -31,5 +31,5 @@
     ],
     "allowJs": true
   },
-  "exclude": ["node_modules", "local-worker"]
+  "exclude": ["node_modules", "local-worker", "extension"]
 }

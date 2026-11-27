@@ -26,7 +26,7 @@ function readParam(
 function GoToSavedJobsButton() {
   return (
     <Button asChild className="w-full sm:w-auto">
-      <Link href="/dashboard/jobs">Go to Saved Jobs</Link>
+      <Link href="/dashboard/jobs">Go to Applications</Link>
     </Button>
   );
 }

@@ -4,7 +4,7 @@ import { ListRowSkeleton } from "@/components/ui/skeletons";
 
 export default function Loading() {
   return (
-    <PageLoading title="Responses" label="responses">
+    <PageLoading title="Replies" label="replies">
       <Skeleton className="h-12 w-full" />
       <ListRowSkeleton rows={4} />
     </PageLoading>

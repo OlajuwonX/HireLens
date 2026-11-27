@@ -18,7 +18,7 @@ import {
   resumeTypographyLabels,
   type ResumeDesignSelection,
 } from "@/lib/resume-design";
-import { Download, Eye, FileText, LayoutTemplate, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { saveResumeDesignAction } from "../actions/resume-design-actions";
 
@@ -295,7 +295,6 @@ export function ResumeDesignControls({
         }}
         trigger={(props) => (
           <Button type="button" variant="outline" {...props}>
-            <LayoutTemplate className="size-4" aria-hidden />
             Templates
           </Button>
         )}
@@ -339,7 +338,6 @@ export function ResumeDesignControls({
 
           <div className="space-y-1.5 border-t border-border pt-3">
             <Button type="button" block size="compact" onClick={openPreview}>
-              <Eye className="size-3.5" aria-hidden />
               Preview
             </Button>
 
@@ -353,7 +351,6 @@ export function ResumeDesignControls({
         panelClassName="sm:w-52"
         trigger={(props) => (
           <Button type="button" variant="outline" {...props}>
-            <Download className="size-4" aria-hidden />
             Download
           </Button>
         )}
@@ -419,7 +416,6 @@ export function ResumeDesignControls({
               panelClassName="sm:w-52"
               trigger={(props) => (
                 <Button type="button" {...props}>
-                  <Download className="size-4" aria-hidden />
                   Download
                 </Button>
               )}
