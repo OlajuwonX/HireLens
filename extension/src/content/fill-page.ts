@@ -6,11 +6,12 @@ import type { FillData, FillSummary, MatchSummary } from "../shared/types";
 import { writeOpenAnswers } from "./answers";
 import { attachFile, fillValue, hasValue, highlight } from "./dom-fill";
 import { fileName, loadData, loadPdf } from "./fill-data";
+import { COVER_LETTER, ensureCoverLetter } from "./cover-letter";
 import { improveResume } from "./improve";
 import { linkPageJob, type Progress } from "./link-job";
 
-const COVER_LETTER = /\bcover letter\b/i;
 const seen = new Set<string>();
+const RESUME_FAILED = "HireLens found the resume upload but could not attach the file. Please upload it yourself.";
 let improved = false;
 let linkTried = false;
 
@@ -57,6 +58,7 @@ async function attach(field: FormField, path: string | null, name: string) {
 async function fillKnownFields(fill: FillData, empty: FormField[]) {
   const plan = planFields(empty, { candidate: fill.candidate, answers: fill.answers, coverLetter: fill.coverLetter });
   let filled = 0;
+  let resumeWanted = false;
   let resumeAttached = false;
   let coverLetterAttached = false;
 
@@ -65,6 +67,7 @@ async function fillKnownFields(fill: FillData, empty: FormField[]) {
     const done = isResume ? await attach(item.field, fill.resume.path, fileName(fill, "Resume")) : fillValue(item.field, item.value);
 
     filled += done ? 1 : 0;
+    resumeWanted ||= isResume;
     resumeAttached ||= done && isResume;
   }
 
@@ -75,14 +78,18 @@ async function fillKnownFields(fill: FillData, empty: FormField[]) {
     coverLetterAttached ||= done;
   }
 
-  return { filled, resumeAttached, coverLetterAttached };
+  return { filled, resumeWanted, resumeAttached, coverLetterAttached };
 }
 
 export async function fillPage(scope: "all" | "new" = "all", progress: Progress = () => undefined): Promise<FillSummary> {
-  const { fill, match, notes } = await prepare(progress, scope === "all");
+  const prepared = await prepare(progress, scope === "all");
   const settings = await readSettings();
   const fields = scope === "new" ? unseenFields() : visibleFields();
   const empty = fields.filter((field) => !hasValue(field));
+  const letter = await ensureCoverLetter(prepared.fill, empty, progress);
+  const fill = letter.fill;
+  const match = prepared.match;
+  const notes = [...prepared.notes, ...letter.notes];
   const known = await fillKnownFields(fill, empty);
   const answers = settings.writeAnswers ? await writeOpenAnswers(fill, empty, progress, settings.writer) : { written: 0, notes: [] };
   const missing = empty.filter((field) => field.required && !hasValue(field));
@@ -100,6 +107,6 @@ export async function fillPage(scope: "all" | "new" = "all", progress: Progress 
     application: fill.application,
     tailored: fill.resume.tailored,
     match,
-    notes: [...notes, ...answers.notes],
+    notes: [...notes, ...(known.resumeWanted && !known.resumeAttached ? [RESUME_FAILED] : []), ...answers.notes],
   };
 }

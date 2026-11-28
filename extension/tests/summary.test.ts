@@ -21,9 +21,9 @@ describe("match wording", () => {
     expect(describeMatchLine({ before: 70, after: 91, gaps: [] })).toBe("Resume match 70% → 91%");
   });
 
-  it("is honest when the resume cannot reach 90% truthfully", () => {
+  it("is honest when the resume cannot reach 85% truthfully", () => {
     expect(describeMatchLine({ before: 70, after: 82, gaps: ["Kubernetes"] })).toBe(
-      "Resume match 70% → 82%. It cannot go higher without inventing experience.",
+      "Resume match 70% → 82%. This is the best version HireLens could make without inventing experience, so it was used.",
     );
   });
 
