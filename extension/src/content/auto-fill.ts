@@ -1,4 +1,5 @@
 import { describeSummary, hideBadge, showBadge } from "./badge";
+import { showChecklist } from "./checklist-panel";
 import { fillPage, unseenFields } from "./fill-page";
 
 const AUTO_KEY = "hirelens-auto-fill";
@@ -15,6 +16,8 @@ async function fillNewFields() {
 
   try {
     const summary = await fillPage("new", (text) => showBadge(text, true));
+
+    showChecklist(summary.checklist);
 
     const worthShowing = summary.filled > 0 || summary.written > 0 || summary.missing.length > 0 || summary.notes.length > 0;
 

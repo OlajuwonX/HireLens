@@ -79,3 +79,23 @@ export const postingPage = `<!doctype html>
 <label for="name">Full name *</label><input id="name" name="name" required>
 <label for="motivation">Why Globex? *</label><textarea id="motivation" name="motivation" required></textarea>
 </body></html>`;
+
+export const modernForm = `<!doctype html>
+<html><body>
+<div class="autofill"><div>Autofill from resume</div><input type="file" class="autofill-input"></div>
+<div class="field"><div>First name *</div><input class="first-input"></div>
+<div class="field"><div>Resume *</div><div class="drop"><input type="file" class="resume-input" style="display:none"><span>Choose file or drag and drop here</span></div></div>
+<div class="question"><div>Are you willing to relocate? *</div>
+  <div class="yes-no"><button type="button" class="choice">Yes</button><button type="button" class="choice">No</button></div>
+</div>
+<div class="field"><div>Pronouns *</div><input class="pronoun-input"></div>
+<div class="field"><div>Headline</div><input class="headline-input"></div>
+<script>
+  document.querySelectorAll(".choice").forEach((button) =>
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".choice").forEach((other) => other.setAttribute("aria-pressed", "false"));
+      button.setAttribute("aria-pressed", "true");
+    }),
+  );
+</script>
+</body></html>`;

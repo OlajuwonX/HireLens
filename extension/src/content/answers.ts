@@ -10,7 +10,7 @@ import { openQuestions } from "./questions";
 const PAGE_LIMIT = 20_000;
 const asked = new Set<string>();
 
-export type Written = { written: number; notes: string[] };
+export type Written = { written: number; notes: string[]; selectors: string[] };
 
 async function requestAnswers(body: AnswersBody, writer: Writer): Promise<{ reply: AnswersReply; notes: string[] }> {
   const toReply = (reply: Awaited<ReturnType<typeof ask<AnswersReply>>>): AnswersReply =>
@@ -36,7 +36,7 @@ export async function writeOpenAnswers(fill: FillData, fields: FormField[], prog
   );
 
   if (open.questions.length === 0) {
-    return { written: 0, notes: [] };
+    return { written: 0, notes: [], selectors: [] };
   }
 
   progress(`${writer === "claude" ? "Claude is writing" : "Writing"} answers for ${open.questions.length} question${open.questions.length === 1 ? "" : "s"}...`);
@@ -55,20 +55,20 @@ export async function writeOpenAnswers(fill: FillData, fields: FormField[], prog
   if (!result.ok) {
     open.fields.forEach((field) => asked.delete(field.selector));
 
-    return { written: 0, notes: [...notes, result.message] };
+    return { written: 0, notes: [...notes, result.message], selectors: [] };
   }
 
   const bySelector = new Map(open.fields.map((field) => [field.selector, field]));
-  let written = 0;
+  const selectors: string[] = [];
 
   for (const { id, answer } of result.answers) {
     const field = bySelector.get(id);
 
     if (field && !hasValue(field) && fillValue(field, answer)) {
       markWritten(field);
-      written += 1;
+      selectors.push(field.selector);
     }
   }
 
-  return { written, notes };
+  return { written: selectors.length, notes, selectors };
 }

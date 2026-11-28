@@ -3,6 +3,7 @@ import { fail, ok } from "../shared/messages";
 import { resumeAutoFill, startAutoFill } from "./auto-fill";
 import { describeSummary, showBadge } from "./badge";
 import { captureDescription } from "./capture";
+import { showChecklist } from "./checklist-panel";
 import { countFields, fillPage } from "./fill-page";
 
 declare global {
@@ -16,6 +17,7 @@ async function fillNow() {
 
   startAutoFill();
   showBadge(describeSummary(summary));
+  showChecklist(summary.checklist);
 
   return summary;
 }

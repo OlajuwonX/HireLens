@@ -1,4 +1,5 @@
 import type { Candidate } from "../../../local-worker/src/contract";
+import type { CheckRow } from "./checklist";
 
 export type Connection = { origin: string; token: string; bypass: string | null };
 
@@ -53,6 +54,7 @@ export type FillSummary = {
   tailored: boolean;
   match: MatchSummary | null;
   notes: string[];
+  checklist: CheckRow[];
 };
 
 export type Request =

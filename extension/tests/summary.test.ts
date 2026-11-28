@@ -13,6 +13,7 @@ const summary = {
   tailored: true,
   match: null,
   notes: [],
+  checklist: [],
 };
 
 describe("match wording", () => {
