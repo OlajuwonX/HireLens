@@ -6,6 +6,7 @@ import { extractJobPosting } from "@/features/applications/server/job-extraction
 import { listSavedJobRefs } from "@/features/discovery/server/feed.repository";
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
 import type { WorkerIdentity } from "@/features/worker/server/worker-auth";
+import { FORM_ONLY_MESSAGE } from "../form-page";
 import { companyFromUrl, describePage } from "../page-job";
 import { describePosting, findAtsPosting } from "./ats-posting";
 import { samePage } from "../page-key";
@@ -16,7 +17,7 @@ const UNREADABLE = "HireLens could not read a job posting on this page.";
 
 export async function importPageJob(
   worker: WorkerIdentity,
-  page: { url: string; title: string; text: string },
+  page: { url: string; title: string; text: string; formOnly?: boolean },
 ): Promise<ImportResult> {
   const userId = worker.userId;
   const existing = (await listSavedJobRefs(userId)).find((ref) => samePage(ref.sourceUrl, page.url));
@@ -32,6 +33,11 @@ export async function importPageJob(
   }
 
   const posting = await findAtsPosting(page.url);
+
+  if (!posting && page.formOnly) {
+    return { ok: false, message: FORM_ONLY_MESSAGE };
+  }
+
   const content = posting
     ? describePage({ url: page.url, title: posting.title, text: describePosting(posting) })
     : describePage(page);

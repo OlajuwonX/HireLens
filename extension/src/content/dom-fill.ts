@@ -1,5 +1,6 @@
 import { pickOption } from "../../../local-worker/src/browser/options";
 import type { FormField } from "../../../local-worker/src/execution/fields";
+import { chooseInGroup, groupHasValue, isChoiceGroup } from "./choice-group";
 
 const elementsFor = (field: FormField) => Array.from(document.querySelectorAll<HTMLElement>(field.selector));
 
@@ -35,6 +36,7 @@ export function hasValue(field: FormField) {
 
   switch (field.kind) {
     case "radio":
+      if (isChoiceGroup(element)) return groupHasValue(element);
       return elementsFor(field).some((radio) => (radio as HTMLInputElement).checked);
     case "checkbox":
       return (element as HTMLInputElement).checked;
@@ -59,6 +61,10 @@ export function fillValue(field: FormField, value: string) {
     setNativeValue(select, option.value);
     announce(select);
     return true;
+  }
+
+  if (field.kind === "radio" && isChoiceGroup(element)) {
+    return chooseInGroup(element, value);
   }
 
   if (field.kind === "radio") {

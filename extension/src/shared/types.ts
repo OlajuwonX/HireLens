@@ -1,4 +1,5 @@
 import type { Candidate } from "../../../local-worker/src/contract";
+import type { CheckRow } from "./checklist";
 
 export type Connection = { origin: string; token: string; bypass: string | null };
 
@@ -38,7 +39,7 @@ export type AnswersBody = {
 
 export type AnswersReply = { ok: true; answers: { id: string; answer: string }[] } | { ok: false; limited: boolean; message: string };
 
-export type PageJob = { url: string; title: string; text: string };
+export type PageJob = { url: string; title: string; text: string; formOnly?: boolean };
 
 export type MatchSummary = { before: number | null; after: number | null; gaps: string[] };
 
@@ -53,6 +54,7 @@ export type FillSummary = {
   tailored: boolean;
   match: MatchSummary | null;
   notes: string[];
+  checklist: CheckRow[];
 };
 
 export type Request =
@@ -66,6 +68,9 @@ export type Request =
   | { type: "claude-status" }
   | { type: "save-connection"; connection: Connection }
   | { type: "fill" }
+  | { type: "capture" }
+  | { type: "held" }
+  | { type: "release" }
   | { type: "ping" };
 
 export type Reply<T> = { ok: true; value: T } | { ok: false; message: string };

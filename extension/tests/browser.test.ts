@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { chromium, type Browser, type Page } from "playwright-core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { APPLY_URL, PROJECT_ANSWER, applicationForm, fillData, postingPage, resumeBase64 } from "./fixtures";
+import { APPLY_URL, PROJECT_ANSWER, applicationForm, fillData, modernForm, postingPage, resumeBase64 } from "./fixtures";
 
 const contentScript = readFileSync("dist/content.js", "utf8");
 const connectScript = readFileSync("dist/connect.js", "utf8");
@@ -172,7 +172,7 @@ describe.skipIf(!browser)("the extension on a real application form", () => {
 });
 
 describe.skipIf(!browser)("improving a weak resume before applying", () => {
-  it("refines the resume until it reaches 90% and reports the change", async () => {
+  it("refines the resume until it clears 85% and reports the change", async () => {
     const page = await openPage(applicationForm, {
       ...baseReplies,
       "fill-data": data({ match: { score: 70, analyzed: true } }),
@@ -212,6 +212,47 @@ describe.skipIf(!browser)("improving a weak resume before applying", () => {
     expect(reply.value.written).toBe(0);
     expect(await sent(page, "boost")).toHaveLength(0);
     expect(await sent(page, "answers")).toHaveLength(0);
+  });
+});
+
+describe.skipIf(!browser)("a modern form with unlabelled fields and button choices", () => {
+  let page: Page;
+  let reply: { ok: boolean; value: Summary & { checklist: { label: string; status: string }[] } };
+
+  beforeAll(async () => {
+    page = await openPage(modernForm, { ...baseReplies, answers: answer([]) }, { improveResume: false, writeAnswers: false });
+    reply = (await fill(page)) as typeof reply;
+  });
+
+  it("fills inputs that have no id, name or label of their own", async () => {
+    expect(await page.inputValue(".first-input")).toBe("Ada");
+  });
+
+  it("puts the resume in the real upload, not the autofill one", async () => {
+    const names = await page.evaluate(() =>
+      [".resume-input", ".autofill-input"].map((selector) => document.querySelector<HTMLInputElement>(selector)!.files?.[0]?.name ?? null),
+    );
+
+    expect(names).toEqual(["Ada-Lovelace-Resume.pdf", null]);
+  });
+
+  it("answers Yes and No button pairs", async () => {
+    expect(await page.getAttribute(".choice:first-child", "aria-pressed")).toBe("true");
+  });
+
+  it("lists every field on an on-page checklist", async () => {
+    const statuses = Object.fromEntries(reply.value.checklist.map((row) => [row.label, row.status]));
+
+    expect(statuses).toMatchObject({
+      "First name": "profile",
+      Resume: "resume",
+      "Are you willing to relocate?": "profile",
+      Pronouns: "needs-you",
+      Headline: "skipped",
+    });
+    expect(await page.evaluate(() => document.querySelector("#hirelens-checklist")?.shadowRoot?.textContent ?? "")).toContain(
+      "need you",
+    );
   });
 });
 

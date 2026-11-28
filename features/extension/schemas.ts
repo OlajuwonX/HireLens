@@ -10,6 +10,7 @@ export const importPageSchema = z.object({
   url: z.url().max(4096),
   title: z.string().max(500).default(""),
   text: z.string().min(1).max(60_000),
+  formOnly: z.boolean().default(false),
 });
 
 export const boostRequestSchema = applicationRefSchema;

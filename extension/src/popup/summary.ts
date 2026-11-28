@@ -21,7 +21,7 @@ export function describeMatchLine(match: MatchSummary | null) {
 
   const change = match.before !== null && match.before !== match.after ? `${match.before}% → ${match.after}%` : `${match.after}%`;
 
-  return match.after >= MATCH_TARGET ? `Resume match ${change}` : `Resume match ${change}. It cannot go higher without inventing experience.`;
+  return match.after >= MATCH_TARGET ? `Resume match ${change}` : `Resume match ${change}. This is the best version HireLens could make without inventing experience, so it was used.`;
 }
 
 export function matchRows(match: MatchSummary | null) {
