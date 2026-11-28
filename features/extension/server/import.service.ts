@@ -7,6 +7,7 @@ import { listSavedJobRefs } from "@/features/discovery/server/feed.repository";
 import { listOwnedVersionOptions } from "@/features/resumes/server/resume-version.service";
 import type { WorkerIdentity } from "@/features/worker/server/worker-auth";
 import { companyFromUrl, describePage } from "../page-job";
+import { describePosting, findAtsPosting } from "./ats-posting";
 import { samePage } from "../page-key";
 
 export type ImportResult = { ok: true; applicationPublicId: string; created: boolean } | { ok: false; message: string };
@@ -30,27 +31,31 @@ export async function importPageJob(
     return { ok: false, message: "Upload a resume to HireLens first." };
   }
 
-  const extracted = await extractJobPosting({ userId, content: describePage(page) });
+  const posting = await findAtsPosting(page.url);
+  const content = posting
+    ? describePage({ url: page.url, title: posting.title, text: describePosting(posting) })
+    : describePage(page);
+  const extracted = await extractJobPosting({ userId, content });
 
-  if (!extracted.ok) {
+  if (!extracted.ok && !posting) {
     return { ok: false, message: UNREADABLE };
   }
 
-  const job = extracted.job;
+  const job = extracted.ok ? extracted.job : null;
   const values = saveAndAnalyzeSchema.safeParse({
     resumeVersionPublicId: version.publicId,
-    title: job.title ?? "",
-    company: job.company ?? companyFromUrl(page.url) ?? "",
-    location: job.location ?? "",
-    workArrangement: job.workArrangement ?? undefined,
-    employmentType: job.employmentType ?? undefined,
-    salaryMin: job.salaryMin ?? "",
-    salaryMax: job.salaryMax ?? "",
-    currency: job.currency ?? "",
+    title: posting?.title ?? job?.title ?? "",
+    company: job?.company ?? posting?.company ?? companyFromUrl(page.url) ?? "",
+    location: job?.location ?? posting?.location ?? "",
+    workArrangement: job?.workArrangement ?? posting?.workArrangement ?? undefined,
+    employmentType: job?.employmentType ?? posting?.employmentType ?? undefined,
+    salaryMin: job?.salaryMin ?? posting?.salaryMin ?? "",
+    salaryMax: job?.salaryMax ?? posting?.salaryMax ?? "",
+    currency: job?.currency ?? posting?.currency ?? "",
     source: "Browser extension",
     sourceUrl: page.url,
-    description: job.description ?? "",
-    requirements: job.requirements ?? "",
+    description: job?.description ?? posting?.description ?? "",
+    requirements: job?.requirements ?? "",
   });
 
   if (!values.success) {
