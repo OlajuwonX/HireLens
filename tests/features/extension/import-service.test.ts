@@ -140,3 +140,36 @@ describe("importPageJob on an application form page", () => {
     });
   });
 });
+
+describe("importPageJob on a form page with no description", () => {
+  const formPage = { url: "https://apply.workable.com/raydar/j/C39C58F585/apply/", title: "Apply", text: "First name Last name", formOnly: true };
+
+  it("refuses to save the form as the job description", async () => {
+    const result = await importPageJob(worker, formPage);
+
+    expect(result).toMatchObject({ ok: false, message: expect.stringContaining("Save description") });
+    expect(mocks.extractJobPosting).not.toHaveBeenCalled();
+    expect(mocks.saveJobOnly).not.toHaveBeenCalled();
+  });
+
+  it("still saves it when the job board has the posting", async () => {
+    mocks.findAtsPosting.mockResolvedValue({
+      sourceId: "1",
+      title: "Senior Software Engineer",
+      company: "Raydar",
+      location: null,
+      workArrangement: "REMOTE",
+      employmentType: "FULL_TIME",
+      salaryMin: null,
+      salaryMax: null,
+      currency: null,
+      description: "Build things.",
+      url: "https://apply.workable.com/raydar/j/C39C58F585/",
+      applyUrl: null,
+      postedAt: null,
+    });
+
+    expect(await importPageJob(worker, formPage)).toMatchObject({ ok: true });
+  });
+});
+

@@ -252,3 +252,14 @@ footer a {
     transition: none;
   }
 }
+
+.held {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px dashed var(--border-strong);
+}
+
+.held .link {
+  justify-self: start;
+}

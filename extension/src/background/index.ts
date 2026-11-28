@@ -1,4 +1,5 @@
 import { readConnection, saveConnection } from "../shared/connection";
+import { readHeld, releaseHeld } from "../shared/held";
 import { fail, ok } from "../shared/messages";
 import type { Connection, Reply, Request } from "../shared/types";
 import { answerWithClaude, helperStatus } from "./claude";
@@ -52,6 +53,11 @@ async function handle(request: Request, sender: chrome.runtime.MessageSender): P
       return withConnection((connection) => answerWithClaude(connection, request.body));
     case "claude-status":
       return ok(await helperStatus());
+    case "held":
+      return ok(await readHeld());
+    case "release":
+      await releaseHeld();
+      return ok(true);
     case "save-connection":
       return acceptConnection(request.connection, sender);
     default:
@@ -60,7 +66,7 @@ async function handle(request: Request, sender: chrome.runtime.MessageSender): P
 }
 
 chrome.runtime.onMessage.addListener((request: Request, sender, respond) => {
-  if (sender.id !== chrome.runtime.id || request.type === "fill" || request.type === "ping") {
+  if (sender.id !== chrome.runtime.id || request.type === "fill" || request.type === "capture" || request.type === "ping") {
     return false;
   }
 

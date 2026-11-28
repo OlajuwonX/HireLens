@@ -1,11 +1,13 @@
 import { clearConnection, readConnection } from "../shared/connection";
 import { ask } from "../shared/messages";
 import type { FillSummary } from "../shared/types";
+import { readHeld, releaseHeld, saveHeld } from "../shared/held";
+import { heldLabel } from "../shared/job-posting";
 import { readSettings, saveSettings } from "../shared/settings";
 import { lastOrigin, startConnect } from "./connect";
 import { showHelperStatus } from "./helper-status";
 import { renderSummary } from "./summary";
-import { fillActiveTab } from "./tab";
+import { captureActiveTab, fillActiveTab } from "./tab";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -47,6 +49,13 @@ async function render() {
   $<HTMLAnchorElement>("open").href = connection?.origin ?? "#";
   $<HTMLInputElement>("origin").value ||= await lastOrigin();
 
+  const held = await readHeld();
+
+  $("held-text").textContent = held
+    ? `Holding: ${heldLabel(held)}`
+    : "On the job description page, save it here. Then open the application form and fill it.";
+  $("release").hidden = !held;
+
   const settings = await readSettings();
 
   toggles.improveResume.checked = settings.improveResume;
@@ -70,6 +79,15 @@ $<HTMLButtonElement>("connect").addEventListener("click", (event) =>
     startConnect($<HTMLInputElement>("origin").value).then(() => window.close()),
   ).catch((error: Error) => ($("connect-error").textContent = error.message)),
 );
+
+$<HTMLButtonElement>("capture").addEventListener("click", (event) =>
+  busy(event.currentTarget as HTMLButtonElement, "Reading...", captureActiveTab)
+    .then(saveHeld)
+    .then(() => (result.textContent = "Description saved. Open the application form and select Fill this page."))
+    .catch((error: Error) => (result.textContent = error.message)),
+);
+
+$<HTMLButtonElement>("release").addEventListener("click", () => void releaseHeld());
 
 $<HTMLButtonElement>("fill").addEventListener("click", (event) =>
   busy(event.currentTarget as HTMLButtonElement, "Working... this can take a minute", fillActiveTab)

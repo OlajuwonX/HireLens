@@ -6,11 +6,13 @@ import type { FillData, FillSummary, MatchSummary } from "../shared/types";
 import { writeOpenAnswers } from "./answers";
 import { attachFile, fillValue, hasValue, highlight } from "./dom-fill";
 import { fileName, loadData, loadPdf } from "./fill-data";
-import { improveResume, type Progress } from "./improve";
+import { improveResume } from "./improve";
+import { linkPageJob, type Progress } from "./link-job";
 
 const COVER_LETTER = /\bcover letter\b/i;
 const seen = new Set<string>();
 let improved = false;
+let linkTried = false;
 
 function isShown(element: Element) {
   return element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden";
@@ -30,17 +32,20 @@ export function unseenFields() {
   return visibleFields().filter((field) => !seen.has(field.selector));
 }
 
-async function prepare(progress: Progress): Promise<{ fill: FillData; match: MatchSummary | null; notes: string[] }> {
-  const fill = await loadData();
+async function prepare(progress: Progress, retryLink: boolean): Promise<{ fill: FillData; match: MatchSummary | null; notes: string[] }> {
+  const start = await loadData();
   const settings = await readSettings();
+  const linked = linkTried && !retryLink ? { fill: start, notes: [] } : await linkPageJob(start, progress, countFields());
+
+  linkTried = true;
 
   if (improved || !settings.improveResume) {
-    return { fill, match: null, notes: [] };
+    return { fill: linked.fill, match: null, notes: linked.notes };
   }
 
   improved = true;
 
-  return improveResume(fill, progress);
+  return improveResume(linked, progress);
 }
 
 async function attach(field: FormField, path: string | null, name: string) {
@@ -74,7 +79,7 @@ async function fillKnownFields(fill: FillData, empty: FormField[]) {
 }
 
 export async function fillPage(scope: "all" | "new" = "all", progress: Progress = () => undefined): Promise<FillSummary> {
-  const { fill, match, notes } = await prepare(progress);
+  const { fill, match, notes } = await prepare(progress, scope === "all");
   const settings = await readSettings();
   const fields = scope === "new" ? unseenFields() : visibleFields();
   const empty = fields.filter((field) => !hasValue(field));

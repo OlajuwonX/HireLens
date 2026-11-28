@@ -3,7 +3,7 @@ import { ask } from "../shared/messages";
 import type { Writer } from "../shared/settings";
 import type { AnswersBody, AnswersReply, FillData } from "../shared/types";
 import { fillValue, hasValue, markWritten } from "./dom-fill";
-import type { Progress } from "./improve";
+import type { Progress } from "./link-job";
 import { readPageText } from "./page-text";
 import { openQuestions } from "./questions";
 

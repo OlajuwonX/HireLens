@@ -1,10 +1,11 @@
+import type { HeldDescription } from "../shared/job-posting";
 import type { FillSummary, Reply } from "../shared/types";
 
-async function activeTabId() {
+async function activeTabId(message = "Open a job application page first.") {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id || !tab.url?.startsWith("http")) {
-    throw new Error("Open a job application page first.");
+    throw new Error(message);
   }
 
   return tab.id;
@@ -33,6 +34,20 @@ export async function fillActiveTab(): Promise<FillSummary> {
 
   if (!reply.ok) {
     throw new Error(reply.message);
+  }
+
+  return reply.value;
+}
+
+export async function captureActiveTab(): Promise<HeldDescription> {
+  const tabId = await activeTabId("Open the job description page first.");
+
+  await ensureContentScript(tabId);
+
+  const reply = (await chrome.tabs.sendMessage(tabId, { type: "capture" })) as Reply<HeldDescription> | undefined;
+
+  if (!reply?.ok) {
+    throw new Error("HireLens could not read this page.");
   }
 
   return reply.value;
